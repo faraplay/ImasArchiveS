@@ -26,25 +26,10 @@
                 <MenuItem Command="Close" />
             </MenuItem>
         </Menu>
-        <ListView
-            Name="lvBrowser"
-            Width="200"
-            Margin="10"
-            DockPanel.Dock="Left">
-            <ListView.Resources>
-                <Style TargetType="ListViewItem">
-                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick" />
-                </Style>
-            </ListView.Resources>
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <WrapPanel>
-                        <Image Source="{Binding Path=IconUri}" />
-                        <TextBlock Text="{Binding Path=Name}" />
-                    </WrapPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <local:FileBrowser
+            x:Name="fbBrowser"
+            Width="220"
+            DockPanel.Dock="Left" />
         <Border
             Margin="10"
             BorderBrush="#FFABADB3"

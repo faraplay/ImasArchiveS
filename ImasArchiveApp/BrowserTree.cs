@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ImasArchiveApp
 {
-    class BrowserTree
+    public class BrowserTree
     {
         private readonly BrowserTree _parent;
         private readonly List<BrowserTree> _children = new List<BrowserTree>();
@@ -67,6 +67,8 @@ namespace ImasArchiveApp
         public ReadOnlyCollection<BrowserTree> Entries { get => new ReadOnlyCollection<BrowserTree>(_children); }
         public BrowserEntryType Type { get => _type; }
         public string Name { get => _entryName; }
+        public bool IsRoot { get => _parent == null; }
+        public BrowserTree Parent { get => _parent; }
 
         public Uri IconUri => _type switch
         {
@@ -76,7 +78,7 @@ namespace ImasArchiveApp
         };
     }
 
-    enum BrowserEntryType
+    public enum BrowserEntryType
     {
         Directory = 0,
         RegularFile = 1

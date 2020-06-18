@@ -26,7 +26,6 @@ namespace ImasArchiveApp
     {
         ArcFile arcFile;
         BrowserTree root;
-        BrowserTree current;
         List<string> browserEntryStrings = new List<string>();
 
         FileStream fileStream;
@@ -88,9 +87,8 @@ namespace ImasArchiveApp
                     {
                         browserEntryStrings.Add(entry.Filepath);
                     }
-                    root = new BrowserTree(truncFilename, browserEntryStrings);
-                    current = root;
-                    lvBrowser.ItemsSource = current.Entries;
+                    root = new BrowserTree("", browserEntryStrings);
+                    fbBrowser.UseTree(root);
                 }
                 fileStream = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read);
                 hxViewer.Stream = fileStream;
@@ -104,10 +102,5 @@ namespace ImasArchiveApp
             fileStream = null;
         }
 
-        private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            current = (BrowserTree)((ListViewItem)sender).DataContext;
-            lvBrowser.ItemsSource = current.Entries;
-        }
     }
 }

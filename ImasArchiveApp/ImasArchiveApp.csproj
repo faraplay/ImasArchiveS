@@ -7,8 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Icons\Backwards_16x.png" />
+    <None Remove="Icons\Backwards_disabled_16x.png" />
     <None Remove="Icons\FolderClosed_16x.png" />
+    <None Remove="Icons\Forwards_16x.png" />
+    <None Remove="Icons\Forwards_disabled_16x.png" />
     <None Remove="Icons\TextFile_16x.png" />
+    <None Remove="Icons\Upload_16x.png" />
+    <None Remove="Icons\Upload_gray_16x.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,12 +22,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Icons\Backwards_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\Backwards_disabled_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Icons\FolderClosed_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Icons\Forwards_16x.png" />
+    <Resource Include="Icons\Forwards_disabled_16x.png" />
     <Resource Include="Icons\TextFile_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Icons\Upload_16x.png" />
+    <Resource Include="Icons\Upload_gray_16x.png" />
   </ItemGroup>
 
 </Project>
