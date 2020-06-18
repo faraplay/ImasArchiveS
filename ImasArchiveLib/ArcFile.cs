@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("ImasArchiveLibTest")]
 
 namespace ImasArchiveLib
 {
@@ -26,7 +29,6 @@ namespace ImasArchiveLib
         }
 
         internal Stream ArcStream { get => _arc_stream; }
-        internal string ArcFilename { get => _arc_filename; }
 
         public ReadOnlyCollection<ArcEntry> Entries { get { return new ReadOnlyCollection<ArcEntry>(_entries); } }
        

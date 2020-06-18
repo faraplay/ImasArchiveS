@@ -34,9 +34,8 @@ namespace ImasArchiveLibTest
             foreach (ArcEntry arcEntry in arcFile.Entries)
             {
                 byte[] actualHeader = new byte[8];
-                Stream stream = arcEntry.Open();
+                using Stream stream = arcEntry.OpenRaw();
                 stream.Read(actualHeader);
-                arcEntry.Close();
                 bool eq = expectedHeader.SequenceEqual(actualHeader);
                 Assert.IsTrue(eq);
             }
@@ -52,9 +51,8 @@ namespace ImasArchiveLibTest
             foreach (ArcEntry arcEntry in arcFile.Entries)
             {
                 MemoryStream memoryStream = new MemoryStream();
-                Stream stream = arcEntry.Open();
+                using Stream stream = arcEntry.OpenRaw();
                 stream.CopyTo(memoryStream);
-                arcEntry.Close();
 
                 Assert.AreEqual(arcEntry.Length, memoryStream.Length);
             }
@@ -62,18 +60,36 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\hdd", "", "songinfo/songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz.fbs")]
+        public void GetEntryRawAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
+        {
+            using ArcFile arcFile = new ArcFile(filename, extension);
+            ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
+            if (arcEntry == null)
+                Assert.Fail("Entry not found.");
+            using (Stream stream = arcEntry.OpenRaw()) 
+            { 
+                using FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
+                stream.CopyTo(fileStream);
+            }
+            bool eq = CompareFiles(expectedFile, "temp.dat");
+            File.Delete("temp.dat");
+            Assert.IsTrue(eq);
+        }
+
+
+        [DataTestMethod]
+        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\hdd", "", "songinfo/songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin")]
         public void GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
             ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
             if (arcEntry == null)
                 Assert.Fail("Entry not found.");
-            var stream = arcEntry.Open();
-            using (FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write))
+            using (Stream stream = arcEntry.Open())
             {
+                using FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
                 stream.CopyTo(fileStream);
             }
-            arcEntry.Close();
             bool eq = CompareFiles(expectedFile, "temp.dat");
             File.Delete("temp.dat");
             Assert.IsTrue(eq);

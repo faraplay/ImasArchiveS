@@ -6,9 +6,9 @@ using System.Text;
 
 namespace ImasArchiveLib
 {
-    public class SegsStream : Stream
+    internal class SegsStream : Stream
     {
-        private readonly Stream _stream;
+        private Stream _stream;
         private readonly SegsStreamMode _mode;
 
         private long _length;
@@ -49,6 +49,26 @@ namespace ImasArchiveLib
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_stream == null)
+                return;
+
+            if (disposing)
+            {
+                _stream.Dispose();
+                _stream = null;
+            }
+
+            base.Dispose(disposing);
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (_stream == null)
+                throw new ObjectDisposedException(Strings.ObjectDisposed_StreamClosed);
         }
 
         private void ReadHeader()
@@ -151,6 +171,7 @@ namespace ImasArchiveLib
         {
             get
             {
+                EnsureNotDisposed();
                 if (_mode == SegsStreamMode.Decompress)
                     return _length;
                 else
@@ -162,6 +183,7 @@ namespace ImasArchiveLib
         {
             get
             {
+                EnsureNotDisposed();
                 if (_mode == SegsStreamMode.Decompress)
                     return _position;
                 else
@@ -170,6 +192,7 @@ namespace ImasArchiveLib
 
             set
             {
+                EnsureNotDisposed();
                 if (_mode != SegsStreamMode.Decompress)
                     throw new NotSupportedException(Strings.NotSupported);
 
@@ -193,6 +216,8 @@ namespace ImasArchiveLib
             if (_mode != SegsStreamMode.Decompress)
                 throw new NotSupportedException(Strings.NotSupported);
 
+            EnsureNotDisposed();
+
             long tempPos = origin switch
             {
                 SeekOrigin.Begin => offset,
@@ -207,6 +232,7 @@ namespace ImasArchiveLib
 
         public override int ReadByte()
         {
+            EnsureNotDisposed();
             EnsureBufferInitialised();
 
             if (_avail_in == 0)
@@ -234,6 +260,7 @@ namespace ImasArchiveLib
 
         private int ReadCore(Span<byte> buffer)
         {
+            EnsureNotDisposed();
             EnsureBufferInitialised();
 
             int totalRead = 0;
