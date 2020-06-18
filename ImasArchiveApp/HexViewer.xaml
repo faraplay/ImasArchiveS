@@ -1,0 +1,15 @@
+﻿<UserControl
+    x:Class="ImasArchiveApp.HexViewer"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ImasArchiveApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="400"
+    mc:Ignorable="d">
+    <DockPanel SizeChanged="hx_SizeChanged">
+        <TextBlock x:Name="tbHeader" DockPanel.Dock="Top" />
+        <TextBlock x:Name="tbData" MouseWheel="tbData_MouseWheel" />
+    </DockPanel>
+</UserControl>
