@@ -12,7 +12,6 @@ namespace ImasArchiveLib
         private long _length;
         private bool _openedForRead;
         private MemoryStream _memory_stream;
-        private BufferedStream _buffered_stream;
         private bool disposed = false;
 
         internal ArcEntry(ArcFile parent, string filepath, long baseOffset, long length)
@@ -34,7 +33,7 @@ namespace ImasArchiveLib
         /// Opens a stream containing the file data of the entry for read access.
         /// </summary>
         /// <returns></returns>
-        public Stream Open()
+        internal Stream OpenRaw()
         {
             if (_openedForRead)
             {
@@ -43,8 +42,7 @@ namespace ImasArchiveLib
             _openedForRead = true;
             if (_memory_stream == null)
             {
-                _buffered_stream = new BufferedStream(new Substream(_parent_file.ArcStream, _base_offset, _length));
-                return _buffered_stream;
+                return new BufferedStream(new Substream(_parent_file.ArcStream, _base_offset, _length));
             }
             else
             {
@@ -52,11 +50,11 @@ namespace ImasArchiveLib
             }
         }
 
-        public void Close()
+        public Stream Open()
         {
-            _buffered_stream?.Dispose();
-            _buffered_stream = null;
-            _openedForRead = false;
+            FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, _name);
+            SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
+            return segsStream;
         }
 
         /// <summary>
@@ -98,7 +96,6 @@ namespace ImasArchiveLib
 
             if (disposing)
             {
-                _buffered_stream?.Dispose();
                 _memory_stream?.Dispose();
             }
 
