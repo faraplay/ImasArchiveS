@@ -5,13 +5,14 @@ using System.Text;
 
 namespace ImasArchiveLib
 {
-    public class FlowbishStream : Stream
+    internal class FlowbishStream : Stream
     {
         private const int DefaultBufferSize = 0x2000;
-        private readonly Stream _stream;
+        private Stream _stream;
         private readonly FlowbishStreamMode _mode;
         private readonly FlowbishBox _box;
         private readonly string _key;
+        private bool disposed = false;
 
         private long _length;
         private long _offset;
@@ -109,6 +110,20 @@ namespace ImasArchiveLib
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                _stream.Dispose();
+                _stream = null;
+            }
+            base.Dispose(disposing);
+            disposed = true;
         }
 
         private void ReadHeader()
