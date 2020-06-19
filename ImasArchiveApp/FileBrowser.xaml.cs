@@ -54,8 +54,15 @@ namespace ImasArchiveApp
         private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             BrowserTree tempTree = (BrowserTree)((ListViewItem)sender).DataContext;
-            if (tempTree.Type == BrowserEntryType.Directory)
-                MoveToTree(tempTree);
+            switch (tempTree.Type)
+            {
+                case BrowserEntryType.Directory:
+                    MoveToTree(tempTree);
+                    break;
+                case BrowserEntryType.RegularFile:
+                    RaiseFileSelectedEvent(tempTree);
+                    break;
+            }
         }
 
         public void UseTree(BrowserTree tree)
@@ -131,6 +138,27 @@ namespace ImasArchiveApp
             if (sender is FileBrowser fb)
                 fb.MoveToTree(fb._tree.Parent);
         }
+
+
+        public static RoutedEvent FileSelectedEvent = EventManager.RegisterRoutedEvent(
+            "FileSelected",
+            RoutingStrategy.Bubble,
+            typeof(FileSelectedEventHandler),
+            typeof(FileBrowser)
+            );
+
+        public event EventHandler<FileSelectedRoutedEventArgs> FileSelected
+        {
+            add { AddHandler(FileSelectedEvent, value); }
+            remove { RemoveHandler(FileSelectedEvent, value); }
+        }
+
+        void RaiseFileSelectedEvent(BrowserTree file)
+        {
+            FileSelectedRoutedEventArgs routedEventArgs = new FileSelectedRoutedEventArgs(FileSelectedEvent);
+            routedEventArgs.File = file;
+            RaiseEvent(routedEventArgs);
+        }
     }
 
     public static class CustomFileBrowserCommands
@@ -144,5 +172,13 @@ namespace ImasArchiveApp
                 new KeyGesture(Key.Up, ModifierKeys.Alt)
             }
             );
+    }
+
+    public delegate void FileSelectedEventHandler(object sender, FileSelectedRoutedEventArgs e);
+
+    public class FileSelectedRoutedEventArgs : RoutedEventArgs
+    {
+        public BrowserTree File { get; set; }
+        public FileSelectedRoutedEventArgs(RoutedEvent routedEvent) : base(routedEvent) { }
     }
 }

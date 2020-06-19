@@ -28,7 +28,6 @@ namespace ImasArchiveApp
         BrowserTree root;
         List<string> browserEntryStrings = new List<string>();
 
-        FileStream fileStream;
         public MainWindow()
         {
             InitializeComponent();
@@ -41,24 +40,21 @@ namespace ImasArchiveApp
 
         private void Open_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (fileStream != null)
-            {
-                CloseStream();
-            }
-            OpenStream();
+            CloseHexViewerStream();
+            OpenArc();
         }
 
         private void Close_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = (fileStream != null);
+            e.CanExecute = (hxViewer.Stream != null);
         }
 
         private void Close_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            CloseStream();
+            CloseHexViewerStream();
         }
 
-        private void OpenStream()
+        private void OpenArc()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat";
@@ -80,27 +76,45 @@ namespace ImasArchiveApp
                 {
                     throw new Exception();
                 }
-                using (ArcFile tempArcFile = new ArcFile(truncFilename, extension))
+                arcFile = new ArcFile(truncFilename, extension);
+                browserEntryStrings.Clear();
+                foreach (ArcEntry entry in arcFile.Entries)
                 {
-                    browserEntryStrings.Clear();
-                    foreach (ArcEntry entry in tempArcFile.Entries)
-                    {
-                        browserEntryStrings.Add(entry.Filepath);
-                    }
-                    root = new BrowserTree("", browserEntryStrings);
-                    fbBrowser.UseTree(root);
+                    browserEntryStrings.Add(entry.Filepath);
                 }
-                fileStream = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read);
-                hxViewer.Stream = fileStream;
+                root = new BrowserTree("", browserEntryStrings);
+                fbBrowser.UseTree(root);
             }
         }
 
-        private void CloseStream()
+        private void OpenHexViewerStream(Stream stream)
         {
-            hxViewer.Stream = null;
-            fileStream.Dispose();
-            fileStream = null;
+            if (stream != null)
+            {
+                CloseHexViewerStream();
+                hxViewer.Stream = stream;
+            }
         }
 
+        private void CloseHexViewerStream()
+        {
+            hxViewer.Stream?.Dispose();
+            hxViewer.Stream = null;
+        }
+
+        private void fbBrowser_FileSelected(object sender, FileSelectedRoutedEventArgs e)
+        {
+            if (arcFile != null)
+            {
+                string entryPath = e.File.ToString();
+                // remove starting slash
+                entryPath = entryPath.Substring(1);
+                ArcEntry arcEntry = arcFile.GetEntry(entryPath);
+                if (arcEntry != null)
+                {
+                    OpenHexViewerStream(arcEntry.Open());
+                }
+            }
+        }
     }
 }

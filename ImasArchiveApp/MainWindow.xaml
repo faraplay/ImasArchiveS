@@ -29,7 +29,8 @@
         <local:FileBrowser
             x:Name="fbBrowser"
             Width="220"
-            DockPanel.Dock="Left" />
+            DockPanel.Dock="Left"
+            FileSelected="fbBrowser_FileSelected" />
         <Border
             Margin="10"
             BorderBrush="#FFABADB3"
