@@ -24,12 +24,12 @@ namespace ImasArchiveApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        ArcModel arcModel = new ArcModel();
+        ArcModel arcModel;
 
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = arcModel;
+            arcModel = DataContext as ArcModel;
         }
 
         private void Open_CanExecute(object sender, CanExecuteRoutedEventArgs e)

@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
@@ -13,6 +15,8 @@ namespace ImasArchiveApp
         private ArcFile _arc_file;
         private BrowserTree _root;
         private List<string> _browser_entries = new List<string>();
+
+        private readonly FileBrowserModel _browser_model = new FileBrowserModel();
 
         public string CurrentFile
         {
@@ -54,6 +58,8 @@ namespace ImasArchiveApp
             }
         }
 
+        internal FileBrowserModel BrowserModel => _browser_model;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
@@ -88,5 +94,35 @@ namespace ImasArchiveApp
             }
             Root = new BrowserTree("", BrowserEntries);
         }
+    }
+
+    public class RelayCommand : ICommand
+    {
+        #region Fields 
+        readonly Action<object> _execute;
+        readonly Predicate<object> _canExecute;
+        #endregion // Fields 
+        #region Constructors 
+        public RelayCommand(Action<object> execute) : this(execute, null) { }
+        public RelayCommand(Action<object> execute, Predicate<object> canExecute)
+        {
+            if (execute == null)
+                throw new ArgumentNullException("execute");
+            _execute = execute; _canExecute = canExecute;
+        }
+        #endregion // Constructors 
+        #region ICommand Members 
+        [DebuggerStepThrough]
+        public bool CanExecute(object parameter)
+        {
+            return _canExecute == null ? true : _canExecute(parameter);
+        }
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+        public void Execute(object parameter) { _execute(parameter); }
+        #endregion // ICommand Members 
     }
 }

@@ -9,6 +9,12 @@
     Width="800"
     Height="450"
     mc:Ignorable="d">
+    <Window.Resources>
+        <local:ArcModel x:Key="modelSource" />
+    </Window.Resources>
+    <Window.DataContext>
+        <Binding Source="{StaticResource modelSource}" />
+    </Window.DataContext>
     <Window.CommandBindings>
         <CommandBinding
             CanExecute="Open_CanExecute"
@@ -29,8 +35,7 @@
         <local:FileBrowser
             x:Name="fbBrowser"
             Width="220"
-            DockPanel.Dock="Left"
-            FileSelected="fbBrowser_FileSelected" />
+            DockPanel.Dock="Left" />
         <DockPanel Margin="10">
             <Border
                 BorderBrush="#FFABADB3"
