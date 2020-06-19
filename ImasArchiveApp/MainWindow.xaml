@@ -31,14 +31,19 @@
             Width="220"
             DockPanel.Dock="Left"
             FileSelected="fbBrowser_FileSelected" />
-        <Border
-            Margin="10"
-            BorderBrush="#FFABADB3"
-            BorderThickness="1">
-            <local:HexViewer
-                x:Name="hxViewer"
-                FontFamily="Consolas"
-                FontSize="14" />
-        </Border>
+        <DockPanel Margin="10">
+            <Border
+                BorderBrush="#FFABADB3"
+                BorderThickness="1"
+                DockPanel.Dock="Top">
+                <TextBlock Name="tbFilename" Text="{Binding Path=Filename}" />
+            </Border>
+            <Border BorderBrush="#FFABADB3" BorderThickness="1">
+                <local:HexViewer
+                    x:Name="hxViewer"
+                    FontFamily="Consolas"
+                    FontSize="14" />
+            </Border>
+        </DockPanel>
     </DockPanel>
 </Window>

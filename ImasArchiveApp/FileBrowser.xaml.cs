@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,8 +22,8 @@ namespace ImasArchiveApp
     /// </summary>
     public partial class FileBrowser : UserControl
     {
-
-        private BrowserTree _tree;
+        private FileBrowserModel model = new FileBrowserModel();
+        private BrowserTree _current_dir;
         private readonly List<BrowserTree> _history = new List<BrowserTree>();
         private int _history_index = 0;
 
@@ -44,20 +46,17 @@ namespace ImasArchiveApp
         public FileBrowser()
         {
             InitializeComponent();
+            Binding myBinding = new Binding("CurrentDir");
+            myBinding.Source = model;
+            SetBinding(DataContextProperty, myBinding);
         }
-
-        public void UpdateFileBrowser()
-        {
-            DataContext = _tree;
-        }
-
         private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             BrowserTree tempTree = (BrowserTree)((ListViewItem)sender).DataContext;
             switch (tempTree.Type)
             {
                 case BrowserEntryType.Directory:
-                    MoveToTree(tempTree);
+                    model.MoveToTree(tempTree);
                     break;
                 case BrowserEntryType.RegularFile:
                     RaiseFileSelectedEvent(tempTree);
@@ -67,23 +66,7 @@ namespace ImasArchiveApp
 
         public void UseTree(BrowserTree tree)
         {
-            _history.Clear();
-            _history_index = 0;
-            _tree = tree;
-            _history.Add(_tree);
-            UpdateFileBrowser();
-        }
-
-        private void MoveToTree(BrowserTree tree)
-        {
-            _tree = tree;
-            if (_history_index + 1 < _history.Count)
-            {
-                _history.RemoveRange(_history_index + 1, _history.Count - (_history_index + 1));
-            }
-            _history.Add(_tree);
-            _history_index++;
-            UpdateFileBrowser();
+            model.HomeDir = tree;
         }
 
         private static void Back_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -99,9 +82,7 @@ namespace ImasArchiveApp
         {
             if (sender is FileBrowser fb)
             {
-                fb._history_index--;
-                fb._tree = fb._history[fb._history_index];
-                fb.UpdateFileBrowser();
+                fb.model.HistoryIndex--;
             }
         }
 
@@ -118,16 +99,14 @@ namespace ImasArchiveApp
         {
             if (sender is FileBrowser fb)
             {
-                fb._history_index++;
-                fb._tree = fb._history[fb._history_index];
-                fb.UpdateFileBrowser();
+                fb.model.HistoryIndex++;
             }
         }
 
         private static void Up_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             if (sender is FileBrowser fb)
-                e.CanExecute = (fb._tree?.IsRoot == false);
+                e.CanExecute = (fb._current_dir?.IsRoot == false);
             else
                 e.CanExecute = false;
             e.Handled = true;
@@ -136,7 +115,7 @@ namespace ImasArchiveApp
         private static void Up_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             if (sender is FileBrowser fb)
-                fb.MoveToTree(fb._tree.Parent);
+                fb.model.MoveUp();
         }
 
 
@@ -158,6 +137,87 @@ namespace ImasArchiveApp
             FileSelectedRoutedEventArgs routedEventArgs = new FileSelectedRoutedEventArgs(FileSelectedEvent);
             routedEventArgs.File = file;
             RaiseEvent(routedEventArgs);
+        }
+    }
+
+    class FileBrowserModel : INotifyPropertyChanged
+    {
+        private BrowserTree _home_dir;
+        private BrowserTree _current_dir;
+        private readonly List<BrowserTree> _history = new List<BrowserTree>();
+        private int _history_index = 0;
+
+        public BrowserTree HomeDir
+        {
+            get => _home_dir;
+            set
+            {
+                _home_dir = value;
+                _history.Clear();
+                _history_index = 0;
+                _history.Add(value);
+                _current_dir = value;
+                OnPropertyChanged(nameof(HomeDir));
+                OnPropertyChanged(nameof(CurrentDir));
+            }
+        }
+
+        public BrowserTree CurrentDir
+        {
+            get => _current_dir; 
+            set
+            {
+                _current_dir = value;
+                OnPropertyChanged(nameof(CurrentDir));
+            }
+        }
+
+        public List<BrowserTree> History => _history;
+
+        public int HistoryIndex
+        {
+            get => _history_index;
+            set
+            {
+                if (value >= 0 && value < _history.Count)
+                {
+                    _history_index = value;
+                    CurrentDir = History[_history_index];
+                }
+                OnPropertyChanged(nameof(HistoryIndex));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void UseTree(BrowserTree tree)
+        {
+            _history.Clear();
+            _history_index = 0;
+            _history.Add(tree);
+            CurrentDir = tree;
+        }
+
+        internal void MoveToTree(BrowserTree tree)
+        {
+            if (_history_index + 1 < _history.Count)
+            {
+                _history.RemoveRange(_history_index + 1, _history.Count - (_history_index + 1));
+            }
+            _history_index++;
+            _history.Add(tree);
+            CurrentDir = tree;
+        }
+
+        internal void MoveUp()
+        {
+            if (_current_dir.Parent != null)
+                MoveToTree(_current_dir.Parent);
         }
     }
 
