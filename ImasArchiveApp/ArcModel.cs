@@ -27,7 +27,7 @@ namespace ImasArchiveApp
             set
             {
                 _arcPath = value;
-                OnPropertyChanged(nameof(ArcPath));
+                OnPropertyChanged();
             }
         }
         public string CurrentFile
@@ -37,7 +37,7 @@ namespace ImasArchiveApp
             {
                 _current_file = value;
                 LoadToHex(_current_file);
-                OnPropertyChanged(nameof(CurrentFile));
+                OnPropertyChanged();
             }
         }
         public ArcFile ArcFile
@@ -46,7 +46,7 @@ namespace ImasArchiveApp
             set
             {
                 _arc_file = value;
-                OnPropertyChanged(nameof(ArcFile));
+                OnPropertyChanged();
             }
         }
         public BrowserTree Root 
@@ -55,7 +55,7 @@ namespace ImasArchiveApp
             set
             {
                 _root = value;
-                OnPropertyChanged(nameof(Root));
+                OnPropertyChanged();
             }
         }
         public FileBrowserModel BrowserModel
@@ -64,7 +64,7 @@ namespace ImasArchiveApp
             set
             {
                 _browser_model = value;
-                OnPropertyChanged(nameof(BrowserModel));
+                OnPropertyChanged();
             }
         }
         public HexViewModel HexViewModel
@@ -73,7 +73,7 @@ namespace ImasArchiveApp
             set
             {
                 _hexViewModel = value;
-                OnPropertyChanged(nameof(HexViewModel));
+                OnPropertyChanged();
             }
         }
         #endregion
@@ -150,6 +150,7 @@ namespace ImasArchiveApp
         public bool CanCloseArc => _arc_file != null;
         public void CloseArc()
         {
+            CurrentFile = null;
             Root = null;
             BrowserModel.UseTree(null);
             _arc_file?.Dispose();
@@ -160,7 +161,7 @@ namespace ImasArchiveApp
         #region Methods
         private void LoadToHex(string path)
         {
-            if (ArcFile != null)
+            if (ArcFile != null && path != null)
             {
                 string entryPath = path.Substring(1);
                 ArcEntry arcEntry = ArcFile.GetEntry(entryPath);
@@ -168,6 +169,10 @@ namespace ImasArchiveApp
                 {
                     HexViewModel.Stream = arcEntry.Open();
                 }
+            } 
+            else
+            {
+                HexViewModel.Stream = null;
             }
 
         }

@@ -23,5 +23,14 @@ namespace ImasArchiveApp
         {
             InitializeComponent();
         }
+
+        private void DockPanel_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            double lineHeight = tbData.LineHeight;
+            if (double.IsNaN(lineHeight))
+                lineHeight = tbData.FontSize * tbData.FontFamily.LineSpacing;
+            int lineCount = (int)(ActualHeight / lineHeight);
+            (DataContext as HexViewModel).LineCount = lineCount;
+        }
     }
 }

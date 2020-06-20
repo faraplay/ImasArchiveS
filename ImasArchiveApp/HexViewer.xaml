@@ -10,19 +10,17 @@
     d:DesignWidth="400"
     mc:Ignorable="d">
     <DockPanel>
-        <i:Interaction.Triggers>
-            <i:EventTrigger EventName="SizeChanged">
-                <i:InvokeCommandAction Command="{Binding Path=UpdateDataTextCommand}" />
-            </i:EventTrigger>
-        </i:Interaction.Triggers>
         <TextBlock
             x:Name="tbHeader"
             DockPanel.Dock="Top"
             Text="{Binding Path=HeaderText}" />
-        <TextBlock x:Name="tbData" Text="{Binding Path=DataText}">
+        <TextBlock
+            x:Name="tbData"
+            SizeChanged="DockPanel_SizeChanged"
+            Text="{Binding Path=DataText}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseWheel">
-                    <i:InvokeCommandAction Command="{Binding Path=ScrollCommand}" />
+                    <i:CallMethodAction MethodName="Scroll" TargetObject="{Binding}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </TextBlock>

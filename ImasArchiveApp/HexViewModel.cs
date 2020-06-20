@@ -21,7 +21,9 @@ namespace ImasArchiveApp
         private byte[] _dataBuffer;
         private int _bufferSize;
         private int _bufferOffset;
+        private int streamLength;
         private const int DefaultBufferSize = 0x10000;
+        private StringBuilder dataStringBuilder = new StringBuilder();
         #endregion
         #region Properties
         public int HeaderLength
@@ -34,7 +36,7 @@ namespace ImasArchiveApp
                     _headerLength = value;
                     UpdateHeaderText();
                     UpdateDataText();
-                    OnPropertyChanged(nameof(HeaderLength));
+                    OnPropertyChanged();
                 }
             }
         }
@@ -44,7 +46,7 @@ namespace ImasArchiveApp
             set
             {
                 _headerText = value;
-                OnPropertyChanged(nameof(HeaderText));
+                OnPropertyChanged();
             }
         }
         public string DataText
@@ -53,7 +55,7 @@ namespace ImasArchiveApp
             set
             {
                 _dataText = value;
-                OnPropertyChanged(nameof(DataText));
+                OnPropertyChanged();
             }
         }
         public Stream Stream
@@ -63,9 +65,10 @@ namespace ImasArchiveApp
             {
                 _stream?.Dispose();
                 _stream = value;
+                streamLength = (int)(_stream == null ? 0 : _stream.Length);
                 ClearBuffer();
                 UpdateDataText();
-                OnPropertyChanged(nameof(Stream));
+                OnPropertyChanged();
             }
         }
         public int Offset
@@ -75,7 +78,7 @@ namespace ImasArchiveApp
             {
                 _offset = value;
                 UpdateDataText();
-                OnPropertyChanged(nameof(Offset));
+                OnPropertyChanged();
             }
         }
         public int LineCount
@@ -83,8 +86,12 @@ namespace ImasArchiveApp
             get => _lineCount;
             set
             {
-                _lineCount = value;
-                OnPropertyChanged(nameof(LineCount));
+                if (value > 0 && value < 256 && value != _lineCount)
+                {
+                    _lineCount = value;
+                    UpdateDataText();
+                    OnPropertyChanged();
+                }
             }
         }
         #endregion
@@ -103,27 +110,20 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Commands
-        RelayCommand _scrollCommand;
-        public ICommand ScrollCommand
+        public void Scroll(object sender, MouseWheelEventArgs e)
         {
-            get
+            if (_stream != null)
             {
-                if (_scrollCommand == null)
-                {
-                    _scrollCommand = new RelayCommand(
-                        param => this.ScrollDown());
-                }
-                return _scrollCommand;
+                int delta = e.Delta / 120;
+                int newOffset = _offset + (_headerLength * -delta);
+                if (newOffset < 0)
+                    newOffset = 0;
+                if (newOffset < _stream.Length)
+                    Offset = newOffset;
             }
         }
-        private void ScrollDown()
-        {
-            int newOffset = _offset + (_headerLength * 1);
-            if (newOffset < 0)
-                newOffset = 0;
-            if (newOffset < _stream.Length)
-                Offset = newOffset;
-        }
+        #endregion
+        #region RelayCommands
         private RelayCommand _updateDataTextCommand;
         public ICommand UpdateDataTextCommand
         {
@@ -154,8 +154,11 @@ namespace ImasArchiveApp
             {
 
                 int totalBytes = _headerLength * _lineCount;
-                if (_dataBuffer == null || _bufferSize < 2 * totalBytes ||
-                    _offset < _bufferOffset || _offset + totalBytes > _bufferOffset + _bufferSize)
+                if (_dataBuffer == null || 
+                    (_bufferSize < 2 * totalBytes && 2 * totalBytes < streamLength) ||
+                    _offset < _bufferOffset || 
+                    (_offset + totalBytes > _bufferOffset + _bufferSize && _bufferOffset + _bufferSize < streamLength)
+                    )
                 {
                     _bufferSize = (2 * totalBytes > DefaultBufferSize) ? 2 * totalBytes : DefaultBufferSize;
                     if (_dataBuffer == null || _bufferSize > _dataBuffer.Length)
@@ -167,7 +170,7 @@ namespace ImasArchiveApp
                     _bufferSize = _stream.Read(_dataBuffer);
                 }
 
-                StringBuilder dataStringBuilder = new StringBuilder();
+                dataStringBuilder.Clear();
                 dataStringBuilder.Capacity = (totalBytes * 4 + 13 * _lineCount);
                 int index = 0;
                 int lineOffset = _offset;
