@@ -20,28 +20,10 @@ namespace ImasArchiveApp
     /// </summary>
     public partial class FileBrowser : UserControl
     {
-        private FileBrowserModel model = new FileBrowserModel();
 
         public FileBrowser()
         {
             InitializeComponent();
-            //Binding myBinding = new Binding("CurrentDir");
-            //myBinding.Source = model;
-            //SetBinding(DataContextProperty, myBinding);
-            DataContext = model;
         }
-
-        public void UseTree(BrowserTree tree)
-        {
-            model.HomeDir = tree;
-        }
-    }
-
-    public delegate void FileSelectedEventHandler(object sender, FileSelectedRoutedEventArgs e);
-
-    public class FileSelectedRoutedEventArgs : RoutedEventArgs
-    {
-        public BrowserTree File { get; set; }
-        public FileSelectedRoutedEventArgs(RoutedEvent routedEvent) : base(routedEvent) { }
     }
 }

@@ -24,96 +24,29 @@ namespace ImasArchiveApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        ArcModel arcModel;
-
         public MainWindow()
         {
             InitializeComponent();
-            arcModel = DataContext as ArcModel;
-        }
-
-        private void Open_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
         }
 
         private void Open_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            CloseHexViewerStream();
-            OpenArcDialog();
+            if ((DataContext as ArcModel).CloseArcCommand.CanExecute(null))
+                (DataContext as ArcModel).CloseArcCommand.Execute(null);
+            if (OpenArcDialog())
+                (DataContext as ArcModel).OpenArcCommand.Execute(null);
         }
 
-        private void Close_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (hxViewer.Stream != null);
-        }
-
-        private void Close_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            CloseHexViewerStream();
-        }
-
-        private void OpenArcDialog()
+        private bool OpenArcDialog()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat";
-            if (openFileDialog.ShowDialog() == true)
+            bool fileSelected = (openFileDialog.ShowDialog() == true);
+            if (fileSelected)
             {
-                string truncFilename = openFileDialog.FileName;
-                string extension;
-                if (truncFilename.EndsWith(".arc"))
-                {
-                    truncFilename = truncFilename.Remove(truncFilename.Length - 4);
-                    extension = "";
-                }
-                else if (truncFilename.EndsWith(".arc.dat"))
-                {
-                    truncFilename = truncFilename.Remove(truncFilename.Length - 8);
-                    extension = ".dat";
-                }
-                else
-                {
-                    throw new Exception();
-                }
-                arcModel.ArcFile = new ArcFile(truncFilename, extension);
-                arcModel.BrowserEntries.Clear();
-                foreach (ArcEntry entry in arcModel.ArcFile.Entries)
-                {
-                    arcModel.BrowserEntries.Add(entry.Filepath);
-                }
-                arcModel.Root = new BrowserTree("", arcModel.BrowserEntries);
-                fbBrowser.UseTree(arcModel.Root);
+                (DataContext as ArcModel).ArcPath = openFileDialog.FileName;
             }
-        }
-
-        private void OpenHexViewerStream(Stream stream)
-        {
-            if (stream != null)
-            {
-                CloseHexViewerStream();
-                hxViewer.Stream = stream;
-            }
-        }
-
-        private void CloseHexViewerStream()
-        {
-            hxViewer.Stream?.Dispose();
-            hxViewer.Stream = null;
-        }
-
-        private void fbBrowser_FileSelected(object sender, FileSelectedRoutedEventArgs e)
-        {
-            if (arcModel.ArcFile != null)
-            {
-                string entryPath = e.File.ToString();
-                // remove starting slash
-                entryPath = entryPath.Substring(1);
-                ArcEntry arcEntry = arcModel.ArcFile.GetEntry(entryPath);
-                if (arcEntry != null)
-                {
-                    OpenHexViewerStream(arcEntry.Open());
-                }
-            }
+            return fileSelected;
         }
     }
 }

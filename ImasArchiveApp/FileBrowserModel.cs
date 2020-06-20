@@ -8,13 +8,16 @@ namespace ImasArchiveApp
 {
     class FileBrowserModel : INotifyPropertyChanged
     {
+        #region Fields
+        private readonly ArcModel _parentModel;
         private BrowserTree _home_dir;
         private BrowserTree _current_dir;
         private readonly List<BrowserTree> _history = new List<BrowserTree>();
         private int _history_index = 0;
         private ObservableCollection<BrowserItemModel> _items;
-        private BrowserTree _selectedFile;
-
+        private string _selectedFile;
+        #endregion
+        #region Properties
         public BrowserTree HomeDir
         {
             get => _home_dir;
@@ -24,7 +27,7 @@ namespace ImasArchiveApp
                 _history.Clear();
                 _history_index = 0;
                 _history.Add(value);
-                OnPropertyChanged(nameof(HomeDir));
+                OnPropertyChanged();
                 CurrentDir = value;
             }
         }
@@ -35,8 +38,8 @@ namespace ImasArchiveApp
             set
             {
                 _current_dir = value;
-                CreateItems();
-                OnPropertyChanged(nameof(CurrentDir));
+                UpdateItems();
+                OnPropertyChanged();
             }
         }
 
@@ -52,7 +55,7 @@ namespace ImasArchiveApp
                     _history_index = value;
                     CurrentDir = History[_history_index];
                 }
-                OnPropertyChanged(nameof(HistoryIndex));
+                OnPropertyChanged();
             }
         }
         public ObservableCollection<BrowserItemModel> Items
@@ -66,23 +69,31 @@ namespace ImasArchiveApp
                 return _items;
             }
         }
-        public BrowserTree SelectedFile
+        public string SelectedFile
         {
             get => _selectedFile;
             set
             {
                 _selectedFile = value;
-                OnPropertyChanged(nameof(SelectedFile));
+                _parentModel.CurrentFile = value;
+                OnPropertyChanged();
             }
         }
-
+        #endregion
+        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
-
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
+        #endregion
+        #region Constructors
+        public FileBrowserModel(ArcModel parentModel)
+        {
+            _parentModel = parentModel;
+        }
+        #endregion
+        #region Commands
         RelayCommand _browseBackCommand;
         public ICommand BrowseBackCommand
         {
@@ -143,7 +154,8 @@ namespace ImasArchiveApp
             if (_current_dir?.Parent != null)
                 MoveToTree(_current_dir.Parent);
         }
-
+        #endregion
+        #region Methods
         public void UseTree(BrowserTree tree)
         {
             _history.Clear();
@@ -152,12 +164,15 @@ namespace ImasArchiveApp
             CurrentDir = tree;
         }
 
-        internal void CreateItems()
+        internal void UpdateItems()
         {
             Items.Clear();
-            foreach (BrowserTree tree in _current_dir.Entries)
+            if (_current_dir != null)
             {
-                Items.Add(new BrowserItemModel(this, tree));
+                foreach (BrowserTree tree in _current_dir.Entries)
+                {
+                    Items.Add(new BrowserItemModel(this, tree));
+                }
             }
         }
 
@@ -177,5 +192,6 @@ namespace ImasArchiveApp
             if (_current_dir.Parent != null)
                 MoveToTree(_current_dir.Parent);
         }
+        #endregion
     }
 }

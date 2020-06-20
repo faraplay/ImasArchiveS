@@ -10,44 +10,36 @@
     Height="450"
     mc:Ignorable="d">
     <Window.Resources>
-        <local:ArcModel x:Key="modelSource" />
+        <DataTemplate DataType="{x:Type local:FileBrowserModel}">
+            <local:FileBrowser Width="220" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:HexViewModel}">
+            <local:HexViewer
+                x:Name="hxViewer"
+                FontFamily="Consolas"
+                FontSize="14" />
+        </DataTemplate>
     </Window.Resources>
-    <Window.DataContext>
-        <Binding Source="{StaticResource modelSource}" />
-    </Window.DataContext>
     <Window.CommandBindings>
-        <CommandBinding
-            CanExecute="Open_CanExecute"
-            Command="Open"
-            Executed="Open_Executed" />
-        <CommandBinding
-            CanExecute="Close_CanExecute"
-            Command="Close"
-            Executed="Close_Executed" />
+        <CommandBinding Command="Open" Executed="Open_Executed" />
     </Window.CommandBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
                 <MenuItem Command="Open" />
-                <MenuItem Command="Close" />
+                <MenuItem Command="{Binding Path=CloseArcCommand}" Header="Close" />
             </MenuItem>
         </Menu>
-        <local:FileBrowser
-            x:Name="fbBrowser"
-            Width="220"
-            DockPanel.Dock="Left" />
+        <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
         <DockPanel Margin="10">
             <Border
                 BorderBrush="#FFABADB3"
                 BorderThickness="1"
                 DockPanel.Dock="Top">
-                <TextBlock Name="tbFilename" Text="{Binding Path=Filename}" />
+                <TextBlock Name="tbFilename" Text="{Binding Path=CurrentFile}" />
             </Border>
             <Border BorderBrush="#FFABADB3" BorderThickness="1">
-                <local:HexViewer
-                    x:Name="hxViewer"
-                    FontFamily="Consolas"
-                    FontSize="14" />
+                <ContentControl Content="{Binding Path=HexViewModel}" />
             </Border>
         </DockPanel>
     </DockPanel>

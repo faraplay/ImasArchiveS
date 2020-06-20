@@ -5,29 +5,41 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
     class ArcModel : INotifyPropertyChanged
     {
+        #region Fields
+        private string _arcPath;
         private string _current_file;
         private ArcFile _arc_file;
         private BrowserTree _root;
-        private List<string> _browser_entries = new List<string>();
-
-        private readonly FileBrowserModel _browser_model = new FileBrowserModel();
-
+        private FileBrowserModel _browser_model;
+        private HexViewModel _hexViewModel;
+        #endregion
+        #region Properties
+        public string ArcPath
+        {
+            get => _arcPath;
+            set
+            {
+                _arcPath = value;
+                OnPropertyChanged(nameof(ArcPath));
+            }
+        }
         public string CurrentFile
         {
             get => _current_file;
             set
             {
                 _current_file = value;
+                LoadToHex(_current_file);
                 OnPropertyChanged(nameof(CurrentFile));
             }
         }
-
         public ArcFile ArcFile
         {
             get => _arc_file;
@@ -37,7 +49,6 @@ namespace ImasArchiveApp
                 OnPropertyChanged(nameof(ArcFile));
             }
         }
-
         public BrowserTree Root 
         { 
             get => _root;
@@ -47,30 +58,56 @@ namespace ImasArchiveApp
                 OnPropertyChanged(nameof(Root));
             }
         }
-
-        public List<string> BrowserEntries
+        public FileBrowserModel BrowserModel
         {
-            get => _browser_entries;
+            get => _browser_model;
             set
             {
-                _browser_entries = value;
-                OnPropertyChanged(nameof(BrowserEntries));
+                _browser_model = value;
+                OnPropertyChanged(nameof(BrowserModel));
             }
         }
-
-        internal FileBrowserModel BrowserModel => _browser_model;
-
+        public HexViewModel HexViewModel
+        {
+            get => _hexViewModel;
+            set
+            {
+                _hexViewModel = value;
+                OnPropertyChanged(nameof(HexViewModel));
+            }
+        }
+        #endregion
+        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
-
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        public void OpenArc(string arcPath)
+        #endregion
+        #region Constructors
+        public ArcModel()
         {
-
-            string truncFilename = arcPath;
+            BrowserModel = new FileBrowserModel(this);
+            HexViewModel = new HexViewModel();
+        }
+        #endregion
+        #region Commands
+        RelayCommand _openArcCommand;
+        public ICommand OpenArcCommand
+        {
+            get
+            {
+                if (_openArcCommand == null)
+                {
+                    _openArcCommand = new RelayCommand(
+                        param => OpenArc());
+                }
+                return _openArcCommand;
+            }
+        }
+        public void OpenArc()
+        {
+            string truncFilename = _arcPath;
             string extension;
             if (truncFilename.EndsWith(".arc"))
             {
@@ -87,13 +124,54 @@ namespace ImasArchiveApp
                 throw new Exception();
             }
             ArcFile = new ArcFile(truncFilename, extension);
-            BrowserEntries.Clear();
+            List<string> browserEntries = new List<string>();
             foreach (ArcEntry entry in ArcFile.Entries)
             {
-                BrowserEntries.Add(entry.Filepath);
+                browserEntries.Add(entry.Filepath);
             }
-            Root = new BrowserTree("", BrowserEntries);
+            Root = new BrowserTree("", browserEntries);
+            _browser_model.HomeDir = Root;
         }
+        RelayCommand _closeArcCommand;
+        public ICommand CloseArcCommand
+        {
+            get
+            {
+                if (_closeArcCommand == null)
+                {
+                    _closeArcCommand = new RelayCommand(
+                        param => CloseArc(),
+                        param => CanCloseArc
+                        );
+                }
+                return _closeArcCommand;
+            }
+        }
+        public bool CanCloseArc => _arc_file != null;
+        public void CloseArc()
+        {
+            Root = null;
+            BrowserModel.UseTree(null);
+            _arc_file?.Dispose();
+            ArcFile = null;
+            ArcPath = null;
+        }
+        #endregion
+        #region Methods
+        private void LoadToHex(string path)
+        {
+            if (ArcFile != null)
+            {
+                string entryPath = path.Substring(1);
+                ArcEntry arcEntry = ArcFile.GetEntry(entryPath);
+                if (arcEntry != null)
+                {
+                    HexViewModel.Stream = arcEntry.Open();
+                }
+            }
+
+        }
+        #endregion
     }
 
     public class RelayCommand : ICommand
