@@ -10,7 +10,6 @@ namespace ImasArchiveLib
         private string _name;
         private long _base_offset;
         private long _length;
-        private bool _openedForRead;
         private MemoryStream _memory_stream;
         private bool disposed = false;
 
@@ -21,7 +20,6 @@ namespace ImasArchiveLib
             _base_offset = baseOffset;
             _length = length;
             _name = _filepath.Substring(_filepath.LastIndexOf('/') + 1);
-            _openedForRead = false;
             _memory_stream = null;
         }
 
@@ -35,11 +33,6 @@ namespace ImasArchiveLib
         /// <returns></returns>
         internal Stream OpenRaw()
         {
-            if (_openedForRead)
-            {
-                throw new IOException(Strings.IO_EntryAlreadyOpen);
-            }
-            _openedForRead = true;
             if (_memory_stream == null)
             {
                 return new BufferedStream(new Substream(_parent_file.ArcStream, _base_offset, _length));
@@ -63,20 +56,12 @@ namespace ImasArchiveLib
         /// <param name="stream">The stream to copy from</param>
         public void Replace(Stream stream)
         {
-            if (_openedForRead)
-            {
-                throw new IOException(Strings.IO_EntryAlreadyOpen);
-            }
             _memory_stream = new MemoryStream();
             stream.CopyTo(_memory_stream);
         }
 
         public void Delete()
         {
-            if (_openedForRead)
-            {
-                throw new IOException(Strings.IO_EntryAlreadyOpen);
-            }
             _parent_file.RemoveEntry(this);
             _parent_file = null;
         }

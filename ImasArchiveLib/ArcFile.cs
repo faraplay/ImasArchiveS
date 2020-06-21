@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("ImasArchiveLibTest")]
 
@@ -112,6 +113,60 @@ namespace ImasArchiveLib
         internal bool RemoveEntry(ArcEntry arcEntry)
         {
             return _entries.Remove(arcEntry);
+        }
+
+        public void ExtractAll(string destDir)
+        {
+            if (destDir.EndsWith('/'))
+                destDir = destDir.Substring(0, destDir.Length - 1);
+            if (!Directory.Exists(destDir))
+                Directory.CreateDirectory(destDir);
+            DirectoryInfo directoryInfo = new DirectoryInfo(destDir);
+            foreach (ArcEntry arcEntry in _entries)
+            {
+                string dirs = arcEntry.Filepath.Substring(0, arcEntry.Filepath.LastIndexOf('/') + 1);
+                if (dirs != "")
+                    directoryInfo.CreateSubdirectory(dirs);
+                string outFile = directoryInfo.FullName + '/' + arcEntry.Filepath;
+                if (outFile.EndsWith(".gz"))
+                    outFile = outFile.Substring(0, outFile.Length - 3);
+                else
+                    throw new InvalidDataException();
+                using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
+                using Stream stream = arcEntry.Open();
+                stream.CopyTo(fileStream);
+            }
+        }
+
+        public async Task ExtractAllAsync(string destDir)
+        {
+            if (destDir.EndsWith('/'))
+                destDir = destDir.Substring(0, destDir.Length - 1);
+            if (!Directory.Exists(destDir))
+                Directory.CreateDirectory(destDir);
+            DirectoryInfo directoryInfo = new DirectoryInfo(destDir);
+            var tasks = new List<Task>();
+            foreach (ArcEntry arcEntry in _entries)
+            {
+                tasks.Add(ExtractEntryAsync(arcEntry, directoryInfo));
+            }
+            await Task.WhenAll(tasks);
+
+        }
+
+        private async Task ExtractEntryAsync(ArcEntry arcEntry, DirectoryInfo directoryInfo)
+        {
+            string dirs = arcEntry.Filepath.Substring(0, arcEntry.Filepath.LastIndexOf('/') + 1);
+            if (dirs != "")
+                directoryInfo.CreateSubdirectory(dirs);
+            string outFile = directoryInfo.FullName + '/' + arcEntry.Filepath;
+            if (outFile.EndsWith(".gz"))
+                outFile = outFile.Substring(0, outFile.Length - 3);
+            else
+                throw new InvalidDataException();
+            using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
+            using Stream stream = arcEntry.Open();
+            await stream.CopyToAsync(fileStream);
         }
 
         public void Dispose()

@@ -57,7 +57,7 @@ namespace ImasArchiveLib
             long tempPosition = origin switch
             {
                 SeekOrigin.Begin => offset,
-                SeekOrigin.Current => _stream.Position - _base_offset + offset,
+                SeekOrigin.Current => _position + offset,
                 SeekOrigin.End => _length - offset,
                 _ => throw new ArgumentOutOfRangeException(Strings.ArgumentOutOfRangeException_Enum),
             };
@@ -66,10 +66,10 @@ namespace ImasArchiveLib
             if (tempPosition > _length)
                 throw new ArgumentOutOfRangeException(Strings.ArgumentOutOfRangeException_StringLength);
             _position = tempPosition;
-            lock (_lock)
-            {
-                _stream.Position = _position + _base_offset;
-            }
+            //lock (_lock)
+            //{
+            //    _stream.Position = _position + _base_offset;
+            //}
             return _position;
         }
 

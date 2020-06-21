@@ -17,6 +17,7 @@ namespace ImasArchiveLib
         private long[] blockOffsets;
         private int[] blockCompSizes;
         private int[] blockUncompSizes;
+        private bool[] blockIsCompressed;
 
         private const int MaxBlockSize = 0x10000;
         private byte[] _buffer;
@@ -85,15 +86,20 @@ namespace ImasArchiveLib
             blockOffsets = new long[_block_count];
             blockCompSizes = new int[_block_count];
             blockUncompSizes = new int[_block_count];
+            blockIsCompressed = new bool[_block_count];
             for (int i = 0; i < _block_count; i++)
             {
                 blockCompSizes[i] = Utils.GetUShort(_stream);
+                if (blockCompSizes[i] == 0)
+                    blockCompSizes[i] = MaxBlockSize;
                 blockUncompSizes[i] = Utils.GetUShort(_stream);
                 if (blockUncompSizes[i] != 0 && i != _block_count - 1)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
                 if (blockUncompSizes[i] == 0)
                     blockUncompSizes[i] = MaxBlockSize;
-                blockOffsets[i] = Utils.GetUInt(_stream) - 1;
+                uint blockOffset = Utils.GetUInt(_stream);
+                blockIsCompressed[i] = (blockOffset % 2 == 1);
+                blockOffsets[i] = blockOffset & -2;
             }
 
         }
@@ -104,10 +110,17 @@ namespace ImasArchiveLib
 
             _buffer_size = blockUncompSizes[index];
             _stream.Seek(blockOffsets[index], SeekOrigin.Begin);
-            using DeflateStream deflateStream = new DeflateStream(_stream, CompressionMode.Decompress, true);
-            deflateStream.Read(_buffer, 0, _buffer_size);
-            if (deflateStream.ReadByte() != -1)
-                throw new InvalidDataException(Strings.InvalidData_Segs);
+            if (blockIsCompressed[index])
+            {
+                using DeflateStream deflateStream = new DeflateStream(_stream, CompressionMode.Decompress, true);
+                deflateStream.Read(_buffer, 0, _buffer_size);
+                if (deflateStream.ReadByte() != -1)
+                    throw new InvalidDataException(Strings.InvalidData_Segs);
+            }
+            else
+            {
+                _stream.Read(_buffer, 0, _buffer_size);
+            }
         }
 
         private void FillBuffer()
