@@ -26,6 +26,7 @@ namespace ImasArchiveLib
         public string Filepath { get => _filepath; }
         public string Name { get => _name; }
         public long Length { get => _length; }
+        internal long Base_offset { get => _base_offset; set => _base_offset = value; }
 
         /// <summary>
         /// Opens a stream containing the file data of the entry for read access.

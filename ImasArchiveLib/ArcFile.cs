@@ -17,15 +17,14 @@ namespace ImasArchiveLib
         private string _arc_filename;
         private string _bin_filename;
         private List<ArcEntry> _entries;
-        private uint _entry_count;
         private bool _disposed = false;
 
         public ArcFile(string filename, string extraExtension = "")
         {
             _arc_filename = filename + ".arc" + extraExtension;
             _bin_filename = filename + ".bin" + extraExtension;
-            _arc_stream = new FileStream(_arc_filename, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
-            _bin_stream = new FileStream(_bin_filename, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            _arc_stream = new FileStream(_arc_filename, FileMode.Open, FileAccess.Read);
+            _bin_stream = new FileStream(_bin_filename, FileMode.Open, FileAccess.Read);
             BuildEntries();
         }
 
@@ -44,7 +43,7 @@ namespace ImasArchiveLib
             {
                 throw new InvalidDataException(Strings.InvalidData_BinHeader);
             }
-            _entry_count = Utils.GetUInt(_bin_stream);
+            uint _entry_count = Utils.GetUInt(_bin_stream);
             if (Utils.GetUInt(_bin_stream) != 32)
             {
                 throw new InvalidDataException(Strings.InvalidData_BinHeader);
@@ -100,14 +99,107 @@ namespace ImasArchiveLib
             }
         }
 
+        private void BuildArc(Stream newArcStream)
+        {
+            _entries.Sort((a, b) => String.CompareOrdinal(a.Filepath.ToUpper(), b.Filepath.ToUpper()));
+
+            newArcStream.Write(new byte[16]);
+            uint baseOffset = 16;
+            foreach (ArcEntry arcEntry in _entries)
+            {
+                using Stream stream = arcEntry.OpenRaw();
+                arcEntry.Base_offset = baseOffset;
+                stream.CopyTo(newArcStream);
+                uint len = (uint)stream.Length;
+                uint pad = (uint)((-len) & 15);
+                newArcStream.Write(new byte[pad]);
+                baseOffset += len + pad;
+            }
+        }
+        private void BuildBin(Stream newBinStream)
+        {
+            List<BinNode> arcTrees;
+            int root;
+            (arcTrees, root) = BuildBinTree();
+
+            using MemoryStream filepaths = new MemoryStream();
+            int filepathOffset = 0;
+            foreach (BinNode arcTree in arcTrees)
+            {
+                filepaths.Write(Encoding.ASCII.GetBytes(arcTree.filepath), 0, arcTree.filepath.Length);
+                filepaths.WriteByte(0);
+                int len = arcTree.filepath.Length + 1;
+                int pad = (-len) & 15;
+                for (int j = 0; j < pad; j++)
+                    filepaths.WriteByte(0);
+                arcTree.stringOffset = filepathOffset;
+                filepathOffset += len + pad;
+            }
+            int stringsStart = 20 * _entries.Count + 32;
+            int offsetsPad = (-stringsStart) & 15;
+            stringsStart += offsetsPad;
+
+            Utils.PutUInt(newBinStream, 0x50414100u);
+            Utils.PutUInt(newBinStream, 0x00010000u);
+            Utils.PutUInt(newBinStream, (uint)Entries.Count);
+            Utils.PutUInt(newBinStream, 32);
+
+            Utils.PutUInt(newBinStream, 16 * (uint)Entries.Count + 32);
+            Utils.PutUInt(newBinStream, (uint)root);
+            Utils.PutUInt(newBinStream, 0);
+            Utils.PutUInt(newBinStream, 0);
+
+            for (int i = 0; i < arcTrees.Count; i++)
+            {
+                Utils.PutUInt(newBinStream, (uint)(stringsStart + arcTrees[i].stringOffset));
+                Utils.PutUInt(newBinStream, (uint)arcTrees[i].arcEntry.Length);
+                Utils.PutUInt(newBinStream, (uint)arcTrees[i].left);
+                Utils.PutUInt(newBinStream, (uint)arcTrees[i].right);
+            }
+
+            for (int i = 0; i < arcTrees.Count; i++)
+            {
+                Utils.PutUInt(newBinStream, (uint)arcTrees[i].arcEntry.Base_offset);
+            }
+            newBinStream.Write(new byte[offsetsPad]);
+            filepaths.Position = 0;
+            filepaths.CopyTo(newBinStream);
+        }
+        private (List<BinNode>, int) BuildBinTree()
+        {
+            List<BinNode> arcTrees = new List<BinNode>();
+            for (int i = 0; i < _entries.Count; i++)
+            {
+                arcTrees.Add(new BinNode
+                {
+                    arcEntry = _entries[i],
+                    index = i,
+                    filepath = _entries[i].Filepath
+                });
+            }
+            arcTrees.Sort((a, b) => String.CompareOrdinal(a.filepath, b.filepath));
+            int root = arcTrees[BuildBinSubTree(arcTrees, 0, arcTrees.Count)].index;
+            arcTrees.Sort((a, b) => a.index.CompareTo(b.index));
+            return (arcTrees, root);
+        }
+
+        private int BuildBinSubTree(List<BinNode> arcTrees, int start, int length)
+        {
+            if (length == 0)
+                return -1;
+
+            int halfLength = length / 2;
+            int midpoint = start + halfLength;
+            int lsize = halfLength;
+            int rsize = length - halfLength - 1;
+            arcTrees[midpoint].left = (lsize == 0) ? -1 : arcTrees[BuildBinSubTree(arcTrees, start, lsize)].index;
+            arcTrees[midpoint].right = (rsize == 0) ? -1 : arcTrees[BuildBinSubTree(arcTrees, midpoint + 1, rsize)].index;
+            return midpoint;
+        }
+
         public ArcEntry GetEntry(string filePath)
         {
             return _entries.Find(entry => entry.Filepath == filePath);
-        }
-
-        public void Flush()
-        {
-
         }
 
         internal bool RemoveEntry(ArcEntry arcEntry)
@@ -169,6 +261,18 @@ namespace ImasArchiveLib
             await stream.CopyToAsync(fileStream);
         }
 
+        public void SaveAs(string filename)
+        {
+            using (FileStream newArcStream = new FileStream(filename + ".arc", FileMode.Create, FileAccess.Write))
+            {
+                BuildArc(newArcStream);
+            }
+            using (FileStream newBinStream = new FileStream(filename + ".bin", FileMode.Create, FileAccess.Write))
+            {
+                BuildBin(newBinStream);
+            }
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -193,6 +297,16 @@ namespace ImasArchiveLib
             }
 
             _disposed = true;
+        }
+
+        private class BinNode
+        {
+            public int index;
+            public int left;
+            public int right;
+            public string filepath;
+            public ArcEntry arcEntry;
+            public int stringOffset;
         }
     }
 }

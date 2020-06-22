@@ -154,6 +154,22 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
+        [DataTestMethod]
+        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\hdd", "")]
+        //[DataRow(@"C:\Users\harve\source\repos\imas_archive\test\disc", "")]
+        //[DataRow(@"C:\Users\harve\source\repos\imas_archive\test\dlc\_dlc03", ".dat")]
+        public void SaveArcAs(string filename, string extension)
+        {
+            using (ArcFile arcFile = new ArcFile(filename, extension))
+            {
+                arcFile.SaveAs("test");
+            }
+            bool eq = CompareFileHashes(filename + ".arc" + extension, "test.arc") && CompareFileHashes(filename + ".bin" + extension, "test.bin");
+            File.Delete("test.arc");
+            File.Delete("test.bin");
+            Assert.IsTrue(eq);
+        }
+
         public static bool CompareFiles(string file1, string file2)
         {
             using FileStream fileStream1 = new FileStream(file1, FileMode.Open, FileAccess.Read);

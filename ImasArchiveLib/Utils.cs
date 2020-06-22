@@ -30,5 +30,15 @@ namespace ImasArchiveLib
             }
             return (ushort)((data[0] << 8) | (data[1]));
         }
+        public static void PutUInt(Stream stream, uint x)
+        {
+            stream.WriteByte((byte)(x >> 24));
+            x <<= 8;
+            stream.WriteByte((byte)(x >> 24));
+            x <<= 8;
+            stream.WriteByte((byte)(x >> 24));
+            x <<= 8;
+            stream.WriteByte((byte)(x >> 24));
+        }
     }
 }
