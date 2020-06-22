@@ -9,8 +9,8 @@ namespace ImasArchiveLibTest
     {
 
         [DataTestMethod]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin")]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par.gz", @"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par")]
+        [DataRow("songResource.bin.gz", "songResource.bin")]
+        [DataRow("_week_00_002.par.gz", "_week_00_002.par")]
         public void DecryptWholeFileTest(string inputFile, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -19,14 +19,14 @@ namespace ImasArchiveLibTest
                 using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
                 segsStream.CopyTo(outStream);
             }
-            bool eq = ArcFileEntryTest.CompareFiles(expectedFile, "temp.dat");
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
             File.Delete("temp.dat");
             Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin")]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par.gz", @"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par")]
+        [DataRow("songResource.bin.gz", "songResource.bin")]
+        [DataRow("_week_00_002.par.gz", "_week_00_002.par")]
         public void DecryptReadByteTest(string inputFile, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -39,16 +39,16 @@ namespace ImasArchiveLibTest
                     outStream.WriteByte((byte)b);
                 }
             }
-            bool eq = ArcFileEntryTest.CompareFiles(expectedFile, "temp.dat");
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
             File.Delete("temp.dat");
             Assert.IsTrue(eq);
         }
 
 
         [DataTestMethod]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin", 32)]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par.gz", @"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par", 0x1040)]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par.gz", @"C:\Users\harve\source\repos\imas_archive\test\_week_00_002.par", 0x50123)]
+        [DataRow("songResource.bin.gz", "songResource.bin", 32)]
+        [DataRow("_week_00_002.par.gz", "_week_00_002.par", 0x1040)]
+        [DataRow("_week_00_002.par.gz", "_week_00_002.par", 0x50123)]
         public void DecryptSeekTest(string inputFile, string expectedFile, int offset)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -64,7 +64,7 @@ namespace ImasArchiveLibTest
                 fileStream1.Seek(offset, SeekOrigin.Begin);
                 fileStream1.CopyTo(outStream);
             }
-            bool eq = ArcFileEntryTest.CompareFiles("temp_exp.dat", "temp.dat");
+            bool eq = Compare.CompareFiles("temp_exp.dat", "temp.dat");
             File.Delete("temp.dat");
             File.Delete("temp_exp.dat");
             Assert.IsTrue(eq);
