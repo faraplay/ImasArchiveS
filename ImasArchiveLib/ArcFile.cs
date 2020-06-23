@@ -109,6 +109,7 @@ namespace ImasArchiveLib
             {
                 using Stream stream = arcEntry.OpenRaw();
                 arcEntry.Base_offset = baseOffset;
+                stream.Position = 0;
                 stream.CopyTo(newArcStream);
                 uint len = (uint)stream.Length;
                 uint pad = (uint)((-len) & 15);
@@ -202,6 +203,20 @@ namespace ImasArchiveLib
             return _entries.Find(entry => entry.Filepath == filePath);
         }
 
+        public ArcEntry NewEntry(string filePath)
+        {
+            return NewEntry(filePath, new MemoryStream());
+        }
+
+        public ArcEntry NewEntry(string filePath, Stream stream)
+        {
+            string internalFilePath = filePath.Replace('\\', '/') + ".gz";
+            ArcEntry arcEntry = new ArcEntry(this, internalFilePath, 0, 0);
+            arcEntry.Replace(stream);
+            _entries.Add(arcEntry);
+            return arcEntry;
+        }
+
         internal bool RemoveEntry(ArcEntry arcEntry)
         {
             return _entries.Remove(arcEntry);
@@ -271,6 +286,22 @@ namespace ImasArchiveLib
             {
                 BuildBin(newBinStream);
             }
+        }
+
+        private ArcFile() { }
+
+        public static void BuildFromDirectory(string dir, string outputName)
+        {
+            using ArcFile arcFile = new ArcFile();
+            arcFile._entries = new List<ArcEntry>();
+            DirectoryInfo directoryInfo = new DirectoryInfo(dir);
+            FileInfo[] files = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
+            foreach (FileInfo fileInfo in files)
+            {
+                using FileStream fileStream = fileInfo.Open(FileMode.Open, FileAccess.Read);
+                arcFile.NewEntry(fileInfo.FullName.Substring(directoryInfo.FullName.Length + 1), fileStream);
+            }
+            arcFile.SaveAs(outputName);
         }
 
         public void Dispose()

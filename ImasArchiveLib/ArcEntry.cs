@@ -57,8 +57,14 @@ namespace ImasArchiveLib
         /// <param name="stream">The stream to copy from</param>
         public void Replace(Stream stream)
         {
+            _memory_stream?.Dispose();
             _memory_stream = new MemoryStream();
-            stream.CopyTo(_memory_stream);
+            using (FlowbishStream flowbishStream = new FlowbishStream(_memory_stream, FlowbishStreamMode.Encipher, Name, true))
+            {
+                SegsStream.CompressStream(stream, flowbishStream);
+            }
+            _length = _memory_stream.Length;
+
         }
 
         public void Delete()

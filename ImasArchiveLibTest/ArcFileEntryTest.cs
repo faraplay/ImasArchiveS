@@ -177,6 +177,63 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
+        [DataTestMethod]
+        [DataRow("disc", "", "system/chara_viewer_def.bin.gz", "songResource.bin", "disc_out")]
+        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par.gz", "week4-3.bin", "hdd_out")]
+        public void EditEntryReextractTest(string filename, string extension, string entryFilepath, string replacementFile, string expectedDir)
+        {
+
+            using (ArcFile arcFile = new ArcFile(filename, extension))
+            {
+                ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
+                if (arcEntry == null)
+                    Assert.Fail("Entry not found.");
+                using (FileStream fileStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
+                {
+                    arcEntry.Replace(fileStream);
+                }
+                arcFile.SaveAs("test");
+            }
+            using (ArcFile arcFile = new ArcFile("test", ""))
+            {
+                Task task = arcFile.ExtractAllAsync("testdir");
+                task.Wait();
+            }
+            File.Move(expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3), "backup");
+            File.Copy(replacementFile, expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3));
+            bool eq = Compare.CompareDirectories(expectedDir, "testdir");
+            File.Delete(expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3));
+            File.Move("backup", expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3));
+
+            DirectoryInfo directoryInfo = new DirectoryInfo("testdir");
+            directoryInfo.Delete(true);
+            File.Delete("test.arc");
+            File.Delete("test.bin");
+            Assert.IsTrue(eq);
+        }
+
+        [DataTestMethod]
+        [DataRow("little")]
+        [DataRow("disc_out")]
+        public void BuildNewArcTest(string dir)
+        {
+            ArcFile.BuildFromDirectory(dir, "test");
+            using (ArcFile arcFile = new ArcFile("test"))
+            {
+                Task task = arcFile.ExtractAllAsync("testdir");
+                task.Wait();
+            }
+
+            bool eq = Compare.CompareDirectories(dir, "testdir");
+
+            DirectoryInfo directoryInfo = new DirectoryInfo("testdir");
+            directoryInfo.Delete(true);
+            File.Delete("test.arc");
+            File.Delete("test.bin");
+
+            Assert.IsTrue(eq);
+        }
+
     }
 }
 

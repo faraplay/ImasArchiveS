@@ -12,6 +12,7 @@ namespace ImasArchiveLib
         private readonly FlowbishStreamMode _mode;
         private readonly FlowbishBox _box;
         private readonly string _key;
+        private bool leaveOpen;
         private bool disposed = false;
 
         private long _length;
@@ -43,12 +44,17 @@ namespace ImasArchiveLib
             return vs;
         }
 
-        public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key)
+        public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key) : this(stream, mode, key, false)
+        { 
+        }
+
+        public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key, bool leaveOpen)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
             _key = key;
+            this.leaveOpen = leaveOpen;
             switch (mode)
             {
                 case FlowbishStreamMode.Decipher:
@@ -81,41 +87,6 @@ namespace ImasArchiveLib
             }
         }
 
-        public FlowbishStream(Stream stream, FlowbishStreamMode mode, FlowbishBox box)
-        {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            switch (mode)
-            {
-                case FlowbishStreamMode.Decipher:
-                    if (!stream.CanRead)
-                        throw new ArgumentException(Strings.NotSupported_UnreadableStream, nameof(stream));
-                    if (!stream.CanSeek)
-                        throw new ArgumentException(Strings.NotSupported_UnseekableStream, nameof(stream));
-                    _box = box;
-                    _stream = stream;
-                    _mode = FlowbishStreamMode.Decipher;
-                    ReadHeader();
-                    _avail_in = 0;
-                    _buffer_offset = 0;
-                    InitialiseBuffer();
-                    break;
-                case FlowbishStreamMode.Encipher:
-                    if (!stream.CanWrite)
-                        throw new ArgumentException(Strings.NotSupported_UnwritableStream, nameof(stream));
-                    if (!stream.CanSeek)
-                        throw new ArgumentException(Strings.NotSupported_UnseekableStream, nameof(stream));
-                    _box = box;
-                    _stream = stream;
-                    _mode = FlowbishStreamMode.Encipher;
-                    _avail_out = 0;
-                    _buffer_offset = 0;
-                    break;
-                default:
-                    throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
-            }
-        }
 
         protected override void Dispose(bool disposing)
         {
@@ -136,7 +107,10 @@ namespace ImasArchiveLib
 
             if (disposing)
             {
-                _stream.Dispose();
+                if (!leaveOpen)
+                {
+                    _stream.Dispose();
+                }
                 _stream = null;
             }
             base.Dispose(disposing);
