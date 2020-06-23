@@ -9,7 +9,7 @@ namespace ImasArchiveLibTest
     {
 
         [DataTestMethod]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz.fbs", "songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz")]
+        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz")]
         public void DecryptWholeFileTest(string inputFile, string name, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -18,13 +18,13 @@ namespace ImasArchiveLibTest
                 using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
                 flowbishStream.CopyTo(outStream);
             }
-            bool eq = ArcFileEntryTest.CompareFiles(expectedFile, "temp.dat");
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
             File.Delete("temp.dat");
             Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz.fbs", "songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz")]
+        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz")]
         public void DecryptReadByteTest(string inputFile, string name, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -37,15 +37,15 @@ namespace ImasArchiveLibTest
                     outStream.WriteByte((byte)b);
                 }
             }
-            bool eq = ArcFileEntryTest.CompareFiles(expectedFile, "temp.dat");
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
             File.Delete("temp.dat");
             Assert.IsTrue(eq);
         }
 
 
         [DataTestMethod]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz.fbs", "songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz", 32)]
-        [DataRow(@"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz.fbs", "songResource.bin.gz", @"C:\Users\harve\source\repos\imas_archive\test\songResource.bin.gz", 0x1040)]
+        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz", 32)]
+        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz", 0x1040)]
         public void DecryptSeekTest(string inputFile, string name, string expectedFile, int offset)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -61,7 +61,44 @@ namespace ImasArchiveLibTest
                 fileStream1.Seek(offset, SeekOrigin.Begin);
                 fileStream1.CopyTo(outStream);
             }
-            bool eq = ArcFileEntryTest.CompareFiles("temp_exp.dat", "temp.dat");
+            bool eq = Compare.CompareFiles("temp_exp.dat", "temp.dat");
+            File.Delete("temp.dat");
+            File.Delete("temp_exp.dat");
+            Assert.IsTrue(eq);
+        }
+
+
+        [DataTestMethod]
+        [DataRow("songResource.bin.gz", "songResource.bin.gz", "songResource.bin.gz.fbs")]
+        public void EncryptWholeFileTest(string inputFile, string name, string expectedFile)
+        {
+            using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
+            {
+                using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
+                using FlowbishStream flowbishStream = new FlowbishStream(outStream, FlowbishStreamMode.Encipher, name);
+                fileStream.CopyTo(flowbishStream);
+            }
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
+            File.Delete("temp.dat");
+            Assert.IsTrue(eq);
+        }
+
+        [DataTestMethod]
+        [DataRow("songResource.bin.gz", "songResource.bin.gz", "songResource.bin.gz.fbs", 32)]
+        [DataRow("songResource.bin.gz", "songResource.bin.gz", "songResource.bin.gz.fbs", 0x1040)]
+        public void EncryptSeekTest(string inputFile, string name, string expectedFile, int offset)
+        {
+            using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
+            {
+                using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
+                using FlowbishStream flowbishStream = new FlowbishStream(outStream, FlowbishStreamMode.Encipher, name);
+                fileStream.CopyTo(flowbishStream);
+                flowbishStream.Flush();
+                flowbishStream.Seek(offset, SeekOrigin.Begin);
+                fileStream.Seek(offset, SeekOrigin.Begin);
+                fileStream.CopyTo(flowbishStream);
+            }
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
             File.Delete("temp.dat");
             File.Delete("temp_exp.dat");
             Assert.IsTrue(eq);

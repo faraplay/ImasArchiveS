@@ -12,6 +12,7 @@ namespace ImasArchiveLib
         private readonly FlowbishStreamMode _mode;
         private readonly FlowbishBox _box;
         private readonly string _key;
+        private bool leaveOpen;
         private bool disposed = false;
 
         private long _length;
@@ -43,12 +44,17 @@ namespace ImasArchiveLib
             return vs;
         }
 
-        public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key)
+        public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key) : this(stream, mode, key, false)
+        { 
+        }
+
+        public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key, bool leaveOpen)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
             _key = key;
+            this.leaveOpen = leaveOpen;
             switch (mode)
             {
                 case FlowbishStreamMode.Decipher:
@@ -72,54 +78,39 @@ namespace ImasArchiveLib
                     _mode = FlowbishStreamMode.Encipher;
                     _avail_out = 0;
                     _buffer_offset = 0;
+                    _position = 0;
+                    _length = 0;
+                    WriteHeader();
                     break;
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
             }
         }
 
-        public FlowbishStream(Stream stream, FlowbishStreamMode mode, FlowbishBox box)
-        {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            switch (mode)
-            {
-                case FlowbishStreamMode.Decipher:
-                    if (!stream.CanRead)
-                        throw new ArgumentException(Strings.NotSupported_UnreadableStream, nameof(stream));
-                    if (!stream.CanSeek)
-                        throw new ArgumentException(Strings.NotSupported_UnseekableStream, nameof(stream));
-                    _box = box;
-                    _stream = stream;
-                    _mode = FlowbishStreamMode.Decipher;
-                    ReadHeader();
-                    _avail_in = 0;
-                    _buffer_offset = 0;
-                    InitialiseBuffer();
-                    break;
-                case FlowbishStreamMode.Encipher:
-                    if (!stream.CanWrite)
-                        throw new ArgumentException(Strings.NotSupported_UnwritableStream, nameof(stream));
-                    _box = box;
-                    _stream = stream;
-                    _mode = FlowbishStreamMode.Encipher;
-                    _avail_out = 0;
-                    _buffer_offset = 0;
-                    break;
-                default:
-                    throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
-            }
-        }
 
         protected override void Dispose(bool disposing)
         {
             if (disposed)
                 return;
 
+            if (_mode == FlowbishStreamMode.Encipher)
+            {
+                try
+                {
+                    Flush();
+                }
+                catch (IOException)
+                {
+
+                }
+            }
+
             if (disposing)
             {
-                _stream.Dispose();
+                if (!leaveOpen)
+                {
+                    _stream.Dispose();
+                }
                 _stream = null;
             }
             base.Dispose(disposing);
@@ -154,6 +145,32 @@ namespace ImasArchiveLib
             if (_stream.Length != _length + _offset)
                 throw new InvalidDataException(Strings.InvalidData_FbsHeader);
             _position = 0;
+        }
+
+        private void WriteHeader()
+        {
+            int keyLength = _key.Length + 1;
+            Utils.PutUInt(_stream, 0x00464253);
+            Utils.PutUInt(_stream, 0);
+            Utils.PutUInt(_stream, (uint)_length);
+            _stream.WriteByte((byte)keyLength);
+            _stream.WriteByte(0);
+            _stream.WriteByte(0);
+            _stream.WriteByte(0);
+            int padKeyLength = 8 * ((keyLength + 7) / 8);
+            _offset = 16 + padKeyLength;
+            byte[] keyBuffer = new byte[padKeyLength];
+            Encoding.ASCII.GetBytes(_key).CopyTo(keyBuffer, 0);
+            _box.Encipher(keyBuffer);
+            _stream.Write(keyBuffer);
+        }
+
+        private void UpdateHeader()
+        {
+            long pos = _stream.Position;
+            _stream.Seek(8, SeekOrigin.Begin);
+            Utils.PutUInt(_stream, (uint)_length);
+            _stream.Position = pos;
         }
 
         private void InitialiseBuffer()
@@ -198,7 +215,7 @@ namespace ImasArchiveLib
                 if (_stream == null)
                     return false;
 
-                return (_stream.CanSeek);
+                return ( _stream.CanSeek);
             }
         }
 
@@ -219,15 +236,24 @@ namespace ImasArchiveLib
                 if (value % 8 != 0)
                     throw new NotSupportedException(Strings.NotSupported_PosNotMultipleOf8);
 
-                _position = value;
-                if (_position >= _buffer_offset && _position < _buffer_offset + _buffer_current_size)
+                if (_mode == FlowbishStreamMode.Decipher)
                 {
-                    _avail_in = (int)(_buffer_offset + _buffer_current_size - _position);
-                }
-                else
+                    _position = value;
+                    if (_position >= _buffer_offset && _position < _buffer_offset + _buffer_current_size)
+                    {
+                        _avail_in = (int)(_buffer_offset + _buffer_current_size - _position);
+                    }
+                    else
+                    {
+                        _buffer_offset = _position;
+                        FillAndDecryptBuffer();
+                    }
+                } else if (_mode == FlowbishStreamMode.Encipher)
                 {
+                    Flush();
+                    _position = value;
                     _buffer_offset = _position;
-                    FillAndDecryptBuffer();
+                    _stream.Position = _position + _offset;
                 }
 
             }
@@ -236,8 +262,12 @@ namespace ImasArchiveLib
         public override void Flush()
         {
             EnsureNotDisposed();
+            EnsureBufferInitialised();
             if (_mode == FlowbishStreamMode.Encipher)
-                FlushBuffer(false);
+            {
+                FlushBuffer();
+                UpdateHeader();
+            }
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -383,11 +413,50 @@ namespace ImasArchiveLib
         }
         private void WriteCore(ReadOnlySpan<byte> buffer)
         {
+            EnsureNotDisposed();
+            EnsureEncipherMode();
+            EnsureBufferInitialised();
 
+            int totalWritten = 0;
+            while (true)
+            {
+                int bufferSize = buffer.Length - totalWritten;
+                int lengthToWrite;
+                if (bufferSize <= _avail_out)
+                    lengthToWrite = bufferSize;
+                else
+                    lengthToWrite = _avail_out;
+
+                Span<byte> _buf_remain = new Span<byte>(_buffer, (int)(_position - _buffer_offset), lengthToWrite);
+                buffer.Slice(totalWritten, lengthToWrite).CopyTo(_buf_remain);
+                _avail_out -= lengthToWrite;
+                _position += lengthToWrite;
+                totalWritten += lengthToWrite;
+
+                if (totalWritten == buffer.Length)
+                    break;
+
+                FlushBuffer();
+            }
+            if (_position > _length)
+                _length = _position;
         }
 
-        private void FlushBuffer(bool final)
+        private void FlushBuffer()
         {
+            EnsureBufferInitialised();
+            int bytes = (int)(_position - _buffer_offset);
+            bytes += (-bytes & 7);
+            _position += (-bytes & 7);
+            Span<byte> toWrite = new Span<byte>(_buffer, 0, bytes);
+            _box.Encipher(toWrite);
+            _stream.Write(toWrite);
+
+            _length = _stream.Length - _offset;
+            _buffer_offset = _position;
+            _buffer_current_size = _buffer.Length;
+            _avail_out = _buffer_current_size;
+            Array.Clear(_buffer, 0, _buffer_current_size);
         }
     }
 }
