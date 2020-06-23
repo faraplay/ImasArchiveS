@@ -72,6 +72,9 @@ namespace ImasArchiveLib
                     _mode = FlowbishStreamMode.Encipher;
                     _avail_out = 0;
                     _buffer_offset = 0;
+                    _position = 0;
+                    _length = 0;
+                    WriteHeader();
                     break;
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
@@ -101,6 +104,8 @@ namespace ImasArchiveLib
                 case FlowbishStreamMode.Encipher:
                     if (!stream.CanWrite)
                         throw new ArgumentException(Strings.NotSupported_UnwritableStream, nameof(stream));
+                    if (!stream.CanSeek)
+                        throw new ArgumentException(Strings.NotSupported_UnseekableStream, nameof(stream));
                     _box = box;
                     _stream = stream;
                     _mode = FlowbishStreamMode.Encipher;
@@ -116,6 +121,18 @@ namespace ImasArchiveLib
         {
             if (disposed)
                 return;
+
+            if (_mode == FlowbishStreamMode.Encipher)
+            {
+                try
+                {
+                    Flush();
+                }
+                catch (IOException)
+                {
+
+                }
+            }
 
             if (disposing)
             {
@@ -154,6 +171,32 @@ namespace ImasArchiveLib
             if (_stream.Length != _length + _offset)
                 throw new InvalidDataException(Strings.InvalidData_FbsHeader);
             _position = 0;
+        }
+
+        private void WriteHeader()
+        {
+            int keyLength = _key.Length + 1;
+            Utils.PutUInt(_stream, 0x00464253);
+            Utils.PutUInt(_stream, 0);
+            Utils.PutUInt(_stream, (uint)_length);
+            _stream.WriteByte((byte)keyLength);
+            _stream.WriteByte(0);
+            _stream.WriteByte(0);
+            _stream.WriteByte(0);
+            int padKeyLength = 8 * ((keyLength + 7) / 8);
+            _offset = 16 + padKeyLength;
+            byte[] keyBuffer = new byte[padKeyLength];
+            Encoding.ASCII.GetBytes(_key).CopyTo(keyBuffer, 0);
+            _box.Encipher(keyBuffer);
+            _stream.Write(keyBuffer);
+        }
+
+        private void UpdateHeader()
+        {
+            long pos = _stream.Position;
+            _stream.Seek(8, SeekOrigin.Begin);
+            Utils.PutUInt(_stream, (uint)_length);
+            _stream.Position = pos;
         }
 
         private void InitialiseBuffer()
@@ -198,7 +241,7 @@ namespace ImasArchiveLib
                 if (_stream == null)
                     return false;
 
-                return (_stream.CanSeek);
+                return (_mode == FlowbishStreamMode.Decipher && _stream.CanSeek);
             }
         }
 
@@ -212,6 +255,8 @@ namespace ImasArchiveLib
             get => _position;
             set
             {
+                if (_mode == FlowbishStreamMode.Encipher)
+                    throw new NotSupportedException(Strings.NotSupported_UnseekableStream);
                 if (value < 0)
                     throw new ArgumentOutOfRangeException(Strings.ArgumentOutOfRangeException_Negative);
                 if (value > _length)
@@ -236,12 +281,18 @@ namespace ImasArchiveLib
         public override void Flush()
         {
             EnsureNotDisposed();
+            EnsureBufferInitialised();
             if (_mode == FlowbishStreamMode.Encipher)
-                FlushBuffer(false);
+            {
+                FlushBuffer();
+                UpdateHeader();
+            }
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
+            if (_mode == FlowbishStreamMode.Encipher)
+                throw new NotSupportedException(Strings.NotSupported_UnseekableStream);
             long tempPos = origin switch
             {
                 SeekOrigin.Begin => offset,
@@ -383,11 +434,49 @@ namespace ImasArchiveLib
         }
         private void WriteCore(ReadOnlySpan<byte> buffer)
         {
+            EnsureNotDisposed();
+            EnsureEncipherMode();
+            EnsureBufferInitialised();
 
+            int totalWritten = 0;
+            while (true)
+            {
+                int bufferSize = buffer.Length - totalWritten;
+                int lengthToWrite;
+                if (bufferSize <= _avail_out)
+                    lengthToWrite = bufferSize;
+                else
+                    lengthToWrite = _avail_out;
+
+                Span<byte> _buf_remain = new Span<byte>(_buffer, (int)(_position - _buffer_offset), lengthToWrite);
+                buffer.Slice(totalWritten, lengthToWrite).CopyTo(_buf_remain);
+                _avail_out -= lengthToWrite;
+                _position += lengthToWrite;
+                totalWritten += lengthToWrite;
+
+                if (totalWritten == buffer.Length)
+                    break;
+
+                FlushBuffer();
+            }
+            _length = _position;
         }
 
-        private void FlushBuffer(bool final)
+        private void FlushBuffer()
         {
+            EnsureBufferInitialised();
+            int bytes = (int)(_position - _buffer_offset);
+            bytes += (-bytes & 7);
+            _position += (-bytes & 7);
+            Span<byte> toWrite = new Span<byte>(_buffer, 0, bytes);
+            _box.Encipher(toWrite);
+            _stream.Write(toWrite);
+
+            _length = _position;
+            _buffer_offset = _position;
+            _buffer_current_size = _buffer.Length;
+            _avail_out = _buffer_current_size;
+            Array.Clear(_buffer, 0, _buffer_current_size);
         }
     }
 }

@@ -66,5 +66,21 @@ namespace ImasArchiveLibTest
             File.Delete("temp_exp.dat");
             Assert.IsTrue(eq);
         }
+
+
+        [DataTestMethod]
+        [DataRow("songResource.bin.gz", "songResource.bin.gz", "songResource.bin.gz.fbs")]
+        public void EncryptWholeFileTest(string inputFile, string name, string expectedFile)
+        {
+            using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
+            {
+                using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
+                using FlowbishStream flowbishStream = new FlowbishStream(outStream, FlowbishStreamMode.Encipher, name);
+                fileStream.CopyTo(flowbishStream);
+            }
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
+            File.Delete("temp.dat");
+            Assert.IsTrue(eq);
+        }
     }
 }
