@@ -69,5 +69,28 @@ namespace ImasArchiveLibTest
             File.Delete("temp_exp.dat");
             Assert.IsTrue(eq);
         }
+
+        [DataTestMethod]
+        [DataRow("songResource.bin")]
+        [DataRow("_week_00_002.par")]
+        [DataRow("ami_bs2_c01.par")]
+        public void CompressUncompressTest(string inputFile)
+        {
+            using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
+            {
+                using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
+                SegsStream.CompressStream(fileStream, outStream);
+            }
+            using (FileStream compStream = new FileStream("temp.dat", FileMode.Open, FileAccess.Read))
+            {
+                using SegsStream segsStream = new SegsStream(compStream, SegsStreamMode.Decompress);
+                using FileStream outStream = new FileStream("temp2.dat", FileMode.Create, FileAccess.Write);
+                segsStream.CopyTo(outStream);
+            }
+            bool eq = Compare.CompareFiles(inputFile, "temp2.dat");
+            File.Delete("temp.dat");
+            File.Delete("temp2.dat");
+            Assert.IsTrue(eq);
+        }
     }
 }

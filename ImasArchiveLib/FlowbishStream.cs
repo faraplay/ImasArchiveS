@@ -241,7 +241,7 @@ namespace ImasArchiveLib
                 if (_stream == null)
                     return false;
 
-                return (_mode == FlowbishStreamMode.Decipher && _stream.CanSeek);
+                return ( _stream.CanSeek);
             }
         }
 

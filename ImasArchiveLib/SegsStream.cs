@@ -12,6 +12,7 @@ namespace ImasArchiveLib
         private readonly SegsStreamMode _mode;
 
         private long _length;
+        private long _offset;
         private long _position;
         private int _block_count;
         private long[] blockOffsets;
@@ -46,6 +47,12 @@ namespace ImasArchiveLib
                 case SegsStreamMode.Compress:
                     if (!stream.CanWrite)
                         throw new ArgumentException(Strings.NotSupported_UnwritableStream, nameof(stream));
+                    if (!stream.CanSeek)
+                        throw new ArgumentException(Strings.NotSupported_UnseekableStream, nameof(stream));
+                    _stream = stream;
+                    _mode = mode;
+                    _position = 0;
+                    _buffer_size = 0;
                     break;
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
@@ -310,7 +317,6 @@ namespace ImasArchiveLib
 
         public override void Flush()
         {
-            throw new NotImplementedException();
         }
         private void ValidateParameters(byte[] array, int offset, int count)
         {
@@ -322,6 +328,112 @@ namespace ImasArchiveLib
                 throw new ArgumentOutOfRangeException(nameof(count));
             if (array.Length - offset < count)
                 throw new ArgumentException(Strings.InvalidArgumentOffsetCount);
+        }
+
+        private SegsStream()
+        {
+
+        }
+
+        public static void CompressStream(Stream inStream, Stream outStream)
+        {
+            if (!inStream.CanRead)
+                throw new NotSupportedException(Strings.NotSupported_UnreadableStream);
+            if (!outStream.CanWrite || !outStream.CanSeek)
+                throw new NotSupportedException(Strings.NotSupported_UnwritableStream);
+
+            using SegsStream segsStream = new SegsStream
+            {
+                _stream = outStream
+            };
+            segsStream.WriteHeader((int)inStream.Length);
+            segsStream._buffer = new byte[MaxBlockSize];
+            for (int i = 0; i < segsStream._block_count; i++)
+                segsStream.WriteBlock(inStream);
+            segsStream.UpdateHeader((int)inStream.Length);
+            segsStream._stream = null;
+        }
+
+        private void WriteHeader(int fileLength)
+        {
+            _block_count = (fileLength + 0xFFFF) / 0x10000;
+            Utils.PutUInt(_stream, 0x73656773u);
+            Utils.PutUShort(_stream, 5);
+            Utils.PutUShort(_stream, (ushort)_block_count);
+            Utils.PutUInt(_stream, (uint)fileLength);
+            Utils.PutUInt(_stream, 0);
+
+            _stream.Write(new byte[8 * _block_count]);
+
+            _offset = 16 + (8 * _block_count);
+            long pad = (-_offset) & 15;
+            _stream.Write(new byte[pad]);
+            _offset += pad;
+
+            blockOffsets = new long[_block_count];
+            blockCompSizes = new int[_block_count];
+            blockUncompSizes = new int[_block_count];
+            blockIsCompressed = new bool[_block_count];
+        }
+
+        private void WriteBlock(Stream inStream)
+        {
+            int blockIndex = (int)(_position / MaxBlockSize);
+            byte[] inBuffer = new byte[MaxBlockSize];
+            int uncompSize = inStream.Read(inBuffer);
+            blockUncompSizes[blockIndex] = uncompSize;
+            _position += blockUncompSizes[blockIndex];
+            int compSize;
+            using (MemoryStream memoryStream = new MemoryStream(inBuffer, 0, uncompSize))
+            {
+                using MemoryStream memoryStream1 = new MemoryStream();
+                using (DeflateStream deflateStream = new DeflateStream(memoryStream1, CompressionLevel.Optimal, true))
+                {
+                    memoryStream.CopyTo(deflateStream);
+                }
+                compSize = (int)memoryStream1.Length;
+                if (compSize >= uncompSize)
+                {
+                    inBuffer.CopyTo(_buffer, 0);
+                    blockIsCompressed[blockIndex] = false;
+                    compSize = uncompSize;
+                }
+                else
+                {
+                    memoryStream1.Position = 0;
+                    memoryStream1.Read(_buffer);
+                    blockIsCompressed[blockIndex] = true;
+                }
+            }
+            blockCompSizes[blockIndex] = compSize;
+            blockOffsets[blockIndex] = _offset;
+            _stream.Write(_buffer, 0, compSize);
+            int pad = (-compSize) & 15;
+            _stream.Write(new byte[pad]);
+            _offset += compSize + pad;
+        }
+
+        private void UpdateHeader(int fileLength)
+        {
+            _stream.Seek(0, SeekOrigin.Begin);
+            Utils.PutUInt(_stream, 0x73656773u);
+            Utils.PutUShort(_stream, 5);
+            Utils.PutUShort(_stream, (ushort)_block_count);
+            Utils.PutUInt(_stream, (uint)fileLength);
+            Utils.PutUInt(_stream, (uint)_offset);
+
+            for (int i = 0; i < _block_count; i++)
+            {
+                if (blockCompSizes[i] == MaxBlockSize)
+                    blockCompSizes[i] = 0;
+                Utils.PutUShort(_stream, (ushort)blockCompSizes[i]);
+                if (blockUncompSizes[i] == MaxBlockSize)
+                    blockUncompSizes[i] = 0;
+                Utils.PutUShort(_stream, (ushort)blockUncompSizes[i]);
+                if (blockIsCompressed[i])
+                    blockOffsets[i] += 1;
+                Utils.PutUInt(_stream, (uint)blockOffsets[i]);
+            }
         }
     }
 }
