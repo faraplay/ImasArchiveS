@@ -255,8 +255,6 @@ namespace ImasArchiveLib
             get => _position;
             set
             {
-                if (_mode == FlowbishStreamMode.Encipher)
-                    throw new NotSupportedException(Strings.NotSupported_UnseekableStream);
                 if (value < 0)
                     throw new ArgumentOutOfRangeException(Strings.ArgumentOutOfRangeException_Negative);
                 if (value > _length)
@@ -264,15 +262,24 @@ namespace ImasArchiveLib
                 if (value % 8 != 0)
                     throw new NotSupportedException(Strings.NotSupported_PosNotMultipleOf8);
 
-                _position = value;
-                if (_position >= _buffer_offset && _position < _buffer_offset + _buffer_current_size)
+                if (_mode == FlowbishStreamMode.Decipher)
                 {
-                    _avail_in = (int)(_buffer_offset + _buffer_current_size - _position);
-                }
-                else
+                    _position = value;
+                    if (_position >= _buffer_offset && _position < _buffer_offset + _buffer_current_size)
+                    {
+                        _avail_in = (int)(_buffer_offset + _buffer_current_size - _position);
+                    }
+                    else
+                    {
+                        _buffer_offset = _position;
+                        FillAndDecryptBuffer();
+                    }
+                } else if (_mode == FlowbishStreamMode.Encipher)
                 {
+                    Flush();
+                    _position = value;
                     _buffer_offset = _position;
-                    FillAndDecryptBuffer();
+                    _stream.Position = _position + _offset;
                 }
 
             }
@@ -291,8 +298,6 @@ namespace ImasArchiveLib
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            if (_mode == FlowbishStreamMode.Encipher)
-                throw new NotSupportedException(Strings.NotSupported_UnseekableStream);
             long tempPos = origin switch
             {
                 SeekOrigin.Begin => offset,
@@ -459,7 +464,8 @@ namespace ImasArchiveLib
 
                 FlushBuffer();
             }
-            _length = _position;
+            if (_position > _length)
+                _length = _position;
         }
 
         private void FlushBuffer()
@@ -472,7 +478,7 @@ namespace ImasArchiveLib
             _box.Encipher(toWrite);
             _stream.Write(toWrite);
 
-            _length = _position;
+            _length = _stream.Length - _offset;
             _buffer_offset = _position;
             _buffer_current_size = _buffer.Length;
             _avail_out = _buffer_current_size;
