@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
@@ -335,7 +336,7 @@ namespace ImasArchiveLib
 
         }
 
-        public static void CompressStream(Stream inStream, Stream outStream)
+        public static async Task CompressStream(Stream inStream, Stream outStream)
         {
             if (!inStream.CanRead)
                 throw new NotSupportedException(Strings.NotSupported_UnreadableStream);
@@ -349,7 +350,7 @@ namespace ImasArchiveLib
             segsStream.WriteHeader((int)inStream.Length);
             segsStream._buffer = new byte[MaxBlockSize];
             for (int i = 0; i < segsStream._block_count; i++)
-                segsStream.WriteBlock(inStream);
+                await segsStream.WriteBlock(inStream);
             segsStream.UpdateHeader((int)inStream.Length);
             segsStream._stream = null;
         }
@@ -376,7 +377,7 @@ namespace ImasArchiveLib
             blockIsCompressed = new bool[_block_count];
         }
 
-        private void WriteBlock(Stream inStream)
+        private async Task WriteBlock(Stream inStream)
         {
             int blockIndex = (int)(_position / MaxBlockSize);
             byte[] inBuffer = new byte[MaxBlockSize];
@@ -389,7 +390,7 @@ namespace ImasArchiveLib
                 using MemoryStream memoryStream1 = new MemoryStream();
                 using (DeflateStream deflateStream = new DeflateStream(memoryStream1, CompressionLevel.Optimal, true))
                 {
-                    memoryStream.CopyTo(deflateStream);
+                    await memoryStream.CopyToAsync(deflateStream);
                 }
                 compSize = (int)memoryStream1.Length;
                 if (compSize >= uncompSize)

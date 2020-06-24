@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
@@ -55,13 +56,13 @@ namespace ImasArchiveLib
         /// Writes the contents of a stream into the entry, overwriting any previous data.
         /// </summary>
         /// <param name="stream">The stream to copy from</param>
-        public void Replace(Stream stream)
+        public async Task Replace(Stream stream)
         {
             _memory_stream?.Dispose();
             _memory_stream = new MemoryStream();
             using (FlowbishStream flowbishStream = new FlowbishStream(_memory_stream, FlowbishStreamMode.Encipher, Name, true))
             {
-                SegsStream.CompressStream(stream, flowbishStream);
+                await SegsStream.CompressStream(stream, flowbishStream);
             }
             _length = _memory_stream.Length;
 
