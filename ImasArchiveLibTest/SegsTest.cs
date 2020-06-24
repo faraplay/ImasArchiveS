@@ -1,6 +1,7 @@
 ﻿using ImasArchiveLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
@@ -74,12 +75,12 @@ namespace ImasArchiveLibTest
         [DataRow("songResource.bin")]
         [DataRow("_week_00_002.par")]
         [DataRow("ami_bs2_c01.par")]
-        public void CompressUncompressTest(string inputFile)
+        public async Task CompressUncompressTest(string inputFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
             {
                 using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
-                SegsStream.CompressStream(fileStream, outStream);
+                await SegsStream.CompressStream(fileStream, outStream);
             }
             using (FileStream compStream = new FileStream("temp.dat", FileMode.Open, FileAccess.Read))
             {

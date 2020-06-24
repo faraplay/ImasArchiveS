@@ -103,24 +103,28 @@ namespace ImasArchiveLib
             }
         }
 
+        private static async Task AppendEntry(Stream newArcStream, ArcEntry arcEntry)
+        {
+            using Stream stream = arcEntry.OpenRaw();
+            arcEntry.Base_offset = newArcStream.Position;
+            stream.Position = 0;
+            await stream.CopyToAsync(newArcStream);
+            uint len = (uint)stream.Length;
+            uint pad = (uint)((-len) & 15);
+            await newArcStream.WriteAsync(new byte[pad]);
+
+        }
+
         private async Task BuildArc(Stream newArcStream, IProgress<ProgressData> progress = null)
         {
             _entries.Sort((a, b) => String.CompareOrdinal(a.Filepath.ToUpper(), b.Filepath.ToUpper()));
 
             newArcStream.Write(new byte[16]);
-            uint baseOffset = 16;
             totalProgress = _entries.Count;
             countProgress = 0;
             foreach (ArcEntry arcEntry in _entries)
             {
-                using Stream stream = arcEntry.OpenRaw();
-                arcEntry.Base_offset = baseOffset;
-                stream.Position = 0;
-                await stream.CopyToAsync(newArcStream);
-                uint len = (uint)stream.Length;
-                uint pad = (uint)((-len) & 15);
-                newArcStream.Write(new byte[pad]);
-                baseOffset += len + pad;
+                await AppendEntry(newArcStream, arcEntry);
                 countProgress++;
                 progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.Filepath });
             }
@@ -260,14 +264,14 @@ namespace ImasArchiveLib
             if (!Directory.Exists(destDir))
                 Directory.CreateDirectory(destDir);
             DirectoryInfo directoryInfo = new DirectoryInfo(destDir);
-            var tasks = new List<Task>();
+            //var tasks = new List<Task>();
             totalProgress = _entries.Count;
             countProgress = 0;
             foreach (ArcEntry arcEntry in _entries)
             {
-                tasks.Add(ExtractEntryAsync(arcEntry, directoryInfo, progress));
+                await ExtractEntryAsync(arcEntry, directoryInfo, progress);
             }
-            await Task.WhenAll(tasks);
+            //await Task.WhenAll(tasks);
 
         }
 
@@ -302,28 +306,49 @@ namespace ImasArchiveLib
 
         private ArcFile() { }
 
-        private async Task NewEntry(string name, FileInfo fileInfo, IProgress<ProgressData> progress = null)
+        private async Task<ArcEntry> NewEntry(string name, FileInfo fileInfo, IProgress<ProgressData> progress = null)
         {
-            using FileStream fileStream = fileInfo.Open(FileMode.Open, FileAccess.Read);
-            await NewEntry(name, fileStream);
-            countProgress++;
-            progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = name });
+            ArcEntry arcEntry;
+            using (FileStream fileStream = fileInfo.Open(FileMode.Open, FileAccess.Read))
+            {
+                arcEntry = await NewEntry(name, fileStream);
+            }
+            return arcEntry;
         }
 
         public static async Task BuildFromDirectory(string dir, string outputName, IProgress<ProgressData> progress = null)
         {
-            using ArcFile arcFile = new ArcFile();
-            arcFile._entries = new List<ArcEntry>();
+            using ArcFile arcFile = new ArcFile
+            {
+                _entries = new List<ArcEntry>()
+            };
             DirectoryInfo directoryInfo = new DirectoryInfo(dir);
             FileInfo[] files = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
-            List<Task> tasks = new List<Task>();
-            arcFile.totalProgress = files.Length;
-            arcFile.countProgress = 0;
-            foreach (FileInfo fileInfo in files) {
-                tasks.Add(arcFile.NewEntry(fileInfo.FullName.Substring(directoryInfo.FullName.Length + 1), fileInfo, progress));
+            Array.Sort(files, (a, b) => string.CompareOrdinal(a.FullName.ToUpper(), b.FullName.ToUpper()));
+
+            using (FileStream newArcStream = new FileStream(outputName + ".arc", FileMode.Create, FileAccess.Write))
+            {
+                await newArcStream.WriteAsync(new byte[16]);
+                arcFile.totalProgress = files.Length;
+                arcFile.countProgress = 0;
+                foreach (FileInfo fileInfo in files)
+                {
+                    ArcEntry arcEntry = await arcFile.NewEntry(
+                        fileInfo.FullName.Substring(directoryInfo.FullName.Length + 1), fileInfo, progress);
+                    await AppendEntry(newArcStream, arcEntry);
+                    arcEntry.ClearMemoryStream();
+                    arcFile.countProgress++;
+                    progress?.Report(new ProgressData { 
+                        count = arcFile.countProgress, 
+                        total = arcFile.totalProgress, 
+                        filename = arcEntry.Filepath 
+                    });
+                }
             }
-            await Task.WhenAll(tasks);
-            await arcFile.SaveAs(outputName, progress);
+            using (FileStream newBinStream = new FileStream(outputName + ".bin", FileMode.Create, FileAccess.Write))
+            {
+                arcFile.BuildBin(newBinStream);
+            }
         }
 
         public void Dispose()
