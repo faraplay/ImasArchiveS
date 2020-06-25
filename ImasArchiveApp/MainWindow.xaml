@@ -22,14 +22,46 @@
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="Open" Executed="Open_Executed" />
+        <CommandBinding
+            CanExecute="Save_CanExecute"
+            Command="Save"
+            Executed="Save_Executed" />
+        <CommandBinding
+            CanExecute="Export_CanExecute"
+            Command="local:CustomCommands.Export"
+            Executed="Export_Executed" />
+        <CommandBinding
+            CanExecute="Import_CanExecute"
+            Command="local:CustomCommands.Import"
+            Executed="Import_Executed" />
+        <CommandBinding
+            CanExecute="ExtractAll_CanExecute"
+            Command="local:CustomCommands.ExtractAll"
+            Executed="ExtractAll_Executed" />
+        <CommandBinding
+            CanExecute="NewFromFolder_CanExecute"
+            Command="local:CustomCommands.NewFromFolder"
+            Executed="NewFromFolder_Executed" />
     </Window.CommandBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Command="Open" />
+                <MenuItem Command="local:CustomCommands.NewFromFolder" />
+                <MenuItem Command="Open" Header="Open Arc" />
+                <MenuItem Command="Save" Header="Save Arc" />
+                <Separator />
+                <MenuItem Command="local:CustomCommands.Import" />
+                <MenuItem Command="local:CustomCommands.Export" />
+                <Separator />
+                <MenuItem Command="local:CustomCommands.ExtractAll" />
+                <Separator />
                 <MenuItem Command="{Binding Path=CloseArcCommand}" Header="Close" />
             </MenuItem>
         </Menu>
+        <TextBlock
+            Margin="10"
+            DockPanel.Dock="Bottom"
+            Text="{Binding Path=ProgressMessage}" />
         <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
         <DockPanel Margin="10">
             <Border

@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace ImasArchiveApp
 {
@@ -33,20 +34,131 @@ namespace ImasArchiveApp
         {
             if ((DataContext as ArcModel).CloseArcCommand.CanExecute(null))
                 (DataContext as ArcModel).CloseArcCommand.Execute(null);
-            if (OpenArcDialog())
+            if (OpenDialog("Open archive", "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat"))
                 (DataContext as ArcModel).OpenArcCommand.Execute(null);
         }
 
-        private bool OpenArcDialog()
+
+        private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (DataContext as ArcModel).SaveAsCommand.CanExecute(null);
+        }
+
+        private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (SaveDialog("Save As", "Arc file (*.arc)|*.arc"))
+                (DataContext as ArcModel).SaveAsCommand.Execute(null);
+        }
+        private void Import_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (DataContext as ArcModel).ImportCommand.CanExecute(null);
+        }
+
+        private void Import_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (OpenDialog("Import", "All files (*.*)|*.*"))
+                (DataContext as ArcModel).ImportCommand.Execute(null);
+        }
+        private void Export_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (DataContext as ArcModel).ExportCommand.CanExecute(null);
+        }
+
+        private void Export_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (SaveDialog("Export"))
+                (DataContext as ArcModel).ExportCommand.Execute(null);
+        }
+        private void ExtractAll_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (DataContext as ArcModel).ExtractAllCommand.CanExecute(null);
+        }
+
+        private void ExtractAll_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (SaveDialog("Extract to..."))
+                (DataContext as ArcModel).ExtractAllCommand.Execute(null);
+        }
+        private void NewFromFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (DataContext as ArcModel).NewFromFolderCommand.CanExecute(null);
+        }
+
+        private void NewFromFolder_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (OpenFolderDialog("Choose folder") && SaveDialog("Save As", "Arc file (*.arc)|*.arc"))
+                (DataContext as ArcModel).NewFromFolderCommand.Execute(null);
+        }
+
+
+
+
+        private bool OpenDialog(string title, string filter)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat";
+            openFileDialog.Title = title;
+            openFileDialog.Filter = filter;
             bool fileSelected = (openFileDialog.ShowDialog() == true);
             if (fileSelected)
             {
-                (DataContext as ArcModel).ArcPath = openFileDialog.FileName;
+                (DataContext as ArcModel).InPath = openFileDialog.FileName;
             }
             return fileSelected;
         }
+        private bool SaveDialog(string title, string filter = "")
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = title;
+            saveFileDialog.Filter = filter;
+            bool fileSelected = (saveFileDialog.ShowDialog() == true);
+            if (fileSelected)
+            {
+                (DataContext as ArcModel).OutPath = saveFileDialog.FileName;
+            }
+            return fileSelected;
+        }
+        private bool OpenFolderDialog(string title)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.Title = title;
+            dialog.IsFolderPicker = true;
+            bool fileSelected = dialog.ShowDialog() == CommonFileDialogResult.Ok;
+            if (fileSelected)
+            {
+                (DataContext as ArcModel).InPath = dialog.FileName;
+            }
+            return fileSelected;
+        }
+    }
+
+    public static class CustomCommands
+    {
+        public static readonly RoutedUICommand Export = new RoutedUICommand
+            (
+                "Export",
+                "Export",
+                typeof(CustomCommands)
+            );
+
+        public static readonly RoutedUICommand Import = new RoutedUICommand
+            (
+                "Import",
+                "Import",
+                typeof(CustomCommands)
+            );
+
+        public static readonly RoutedUICommand ExtractAll = new RoutedUICommand
+            (
+                "Extract All",
+                "ExtractAll",
+                typeof(CustomCommands)
+            );
+
+        public static readonly RoutedUICommand NewFromFolder = new RoutedUICommand
+            (
+                "New From Folder",
+                "NewFromFolder",
+                typeof(CustomCommands)
+            );
     }
 }

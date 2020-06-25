@@ -65,7 +65,7 @@ namespace ImasArchiveApp
                     _parent.MoveToTree(_tree);
                     break;
                 case BrowserEntryType.RegularFile:
-                    _parent.SelectedFile = _tree.ToString();
+                    _parent.SelectedFile = _tree.ToString().Substring(1);
                     break;
             }
         }
