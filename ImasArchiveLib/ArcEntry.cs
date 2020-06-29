@@ -41,6 +41,7 @@ namespace ImasArchiveLib
             }
             else
             {
+                _memory_stream.Seek(0, SeekOrigin.Begin);
                 return _memory_stream;
             }
         }
@@ -72,6 +73,12 @@ namespace ImasArchiveLib
         {
             _parent_file.RemoveEntry(this);
             _parent_file = null;
+        }
+
+        internal void ClearMemoryStream()
+        {
+            _memory_stream?.Dispose();
+            _memory_stream = null;
         }
 
         public void Dispose()

@@ -408,9 +408,9 @@ namespace ImasArchiveLib
             }
             blockCompSizes[blockIndex] = compSize;
             blockOffsets[blockIndex] = _offset;
-            _stream.Write(_buffer, 0, compSize);
+            await _stream.WriteAsync(_buffer, 0, compSize);
             int pad = (-compSize) & 15;
-            _stream.Write(new byte[pad]);
+            await _stream.WriteAsync(new byte[pad]);
             _offset += compSize + pad;
         }
 
