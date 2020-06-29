@@ -11,16 +11,17 @@ namespace ImasArchiveLib
 
         public static Bitmap ReadGTF(Stream stream)
         {
-            stream.Position = 24;
+            long pos = stream.Position;
+            stream.Position = pos + 24;
             int type = stream.ReadByte();
 
-            stream.Position = 32;
+            stream.Position = pos + 32;
             int width = Utils.GetUShort(stream);
             int height = Utils.GetUShort(stream);
 
-            stream.Position = 52;
+            stream.Position = pos + 52;
             int paletteData = (int)Utils.GetUInt(stream);
-            stream.Position = 128;
+            stream.Position = pos + 128;
             return type switch
             {
                 0x81 => GTFPaletteInterlace(stream, width, height, paletteData),
@@ -36,12 +37,25 @@ namespace ImasArchiveLib
             };
         }
 
+        public static void WriteGTF(Stream stream, Bitmap bitmap, int encodingType)
+        {
+            switch (encodingType)
+            {
+                case 0x83:
+                    WriteGTF4444MixXY(stream, bitmap);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
         private static Bitmap GTFPalette(Stream stream, int width, int height, int paletteData)
         {
+            long pos = stream.Position - 128;
             Bitmap bitmap = new Bitmap(width, height);
 
             Color[] colors = new Color[0x100];
-            stream.Position = paletteData;
+            stream.Position = pos + paletteData;
             for (int n = 0; n < 0x400; n++)
             {
                 int b0 = stream.ReadByte();
@@ -51,7 +65,7 @@ namespace ImasArchiveLib
                 colors[n / 4] = Color.FromArgb(b0, b3, b2, b1);
             }
 
-            stream.Position = 128;
+            stream.Position = pos + 128;
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -66,10 +80,11 @@ namespace ImasArchiveLib
 
         private static Bitmap GTFPaletteInterlace(Stream stream, int width, int height, int paletteData)
         {
+            long pos = stream.Position - 128;
             Bitmap bitmap = new Bitmap(width, height);
 
             Color[] colors = new Color[0x100];
-            stream.Position = paletteData;
+            stream.Position = pos + paletteData;
             for (int n = 0; n < 0x400; n++)
             {
                 int b0 = stream.ReadByte();
@@ -79,7 +94,7 @@ namespace ImasArchiveLib
                 colors[n / 4] = Color.FromArgb(b0, b3, b2, b1);
             }
 
-            stream.Position = 128;
+            stream.Position = pos + 128;
 
             int size = width;
             int p = -1;
@@ -168,6 +183,38 @@ namespace ImasArchiveLib
             return bitmap;
         }
 
+        private static void WriteGTF4444MixXY(Stream stream, Bitmap bitmap)
+        {
+            int pixelCount = bitmap.Width * bitmap.Height;
+            int size = pixelCount * 2;
+
+            Utils.PutUInt(stream, 0x02020000);
+            Utils.PutInt32(stream, size);
+            Utils.PutUInt(stream, 1);
+            Utils.PutUInt(stream, 0);
+
+            Utils.PutUInt(stream, 0x80);
+            Utils.PutInt32(stream, size);
+            Utils.PutByte(stream, 0x83);
+            Utils.PutByte(stream, 1);
+            Utils.PutByte(stream, 2);
+            Utils.PutByte(stream, 0);
+            Utils.PutUInt(stream, 0xAAE4);
+
+            Utils.PutInt16(stream, (short)bitmap.Width);
+            Utils.PutInt16(stream, (short)bitmap.Height);
+            Utils.PutUInt(stream, 0x10000);
+            stream.Write(new byte[0x58]);
+
+            for (int n = 0; n < pixelCount; n++)
+            {
+                int x, y;
+                (x, y) = GetXY(n, 11);
+                Color color = bitmap.GetPixel(x, y);
+                Utils.PutUShort(stream, ColorHelp.To4444(color));
+            }
+        }
+
         private static (int, int) GetXY(int n, int p)
         {
             int[] d = new int[2 * p];
@@ -193,7 +240,6 @@ namespace ImasArchiveLib
 
             Bitmap bitmap = new Bitmap(width, height);
 
-            stream.Position = 128;
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
                 {
@@ -201,8 +247,8 @@ namespace ImasArchiveLib
                     int c1 = binaryReader.ReadUInt16();
 
                     Color[] color = new Color[4];
-                    color[0] = ColorHelp.From16Bit(c0);
-                    color[1] = ColorHelp.From16Bit(c1);
+                    color[0] = ColorHelp.From565(c0);
+                    color[1] = ColorHelp.From565(c1);
                     if (c0 <= c1)
                     {
                         color[2] = ColorHelp.MixRatio(color[0], color[1], 1, 1);
@@ -235,7 +281,6 @@ namespace ImasArchiveLib
 
             Bitmap bitmap = new Bitmap(width, height);
 
-            stream.Position = 128;
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
                 {
@@ -282,8 +327,8 @@ namespace ImasArchiveLib
                     int c1 = binaryReader.ReadUInt16();
 
                     Color[] color = new Color[4];
-                    color[0] = ColorHelp.From16Bit(c0);
-                    color[1] = ColorHelp.From16Bit(c1);
+                    color[0] = ColorHelp.From565(c0);
+                    color[1] = ColorHelp.From565(c1);
                     color[2] = ColorHelp.MixRatio(color[0], color[1], 2, 1);
                     color[3] = ColorHelp.MixRatio(color[0], color[1], 1, 2);
 
@@ -305,12 +350,33 @@ namespace ImasArchiveLib
 
         private static class ColorHelp
         {
-            public static Color From16Bit(int x)
+            public static Color From565(int x)
             {
                 int r0 = (x >> 11) * 8;
                 int g0 = ((x >> 5) & 0x3F) * 4;
                 int b0 = (x & 0x1F) * 8;
                 return Color.FromArgb(r0, g0, b0);
+            }
+
+            public static Color From4444(int x)
+            {
+                int b = (x & 15) * 17;
+                x >>= 4;
+                int g = (x & 15) * 17;
+                x >>= 4;
+                int r = (x & 15) * 17;
+                x >>= 4;
+                int a = (x & 15) * 17;
+                return Color.FromArgb(a, r, g, b);
+            }
+
+            public static ushort To4444(Color color)
+            {
+                return (ushort)(
+                    ((color.A >> 4) << 12)
+                    + ((color.R >> 4) << 8)
+                    + ((color.G >> 4) << 4)
+                    + (color.B >> 4));
             }
 
             public static Color MixRatio(Color c0, Color c1, int m0, int m1)
