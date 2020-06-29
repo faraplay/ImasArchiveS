@@ -71,7 +71,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "songinfo/songResource.bin.gz", "songResource.bin.gz.fbs")]
+        [DataRow("hdd", "", "songinfo/songResource.bin.gz", "other/songResource.bin.gz.fbs")]
         public void GetEntryRawAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
@@ -90,8 +90,8 @@ namespace ImasArchiveLibTest
 
 
         [DataTestMethod]
-        [DataRow("hdd", "", "songinfo/songResource.bin.gz", "songResource.bin")]
-        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par.gz", "ami_bs2_c01.par")]
+        [DataRow("hdd", "", "songinfo/songResource.bin.gz", "other/songResource.bin")]
+        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par.gz", "other/ami_bs2_c01.par")]
         public void GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
@@ -109,31 +109,16 @@ namespace ImasArchiveLibTest
         }
 
 
-        //[DataTestMethod]
-        //[DataRow("hdd", "", "hdd_out")]
-        //[DataRow("disc", "", "disc_out")]
-        //[DataRow("dlc\\_dlc03", ".dat", "_dlc03_out")]
-        //public void ExtractAllUncompress(string filename, string extension, string expectedFolder)
-        //{
-        //    using ArcFile arcFile = new ArcFile(filename, extension);
-        //    arcFile.ExtractAll("test");
-        //    bool eq = Compare.CompareDirectories(expectedFolder, "test");
-        //    DirectoryInfo directoryInfo = new DirectoryInfo("test");
-        //    directoryInfo.Delete(true);
-        //    Assert.IsTrue(eq);
-        //}
-
-
         [DataTestMethod]
-        [DataRow("disc", "", "disc_out")]
-        [DataRow("hdd", "", "hdd_out")]
-        [DataRow("dlc\\_dlc03", ".dat", "_dlc03_out")]
+        [DataRow("disc", "", "disc")]
+        [DataRow("hdd", "", "hdd")]
+        [DataRow("dlc\\_dlc03", ".dat", "_dlc03")]
         public async Task ExtractAllUncompressAsync(string filename, string extension, string expectedFolder)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
-            await Task.Run(() => arcFile.ExtractAllAsync("test", progress));
-            bool eq = Compare.CompareDirectories(expectedFolder, "test");
-            DirectoryInfo directoryInfo = new DirectoryInfo("test");
+            await Task.Run(() => arcFile.ExtractAllAsync("temp", progress));
+            bool eq = Compare.CompareDirectories(expectedFolder, "temp");
+            DirectoryInfo directoryInfo = new DirectoryInfo("temp");
             directoryInfo.Delete(true);
             Assert.IsTrue(eq);
         }
@@ -146,17 +131,17 @@ namespace ImasArchiveLibTest
         {
             using (ArcFile arcFile = new ArcFile(filename, extension))
             {
-                await arcFile.SaveAs("test", progress);
+                await arcFile.SaveAs("temp", progress);
             }
-            bool eq = Compare.CompareFileHashes(filename + ".arc" + extension, "test.arc") && Compare.CompareFileHashes(filename + ".bin" + extension, "test.bin");
-            File.Delete("test.arc");
-            File.Delete("test.bin");
+            bool eq = Compare.CompareFileHashes(filename + ".arc" + extension, "temp.arc") && Compare.CompareFileHashes(filename + ".bin" + extension, "temp.bin");
+            File.Delete("temp.arc");
+            File.Delete("temp.bin");
             Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
-        [DataRow("disc", "", "system/chara_viewer_def.bin.gz", "songResource.bin", "disc_out")]
-        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par.gz", "week4-3.bin", "hdd_out")]
+        [DataRow("disc", "", "system/chara_viewer_def.bin.gz", "other/songResource.bin", "disc")]
+        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par.gz", "other/week4-3.bin", "hdd")]
         public async Task EditEntryReextractTest(string filename, string extension, string entryFilepath, string replacementFile, string expectedDir)
         {
 
@@ -169,42 +154,42 @@ namespace ImasArchiveLibTest
                 {
                     await arcEntry.Replace(fileStream);
                 }
-                await arcFile.SaveAs("test", progress);
+                await arcFile.SaveAs("temp", progress);
             }
-            using (ArcFile arcFile = new ArcFile("test", ""))
+            using (ArcFile arcFile = new ArcFile("temp", ""))
             {
-                await arcFile.ExtractAllAsync("testdir", progress);
+                await arcFile.ExtractAllAsync("tempdir", progress);
             }
             File.Move(expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3), "backup");
             File.Copy(replacementFile, expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3));
-            bool eq = Compare.CompareDirectories(expectedDir, "testdir");
+            bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
             File.Delete(expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3));
             File.Move("backup", expectedDir + "/" + entryFilepath.Substring(0, entryFilepath.Length - 3));
 
-            DirectoryInfo directoryInfo = new DirectoryInfo("testdir");
+            DirectoryInfo directoryInfo = new DirectoryInfo("tempdir");
             directoryInfo.Delete(true);
-            File.Delete("test.arc");
-            File.Delete("test.bin");
+            File.Delete("temp.arc");
+            File.Delete("temp.bin");
             Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
         [DataRow("little")]
-        [DataRow("disc_out")]
+        [DataRow("disc")]
         public async Task BuildNewArcTest(string dir)
         {
-            await ArcFile.BuildFromDirectory(dir, "test", progress);
-            using (ArcFile arcFile = new ArcFile("test"))
+            await ArcFile.BuildFromDirectory(dir, "temp", progress);
+            using (ArcFile arcFile = new ArcFile("temp"))
             {
-                await arcFile.ExtractAllAsync("testdir", progress);
+                await arcFile.ExtractAllAsync("tempdir", progress);
             }
 
-            bool eq = Compare.CompareDirectories(dir, "testdir");
+            bool eq = Compare.CompareDirectories(dir, "tempdir");
 
-            DirectoryInfo directoryInfo = new DirectoryInfo("testdir");
+            DirectoryInfo directoryInfo = new DirectoryInfo("tempdir");
             directoryInfo.Delete(true);
-            File.Delete("test.arc");
-            File.Delete("test.bin");
+            File.Delete("temp.arc");
+            File.Delete("temp.bin");
 
             Assert.IsTrue(eq);
         }

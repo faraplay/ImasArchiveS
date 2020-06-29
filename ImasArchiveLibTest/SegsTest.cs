@@ -1,6 +1,7 @@
 ﻿using ImasArchiveLib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
@@ -9,8 +10,8 @@ namespace ImasArchiveLibTest
     {
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz", "songResource.bin")]
-        [DataRow("_week_00_002.par.gz", "_week_00_002.par")]
+        [DataRow("other/songResource.bin.gz", "other/songResource.bin")]
+        [DataRow("other/_week_00_002.par.gz", "other/_week_00_002.par")]
         public void DecryptWholeFileTest(string inputFile, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -25,8 +26,8 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz", "songResource.bin")]
-        [DataRow("_week_00_002.par.gz", "_week_00_002.par")]
+        [DataRow("other/songResource.bin.gz", "other/songResource.bin")]
+        [DataRow("other/_week_00_002.par.gz", "other/_week_00_002.par")]
         public void DecryptReadByteTest(string inputFile, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -46,9 +47,9 @@ namespace ImasArchiveLibTest
 
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz", "songResource.bin", 32)]
-        [DataRow("_week_00_002.par.gz", "_week_00_002.par", 0x1040)]
-        [DataRow("_week_00_002.par.gz", "_week_00_002.par", 0x50123)]
+        [DataRow("other/songResource.bin.gz", "other/songResource.bin", 32)]
+        [DataRow("other/_week_00_002.par.gz", "other/_week_00_002.par", 0x1040)]
+        [DataRow("other/_week_00_002.par.gz", "other/_week_00_002.par", 0x50123)]
         public void DecryptSeekTest(string inputFile, string expectedFile, int offset)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -71,15 +72,15 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("songResource.bin")]
-        [DataRow("_week_00_002.par")]
-        [DataRow("ami_bs2_c01.par")]
-        public void CompressUncompressTest(string inputFile)
+        [DataRow("other/songResource.bin")]
+        [DataRow("other/_week_00_002.par")]
+        [DataRow("other/ami_bs2_c01.par")]
+        public async Task CompressUncompressTest(string inputFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
             {
                 using FileStream outStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
-                SegsStream.CompressStream(fileStream, outStream);
+                await SegsStream.CompressStream(fileStream, outStream);
             }
             using (FileStream compStream = new FileStream("temp.dat", FileMode.Open, FileAccess.Read))
             {
