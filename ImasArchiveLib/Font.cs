@@ -12,6 +12,7 @@ namespace ImasArchiveLib
         CharData[] chars;
         int root;
 
+        #region par
         private readonly byte[] zeros = new byte[256];
         byte[] parHeader;
         public void ReadFontPar(Stream stream)
@@ -141,7 +142,7 @@ namespace ImasArchiveLib
                 stream.Write(zeros, 0, 6);
             }
         }
-
+        #endregion
         #region Bitmaps
         public Bitmap BigBitmap { get; private set; }
         public Bitmap[] charBitmaps { get; private set; }
@@ -231,21 +232,71 @@ namespace ImasArchiveLib
             }
         }
 
+        public void RecreateBigBitmap()
+        {
+            UseBitmapArray();
+            UseBigBitmap();
+        }
+        #endregion
+        #region Save/Load PNG
         public void SaveAllCharBitmaps(string destDir)
         {
             DirectoryInfo dInfo = new DirectoryInfo(destDir);
             dInfo.Create();
             UseBitmapArray();
+            SaveCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
             for (int i = 0; i < charBitmaps.Length; i++)
             {
                 charBitmaps[i].Save(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png", ImageFormat.Png);
             }
         }
 
-        public void RecreateBigBitmap()
+        private void SaveCharBitmapExtraData(string outFile)
         {
-            UseBitmapArray();
-            UseBigBitmap();
+            using FileStream stream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
+            Utils.PutInt32(stream, chars.Length);
+            foreach (CharData c in chars)
+            {
+                Utils.PutUShort(stream, c.key);
+                Utils.PutInt16(stream, c.offsetx);
+                Utils.PutInt16(stream, c.offsety);
+                Utils.PutInt16(stream, c.width);
+                Utils.PutUShort(stream, c.isEmoji);
+            }
+        }
+
+        public void LoadCharBitmaps(string srcDir)
+        {
+            DirectoryInfo dInfo = new DirectoryInfo(srcDir);
+            if (!dInfo.Exists)
+                throw new FileNotFoundException();
+            LoadCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
+            charBitmaps = new Bitmap[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+            {
+                charBitmaps[i] = new Bitmap(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png");
+                chars[i].datawidth = (byte)charBitmaps[i].Width;
+                chars[i].dataheight = (byte)charBitmaps[i].Height;
+            }
+            BuildTree();
+        }
+
+        private void LoadCharBitmapExtraData(string inFile)
+        {
+            using FileStream stream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
+            int charCount = Utils.GetInt32(stream);
+            chars = new CharData[charCount];
+            for (int i = 0; i < charCount; i++)
+            {
+                chars[i] = new CharData
+                {
+                    key = Utils.GetUShort(stream),
+                    offsetx = Utils.GetInt16(stream),
+                    offsety = Utils.GetInt16(stream),
+                    width = Utils.GetInt16(stream),
+                    isEmoji = Utils.GetUShort(stream)
+                };
+            }
         }
         #endregion
         #region Tree

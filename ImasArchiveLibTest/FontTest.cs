@@ -30,6 +30,16 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
+        [DataRow("font", "other/font_fromFolder.png")]
+        public void ReadFontFolderTest(string inDir, string outFile)
+        {
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            font.RecreateBigBitmap();
+            font.BigBitmap.Save(outFile, ImageFormat.Png);
+        }
+
+        [DataTestMethod]
         [DataRow("disc/im2nx_font.par")]
         public void CheckTreeTest(string inFile)
         {
