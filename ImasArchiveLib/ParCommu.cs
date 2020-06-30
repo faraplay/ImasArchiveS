@@ -133,8 +133,7 @@ namespace ImasArchiveLib
             for (int i = 0; i < msgCount; i++)
             {
                 string line = GetNonCommentLine(commuBin);
-                int lineID;
-                if (!int.TryParse(line.Trim(), out lineID))
+                if (!int.TryParse(line.Trim(), out int lineID))
                 {
                     throw new InvalidDataException();
                 }
@@ -177,7 +176,6 @@ namespace ImasArchiveLib
         {
             List<byte> list = new List<byte>();
             NextByteOptions next = NextByteOptions.None;
-            int i = 0;
             foreach (char c in s)
             {
                 switch (next) 
@@ -215,13 +213,7 @@ namespace ImasArchiveLib
                     case NextByteOptions.None:
                         break;
                 }
-                if (c >= 0x7F)
-                {
-                    list.Add((byte)((c & 0xFF00) >> 8));
-                    list.Add((byte)(c & 0xFF));
-                    next = NextByteOptions.None;
-                }
-                else if (c == 0x20)
+                if (c == 0x20)
                 {
                     list.Add((byte)(c + 0x80));
                     next = NextByteOptions.AllASCII;
@@ -231,10 +223,16 @@ namespace ImasArchiveLib
                     list.Add((byte)(c + 0x80));
                     next = NextByteOptions.Lowercase;
                 }
-                else
+                else if (c >= 0x20  && c < 0x7F)
                 {
                     list.Add((byte)(c + 0x80));
                     next = NextByteOptions.SpaceOnly;
+                }
+                else
+                {
+                    list.Add((byte)((c & 0xFF00) >> 8));
+                    list.Add((byte)(c & 0xFF));
+                    next = NextByteOptions.None;
                 }
             }
             switch (next)
