@@ -101,5 +101,38 @@ namespace ImasArchiveLib
 
             disposed = true;
         }
+
+        public bool TryGetCommuText(string destDir)
+        {
+            using Stream parStream = this.Open();
+            if (!_name.EndsWith(".par.gz"))
+                return false;
+            int mbinPos = ParCommu.TryGetMBin(parStream, _name[0..^3]);
+            if (mbinPos != -1)
+            {
+                using StreamWriter streamWriter = new StreamWriter(destDir + '/' + _name[0..^7] + "_m.txt");
+                streamWriter.WriteLine(_filepath[0..^3]);
+                parStream.Position = mbinPos;
+                ParCommu.GetCommuText(parStream, streamWriter);
+            }
+            return (mbinPos != -1);
+        }
+
+        public async Task TryReplaceCommuText(string commuFileName)
+        {
+            using Stream parStream = this.Open();
+            MemoryStream memoryStream = new MemoryStream();
+            using StreamReader commuReader = new StreamReader(commuFileName);
+            try
+            {
+                await ParCommu.ReplaceMBin(parStream, memoryStream, commuReader, _name[0..^3]);
+            }
+            catch (InvalidDataException)
+            {
+                return;
+            }
+            memoryStream.Position = 0;
+            await Replace(memoryStream);
+        }
     }
 }
