@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ImasArchiveLib
 {
-    class Font : IDisposable
+    public class Font : IDisposable
     {
         CharData[] chars;
         int root;
@@ -20,7 +20,7 @@ namespace ImasArchiveLib
             parHeader = new byte[16];
             stream.Read(parHeader);
             int gtfPos = Utils.GetInt32(stream);
-            int nxPos = Utils.GetInt32(stream);
+            _ = Utils.GetInt32(stream);
             int nxpPos = Utils.GetInt32(stream);
 
             stream.Position = gtfPos;
@@ -52,7 +52,7 @@ namespace ImasArchiveLib
                 stream.Position += 6;
             }
         }
-        public void WriteFontPar(Stream stream)
+        public void WriteFontPar(Stream stream, bool nxFixedWidth = true)
         {
             UseBigBitmap();
             BuildTree();
@@ -101,14 +101,14 @@ namespace ImasArchiveLib
             GTF.WriteGTF(stream, BigBitmap, 0x83);
             stream.Write(zeros, 0, gtfPad);
 
-            WritePaf(stream, false);
+            WritePaf(stream, false, nxFixedWidth);
             stream.Write(zeros, 0, nxPad);
 
-            WritePaf(stream, true);
+            WritePaf(stream, true, nxFixedWidth);
             stream.Write(zeros, 0, nxpPad);
         }
 
-        private void WritePaf(Stream stream, bool isNxp)
+        private void WritePaf(Stream stream, bool isNxp, bool nxFixedWidth = true)
         {
             Utils.PutUInt(stream, 0x70616601);
             Utils.PutUInt(stream, 0x0201001D);
@@ -134,7 +134,7 @@ namespace ImasArchiveLib
                 Utils.PutInt16(stream, c.datay);
                 Utils.PutInt16(stream, c.offsetx);
                 Utils.PutInt16(stream, c.offsety);
-                Utils.PutInt16(stream, isNxp ? c.width : (short)0x20);
+                Utils.PutInt16(stream, (isNxp || !nxFixedWidth) ? c.width : (short)0x20);
                 Utils.PutInt16(stream, c.blank);
                 Utils.PutInt32(stream, c.left);
                 Utils.PutInt32(stream, c.right);
@@ -145,7 +145,7 @@ namespace ImasArchiveLib
         #endregion
         #region Bitmaps
         public Bitmap BigBitmap { get; private set; }
-        public Bitmap[] charBitmaps { get; private set; }
+        private bool charsHaveBitmaps;
 
         private Bitmap GetCharBitmap(CharData c)
         {
@@ -167,23 +167,25 @@ namespace ImasArchiveLib
             return charBitmap;
         }
 
-        private void UseBitmapArray()
+        private void UseCharBitmaps()
         {
-            if (charBitmaps == null && BigBitmap != null)
+            if (!charsHaveBitmaps && BigBitmap != null)
             {
-                charBitmaps = new Bitmap[chars.Length];
                 foreach (CharData c in chars)
                 {
-                    charBitmaps[c.index] = GetCharBitmap(c);
+                    c.bitmap = GetCharBitmap(c);
                 }
             }
             BigBitmap?.Dispose();
             BigBitmap = null;
+            charsHaveBitmaps = true;
         }
 
+        // have 2 pixels of space between chars
+        // 1 pixel led to artifacts around the chars :(
         private void UseBigBitmap()
         {
-            if (BigBitmap == null && charBitmaps != null)
+            if (BigBitmap == null && charsHaveBitmaps)
             {
                 BigBitmap = new Bitmap(2048, 2048);
                 Array.Sort(chars, (c1, c2) => {
@@ -203,21 +205,22 @@ namespace ImasArchiveLib
                     {
                         y += lineHeight;
                         lineHeight = c.dataheight;
-                        lineHeight--;
+                        //lineHeight--;
                         x = -1;
                     }
                     CopyCharBitmap(BigBitmap, c, x, y);
                     c.datax = x;
                     c.datay = y;
                     x += c.datawidth;
-                    x--;
+                    //x--;
                 }
                 Array.Sort(chars);
-                foreach (Bitmap charBitmap in charBitmaps)
+                foreach (CharData c in chars)
                 {
-                    charBitmap?.Dispose();
+                    c.bitmap?.Dispose();
+                    c.bitmap = null;
                 }
-                charBitmaps = null;
+                charsHaveBitmaps = false;
             }
         }
 
@@ -227,15 +230,152 @@ namespace ImasArchiveLib
             {
                 for (int xx = 1; xx < c.datawidth - 1; xx++)
                 {
-                    bigBitmap.SetPixel(x + xx, y + yy, charBitmaps[c.index].GetPixel(xx, yy));
+                    bigBitmap.SetPixel(x + xx, y + yy, c.bitmap.GetPixel(xx, yy));
                 }
             }
         }
 
         public void RecreateBigBitmap()
         {
-            UseBitmapArray();
+            UseCharBitmaps();
             UseBigBitmap();
+        }
+        #endregion
+        #region Digraph
+        // Do not rebuild big bitmap after calling this function!
+        public void AddDigraphs()
+        {
+            char[] lowerCharset = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
+            char[] allCharset = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".ToCharArray();
+            AddDigraphsToFont(lowerCharset, lowerCharset);
+            AddSpaceDigraphsToFont(allCharset);
+        }
+
+        // Do not rebuild big bitmap after calling this function!
+        private void AddSpaceDigraphsToFont(char[] charset)
+        {
+            UseBigBitmap();
+            List<CharData> list = new List<CharData>();
+            foreach (char char1 in charset)
+            {
+                CharData c = Array.Find(chars, (c) => (c.key == char1));
+                if (c != null && c.key < 0x80)
+                    list.Add(c);
+            }
+
+            List<CharData> charsNew = new List<CharData>(chars);
+            foreach (CharData c in list)
+            {
+                charsNew.Add(new CharData
+                {
+                    key = (ushort)((c.key & 0xFF | 0x80) << 8 + 0xA0),
+                    bitmap = null,
+                    datawidth = c.datawidth,
+                    dataheight = c.dataheight,
+                    datax = c.datax,
+                    datay = c.datay,
+                    offsetx = c.offsetx,
+                    offsety = c.offsety,
+                    width = (short)(c.width + 0xA)
+                });
+                charsNew.Add(new CharData
+                {
+                    key = (ushort)(0xA000 + (c.key & 0xFF | 0x80)),
+                    bitmap = null,
+                    datawidth = c.datawidth,
+                    dataheight = c.dataheight,
+                    datax = c.datax,
+                    datay = c.datay,
+                    offsetx = (short)(c.offsetx + 0xA),
+                    offsety = c.offsety,
+                    width = (short)(c.width + 0xA)
+                });
+            }
+            chars = charsNew.ToArray();
+            BuildTree();
+
+        }
+        public void AddDigraphsToFont(char[] charset1, char[] charset2)
+        {
+            UseCharBitmaps();
+            List<CharData> list1 = new List<CharData>();
+            foreach (char char1 in charset1)
+            {
+                CharData c1 = Array.Find(chars, (c) => (c.key == char1));
+                if (c1 != null && c1.key < 0x80)
+                    list1.Add(c1);
+            }
+            List<CharData> list2 = new List<CharData>();
+            foreach (char char2 in charset2)
+            {
+                CharData c2 = Array.Find(chars, (c) => (c.key == char2));
+                if (c2 != null && c2.key < 0x80)
+                    list2.Add(c2);
+            }
+
+            List<CharData> charsNew = new List<CharData>(chars);
+            foreach (CharData c1 in list1)
+            {
+                foreach (CharData c2 in list2)
+                {
+                    charsNew.Add(CreateDigraph(c1, c2));
+                }
+            }
+            chars = charsNew.ToArray();
+            BuildTree();
+        }
+        public void CreateDigraphs(string destDir, char[] charset1, char[] charset2)
+        {
+            UseCharBitmaps();
+            DirectoryInfo dInfo = new DirectoryInfo(destDir);
+            dInfo.Create();
+            List<CharData> list1 = new List<CharData>();
+            foreach (char char1 in charset1)
+            {
+                CharData c1 = Array.Find(chars, (c) => (c.key == char1));
+                if (c1 != null && c1.key < 0x80)
+                    list1.Add(c1);
+            }
+            List<CharData> list2 = new List<CharData>();
+            foreach (char char2 in charset2)
+            {
+                CharData c2 = Array.Find(chars, (c) => (c.key == char2));
+                if (c2 != null && c2.key < 0x80)
+                    list2.Add(c2);
+            }
+            foreach (CharData c1 in list1)
+            {
+                foreach (CharData c2 in list2)
+                {
+                    using CharData c = CreateDigraph(c1, c2);
+                    c.bitmap.Save(dInfo.FullName + "\\" + c1.key.ToString("X4") + c2.key.ToString("X4") + ".png",
+                        ImageFormat.Png);
+                }
+            }
+        }
+        private CharData CreateDigraph(CharData c1, CharData c2)
+        {
+            int offsetxmin = Math.Min(c1.offsetx, c2.offsetx + c1.width);
+            int offsetymin = Math.Min(c1.offsety, c2.offsety);
+            int offsetxmax = Math.Max(c1.offsetx + c1.datawidth, c2.offsetx + c1.width + c2.datawidth);
+            int offsetymax = Math.Max(c1.offsety + c1.dataheight, c2.offsety + c2.dataheight);
+            int width = offsetxmax - offsetxmin;
+            int height = offsetymax - offsetymin;
+            Bitmap bitmap = new Bitmap(width, height);
+
+            CopyCharBitmap(bitmap, c1, c1.offsetx - offsetxmin, c1.offsety - offsetymin);
+            CopyCharBitmap(bitmap, c2, c2.offsetx + c1.width - offsetxmin, c2.offsety - offsetymin);
+
+            return new CharData
+            {
+                key = (ushort)(((c1.key & 0xFF | 0x80) << 8) + (c2.key & 0xFF | 0x80)),
+                bitmap = bitmap,
+                datawidth = (byte)width,
+                dataheight = (byte)height,
+                offsetx = (short)offsetxmin,
+                offsety = (short)offsetymin,
+                width = (short)(c1.width + c2.width)
+            };
         }
         #endregion
         #region Save/Load PNG
@@ -243,11 +383,11 @@ namespace ImasArchiveLib
         {
             DirectoryInfo dInfo = new DirectoryInfo(destDir);
             dInfo.Create();
-            UseBitmapArray();
+            UseCharBitmaps();
             SaveCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
-            for (int i = 0; i < charBitmaps.Length; i++)
+            for (int i = 0; i < chars.Length; i++)
             {
-                charBitmaps[i].Save(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png", ImageFormat.Png);
+                chars[i].bitmap.Save(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png", ImageFormat.Png);
             }
         }
 
@@ -271,13 +411,13 @@ namespace ImasArchiveLib
             if (!dInfo.Exists)
                 throw new FileNotFoundException();
             LoadCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
-            charBitmaps = new Bitmap[chars.Length];
             for (int i = 0; i < chars.Length; i++)
             {
-                charBitmaps[i] = new Bitmap(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png");
-                chars[i].datawidth = (byte)charBitmaps[i].Width;
-                chars[i].dataheight = (byte)charBitmaps[i].Height;
+                chars[i].bitmap = new Bitmap(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png");
+                chars[i].datawidth = (byte)chars[i].bitmap.Width;
+                chars[i].dataheight = (byte)chars[i].bitmap.Height;
             }
+            charsHaveBitmaps = true;
             BuildTree();
         }
 
@@ -358,14 +498,10 @@ namespace ImasArchiveLib
             {
                 BigBitmap?.Dispose();
                 BigBitmap = null;
-                if (charBitmaps != null)
+                foreach (CharData c in chars)
                 {
-                    foreach (Bitmap charBitmap in charBitmaps)
-                    {
-                        charBitmap?.Dispose();
-                    }
+                    c?.Dispose();
                 }
-                charBitmaps = null;
             }
         }
 
@@ -376,7 +512,7 @@ namespace ImasArchiveLib
         #endregion
     }
 
-    class CharData : IComparable<CharData>
+    class CharData : IComparable<CharData>, IDisposable
     {
         public ushort key;
         public byte datawidth;
@@ -394,6 +530,30 @@ namespace ImasArchiveLib
 
         public ushort isEmoji;
 
+        public Bitmap bitmap;
         public int CompareTo(CharData other) => key.CompareTo(other.key);
+
+
+        #region IDisposable
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                bitmap?.Dispose();
+                bitmap = null;
+            }
+        }
+
+        ~CharData()
+        {
+            Dispose(false);
+        }
+        #endregion
     }
 }

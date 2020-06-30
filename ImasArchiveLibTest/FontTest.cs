@@ -77,5 +77,44 @@ namespace ImasArchiveLibTest
             File.Delete("temp.par");
             Assert.IsTrue(eq);
         }
+
+        [DataTestMethod]
+        [DataRow("font", "abcdefghijklmnopqrstuvwxyz", "digraphs")]
+        public void SaveFontDigraphsTest(string inDir, string charset, string outDir)
+        {
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            char[] set = charset.ToCharArray();
+            font.CreateDigraphs(outDir, set, set);
+        }
+
+        [DataTestMethod]
+        [DataRow("font", "abcdefghijklmnopqrstuvwxyz", "other/digraphs.png", "other/digraphs.par")]
+        public void AddSpecifiedDigraphsToFontTest(string inDir, string charset, string outPng, string outPar)
+        {
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            char[] set = charset.ToCharArray();
+            font.AddDigraphsToFont(set, set);
+            font.RecreateBigBitmap();
+            font.BigBitmap.Save(outPng);
+            using FileStream outStream = new FileStream(outPar, FileMode.Create, FileAccess.Write);
+            font.WriteFontPar(outStream);
+        }
+
+        [DataTestMethod]
+        [DataRow("disc/im2nx_font.par", "other/newfont.png", "other/newfont.par")]
+        public void AddAllDigraphsToFontTest(string inFile, string outPng, string outPar)
+        {
+            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                using Font font = new Font();
+                font.ReadFontPar(inStream);
+                font.AddDigraphs();
+                font.BigBitmap.Save(outPng);
+                using FileStream outStream = new FileStream(outPar, FileMode.Create, FileAccess.Write);
+                font.WriteFontPar(outStream, false);
+            }
+        }
     }
 }
