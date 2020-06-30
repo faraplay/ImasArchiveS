@@ -35,21 +35,24 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "commu2/par/_week_00_002.par.gz", "translated.txt")]
-        public async Task ArcEntryCommuReplaceTest(string arcName, string extension, string searchFile, string replacementFile)
+        [DataRow("hdd", "", "commu2/par/_week_00_002.par.gz", "other/translated.txt", "other/translated.par")]
+        public async Task ArcEntryCommuReplaceTest(string arcName, string extension, string searchFile, 
+            string replacementFile, string outFile)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
             ArcEntry arcEntry = arcFile.GetEntry(searchFile);
             Assert.IsNotNull(arcEntry);
             await arcEntry.TryReplaceCommuText(replacementFile);
 
-            using FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
-            using Stream stream = arcEntry.Open();
-            stream.CopyTo(fileStream);
+            using (FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write))
+            {
+                using Stream stream = arcEntry.Open();
+                stream.CopyTo(fileStream);
+            }
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "translated.txt")]
+        [DataRow("hdd", "", "other/translated.txt")]
         public async Task ArcFileCommuReplaceTest(string arcName, string extension, string replacementFile)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
@@ -69,7 +72,7 @@ namespace ImasArchiveLibTest
             {
                 await arcFile.ReplaceCommu(file.FullName);
             }
-            await arcFile.SaveAs("test");
+            await arcFile.SaveAs("../data/hdd");
         }
     }
 }

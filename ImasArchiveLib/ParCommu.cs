@@ -156,24 +156,107 @@ namespace ImasArchiveLib
                         throw new InvalidDataException();
                     msg += '\n' + msgline;
                 }
-                if (name.Length > 15)
-                    name = name.Substring(0, 15);
-                if (msg.Length > 63)
-                    msg = msg.Substring(0, 63);
 
-                Utils.PutUInt(outParStream, (uint)name.Length);
-                Utils.PutUInt(outParStream, (uint)msg.Length);
+                byte[] namebytes = ToCustomEncoding(name);
+                byte[] msgbytes = ToCustomEncoding(msg);
 
-                byte[] namebytes = new byte[32];
-                Encoding.BigEndianUnicode.GetBytes(name).CopyTo(namebytes, 0);
-                byte[] msgbytes = new byte[128];
-                Encoding.BigEndianUnicode.GetBytes(msg).CopyTo(msgbytes, 0);
+                int nameLen = Math.Min(namebytes.Length, 30);
+                int msgLen = Math.Min(msgbytes.Length, 126);
 
-                outParStream.Write(namebytes);
-                outParStream.Write(msgbytes);
+                Utils.PutUInt(outParStream, (uint)nameLen);
+                Utils.PutUInt(outParStream, (uint)msgLen);
+
+                outParStream.Write(namebytes, 0, nameLen);
+                outParStream.Write(new byte[32 - nameLen]);
+                outParStream.Write(msgbytes, 0, msgLen);
+                outParStream.Write(new byte[128 - msgLen]);
             }
         }
 
+        private static byte[] ToCustomEncoding(string s)
+        {
+            List<byte> list = new List<byte>();
+            NextByteOptions next = NextByteOptions.None;
+            int i = 0;
+            foreach (char c in s)
+            {
+                switch (next) 
+                {
+                    case NextByteOptions.AllASCII:
+                        if (c > 0x20 && c < 0x7F)
+                        {
+                            list.Add((byte)(c + 0x80));
+                            next = NextByteOptions.None;
+                            continue;
+                        }
+                        else
+                            list.Add(0);
+                        break;
+                    case NextByteOptions.Lowercase:
+                        if (c == 0x20 || c > 0x60 && c <= 0x7A)
+                        {
+                            list.Add((byte)(c + 0x80));
+                            next = NextByteOptions.None;
+                            continue;
+                        }
+                        else
+                            list.Add(0);
+                        break;
+                    case NextByteOptions.SpaceOnly:
+                        if (c == 0x20)
+                        {
+                            list.Add((byte)(c + 0x80));
+                            next = NextByteOptions.None;
+                            continue;
+                        }
+                        else
+                            list.Add(0);
+                        break;
+                    case NextByteOptions.None:
+                        break;
+                }
+                if (c >= 0x7F)
+                {
+                    list.Add((byte)((c & 0xFF00) >> 8));
+                    list.Add((byte)(c & 0xFF));
+                    next = NextByteOptions.None;
+                }
+                else if (c == 0x20)
+                {
+                    list.Add((byte)(c + 0x80));
+                    next = NextByteOptions.AllASCII;
+                }
+                else if (c > 0x60 && c <= 0x7A)
+                {
+                    list.Add((byte)(c + 0x80));
+                    next = NextByteOptions.Lowercase;
+                }
+                else
+                {
+                    list.Add((byte)(c + 0x80));
+                    next = NextByteOptions.SpaceOnly;
+                }
+            }
+            switch (next)
+            {
+                case NextByteOptions.AllASCII:
+                case NextByteOptions.Lowercase:
+                case NextByteOptions.SpaceOnly:
+                        list.Add(0);
+                    break;
+                case NextByteOptions.None:
+                    break;
+            }
+            return list.ToArray();
+        }
+
+        private enum NextByteOptions
+        {
+            None,
+            SpaceOnly,
+            Lowercase,
+            AllASCII
+        }
 
         static string GetNonCommentLine(TextReader textReader)
         {
