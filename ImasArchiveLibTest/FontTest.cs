@@ -111,6 +111,7 @@ namespace ImasArchiveLibTest
                 using Font font = new Font();
                 font.ReadFontPar(inStream);
                 font.AddDigraphs();
+                Assert.IsTrue(font.CheckTree());
                 font.BigBitmap.Save(outPng);
                 using FileStream outStream = new FileStream(outPar, FileMode.Create, FileAccess.Write);
                 font.WriteFontPar(outStream, false);

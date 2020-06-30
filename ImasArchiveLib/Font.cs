@@ -246,9 +246,10 @@ namespace ImasArchiveLib
         public void AddDigraphs()
         {
             char[] lowerCharset = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
-            char[] allCharset = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".ToCharArray();
+            char[] asciiCharset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".ToCharArray();
             AddDigraphsToFont(lowerCharset, lowerCharset);
-            AddSpaceDigraphsToFont(allCharset);
+            AddSpaceDigraphsToFont(asciiCharset);
+            AddAlternateASCIIToFont(asciiCharset);
         }
 
         // Do not rebuild big bitmap after calling this function!
@@ -268,7 +269,7 @@ namespace ImasArchiveLib
             {
                 charsNew.Add(new CharData
                 {
-                    key = (ushort)((c.key & 0xFF | 0x80) << 8 + 0xA0),
+                    key = (ushort)(((c.key & 0xFF | 0x80) << 8) + 0xA0),
                     bitmap = null,
                     datawidth = c.datawidth,
                     dataheight = c.dataheight,
@@ -278,23 +279,57 @@ namespace ImasArchiveLib
                     offsety = c.offsety,
                     width = (short)(c.width + 0xA)
                 });
+                if (c.key != 0x20)
+                {
+                    charsNew.Add(new CharData
+                    {
+                        key = (ushort)(0xA000 + (c.key & 0xFF | 0x80)),
+                        bitmap = null,
+                        datawidth = c.datawidth,
+                        dataheight = c.dataheight,
+                        datax = c.datax,
+                        datay = c.datay,
+                        offsetx = (short)(c.offsetx + 0xA),
+                        offsety = c.offsety,
+                        width = (short)(c.width + 0xA)
+                    });
+                }
+            }
+            chars = charsNew.ToArray();
+            BuildTree();
+        }
+        // Do not rebuild big bitmap after calling this function!
+        private void AddAlternateASCIIToFont(char[] charset)
+        {
+            UseBigBitmap();
+            List<CharData> list = new List<CharData>();
+            foreach (char char1 in charset)
+            {
+                CharData c = Array.Find(chars, (c) => (c.key == char1));
+                if (c != null && c.key < 0x80)
+                    list.Add(c);
+            }
+
+            List<CharData> charsNew = new List<CharData>(chars);
+            foreach (CharData c in list)
+            {
                 charsNew.Add(new CharData
                 {
-                    key = (ushort)(0xA000 + (c.key & 0xFF | 0x80)),
+                    key = (ushort)((c.key & 0xFF | 0x80) << 8),
                     bitmap = null,
                     datawidth = c.datawidth,
                     dataheight = c.dataheight,
                     datax = c.datax,
                     datay = c.datay,
-                    offsetx = (short)(c.offsetx + 0xA),
+                    offsetx = c.offsetx,
                     offsety = c.offsety,
-                    width = (short)(c.width + 0xA)
+                    width = c.width
                 });
             }
             chars = charsNew.ToArray();
             BuildTree();
-
         }
+
         public void AddDigraphsToFont(char[] charset1, char[] charset2)
         {
             UseCharBitmaps();
