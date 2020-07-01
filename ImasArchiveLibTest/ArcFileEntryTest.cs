@@ -133,7 +133,7 @@ namespace ImasArchiveLibTest
             {
                 await arcFile.SaveAs("temp", progress);
             }
-            bool eq = Compare.CompareFileHashes(filename + ".arc" + extension, "temp.arc") && Compare.CompareFileHashes(filename + ".bin" + extension, "temp.bin");
+            bool eq = Compare.CompareFiles(filename + ".arc" + extension, "temp.arc") && Compare.CompareFiles(filename + ".bin" + extension, "temp.bin");
             File.Delete("temp.arc");
             File.Delete("temp.bin");
             Assert.IsTrue(eq);
