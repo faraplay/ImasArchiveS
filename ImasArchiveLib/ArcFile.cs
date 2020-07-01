@@ -351,6 +351,19 @@ namespace ImasArchiveLib
             }
         }
 
+        public async Task ReplaceCommu(string commuFileName)
+        {
+            string parPath;
+            using (StreamReader reader = new StreamReader(commuFileName))
+            {
+                parPath = reader.ReadLine();
+            }
+            ArcEntry arcEntry = GetEntry(parPath + ".gz");
+            if (arcEntry == null)
+                return;
+            await arcEntry.TryReplaceCommuText(commuFileName);
+        }
+
         public void Dispose()
         {
             Dispose(true);
