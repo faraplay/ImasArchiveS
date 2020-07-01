@@ -9,7 +9,7 @@ namespace ImasArchiveLibTest
     {
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz")]
+        [DataRow("other/songResource.bin.gz.fbs", "songResource.bin.gz", "other/songResource.bin.gz")]
         public void DecryptWholeFileTest(string inputFile, string name, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -24,7 +24,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz")]
+        [DataRow("other/songResource.bin.gz.fbs", "songResource.bin.gz", "other/songResource.bin.gz")]
         public void DecryptReadByteTest(string inputFile, string name, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -44,8 +44,8 @@ namespace ImasArchiveLibTest
 
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz", 32)]
-        [DataRow("songResource.bin.gz.fbs", "songResource.bin.gz", "songResource.bin.gz", 0x1040)]
+        [DataRow("other/songResource.bin.gz.fbs", "songResource.bin.gz", "other/songResource.bin.gz", 32)]
+        [DataRow("other/songResource.bin.gz.fbs", "songResource.bin.gz", "other/songResource.bin.gz", 0x1040)]
         public void DecryptSeekTest(string inputFile, string name, string expectedFile, int offset)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -69,7 +69,7 @@ namespace ImasArchiveLibTest
 
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz", "songResource.bin.gz", "songResource.bin.gz.fbs")]
+        [DataRow("other/songResource.bin.gz", "songResource.bin.gz", "other/songResource.bin.gz.fbs")]
         public void EncryptWholeFileTest(string inputFile, string name, string expectedFile)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
@@ -84,8 +84,8 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("songResource.bin.gz", "songResource.bin.gz", "songResource.bin.gz.fbs", 32)]
-        [DataRow("songResource.bin.gz", "songResource.bin.gz", "songResource.bin.gz.fbs", 0x1040)]
+        [DataRow("other/songResource.bin.gz", "songResource.bin.gz", "other/songResource.bin.gz.fbs", 32)]
+        [DataRow("other/songResource.bin.gz", "songResource.bin.gz", "other/songResource.bin.gz.fbs", 0x1040)]
         public void EncryptSeekTest(string inputFile, string name, string expectedFile, int offset)
         {
             using (FileStream fileStream = new FileStream(inputFile, FileMode.Open, FileAccess.Read))

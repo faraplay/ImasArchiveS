@@ -11,44 +11,55 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("hdd", "", "commu2/par/_week_00_002.par.gz", "hddcommu")]
-        public void ArcEntryCommuTest(string arcName, string extension, string searchFile, string outputDir)
+        public void ArcEntryCommuTest(string arcName, string extension, string searchFile, string expectedDir)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
             ArcEntry arcEntry = arcFile.GetEntry(searchFile);
             Assert.IsNotNull(arcEntry);
-            Directory.CreateDirectory(outputDir);
-            Assert.IsTrue(arcEntry.TryGetCommuText(outputDir));
+            Directory.CreateDirectory("tempdir");
+            Assert.IsTrue(arcEntry.TryGetCommuText("tempdir"));
+            string filename = searchFile.Substring(searchFile.LastIndexOf('/'))[0..^7] + "_m.txt";
+            bool eq = Compare.CompareFiles("tempdir/" + filename, expectedDir + "/" + filename);
+            Directory.Delete("tempdir", true);
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
         [DataRow("hdd", "", "hddcommu")]
-        public void ArcFileCommuTest(string arcName, string extension, string outputDir)
+        public void ArcFileCommuTest(string arcName, string extension, string expectedDir)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
             var arcEntries = arcFile.Entries;
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory("tempdir");
             foreach (ArcEntry arcEntry in arcEntries)
             {
                 Assert.IsNotNull(arcEntry);
-                arcEntry.TryGetCommuText(outputDir);
+                arcEntry.TryGetCommuText("tempdir");
             }
+            bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
+            Directory.Delete("tempdir", true);
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
         [DataRow("hdd", "", "commu2/par/_week_00_002.par.gz", "other/translated.txt", "other/translated.par")]
         public async Task ArcEntryCommuReplaceTest(string arcName, string extension, string searchFile, 
-            string replacementFile, string outFile)
+            string replacementFile, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
             ArcEntry arcEntry = arcFile.GetEntry(searchFile);
             Assert.IsNotNull(arcEntry);
             await arcEntry.TryReplaceCommuText(replacementFile);
 
-            using (FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write))
+            using (FileStream fileStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
             {
                 using Stream stream = arcEntry.Open();
                 stream.CopyTo(fileStream);
             }
+
+            bool eq = Compare.CompareFiles(expectedFile, "temp.par");
+            File.Delete("temp.par");
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]

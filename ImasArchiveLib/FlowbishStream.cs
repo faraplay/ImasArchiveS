@@ -12,7 +12,7 @@ namespace ImasArchiveLib
         private readonly FlowbishStreamMode _mode;
         private readonly FlowbishBox _box;
         private readonly string _key;
-        private bool leaveOpen;
+        private readonly bool leaveOpen;
         private bool disposed = false;
 
         private long _length;
