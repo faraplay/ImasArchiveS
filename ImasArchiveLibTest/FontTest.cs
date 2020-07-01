@@ -11,32 +11,48 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("disc/im2nx_font.par", "other/font.png")]
-        public void ReadFontImageTest(string inFile, string outFile)
+        public void ReadFontImageTest(string inFile, string expectedFile)
         {
-            using FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
-            using Font font = new Font();
-            font.ReadFontPar(inStream);
-            font.BigBitmap.Save(outFile, ImageFormat.Png);
+            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                using Font font = new Font();
+                font.ReadFontPar(inStream);
+                font.BigBitmap.Save("temp.png", ImageFormat.Png);
+            }
+
+            bool eq = Compare.CompareFiles(expectedFile, "temp.png");
+            File.Delete("temp.png");
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
         [DataRow("disc/im2nx_font.par", "font")]
-        public void SaveFontCharsTest(string inFile, string outDir)
+        public void SaveFontCharsTest(string inFile, string expectedDir)
         {
-            using FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
-            using Font font = new Font();
-            font.ReadFontPar(inStream);
-            font.SaveAllCharBitmaps(outDir);
+            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                using Font font = new Font();
+                font.ReadFontPar(inStream);
+                font.SaveAllCharBitmaps("tempdir");
+            }
+
+            bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
+            Directory.Delete("tempdir", true);
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
         [DataRow("font", "other/font_fromFolder.png")]
-        public void ReadFontFolderTest(string inDir, string outFile)
+        public void ReadFontFolderTest(string inDir, string expectedFile)
         {
             using Font font = new Font();
             font.LoadCharBitmaps(inDir);
             font.RecreateBigBitmap();
-            font.BigBitmap.Save(outFile, ImageFormat.Png);
+            font.BigBitmap.Save("temp.png", ImageFormat.Png);
+
+            bool eq = Compare.CompareFiles(expectedFile, "temp.png");
+            File.Delete("temp.png");
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
@@ -51,14 +67,21 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("disc/im2nx_font.par", "other/font_remade.png", "font_remade")]
-        public void BuildBitmapTest(string inFile, string outFile, string outDir)
+        public void BuildBitmapTest(string inFile, string expectedFile, string expectedDir)
         {
-            using FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
-            using Font font = new Font();
-            font.ReadFontPar(inStream);
-            font.RecreateBigBitmap();
-            font.BigBitmap.Save(outFile, ImageFormat.Png);
-            font.SaveAllCharBitmaps(outDir);
+            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                using Font font = new Font();
+                font.ReadFontPar(inStream);
+                font.RecreateBigBitmap();
+                font.BigBitmap.Save("temp.png", ImageFormat.Png);
+                font.SaveAllCharBitmaps("tempdir");
+            }
+
+            bool eq = Compare.CompareFiles(expectedFile, "temp.png") && Compare.CompareDirectories(expectedDir, "tempdir");
+            File.Delete("temp.png");
+            Directory.Delete("tempdir", true);
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
@@ -73,6 +96,7 @@ namespace ImasArchiveLibTest
                 using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
                 font.WriteFontPar(outStream);
             }
+
             bool eq = Compare.CompareFiles(inFile, "temp.par");
             File.Delete("temp.par");
             Assert.IsTrue(eq);
@@ -80,31 +104,42 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("font", "abcdefghijklmnopqrstuvwxyz", "digraphs")]
-        public void SaveFontDigraphsTest(string inDir, string charset, string outDir)
+        public void SaveFontDigraphsTest(string inDir, string charset, string expectedDir)
         {
             using Font font = new Font();
             font.LoadCharBitmaps(inDir);
             char[] set = charset.ToCharArray();
-            font.CreateDigraphs(outDir, set, set);
+            font.CreateDigraphs("tempdir", set, set);
+
+            bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
+            Directory.Delete("tempdir", true);
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
         [DataRow("font", "abcdefghijklmnopqrstuvwxyz", "other/digraphs.png", "other/digraphs.par")]
-        public void AddSpecifiedDigraphsToFontTest(string inDir, string charset, string outPng, string outPar)
+        public void AddSpecifiedDigraphsToFontTest(string inDir, string charset, string expectedPng, string expectedPar)
         {
-            using Font font = new Font();
-            font.LoadCharBitmaps(inDir);
-            char[] set = charset.ToCharArray();
-            font.AddDigraphsToFont(set, set);
-            font.RecreateBigBitmap();
-            font.BigBitmap.Save(outPng);
-            using FileStream outStream = new FileStream(outPar, FileMode.Create, FileAccess.Write);
-            font.WriteFontPar(outStream);
+            using (Font font = new Font())
+            {
+                font.LoadCharBitmaps(inDir);
+                char[] set = charset.ToCharArray();
+                font.AddDigraphsToFont(set, set);
+                font.RecreateBigBitmap();
+                font.BigBitmap.Save("temp.png");
+                using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
+                font.WriteFontPar(outStream);
+            }
+
+            bool eq = Compare.CompareFiles(expectedPar, "temp.par") && Compare.CompareFiles(expectedPng, "temp.png");
+            File.Delete("temp.par");
+            File.Delete("temp.png");
+            Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
         [DataRow("disc/im2nx_font.par", "other/newfont.png", "other/newfont.par")]
-        public void AddAllDigraphsToFontTest(string inFile, string outPng, string outPar)
+        public void AddAllDigraphsToFontTest(string inFile, string expectedPng, string expectedPar)
         {
             using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
             {
@@ -112,10 +147,15 @@ namespace ImasArchiveLibTest
                 font.ReadFontPar(inStream);
                 font.AddDigraphs();
                 Assert.IsTrue(font.CheckTree());
-                font.BigBitmap.Save(outPng);
-                using FileStream outStream = new FileStream(outPar, FileMode.Create, FileAccess.Write);
+                font.BigBitmap.Save("temp.png");
+                using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
                 font.WriteFontPar(outStream, false);
             }
+
+            bool eq = Compare.CompareFiles(expectedPar, "temp.par") && Compare.CompareFiles(expectedPng, "temp.png");
+            File.Delete("temp.par");
+            File.Delete("temp.png");
+            Assert.IsTrue(eq);
         }
     }
 }

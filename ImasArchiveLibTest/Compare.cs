@@ -11,27 +11,6 @@ namespace ImasArchiveLibTest
 {
     public static class Compare
     {
-        public static bool CompareFileHashes(string file1, string file2)
-        {
-            using FileStream fileStream1 = new FileStream(file1, FileMode.Open, FileAccess.Read);
-            using FileStream fileStream2 = new FileStream(file2, FileMode.Open, FileAccess.Read);
-            if (fileStream1.Length != fileStream2.Length)
-                return false;
-            byte[] hash1, hash2;
-            using (SHA256Managed sha = new SHA256Managed())
-            {
-                hash1 = sha.ComputeHash(fileStream1);
-                hash2 = sha.ComputeHash(fileStream2);
-            }
-            for (int i = 0; (i < hash1.Length); i++)
-            {
-                if (hash1[i] != hash2[i])
-                    return false;
-            }
-            return true;
-        }
-
-
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern int memcmp(byte[] b1, byte[] b2, long count);
 

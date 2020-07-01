@@ -111,8 +111,6 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("disc", "", "disc")]
-        [DataRow("hdd", "", "hdd")]
-        [DataRow("dlc\\_dlc03", ".dat", "_dlc03")]
         public async Task ExtractAllUncompressAsync(string filename, string extension, string expectedFolder)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
@@ -141,7 +139,6 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("disc", "", "system/chara_viewer_def.bin.gz", "other/songResource.bin", "disc")]
-        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par.gz", "other/week4-3.bin", "hdd")]
         public async Task EditEntryReextractTest(string filename, string extension, string entryFilepath, string replacementFile, string expectedDir)
         {
 
