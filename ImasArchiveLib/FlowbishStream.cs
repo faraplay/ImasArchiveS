@@ -44,13 +44,34 @@ namespace ImasArchiveLib
             return vs;
         }
 
+        /// <summary>
+        /// Initialises a new instance of the FlowbishStream class.
+        /// </summary>
+        /// <param name="stream">The base stream.</param>
+        /// <param name="mode">The mode of operation.</param>
+        /// <param name="key">The key used for encryption (usually the filename).</param>
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        /// 
         public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key) : this(stream, mode, key, false)
         { 
         }
 
+        /// <summary>
+        /// Initialises a new instance of the FlowbishStream class.
+        /// </summary>
+        /// <param name="stream">The base stream.</param>
+        /// <param name="mode">The mode of operation.</param>
+        /// <param name="key">The key used for encryption (usually the filename).</param>
+        /// <param name="leaveOpen">Whether to leave the file open after disposal.</param>
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key, bool leaveOpen)
         {
-            if (stream == null)
+            if (stream == null || key == null)
                 throw new ArgumentNullException(nameof(stream));
 
             _key = key;
@@ -80,7 +101,14 @@ namespace ImasArchiveLib
                     _buffer_offset = 0;
                     _position = 0;
                     _length = 0;
-                    WriteHeader();
+                    try
+                    {
+                        WriteHeader();
+                    }
+                    catch (EncoderFallbackException)
+                    {
+                        throw new ArgumentException(nameof(key));
+                    }
                     break;
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
@@ -117,36 +145,47 @@ namespace ImasArchiveLib
             disposed = true;
         }
 
+        /// <exception cref="InvalidDataException"/>
         private void ReadHeader()
         {
-            if (Utils.GetUInt(_stream) != 0x00464253)
-                throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-            if (Utils.GetUInt(_stream) != 0)
-                throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-            _length = Utils.GetUInt(_stream);
-            int keyLength = _stream.ReadByte();
-            if (keyLength != _key.Length + 1)
-                throw new InvalidDataException(Strings.InvalidData_FbsKey);
-            if (_stream.ReadByte() != 0)
-                throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-            if (_stream.ReadByte() != 0)
-                throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-            if (_stream.ReadByte() != 0)
-                throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-            int padKeyLength = 8 * ((keyLength + 7) / 8);
-            _offset = 16 + padKeyLength;
-            byte[] keyBuffer = new byte[padKeyLength];
-            _stream.Read(keyBuffer);
-            _box.Decipher(keyBuffer);
+            try
+            {
+                if (Utils.GetUInt(_stream) != 0x00464253)
+                    throw new InvalidDataException(Strings.InvalidData_FbsHeader);
+                if (Utils.GetUInt(_stream) != 0)
+                    throw new InvalidDataException(Strings.InvalidData_FbsHeader);
+                _length = Utils.GetUInt(_stream);
+                int keyLength = _stream.ReadByte();
+                if (keyLength != _key.Length + 1)
+                    throw new InvalidDataException(Strings.InvalidData_FbsKey);
+                if (_stream.ReadByte() != 0)
+                    throw new InvalidDataException(Strings.InvalidData_FbsHeader);
+                if (_stream.ReadByte() != 0)
+                    throw new InvalidDataException(Strings.InvalidData_FbsHeader);
+                if (_stream.ReadByte() != 0)
+                    throw new InvalidDataException(Strings.InvalidData_FbsHeader);
+                int padKeyLength = 8 * ((keyLength + 7) / 8);
+                _offset = 16 + padKeyLength;
+                byte[] keyBuffer = new byte[padKeyLength];
+                _stream.Read(keyBuffer);
+                _box.Decipher(keyBuffer);
 
-            if (!(Encoding.ASCII.GetString(keyBuffer, 0, keyLength - 1) == _key && keyBuffer[keyLength - 1] == 0))
-                throw new InvalidDataException(Strings.InvalidData_FbsKey);
+                if (!(Encoding.ASCII.GetString(keyBuffer, 0, keyLength - 1) == _key && keyBuffer[keyLength - 1] == 0))
+                    throw new InvalidDataException(Strings.InvalidData_FbsKey);
 
-            if (_stream.Length != _length + _offset)
+                if (_stream.Length != _length + _offset)
+                    throw new InvalidDataException(Strings.InvalidData_FbsHeader);
+                _position = 0;
+            }
+            catch (EndOfStreamException)
+            {
                 throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-            _position = 0;
+            }
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="EncoderFallbackException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private void WriteHeader()
         {
             int keyLength = _key.Length + 1;
@@ -165,6 +204,8 @@ namespace ImasArchiveLib
             _stream.Write(keyBuffer);
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private void UpdateHeader()
         {
             long pos = _stream.Position;
@@ -224,6 +265,11 @@ namespace ImasArchiveLib
             get => _length;
         }
 
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override long Position
         {
             get => _position;
@@ -259,6 +305,8 @@ namespace ImasArchiveLib
             }
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override void Flush()
         {
             EnsureNotDisposed();
@@ -270,6 +318,11 @@ namespace ImasArchiveLib
             }
         }
 
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override long Seek(long offset, SeekOrigin origin)
         {
             long tempPos = origin switch
@@ -284,11 +337,16 @@ namespace ImasArchiveLib
             return Position;
         }
 
+        /// <exception cref="NotSupportedException"/>
         public override void SetLength(long value)
         {
             throw new NotSupportedException(Strings.NotSupported);
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override int ReadByte()
         {
             EnsureDecipherMode();
@@ -307,17 +365,33 @@ namespace ImasArchiveLib
             return b;
         }
 
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override int Read(byte[] buffer, int offset, int count)
         {
             ValidateParameters(buffer, offset, count);
             return ReadCore(new Span<byte>(buffer, offset, count));
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override int Read(Span<byte> buffer)
         {
             return ReadCore(buffer);
         }
 
+
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private int ReadCore(Span<Byte> buffer)
         {
             EnsureDecipherMode();
@@ -350,6 +424,9 @@ namespace ImasArchiveLib
             return totalRead;
         }
 
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private void FillAndDecryptBuffer()
         {
             Debug.Assert(_position % 8 == 0);
@@ -371,6 +448,9 @@ namespace ImasArchiveLib
 
         }
 
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
         private void ValidateParameters(byte[] array, int offset, int count)
         {
             if (array == null)
@@ -383,34 +463,50 @@ namespace ImasArchiveLib
                 throw new ArgumentException(Strings.InvalidArgumentOffsetCount);
         }
 
+        /// <exception cref="ObjectDisposedException"/>
         private void EnsureNotDisposed()
         {
             if (_stream == null)
                 throw new ObjectDisposedException(Strings.ObjectDisposed_StreamClosed);
         }
 
+        /// <exception cref="NotSupportedException"/>
         private void EnsureDecipherMode()
         {
             if (_mode != FlowbishStreamMode.Decipher)
-                throw new InvalidOperationException(Strings.CannotReadFromDecipherStream);
+                throw new NotSupportedException(Strings.CannotReadFromDecipherStream);
         }
 
+        /// <exception cref="NotSupportedException"/>
         private void EnsureEncipherMode()
         {
             if (_mode != FlowbishStreamMode.Encipher)
-                throw new InvalidOperationException(Strings.CannotWriteToEncipherStream);
+                throw new NotSupportedException(Strings.CannotWriteToEncipherStream);
         }
 
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override void Write(byte[] buffer, int offset, int count)
         {
             ValidateParameters(buffer, offset, count);
             WriteCore(new Span<byte>(buffer, offset, count));
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             WriteCore(buffer);
         }
+
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private void WriteCore(ReadOnlySpan<byte> buffer)
         {
             EnsureNotDisposed();
@@ -442,6 +538,8 @@ namespace ImasArchiveLib
                 _length = _position;
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private void FlushBuffer()
         {
             EnsureBufferInitialised();

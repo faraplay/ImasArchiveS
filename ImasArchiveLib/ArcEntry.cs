@@ -48,12 +48,13 @@ namespace ImasArchiveLib
         }
 
         /// <summary>
-        /// Create a new ArcEntry without any backing data in its parent ArcFile.
+        /// Asynchronously create a new ArcEntry without any backing data in its parent ArcFile.
         /// </summary>
         /// <param name="parent"></param>
         /// <param name="filepath"></param>
         /// <param name="stream">The stream to copy from.</param>
-        /// <returns></returns>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        /// <exception cref="IOException"/>
         internal static async Task<ArcEntry> NewEntry(ArcFile parent, string filepath, Stream stream)
         {
             ArcEntry arcEntry = new ArcEntry(parent, filepath);
@@ -65,34 +66,55 @@ namespace ImasArchiveLib
 
 
         /// <summary>
-        /// Opens a stream containing the file data of the entry for read access.
+        /// Opens a stream containing the raw file data of the entry for read access.
+        /// If an exception occurs, returns null.
         /// Do not dispose if there is a memory stream (Edited is true)
         /// </summary>
         /// <returns></returns>
         internal Stream OpenRaw()
         {
-            if (_memory_stream == null)
+            try
             {
-                return new BufferedStream(_parent_file.GetSubstream(_base_offset, _originalLength));
+                if (_memory_stream == null)
+                {
+                    return new BufferedStream(_parent_file.GetSubstream(_base_offset, _originalLength));
+                }
+                else
+                {
+                    _memory_stream.Seek(0, SeekOrigin.Begin);
+                    return _memory_stream;
+                }
             }
-            else
+            catch
             {
-                _memory_stream.Seek(0, SeekOrigin.Begin);
-                return _memory_stream;
+                return null;
             }
         }
 
+        /// <summary>
+        /// Opens a stream containing the raw file data of the entry for read access.
+        /// If an exception occurs, returns null.
+        /// </summary>
+        /// <returns></returns>
         public Stream Open()
         {
-            FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name);
-            SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
-            return segsStream;
+            try
+            {
+                FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name);
+                SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
+                return segsStream;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>
         /// Writes the contents of a stream into the entry, overwriting any previous data.
         /// </summary>
         /// <param name="stream">The stream to copy from</param>
+        /// <exception cref="IOException"/>
         public async Task Replace(Stream stream)
         {
             _memory_stream?.Dispose();
@@ -136,20 +158,32 @@ namespace ImasArchiveLib
         }
         #endregion
         #region Commu
+        /// <summary>
+        /// Tries to output commu text from the entry to a new file in the specified directory.
+        /// </summary>
+        /// <param name="destDir"></param>
+        /// <returns></returns>
         public bool TryGetCommuText(string destDir)
         {
-            using Stream parStream = this.Open();
-            if (!Name.EndsWith(".par.gz"))
-                return false;
-            int mbinPos = ParCommu.TryGetMBin(parStream, Name[0..^3]);
-            if (mbinPos != -1)
+            try
             {
-                using StreamWriter streamWriter = new StreamWriter(destDir + '/' + Name[0..^7] + "_m.txt");
-                streamWriter.WriteLine(Filepath[0..^3]);
-                parStream.Position = mbinPos;
-                ParCommu.GetCommuText(parStream, streamWriter);
+                using Stream parStream = this.Open();
+                if (!Name.EndsWith(".par.gz"))
+                    return false;
+                int mbinPos = ParCommu.TryGetMBin(parStream, Name[0..^3]);
+                if (mbinPos != -1)
+                {
+                    using StreamWriter streamWriter = new StreamWriter(destDir + '/' + Name[0..^7] + "_m.txt");
+                    streamWriter.WriteLine(Filepath[0..^3]);
+                    parStream.Position = mbinPos;
+                    ParCommu.GetCommuText(parStream, streamWriter);
+                }
+                return (mbinPos != -1);
             }
-            return (mbinPos != -1);
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task TryReplaceCommuText(string commuFileName)
