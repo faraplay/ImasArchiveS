@@ -26,6 +26,14 @@ namespace ImasArchiveLib
         private int _buffer_size;
         private int _avail_in;
 
+        /// <summary>
+        /// Initialises a new instance of the SegsStream class woth the specified stream and mode.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="mode"></param>
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="InvalidDataException"/>
         public SegsStream(Stream stream, SegsStreamMode mode)
         {
             if (stream == null)
@@ -74,44 +82,58 @@ namespace ImasArchiveLib
             base.Dispose(disposing);
         }
 
+        /// <exception cref="ObjectDisposedException"/>
         private void EnsureNotDisposed()
         {
             if (_stream == null)
                 throw new ObjectDisposedException(Strings.ObjectDisposed_StreamClosed);
         }
 
+        /// <summary>
+        /// Reads SEGS header and loads the block metadata.
+        /// </summary>
+        /// <exception cref="InvalidDataException"/>
         private void ReadHeader()
         {
-            if (Utils.GetUInt(_stream) != 0x73656773u)
-                throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-            if (Utils.GetUShort(_stream) != 5)
-                throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-            _block_count = Utils.GetUShort(_stream);
-            _length = Utils.GetUInt(_stream);
-            if (Utils.GetUInt(_stream) != _stream.Length)
-                throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-
-            blockOffsets = new long[_block_count];
-            blockCompSizes = new int[_block_count];
-            blockUncompSizes = new int[_block_count];
-            blockIsCompressed = new bool[_block_count];
-            for (int i = 0; i < _block_count; i++)
+            try
             {
-                blockCompSizes[i] = Utils.GetUShort(_stream);
-                if (blockCompSizes[i] == 0)
-                    blockCompSizes[i] = MaxBlockSize;
-                blockUncompSizes[i] = Utils.GetUShort(_stream);
-                if (blockUncompSizes[i] != 0 && i != _block_count - 1)
+                if (Utils.GetUInt(_stream) != 0x73656773u)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-                if (blockUncompSizes[i] == 0)
-                    blockUncompSizes[i] = MaxBlockSize;
-                uint blockOffset = Utils.GetUInt(_stream);
-                blockIsCompressed[i] = (blockOffset % 2 == 1);
-                blockOffsets[i] = blockOffset & -2;
-            }
+                if (Utils.GetUShort(_stream) != 5)
+                    throw new InvalidDataException(Strings.InvalidData_SegsHeader);
+                _block_count = Utils.GetUShort(_stream);
+                _length = Utils.GetUInt(_stream);
+                if (Utils.GetUInt(_stream) != _stream.Length)
+                    throw new InvalidDataException(Strings.InvalidData_SegsHeader);
 
+                blockOffsets = new long[_block_count];
+                blockCompSizes = new int[_block_count];
+                blockUncompSizes = new int[_block_count];
+                blockIsCompressed = new bool[_block_count];
+                for (int i = 0; i < _block_count; i++)
+                {
+                    blockCompSizes[i] = Utils.GetUShort(_stream);
+                    if (blockCompSizes[i] == 0)
+                        blockCompSizes[i] = MaxBlockSize;
+                    blockUncompSizes[i] = Utils.GetUShort(_stream);
+                    if (blockUncompSizes[i] != 0 && i != _block_count - 1)
+                        throw new InvalidDataException(Strings.InvalidData_SegsHeader);
+                    if (blockUncompSizes[i] == 0)
+                        blockUncompSizes[i] = MaxBlockSize;
+                    uint blockOffset = Utils.GetUInt(_stream);
+                    blockIsCompressed[i] = (blockOffset % 2 == 1);
+                    blockOffsets[i] = blockOffset & -2;
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                throw new InvalidDataException(Strings.InvalidData_SegsHeader);
+            }
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="InvalidDataException"/>
         private void ReadBlockIntoBuffer(int index)
         {
             EnsureBufferInitialised();
@@ -131,6 +153,9 @@ namespace ImasArchiveLib
             }
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="InvalidDataException"/>
         private void FillBuffer()
         {
             if (_position >= _length)
@@ -188,6 +213,8 @@ namespace ImasArchiveLib
             }
         }
 
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public override long Length
         {
             get
@@ -200,6 +227,11 @@ namespace ImasArchiveLib
             }
         }
 
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
         public override long Position
         {
             get
@@ -232,6 +264,17 @@ namespace ImasArchiveLib
             throw new NotSupportedException(Strings.NotSupported);
         }
 
+        /// <summary>
+        /// Sets position of the stream. This may involve inflating data.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="origin"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
         public override long Seek(long offset, SeekOrigin origin)
         {
             if (_mode != SegsStreamMode.Decompress)
@@ -251,10 +294,19 @@ namespace ImasArchiveLib
             return Position;
         }
 
+        /// <summary>
+        /// Reads a byte from the stream, or -1 if at the end of the stream.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
         public override int ReadByte()
         {
             EnsureNotDisposed();
             EnsureBufferInitialised();
+            EnsureCanRead();
 
             if (_avail_in == 0)
             {
@@ -268,21 +320,37 @@ namespace ImasArchiveLib
             return b;
         }
 
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
         public override int Read(byte[] buffer, int offset, int count)
         {
             ValidateParameters(buffer, offset, count);
             return ReadCore(new Span<byte>(buffer, offset, count));
         }
 
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
         public override int Read(Span<byte> buffer)
         {
             return ReadCore(buffer);
         }
 
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="InvalidDataException"/>
         private int ReadCore(Span<byte> buffer)
         {
             EnsureNotDisposed();
             EnsureBufferInitialised();
+            EnsureCanRead();
 
             int totalRead = 0;
             while (true)
@@ -311,6 +379,19 @@ namespace ImasArchiveLib
 
         }
 
+        ///<exception cref="NotSupportedException"/>
+        private void EnsureCanRead()
+        {
+            if (_mode != SegsStreamMode.Decompress)
+                throw new NotSupportedException(Strings.NotSupported_UnreadableStream);
+        }
+
+        /// <summary>
+        /// Always throws a NotImplementedException.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();
@@ -319,6 +400,10 @@ namespace ImasArchiveLib
         public override void Flush()
         {
         }
+
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
         private void ValidateParameters(byte[] array, int offset, int count)
         {
             if (array == null)
@@ -336,6 +421,15 @@ namespace ImasArchiveLib
 
         }
 
+        /// <summary>
+        /// Asynchronously compresses data in inStream and copies it out to outStream.
+        /// </summary>
+        /// <param name="inStream"></param>
+        /// <param name="outStream"></param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         public static async Task CompressStream(Stream inStream, Stream outStream)
         {
             if (!inStream.CanRead)
@@ -355,6 +449,9 @@ namespace ImasArchiveLib
             segsStream._stream = null;
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private void WriteHeader(int fileLength)
         {
             _block_count = (fileLength + 0xFFFF) / 0x10000;
@@ -377,6 +474,9 @@ namespace ImasArchiveLib
             blockIsCompressed = new bool[_block_count];
         }
 
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private async Task WriteBlock(Stream inStream)
         {
             int blockIndex = (int)(_position / MaxBlockSize);
@@ -414,6 +514,10 @@ namespace ImasArchiveLib
             _offset += compSize + pad;
         }
 
+
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private void UpdateHeader(int fileLength)
         {
             _stream.Seek(0, SeekOrigin.Begin);

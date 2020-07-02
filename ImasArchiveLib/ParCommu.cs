@@ -8,107 +8,127 @@ namespace ImasArchiveLib
 {
     class ParCommu
     {
+        /// <summary>
+        /// Attempts to get the offset of the _m.bin file in the .par.
+        /// </summary>
+        /// <param name="parStream"></param>
+        /// <param name="parName"></param>
+        /// <returns>The offset of the _m.bin, or -1 if unsuccessful.</returns>
         public static int TryGetMBin(Stream parStream, string parName)
         {
-            parStream.Position = 0;
-            if (Utils.GetUInt(parStream) != 0x50415202 ||
-                Utils.GetUInt(parStream) != 3)
+            try
+            {
+                parStream.Position = 0;
+                if (Utils.GetUInt(parStream) != 0x50415202 ||
+                    Utils.GetUInt(parStream) != 3)
+                {
+                    return -1;
+                }
+
+                int filecount = (int)Utils.GetUInt(parStream);
+
+                if (Utils.GetUInt(parStream) != 0x03000000)
+                {
+                    return -1;
+                }
+
+
+                List<uint> fileOffsets = new List<uint>();
+                for (int i = 0; i < filecount; i++)
+                {
+                    fileOffsets.Add(Utils.GetUInt(parStream));
+                }
+
+                int blank = (-filecount) & 3;
+                parStream.Position += 4 * blank;
+
+                int strSize = 128;
+
+                byte[] namebuf = new byte[strSize];
+                List<string> filenames = new List<string>();
+                for (int i = 0; i < filecount; i++)
+                {
+                    parStream.Read(namebuf);
+                    string name = Encoding.ASCII.GetString(namebuf);
+                    name = name.Substring(0, name.IndexOf('\0'));
+                    filenames.Add(name);
+                }
+
+                List<uint> fileProperty = new List<uint>();
+                for (int i = 0; i < filecount; i++)
+                {
+                    fileProperty.Add(Utils.GetUInt(parStream));
+                }
+                parStream.Position += 4 * blank;
+
+                List<uint> fileSizes = new List<uint>();
+                for (int i = 0; i < filecount; i++)
+                {
+                    fileSizes.Add(Utils.GetUInt(parStream));
+                }
+                parStream.Position += 4 * blank;
+
+                string mbinName = parName[0..^4] + "_m.bin";
+
+                int index = filenames.IndexOf(mbinName);
+                if (index == -1)
+                    return -1;
+
+                //parStream.Position = fileOffsets[index];
+                return (int)fileOffsets[index];
+            }
+            catch
             {
                 return -1;
             }
-
-            int filecount = (int)Utils.GetUInt(parStream);
-
-            if (Utils.GetUInt(parStream) != 0x03000000)
-            {
-                return -1;
-            }
-
-
-            List<uint> fileOffsets = new List<uint>();
-            for (int i = 0; i < filecount; i++)
-            {
-                fileOffsets.Add(Utils.GetUInt(parStream));
-            }
-
-            int blank = (-filecount) & 3;
-            parStream.Position += 4 * blank;
-
-            int strSize = 128;
-
-            byte[] namebuf = new byte[strSize];
-            List<string> filenames = new List<string>();
-            for (int i = 0; i < filecount; i++)
-            {
-                parStream.Read(namebuf);
-                string name = Encoding.ASCII.GetString(namebuf);
-                name = name.Substring(0, name.IndexOf('\0'));
-                filenames.Add(name);
-            }
-
-            List<uint> fileProperty = new List<uint>();
-            for (int i = 0; i < filecount; i++)
-            {
-                fileProperty.Add(Utils.GetUInt(parStream));
-            }
-            parStream.Position += 4 * blank;
-
-            List<uint> fileSizes = new List<uint>();
-            for (int i = 0; i < filecount; i++)
-            {
-                fileSizes.Add(Utils.GetUInt(parStream));
-            }
-            parStream.Position += 4 * blank;
-
-            string mbinName = parName[0..^4] + "_m.bin";
-
-            int index = filenames.IndexOf(mbinName);
-            if (index == -1)
-                return -1;
-
-            //parStream.Position = fileOffsets[index];
-            return (int)fileOffsets[index];
         }
         public static void GetCommuText(Stream parStream, TextWriter textWriter)
         {
-            if (Utils.GetUInt(parStream) != 0x004D0053 ||
-                Utils.GetUInt(parStream) != 0x00470000)
+            try
             {
-                throw new InvalidDataException();
-            }
-
-            int msgCount = (int)Utils.GetUInt(parStream);
-
-            Utils.GetUInt(parStream);
-
-            byte[] namebuf = new byte[32];
-            byte[] msgbuf = new byte[128];
-            for (int i = 0; i < msgCount; i++)
-            {
-                uint lineID = Utils.GetUInt(parStream);
-                uint flags = Utils.GetUInt(parStream);
-                if (Utils.GetUInt(parStream) != 0 ||
-                    Utils.GetUInt(parStream) != 0 ||
-                    Utils.GetUInt(parStream) != 0 ||
-                    Utils.GetUInt(parStream) != 0)
+                if (Utils.GetUInt(parStream) != 0x004D0053 ||
+                    Utils.GetUInt(parStream) != 0x00470000)
                 {
                     throw new InvalidDataException();
                 }
-                uint nameLen = Utils.GetUInt(parStream);
-                uint msgLen = Utils.GetUInt(parStream);
 
-                parStream.Read(namebuf);
-                parStream.Read(msgbuf);
+                int msgCount = (int)Utils.GetUInt(parStream);
 
-                string name = Encoding.BigEndianUnicode.GetString(namebuf);
-                name = name.Substring(0, name.IndexOf('\0'));
-                string msg = Encoding.BigEndianUnicode.GetString(msgbuf);
-                msg = msg.Substring(0, msg.IndexOf('\0'));
+                Utils.GetUInt(parStream);
 
-                textWriter.WriteLine(lineID);
-                textWriter.WriteLine(name);
-                textWriter.WriteLine(msg);
-                textWriter.WriteLine("$");
+                byte[] namebuf = new byte[32];
+                byte[] msgbuf = new byte[128];
+                for (int i = 0; i < msgCount; i++)
+                {
+                    uint lineID = Utils.GetUInt(parStream);
+                    uint flags = Utils.GetUInt(parStream);
+                    if (Utils.GetUInt(parStream) != 0 ||
+                        Utils.GetUInt(parStream) != 0 ||
+                        Utils.GetUInt(parStream) != 0 ||
+                        Utils.GetUInt(parStream) != 0)
+                    {
+                        throw new InvalidDataException();
+                    }
+                    uint nameLen = Utils.GetUInt(parStream);
+                    uint msgLen = Utils.GetUInt(parStream);
+
+                    parStream.Read(namebuf);
+                    parStream.Read(msgbuf);
+
+                    string name = Encoding.BigEndianUnicode.GetString(namebuf);
+                    name = name.Substring(0, name.IndexOf('\0'));
+                    string msg = Encoding.BigEndianUnicode.GetString(msgbuf);
+                    msg = msg.Substring(0, msg.IndexOf('\0'));
+
+                    textWriter.WriteLine(lineID);
+                    textWriter.WriteLine(name);
+                    textWriter.WriteLine(msg);
+                    textWriter.WriteLine("$");
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                throw new InvalidDataException();
             }
 
         }

@@ -13,9 +13,7 @@ namespace ImasArchiveLib
     public class ArcFile : IDisposable
     {
         private readonly Stream _arcStream;
-        private readonly Stream _bin_stream;
-        private readonly string _arc_filename;
-        private readonly string _bin_filename;
+        private readonly Stream _binStream;
         private List<ArcEntry> _entries;
         private bool _disposed = false;
 
@@ -27,84 +25,104 @@ namespace ImasArchiveLib
         #region Constructors
         public ArcFile(string filename, string extraExtension = "")
         {
-            _arc_filename = filename + ".arc" + extraExtension;
-            _bin_filename = filename + ".bin" + extraExtension;
+            string _arc_filename = filename + ".arc" + extraExtension;
+            string _bin_filename = filename + ".bin" + extraExtension;
+            if (!File.Exists(_arc_filename))
+                throw new FileNotFoundException("Arc file not found.");
+            if (!File.Exists(_bin_filename))
+                throw new FileNotFoundException("Bin file not found.");
             _arcStream = new FileStream(_arc_filename, FileMode.Open, FileAccess.Read);
-            _bin_stream = new FileStream(_bin_filename, FileMode.Open, FileAccess.Read);
+            _binStream = new FileStream(_bin_filename, FileMode.Open, FileAccess.Read);
             BuildEntries();
         }
 
         private ArcFile() { }
         #endregion
         #region Initialisation
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="IOException"/>
         private void BuildEntries()
         {
-            if (Utils.GetUInt(_bin_stream) != 0x50414100u)
+            try
             {
-                throw new InvalidDataException(Strings.InvalidData_BinHeader);
-            }
-
-            if (Utils.GetUInt(_bin_stream) != 0x00010000u)
-            {
-                throw new InvalidDataException(Strings.InvalidData_BinHeader);
-            }
-            uint _entry_count = Utils.GetUInt(_bin_stream);
-            if (Utils.GetUInt(_bin_stream) != 32)
-            {
-                throw new InvalidDataException(Strings.InvalidData_BinHeader);
-            }
-            if (Utils.GetUInt(_bin_stream) != 16 * _entry_count + 32)
-            {
-                throw new InvalidDataException(Strings.InvalidData_BinHeader);
-            }
-            Utils.GetUInt(_bin_stream);
-            if (Utils.GetUInt(_bin_stream) != 0)
-            {
-                throw new InvalidDataException(Strings.InvalidData_BinHeader);
-            }
-            if (Utils.GetUInt(_bin_stream) != 0)
-            {
-                throw new InvalidDataException(Strings.InvalidData_BinHeader);
-            }
-
-            uint[] filePathOffsets = new uint[_entry_count];
-            uint[] lengths = new uint[_entry_count];
-            uint[] offsets = new uint[_entry_count];
-            string[] filePaths = new string[_entry_count];
-
-            for (int i = 0; i < _entry_count; i++)
-            {
-                filePathOffsets[i] = Utils.GetUInt(_bin_stream);
-                lengths[i] = Utils.GetUInt(_bin_stream);
-                Utils.GetUInt(_bin_stream);
-                Utils.GetUInt(_bin_stream);
-            }
-
-            for (int i = 0; i < _entry_count; i++)
-            {
-                offsets[i] = Utils.GetUInt(_bin_stream);
-            }
-
-            for (int i = 0; i < _entry_count; i++)
-            {
-                _bin_stream.Seek(filePathOffsets[i], SeekOrigin.Begin);
-                string filepath = "";
-                int b;
-                while ((b = _bin_stream.ReadByte()) > 0)
+                if (Utils.GetUInt(_binStream) != 0x50414100u)
                 {
-                    filepath += Convert.ToChar(b);
+                    throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                filePaths[i] = filepath;
-            }
 
-            _entries = new List<ArcEntry>((int)_entry_count);
-            for (int i = 0; i < _entry_count; i++)
+                if (Utils.GetUInt(_binStream) != 0x00010000u)
+                {
+                    throw new InvalidDataException(Strings.InvalidData_BinHeader);
+                }
+                uint _entry_count = Utils.GetUInt(_binStream);
+                if (Utils.GetUInt(_binStream) != 32)
+                {
+                    throw new InvalidDataException(Strings.InvalidData_BinHeader);
+                }
+                if (Utils.GetUInt(_binStream) != 16 * _entry_count + 32)
+                {
+                    throw new InvalidDataException(Strings.InvalidData_BinHeader);
+                }
+                Utils.GetUInt(_binStream);
+                if (Utils.GetUInt(_binStream) != 0)
+                {
+                    throw new InvalidDataException(Strings.InvalidData_BinHeader);
+                }
+                if (Utils.GetUInt(_binStream) != 0)
+                {
+                    throw new InvalidDataException(Strings.InvalidData_BinHeader);
+                }
+
+                uint[] filePathOffsets = new uint[_entry_count];
+                uint[] lengths = new uint[_entry_count];
+                uint[] offsets = new uint[_entry_count];
+                string[] filePaths = new string[_entry_count];
+
+                for (int i = 0; i < _entry_count; i++)
+                {
+                    filePathOffsets[i] = Utils.GetUInt(_binStream);
+                    lengths[i] = Utils.GetUInt(_binStream);
+                    Utils.GetUInt(_binStream);
+                    Utils.GetUInt(_binStream);
+                }
+
+                for (int i = 0; i < _entry_count; i++)
+                {
+                    offsets[i] = Utils.GetUInt(_binStream);
+                }
+
+                for (int i = 0; i < _entry_count; i++)
+                {
+                    _binStream.Seek(filePathOffsets[i], SeekOrigin.Begin);
+                    string filepath = "";
+                    int b;
+                    while ((b = _binStream.ReadByte()) > 0)
+                    {
+                        filepath += Convert.ToChar(b);
+                    }
+                    filePaths[i] = filepath;
+                }
+
+                _entries = new List<ArcEntry>((int)_entry_count);
+                for (int i = 0; i < _entry_count; i++)
+                {
+                    _entries.Add(new ArcEntry(this, filePaths[i], offsets[i], lengths[i]));
+                }
+            }
+            catch (EndOfStreamException)
             {
-                _entries.Add(new ArcEntry(this, filePaths[i], offsets[i], lengths[i]));
+                throw new InvalidDataException(Strings.InvalidData_BinHeader);
             }
         }
         #endregion
         #region Build Arc/Bin
+        /// <summary>
+        /// Asynchronously creates a new archive from the specified directory.
+        /// </summary>
+        /// <param name="dir">The directory to read from.</param>
+        /// <param name="outputName">The name of the new archive.</param>
+        /// <param name="progress"></param>
+        /// <returns></returns>
         public static async Task BuildFromDirectory(string dir, string outputName, IProgress<ProgressData> progress = null)
         {
             using ArcFile arcFile = new ArcFile
@@ -137,6 +155,13 @@ namespace ImasArchiveLib
             using FileStream newBinStream = new FileStream(outputName + ".bin", FileMode.Create, FileAccess.Write);
             arcFile.BuildBin(newBinStream);
         }
+        /// <summary>
+        /// Asynchronously save a copy of the edited archive.
+        /// </summary>
+        /// <param name="filename">The name of the new file.</param>
+        /// <param name="progress"></param>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        /// <exception cref="IOException"/>
         public async Task SaveAs(string filename, IProgress<ProgressData> progress = null)
         {
             using (FileStream newArcStream = new FileStream(filename + ".arc", FileMode.Create, FileAccess.Write))
@@ -146,8 +171,14 @@ namespace ImasArchiveLib
             using FileStream newBinStream = new FileStream(filename + ".bin", FileMode.Create, FileAccess.Write);
             BuildBin(newBinStream);
         }
+        /// <exception cref="IOException"/>
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
         private async Task BuildArc(Stream newArcStream, IProgress<ProgressData> progress = null)
         {
+            if (newArcStream == null)
+                throw new ArgumentNullException(nameof(newArcStream));
             _entries.Sort((a, b) => String.CompareOrdinal(a.Filepath.ToUpper(), b.Filepath.ToUpper()));
 
             newArcStream.Write(new byte[16]);
@@ -160,8 +191,14 @@ namespace ImasArchiveLib
                 progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.Filepath });
             }
         }
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="NotSupportedException"/>
         private static async Task AppendEntry(Stream newArcStream, ArcEntry arcEntry)
         {
+            if (newArcStream == null || arcEntry == null)
+                throw new ArgumentNullException();
             Stream stream = arcEntry.OpenRaw();
             arcEntry.SaveAsOffset = newArcStream.Position;
             stream.Position = 0;
@@ -172,8 +209,14 @@ namespace ImasArchiveLib
             if (!arcEntry.Edited)
                 stream.Dispose();
         }
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="ArgumentNullException"/>
         private void BuildBin(Stream newBinStream)
         {
+            if (newBinStream == null)
+                throw new ArgumentNullException();
             List<BinNode> arcTrees;
             int root;
             (arcTrees, root) = BuildBinTree();
@@ -257,7 +300,12 @@ namespace ImasArchiveLib
         {
             return _entries.Find(entry => entry.Filepath == filePath);
         }
-
+        /// <summary>
+        /// Creates a new entry in the ArcFile with no data.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        /// <exception cref="IOException"/>
         public ArcEntry NewEntry(string filePath)
         {
             return NewEntry(filePath, new MemoryStream()).Result;
@@ -272,6 +320,13 @@ namespace ImasArchiveLib
             }
             return arcEntry;
         }
+        /// <summary>
+        /// Asynchronously creates a new entry in the ArcFile and copies over the specified stream's data.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="stream"></param>
+        /// <returns>A Task representing the asynchronous operation.</returns>
+        /// <exception cref="IOException"/>
         public async Task<ArcEntry> NewEntry(string filePath, Stream stream)
         {
             string internalFilePath = filePath.Replace('\\', '/') + ".gz";
@@ -345,6 +400,7 @@ namespace ImasArchiveLib
         }
         #endregion
 
+        /// <exception cref="ArgumentOutOfRangeException"/>
         internal Substream GetSubstream(long offset, long length) => new Substream(_arcStream, offset, length);
 
         #region Commu
@@ -378,7 +434,7 @@ namespace ImasArchiveLib
             if (disposing)
             {
                 _arcStream?.Dispose();
-                _bin_stream?.Dispose();
+                _binStream?.Dispose();
                 foreach (ArcEntry arcEntry in _entries)
                 {
                     arcEntry.Dispose();
