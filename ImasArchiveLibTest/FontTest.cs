@@ -103,6 +103,23 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
+        [DataRow("disc/im2nx_font.par")]
+        public void WriteJSONTest(string inFile)
+        {
+            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                using Font font = new Font();
+                font.ReadFontPar(inStream);
+                font.AddDigraphs();
+                Assert.IsTrue(font.CheckTree());
+                font.BigBitmap.Save("../textbox-display/font.png");
+
+                using StreamWriter writer = new StreamWriter("../textbox-display/fontdata.js");
+                font.WriteJSON(writer);
+            }
+        }
+
+        [DataTestMethod]
         [DataRow("font", "abcdefghijklmnopqrstuvwxyz", "digraphs")]
         public void SaveFontDigraphsTest(string inDir, string charset, string expectedDir)
         {
