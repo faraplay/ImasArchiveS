@@ -197,6 +197,25 @@ namespace ImasArchiveLib
             charsHaveBitmaps = true;
         }
 
+        public void UseBlackBitmaps()
+        {
+            UseCharBitmaps();
+            foreach (CharData c in chars)
+            {
+                if (c.isEmoji == 0)
+                {
+                    for (int y = 0; y < c.bitmap.Height; y++)
+                    {
+                        for (int x = 0; x < c.bitmap.Width; x++)
+                        {
+                            int a = c.bitmap.GetPixel(x, y).A;
+                            c.bitmap.SetPixel(x, y, Color.FromArgb(a, Color.Black));
+                        }
+                    }
+                }
+            }
+        }
+
         // have 2 pixels of space between chars
         // 1 pixel led to artifacts around the chars :(
         private void UseBigBitmap()

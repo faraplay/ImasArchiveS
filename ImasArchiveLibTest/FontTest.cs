@@ -112,10 +112,25 @@ namespace ImasArchiveLibTest
                 font.ReadFontPar(inStream);
                 font.AddDigraphs();
                 Assert.IsTrue(font.CheckTree());
-                font.BigBitmap.Save("../textbox-display/font.png");
+                font.BigBitmap.Save("../textbox-display/fontwhite.png");
 
                 using StreamWriter writer = new StreamWriter("../textbox-display/fontdata.js");
                 font.WriteJSON(writer);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("disc/im2nx_font.par")]
+        public void BlackFontTest(string inFile)
+        {
+            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                using Font font = new Font();
+                font.ReadFontPar(inStream);
+                font.UseBlackBitmaps();
+                font.AddDigraphs();
+                Assert.IsTrue(font.CheckTree());
+                font.BigBitmap.Save("../textbox-display/fontblack.png");
             }
         }
 
