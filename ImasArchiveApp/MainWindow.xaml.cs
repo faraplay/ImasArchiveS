@@ -90,6 +90,16 @@ namespace ImasArchiveApp
                 (DataContext as ArcModel).NewFromFolderCommand.Execute(null);
         }
 
+        private void ReplaceCommus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (DataContext as ArcModel).ReplaceCommusCommand.CanExecute(null);
+        }
+
+        private void ReplaceCommus_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (OpenFolderDialog("Choose folder"))
+                (DataContext as ArcModel).ReplaceCommusCommand.Execute(null);
+        }
 
 
 
@@ -158,6 +168,13 @@ namespace ImasArchiveApp
             (
                 "New From Folder",
                 "NewFromFolder",
+                typeof(CustomCommands)
+            );
+
+        public static readonly RoutedUICommand ReplaceCommus = new RoutedUICommand
+            (
+                "Replace Commus",
+                "ReplaceCommus",
                 typeof(CustomCommands)
             );
     }

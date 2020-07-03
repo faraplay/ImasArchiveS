@@ -227,6 +227,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanNewFromFolder() => _arc_file == null;
+        AsyncCommand _replaceCommusCommand;
+        public ICommand ReplaceCommusCommand
+        {
+            get
+            {
+                if (_replaceCommusCommand == null)
+                {
+                    _replaceCommusCommand = new AsyncCommand(() => ReplaceCommus(), () => CanReplaceCommus());
+                }
+                return _replaceCommusCommand;
+            }
+        }
+        public bool CanReplaceCommus() => _arc_file != null;
         #endregion
         #region Command Methods
         public void OpenArc()
@@ -398,6 +411,19 @@ namespace ImasArchiveApp
             }
             _inPath = _outPath;
             OpenArc();
+        }
+        public async Task ReplaceCommus()
+        {
+            try
+            {
+                ClearStatus();
+                await ArcFile.ReplaceCommusDir(_inPath, new Progress<ProgressData>(ReportProgress));
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
         }
         #endregion
         #region Other Methods

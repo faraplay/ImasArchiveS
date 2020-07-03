@@ -42,20 +42,27 @@
             CanExecute="NewFromFolder_CanExecute"
             Command="local:CustomCommands.NewFromFolder"
             Executed="NewFromFolder_Executed" />
+        <CommandBinding
+            CanExecute="ReplaceCommus_CanExecute"
+            Command="local:CustomCommands.ReplaceCommus"
+            Executed="ReplaceCommus_Executed" />
     </Window.CommandBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Command="local:CustomCommands.NewFromFolder" />
                 <MenuItem Command="Open" Header="Open Arc" />
                 <MenuItem Command="Save" Header="Save Arc" />
                 <Separator />
                 <MenuItem Command="local:CustomCommands.Import" />
                 <MenuItem Command="local:CustomCommands.Export" />
                 <Separator />
+                <MenuItem Command="{Binding Path=CloseArcCommand}" Header="Close" />
+            </MenuItem>
+            <MenuItem Header="Arc">
+                <MenuItem Command="local:CustomCommands.NewFromFolder" />
                 <MenuItem Command="local:CustomCommands.ExtractAll" />
                 <Separator />
-                <MenuItem Command="{Binding Path=CloseArcCommand}" Header="Close" />
+                <MenuItem Command="local:CustomCommands.ReplaceCommus" />
             </MenuItem>
         </Menu>
         <TextBlock

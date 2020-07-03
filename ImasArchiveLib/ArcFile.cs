@@ -406,9 +406,30 @@ namespace ImasArchiveLib
         internal Substream GetSubstream(long offset, long length) => new Substream(_arcStream, offset, length);
 
         #region Commu
+        public async Task ReplaceCommusDir(string commuDirName, IProgress<ProgressData> progress = null)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(commuDirName);
+            if (!directoryInfo.Exists)
+            {
+                throw new DirectoryNotFoundException();
+            }
+            var files = directoryInfo.GetFiles("*.txt", SearchOption.AllDirectories);
+            totalProgress = files.Length;
+            countProgress = 0;
+            foreach (FileInfo file in files)
+            {
+                await ReplaceCommu(file.FullName);
+                countProgress++;
+                progress.Report(new ProgressData { count = countProgress, filename = file.FullName, total = totalProgress });
+            }
+        }
         public async Task ReplaceCommu(string commuFileName)
         {
             string parPath;
+            if (!File.Exists(commuFileName))
+            {
+                throw new FileNotFoundException("Could not find file" ,commuFileName);
+            }
             using (StreamReader reader = new StreamReader(commuFileName))
             {
                 parPath = reader.ReadLine();
