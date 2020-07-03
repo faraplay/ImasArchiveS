@@ -20,7 +20,8 @@ namespace ImasArchiveApp
         private BrowserTree _root;
         private FileBrowserModel _browser_model;
         private HexViewModel _hexViewModel;
-        private string _progressMessage;
+        private string _statusMessage;
+        private bool _statusIsException;
         private string _inPath;
         private string _outPath;
         #endregion
@@ -80,12 +81,21 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public string ProgressMessage
+        public string StatusMessage
         {
-            get => _progressMessage;
+            get => _statusMessage;
             set
             {
-                _progressMessage = value;
+                _statusMessage = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool StatusIsException
+        {
+            get => _statusIsException;
+            set
+            {
+                _statusIsException = value;
                 OnPropertyChanged();
             }
         }
@@ -136,34 +146,6 @@ namespace ImasArchiveApp
                 return _openArcCommand;
             }
         }
-        public void OpenArc()
-        {
-            _arcPath = _inPath;
-            string truncFilename = _arcPath;
-            string extension;
-            if (truncFilename.EndsWith(".arc"))
-            {
-                truncFilename = truncFilename.Remove(truncFilename.Length - 4);
-                extension = "";
-            }
-            else if (truncFilename.EndsWith(".arc.dat"))
-            {
-                truncFilename = truncFilename.Remove(truncFilename.Length - 8);
-                extension = ".dat";
-            }
-            else
-            {
-                throw new Exception();
-            }
-            ArcFile = new ArcFile(truncFilename, extension);
-            List<string> browserEntries = new List<string>();
-            foreach (ArcEntry entry in ArcFile.Entries)
-            {
-                browserEntries.Add(entry.Filepath);
-            }
-            Root = new BrowserTree("", browserEntries);
-            _browser_model.HomeDir = Root;
-        }
         RelayCommand _closeArcCommand;
         public ICommand CloseArcCommand
         {
@@ -180,15 +162,6 @@ namespace ImasArchiveApp
             }
         }
         public bool CanCloseArc => _arc_file != null;
-        public void CloseArc()
-        {
-            CurrentFile = null;
-            Root = null;
-            BrowserModel.UseTree(null);
-            _arc_file?.Dispose();
-            ArcFile = null;
-            ArcPath = null;
-        }
         AsyncCommand _importCommand;
         public ICommand ImportCommand
         {
@@ -202,15 +175,6 @@ namespace ImasArchiveApp
             }
         }
         public bool CanImport() => _arc_file != null && !string.IsNullOrEmpty(_current_file);
-        public async Task Import()
-        {
-            ArcEntry arcEntry = _arc_file.GetEntry(_current_file);
-            using FileStream fileStream = new FileStream(_inPath, FileMode.Open, FileAccess.Read);
-            ProgressMessage = "Importing...";
-            await arcEntry.Replace(fileStream);
-            ProgressMessage = "Done.";
-            LoadToHex(_current_file);
-        }
         AsyncCommand _exportCommand;
         public ICommand ExportCommand
         {
@@ -224,15 +188,6 @@ namespace ImasArchiveApp
             }
         }
         public bool CanExport() => _arc_file != null && !string.IsNullOrEmpty(_current_file);
-        public async Task Export()
-        {
-            ArcEntry arcEntry = _arc_file.GetEntry(_current_file);
-            using Stream stream = arcEntry.Open();
-            using FileStream fileStream = new FileStream(_outPath, FileMode.Create, FileAccess.Write);
-            ProgressMessage = "Exporting...";
-            await stream.CopyToAsync(fileStream);
-            ProgressMessage = "Done.";
-        }
         AsyncCommand _saveAsCommand;
         public ICommand SaveAsCommand
         {
@@ -246,11 +201,6 @@ namespace ImasArchiveApp
             }
         }
         public bool CanSaveAs() => _arc_file != null;
-        public async Task SaveAs()
-        {
-            await ArcFile.SaveAs(OutPath[0..^4], new Progress<ProgressData>(ReportProgress));
-            ProgressMessage = "Done.";
-        }
         AsyncCommand _extractAllCommand;
         public ICommand ExtractAllCommand
         {
@@ -264,11 +214,6 @@ namespace ImasArchiveApp
             }
         }
         public bool CanExtractAll() => _arc_file != null;
-        public async Task ExtractAll()
-        {
-            await ArcFile.ExtractAllAsync(OutPath, new Progress<ProgressData>(ReportProgress));
-            ProgressMessage = "Done.";
-        }
         AsyncCommand _newFromFolderCommand;
         public ICommand NewFromFolderCommand
         {
@@ -276,21 +221,186 @@ namespace ImasArchiveApp
             {
                 if (_newFromFolderCommand == null)
                 {
-                    _newFromFolderCommand = new AsyncCommand(() => NewFromFolder(), () => CanNewFromFolder());
+                    _newFromFolderCommand = new AsyncCommand(() => CreateNewFromFolder(), () => CanNewFromFolder());
                 }
                 return _newFromFolderCommand;
             }
         }
         public bool CanNewFromFolder() => _arc_file == null;
-        public async Task NewFromFolder()
+        #endregion
+        #region Command Methods
+        public void OpenArc()
         {
-            await ArcFile.BuildFromDirectory(InPath, OutPath[0..^4], new Progress<ProgressData>(ReportProgress));
-            ProgressMessage = "Done.";
+            try
+            {
+                ClearStatus();
+                _arcPath = _inPath;
+                string truncFilename = _arcPath;
+                string extension;
+                if (truncFilename.EndsWith(".arc"))
+                {
+                    truncFilename = truncFilename.Remove(truncFilename.Length - 4);
+                    extension = "";
+                }
+                else if (truncFilename.EndsWith(".arc.dat"))
+                {
+                    truncFilename = truncFilename.Remove(truncFilename.Length - 8);
+                    extension = ".dat";
+                }
+                else
+                {
+                    throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
+                }
+                ArcFile = new ArcFile(truncFilename, extension);
+                List<string> browserEntries = new List<string>();
+                foreach (ArcEntry entry in ArcFile.Entries)
+                {
+                    browserEntries.Add(entry.Filepath);
+                }
+                Root = new BrowserTree("", browserEntries);
+                _browser_model.HomeDir = Root;
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                CloseArcInner();
+            }
+        }
+        private void CloseArcInner()
+        {
+            CurrentFile = null;
+            Root = null;
+            BrowserModel.UseTree(null);
+            _arc_file?.Dispose();
+            ArcFile = null;
+            ArcPath = null;
+        }
+        public void CloseArc()
+        {
+            ClearStatus();
+            CloseArcInner();
+        }
+        public async Task Import()
+        {
+            ArcEntry arcEntry;
+            try
+            {
+                ClearStatus();
+                if (_inPath == null)
+                    return;
+                if (!File.Exists(_inPath))
+                {
+                    StatusMessage = "Selected file not found.";
+                    return;
+                }
+                arcEntry = _arc_file.GetEntry(_current_file);
+                if (arcEntry == null)
+                    throw new ArgumentNullException("Could not find current file in archive.");
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                return;
+            }
+            try
+            {
+                using FileStream fileStream = new FileStream(_inPath, FileMode.Open, FileAccess.Read);
+                StatusMessage = "Importing...";
+                await arcEntry.Replace(fileStream);
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                arcEntry.RevertToOriginal();
+                StatusMessage += "\n Entry has been reverted to original contents. ";
+            }
+            finally
+            {
+                LoadToHex(_current_file);
+            }
+        }
+        public async Task Export()
+        {
+            try
+            {
+                ClearStatus();
+                ArcEntry arcEntry = _arc_file.GetEntry(_current_file);
+                if (arcEntry == null)
+                    throw new ArgumentNullException("Could not find current file in archive.");
+                using Stream stream = arcEntry.Open();
+                using FileStream fileStream = new FileStream(_outPath, FileMode.Create, FileAccess.Write);
+                StatusMessage = "Exporting...";
+                await stream.CopyToAsync(fileStream);
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                try
+                {
+                    if (File.Exists(_outPath))
+                        File.Delete(_outPath);
+                }
+                catch { }
+            }
+        }
+        public async Task SaveAs()
+        {
+            try
+            {
+                ClearStatus();
+                await ArcFile.SaveAs(OutPath[0..^4], new Progress<ProgressData>(ReportProgress));
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                try
+                {
+                    if (File.Exists(OutPath[0..^4] + ".arc"))
+                        File.Delete(OutPath[0..^4] + ".arc");
+                }
+                catch { }
+                try
+                {
+                    if (File.Exists(OutPath[0..^4] + ".bin"))
+                        File.Delete(OutPath[0..^4] + ".bin");
+                }
+                catch { }
+            }
+        }
+        public async Task ExtractAll()
+        {
+            try
+            {
+                ClearStatus();
+                await ArcFile.ExtractAllAsync(OutPath, new Progress<ProgressData>(ReportProgress));
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+        }
+        public async Task CreateNewFromFolder()
+        {
+            try
+            {
+                ClearStatus();
+                await ArcFile.BuildFromDirectory(InPath, OutPath[0..^4], new Progress<ProgressData>(ReportProgress));
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                return;
+            }
             _inPath = _outPath;
             OpenArc();
         }
         #endregion
-        #region Methods
+        #region Other Methods
         private void LoadToHex(string path)
         {
             if (ArcFile != null && path != null)
@@ -308,9 +418,22 @@ namespace ImasArchiveApp
 
         }
 
-        private void ReportProgress(ProgressData data)
+        public void ClearStatus()
         {
-            ProgressMessage = string.Format("{0} of {1}: {2}", data.count, data.total, data.filename);
+            StatusMessage = "";
+            StatusIsException = false;
+        }
+
+        public void ReportProgress(ProgressData data)
+        {
+            StatusMessage = string.Format("{0} of {1}: {2}", data.count, data.total, data.filename);
+            StatusIsException = false;
+        }
+
+        public void ReportException(Exception ex)
+        {
+            StatusMessage = ex.GetType().ToString() + ": " + ex.Message;
+            StatusIsException = true;
         }
         #endregion
     }

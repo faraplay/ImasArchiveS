@@ -44,6 +44,7 @@ namespace ImasArchiveLib
         {
             _parent_file = parent;
             Filepath = filepath;
+            _base_offset = -1;
             Name = Filepath.Substring(Filepath.LastIndexOf('/') + 1);
         }
 
@@ -75,14 +76,18 @@ namespace ImasArchiveLib
         {
             try
             {
-                if (_memory_stream == null)
+                if (_memory_stream != null)
+                {
+                    _memory_stream.Seek(0, SeekOrigin.Begin);
+                    return _memory_stream;
+                }
+                else if (_base_offset >= 0)
                 {
                     return new BufferedStream(_parent_file.GetSubstream(_base_offset, _originalLength));
                 }
                 else
                 {
-                    _memory_stream.Seek(0, SeekOrigin.Begin);
-                    return _memory_stream;
+                    return null;
                 }
             }
             catch
@@ -129,12 +134,19 @@ namespace ImasArchiveLib
             _parent_file = null;
         }
 
-        #region IDisposable
+        public void RevertToOriginal()
+        {
+            ClearMemoryStream();
+            if (_base_offset == -1)
+                _originalLength = 0;
+        }
         internal void ClearMemoryStream()
         {
             _memory_stream?.Dispose();
             _memory_stream = null;
         }
+
+        #region IDisposable
 
         public void Dispose()
         {

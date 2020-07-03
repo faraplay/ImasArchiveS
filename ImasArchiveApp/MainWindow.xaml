@@ -61,7 +61,18 @@
         <TextBlock
             Margin="10"
             DockPanel.Dock="Bottom"
-            Text="{Binding Path=ProgressMessage}" />
+            Text="{Binding Path=StatusMessage}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=StatusIsException}" Value="True">
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
         <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
         <DockPanel Margin="10">
             <Border

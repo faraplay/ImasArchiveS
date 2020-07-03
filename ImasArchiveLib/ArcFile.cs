@@ -93,6 +93,8 @@ namespace ImasArchiveLib
 
                 for (int i = 0; i < _entry_count; i++)
                 {
+                    if (filePathOffsets[i] > _binStream.Length || filePathOffsets[i] < 0)
+                        throw new InvalidDataException(Strings.InvalidData_BinHeader);
                     _binStream.Seek(filePathOffsets[i], SeekOrigin.Begin);
                     string filepath = "";
                     int b;
