@@ -6,8 +6,8 @@
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="im@s Archive App"
-    Width="800"
-    Height="450"
+    Width="1280"
+    Height="800"
     mc:Ignorable="d">
     <Window.Resources>
         <DataTemplate DataType="{x:Type local:FileBrowserModel}">
@@ -63,6 +63,8 @@
                 <MenuItem Command="local:CustomCommands.ExtractAll" />
                 <Separator />
                 <MenuItem Command="local:CustomCommands.ReplaceCommus" />
+                <Separator />
+                <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
             </MenuItem>
         </Menu>
         <TextBlock

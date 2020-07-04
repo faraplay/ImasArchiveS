@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
@@ -15,132 +16,146 @@ namespace ImasArchiveLib
         #region par
         private readonly byte[] zeros = new byte[256];
         byte[] parHeader;
-        public void ReadFontPar(Stream stream)
+        public async Task ReadFontPar(Stream stream)
         {
+            using MemoryStream memStream = new MemoryStream();
+            await stream.CopyToAsync(memStream);
+            memStream.Position = 0;
             parHeader = new byte[16];
-            stream.Read(parHeader);
-            int gtfPos = Utils.GetInt32(stream);
-            _ = Utils.GetInt32(stream);
-            int nxpPos = Utils.GetInt32(stream);
+            memStream.Read(parHeader);
+            int gtfPos = Utils.GetInt32(memStream);
+            _ = Utils.GetInt32(memStream);
+            int nxpPos = Utils.GetInt32(memStream);
 
-            stream.Position = gtfPos;
-            BigBitmap = GTF.ReadGTF(stream);
+            memStream.Position = gtfPos;
+            BigBitmap = GTF.ReadGTF(memStream);
 
-            stream.Position = nxpPos + 8;
-            int charCount = Utils.GetInt32(stream);
-            root = Utils.GetInt32(stream);
+            memStream.Position = nxpPos + 8;
+            int charCount = Utils.GetInt32(memStream);
+            root = Utils.GetInt32(memStream);
             chars = new CharData[charCount];
-            stream.Position = nxpPos + 48;
+            memStream.Position = nxpPos + 48;
             for (int i = 0; i < charCount; i++)
             {
                 chars[i] = new CharData
                 {
                     index = i,
-                    key = Utils.GetUShort(stream),
-                    datawidth = Utils.GetByte(stream),
-                    dataheight = Utils.GetByte(stream),
-                    datax = Utils.GetInt16(stream),
-                    datay = Utils.GetInt16(stream),
-                    offsetx = Utils.GetInt16(stream),
-                    offsety = Utils.GetInt16(stream),
-                    width = Utils.GetInt16(stream),
-                    blank = Utils.GetInt16(stream),
-                    left = Utils.GetInt32(stream),
-                    right = Utils.GetInt32(stream),
-                    isEmoji = Utils.GetUShort(stream)
+                    key = Utils.GetUShort(memStream),
+                    datawidth = Utils.GetByte(memStream),
+                    dataheight = Utils.GetByte(memStream),
+                    datax = Utils.GetInt16(memStream),
+                    datay = Utils.GetInt16(memStream),
+                    offsetx = Utils.GetInt16(memStream),
+                    offsety = Utils.GetInt16(memStream),
+                    width = Utils.GetInt16(memStream),
+                    blank = Utils.GetInt16(memStream),
+                    left = Utils.GetInt32(memStream),
+                    right = Utils.GetInt32(memStream),
+                    isEmoji = Utils.GetUShort(memStream)
                 };
-                stream.Position += 6;
+                memStream.Position += 6;
             }
         }
-        public void WriteFontPar(Stream stream, bool nxFixedWidth = true)
+        public async Task WriteFontPar(Stream stream, bool nxFixedWidth = true)
         {
-            UseBigBitmap();
-            BuildTree();
+            int gtfPad, nxPad, nxpPad;
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                UseBigBitmap();
+                BuildTree();
 
-            long pos = stream.Position;
-            stream.Write(parHeader);
+                long pos = 0;
+                memStream.Write(parHeader);
 
-            int gtfPos = 0x200;
-            int gtfLen = 0x800080;
-            int gtfPad = (-gtfLen) & 0x7F;
-            int nxPos = gtfPos + gtfLen + gtfPad;
-            int nxLen = 0x30 + 0x20 * chars.Length;
-            int nxPad = (-nxLen) & 0x7F;
-            int nxpPos = nxPos + nxLen + nxPad;
-            int nxpLen = 0x30 + 0x20 * chars.Length;
-            int nxpPad = (-nxpLen) & 0x7F;
+                int gtfPos = 0x200;
+                int gtfLen = 0x800080;
+                gtfPad = (-gtfLen) & 0x7F;
+                int nxPos = gtfPos + gtfLen + gtfPad;
+                int nxLen = 0x30 + 0x20 * chars.Length;
+                nxPad = (-nxLen) & 0x7F;
+                int nxpPos = nxPos + nxLen + nxPad;
+                int nxpLen = 0x30 + 0x20 * chars.Length;
+                nxpPad = (-nxpLen) & 0x7F;
 
-            Utils.PutInt32(stream, gtfPos);
-            Utils.PutInt32(stream, nxPos);
-            Utils.PutInt32(stream, nxpPos);
-            Utils.PutInt32(stream, 0);
+                Utils.PutInt32(memStream, gtfPos);
+                Utils.PutInt32(memStream, nxPos);
+                Utils.PutInt32(memStream, nxpPos);
+                Utils.PutInt32(memStream, 0);
 
-            string gtfName = "im2nx.gtf";
-            string nxName = "im2nx.paf";
-            string nxpName = "im2nxp.paf";
-            stream.Write(Encoding.ASCII.GetBytes(gtfName));
-            stream.Write(zeros, 0, 0x80 - gtfName.Length);
-            stream.Write(Encoding.ASCII.GetBytes(nxName));
-            stream.Write(zeros, 0, 0x80 - nxName.Length);
-            stream.Write(Encoding.ASCII.GetBytes(nxpName));
-            stream.Write(zeros, 0, 0x80 - nxpName.Length);
+                string gtfName = "im2nx.gtf";
+                string nxName = "im2nx.paf";
+                string nxpName = "im2nxp.paf";
+                memStream.Write(Encoding.ASCII.GetBytes(gtfName));
+                memStream.Write(zeros, 0, 0x80 - gtfName.Length);
+                memStream.Write(Encoding.ASCII.GetBytes(nxName));
+                memStream.Write(zeros, 0, 0x80 - nxName.Length);
+                memStream.Write(Encoding.ASCII.GetBytes(nxpName));
+                memStream.Write(zeros, 0, 0x80 - nxpName.Length);
 
-            Utils.PutUInt(stream, 0);
-            Utils.PutUInt(stream, 1);
-            Utils.PutUInt(stream, 2);
-            Utils.PutUInt(stream, 0);
+                Utils.PutUInt(memStream, 0);
+                Utils.PutUInt(memStream, 1);
+                Utils.PutUInt(memStream, 2);
+                Utils.PutUInt(memStream, 0);
 
-            Utils.PutInt32(stream, gtfLen);
-            Utils.PutInt32(stream, nxLen);
-            Utils.PutInt32(stream, nxpLen);
-            Utils.PutInt32(stream, 0);
+                Utils.PutInt32(memStream, gtfLen);
+                Utils.PutInt32(memStream, nxLen);
+                Utils.PutInt32(memStream, nxpLen);
+                Utils.PutInt32(memStream, 0);
 
-            int pad = (int)(pos - stream.Position) & 0x7F;
-            stream.Write(zeros, 0, pad);
+                int pad = (int)(pos - memStream.Position) & 0x7F;
+                memStream.Write(zeros, 0, pad);
 
-            GTF.WriteGTF(stream, BigBitmap, 0x83);
-            stream.Write(zeros, 0, gtfPad);
+                memStream.Position = 0;
+                await memStream.CopyToAsync(stream);
+            }
 
-            WritePaf(stream, false, nxFixedWidth);
-            stream.Write(zeros, 0, nxPad);
+            await GTF.WriteGTF(stream, BigBitmap, 0x83);
+            await stream.WriteAsync(zeros, 0, gtfPad);
 
-            WritePaf(stream, true, nxFixedWidth);
-            stream.Write(zeros, 0, nxpPad);
+            await WritePaf(stream, false, nxFixedWidth);
+            await stream.WriteAsync(zeros, 0, nxPad);
+
+            await WritePaf(stream, true, nxFixedWidth);
+            await stream.WriteAsync(zeros, 0, nxpPad);
         }
 
-        private void WritePaf(Stream stream, bool isNxp, bool nxFixedWidth = true)
+        private async Task WritePaf(Stream stream, bool isNxp, bool nxFixedWidth = true)
         {
-            Utils.PutUInt(stream, 0x70616601);
-            Utils.PutUInt(stream, 0x0201001D);
-            Utils.PutInt32(stream, chars.Length);
-            Utils.PutInt32(stream, root);
-            stream.Write(Encoding.ASCII.GetBytes("im2nx"));
+            using MemoryStream memStream = new MemoryStream();
+            Utils.PutUInt(memStream, 0x70616601);
+            Utils.PutUInt(memStream, 0x0201001D);
+            Utils.PutInt32(memStream, chars.Length);
+            Utils.PutInt32(memStream, root);
+            memStream.Write(Encoding.ASCII.GetBytes("im2nx"));
             if (isNxp)
-                stream.WriteByte(0x70);
+                memStream.WriteByte(0x70);
             else
-                stream.WriteByte(0);
-            stream.Write(zeros, 0, 0xA);
+                memStream.WriteByte(0);
+            memStream.Write(zeros, 0, 0xA);
 
-            Utils.PutInt16(stream, 0x30);
-            Utils.PutInt16(stream, 0x100);
-            stream.Write(zeros, 0, 0xC);
+            Utils.PutInt16(memStream, 0x30);
+            Utils.PutInt16(memStream, 0x100);
+            memStream.Write(zeros, 0, 0xC);
 
             foreach (CharData c in chars)
             {
-                Utils.PutUShort(stream, c.key);
-                Utils.PutByte(stream, c.datawidth);
-                Utils.PutByte(stream, c.dataheight);
-                Utils.PutInt16(stream, c.datax);
-                Utils.PutInt16(stream, c.datay);
-                Utils.PutInt16(stream, c.offsetx);
-                Utils.PutInt16(stream, c.offsety);
-                Utils.PutInt16(stream, (isNxp || !nxFixedWidth) ? c.width : (short)0x20);
-                Utils.PutInt16(stream, c.blank);
-                Utils.PutInt32(stream, c.left);
-                Utils.PutInt32(stream, c.right);
-                Utils.PutUShort(stream, c.isEmoji);
-                stream.Write(zeros, 0, 6);
+                Utils.PutUShort(memStream, c.key);
+                Utils.PutByte(memStream, c.datawidth);
+                Utils.PutByte(memStream, c.dataheight);
+                Utils.PutInt16(memStream, c.datax);
+                Utils.PutInt16(memStream, c.datay);
+                Utils.PutInt16(memStream, c.offsetx);
+                Utils.PutInt16(memStream, c.offsety);
+                Utils.PutInt16(memStream, (isNxp || !nxFixedWidth) ? c.width : (short)0x20);
+                Utils.PutInt16(memStream, c.blank);
+                Utils.PutInt32(memStream, c.left);
+                Utils.PutInt32(memStream, c.right);
+                Utils.PutUShort(memStream, c.isEmoji);
+                memStream.Write(zeros, 0, 6);
             }
+
+            memStream.Position = 0;
+            await memStream.CopyToAsync(stream);
         }
         #endregion
         #region Bitmaps
@@ -398,8 +413,14 @@ namespace ImasArchiveLib
             int height = offsetymax - offsetymin;
             Bitmap bitmap = new Bitmap(width, height);
 
-            CopyCharBitmap(bitmap, c1, c1.offsetx - offsetxmin, c1.offsety - offsetymin);
-            CopyCharBitmap(bitmap, c2, c2.offsetx + c1.width - offsetxmin, c2.offsety - offsetymin);
+            using (Graphics graphics = Graphics.FromImage(bitmap))
+            {
+                graphics.DrawImage(c1.bitmap, c1.offsetx - offsetxmin, c1.offsety - offsetymin);
+                graphics.DrawImage(c2.bitmap, c2.offsetx + c1.width - offsetxmin, c2.offsety - offsetymin);
+            }
+
+            //    CopyCharBitmap(bitmap, c1, c1.offsetx - offsetxmin, c1.offsety - offsetymin);
+            //CopyCharBitmap(bitmap, c2, c2.offsetx + c1.width - offsetxmin, c2.offsety - offsetymin);
 
             return new CharData
             {

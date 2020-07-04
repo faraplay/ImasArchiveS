@@ -17,16 +17,14 @@ namespace ImasArchiveApp
         public RelayCommand(Action<object> execute) : this(execute, null) { }
         public RelayCommand(Action<object> execute, Predicate<object> canExecute)
         {
-            if (execute == null)
-                throw new ArgumentNullException("execute");
-            _execute = execute; _canExecute = canExecute;
+            _execute = execute ?? throw new ArgumentNullException("execute"); _canExecute = canExecute;
         }
         #endregion // Constructors 
         #region ICommand Members 
         [DebuggerStepThrough]
         public bool CanExecute(object parameter)
         {
-            return _canExecute == null ? true : _canExecute(parameter);
+            return _canExecute == null || _canExecute(parameter);
         }
         public event EventHandler CanExecuteChanged
         {
@@ -166,16 +164,14 @@ TaskStatus.RanToCompletion;
         {
             get
             {
-                return (Exception == null) ?
-null : Exception.InnerException;
+                return Exception?.InnerException;
             }
         }
         public string ErrorMessage
         {
             get
             {
-                return (InnerException == null) ?
-null : InnerException.Message;
+                return InnerException?.Message;
             }
         }
         public event PropertyChangedEventHandler PropertyChanged;

@@ -105,9 +105,11 @@ namespace ImasArchiveApp
 
         private bool OpenDialog(string title, string filter)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = title;
-            openFileDialog.Filter = filter;
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = title,
+                Filter = filter
+            };
             bool fileSelected = (openFileDialog.ShowDialog() == true);
             if (fileSelected)
             {
@@ -117,9 +119,11 @@ namespace ImasArchiveApp
         }
         private bool SaveDialog(string title, string filter = "")
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Title = title;
-            saveFileDialog.Filter = filter;
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Title = title,
+                Filter = filter
+            };
             bool fileSelected = (saveFileDialog.ShowDialog() == true);
             if (fileSelected)
             {
@@ -129,9 +133,11 @@ namespace ImasArchiveApp
         }
         private bool OpenFolderDialog(string title)
         {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.Title = title;
-            dialog.IsFolderPicker = true;
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog
+            {
+                Title = title,
+                IsFolderPicker = true
+            };
             bool fileSelected = dialog.ShowDialog() == CommonFileDialogResult.Ok;
             if (fileSelected)
             {

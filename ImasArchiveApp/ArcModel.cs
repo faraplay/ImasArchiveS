@@ -240,6 +240,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanReplaceCommus() => _arc_file != null;
+        AsyncCommand _patchFontCommand;
+        public ICommand PatchFontCommand
+        {
+            get
+            {
+                if (_patchFontCommand == null)
+                {
+                    _patchFontCommand = new AsyncCommand(() => PatchFont(), () => CanPatchFont());
+                }
+                return _patchFontCommand;
+            }
+        }
+        public bool CanPatchFont() => _arc_file != null;
         #endregion
         #region Command Methods
         public void OpenArc()
@@ -418,6 +431,39 @@ namespace ImasArchiveApp
             {
                 ClearStatus();
                 await ArcFile.ReplaceCommusDir(_inPath, new Progress<ProgressData>(ReportProgress));
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+        }
+        public async Task PatchFont()
+        {
+            try
+            {
+                ClearStatus();
+                ArcEntry fontEntry = ArcFile.GetEntry("im2nx_font.par.gz");
+                if (fontEntry == null)
+                {
+                    throw new FileNotFoundException("File im2nx_font.par not found. Make sure you are opening disc.arc");
+                }
+                using (Font font = new Font())
+                {
+                    using (Stream parStream = fontEntry.Open())
+                    {
+                        StatusMessage = "Reading im2nx_font.par...";
+                        await Task.Run(() => font.ReadFontPar(parStream));
+                    }
+                    StatusMessage = "Patching font...";
+                    await Task.Run(() => font.AddDigraphs());
+
+                    StatusMessage = "Writing font as par...";
+                    using MemoryStream memStream = new MemoryStream();
+                    await font.WriteFontPar(memStream, false);
+                    memStream.Position = 0;
+                    await fontEntry.Replace(memStream);
+                }
                 StatusMessage = "Done.";
             }
             catch (Exception ex)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
@@ -37,12 +38,12 @@ namespace ImasArchiveLib
             };
         }
 
-        public static void WriteGTF(Stream stream, Bitmap bitmap, int encodingType)
+        public static async Task WriteGTF(Stream stream, Bitmap bitmap, int encodingType)
         {
             switch (encodingType)
             {
                 case 0x83:
-                    WriteGTF4444MixXY(stream, bitmap);
+                    await WriteGTF4444MixXY(stream, bitmap);
                     break;
                 default:
                     throw new NotSupportedException();
@@ -183,36 +184,40 @@ namespace ImasArchiveLib
             return bitmap;
         }
 
-        private static void WriteGTF4444MixXY(Stream stream, Bitmap bitmap)
+        private static async Task WriteGTF4444MixXY(Stream stream, Bitmap bitmap)
         {
+            using MemoryStream memStream = new MemoryStream();
             int pixelCount = bitmap.Width * bitmap.Height;
             int size = pixelCount * 2;
 
-            Utils.PutUInt(stream, 0x02020000);
-            Utils.PutInt32(stream, size);
-            Utils.PutUInt(stream, 1);
-            Utils.PutUInt(stream, 0);
+            Utils.PutUInt(memStream, 0x02020000);
+            Utils.PutInt32(memStream, size);
+            Utils.PutUInt(memStream, 1);
+            Utils.PutUInt(memStream, 0);
 
-            Utils.PutUInt(stream, 0x80);
-            Utils.PutInt32(stream, size);
-            Utils.PutByte(stream, 0x83);
-            Utils.PutByte(stream, 1);
-            Utils.PutByte(stream, 2);
-            Utils.PutByte(stream, 0);
-            Utils.PutUInt(stream, 0xAAE4);
+            Utils.PutUInt(memStream, 0x80);
+            Utils.PutInt32(memStream, size);
+            Utils.PutByte(memStream, 0x83);
+            Utils.PutByte(memStream, 1);
+            Utils.PutByte(memStream, 2);
+            Utils.PutByte(memStream, 0);
+            Utils.PutUInt(memStream, 0xAAE4);
 
-            Utils.PutInt16(stream, (short)bitmap.Width);
-            Utils.PutInt16(stream, (short)bitmap.Height);
-            Utils.PutUInt(stream, 0x10000);
-            stream.Write(new byte[0x58]);
+            Utils.PutInt16(memStream, (short)bitmap.Width);
+            Utils.PutInt16(memStream, (short)bitmap.Height);
+            Utils.PutUInt(memStream, 0x10000);
+            memStream.Write(new byte[0x58]);
 
             for (int n = 0; n < pixelCount; n++)
             {
                 int x, y;
                 (x, y) = GetXY(n, 11);
                 Color color = bitmap.GetPixel(x, y);
-                Utils.PutUShort(stream, ColorHelp.To4444(color));
+                Utils.PutUShort(memStream, ColorHelp.To4444(color));
             }
+
+            memStream.Position = 0;
+            await memStream.CopyToAsync(stream);
         }
 
         private static (int, int) GetXY(int n, int p)
