@@ -166,7 +166,7 @@ namespace ImasArchiveLib
 
                 string name = GetNonCommentLine(commuBin);
                 string msg = GetNonCommentLine(commuBin);
-                if (name == null || msg == null)
+                if (name == null || msg == null || msg == "$")
                     throw new InvalidDataException();
                 string msgline;
                 while ((msgline = GetNonCommentLine(commuBin)) != "$")
@@ -182,8 +182,8 @@ namespace ImasArchiveLib
                 int nameLen = Math.Min(namebytes.Length, 30);
                 int msgLen = Math.Min(msgbytes.Length, 126);
 
-                Utils.PutUInt(outParStream, (uint)nameLen);
-                Utils.PutUInt(outParStream, (uint)msgLen);
+                Utils.PutInt32(outParStream, nameLen / 2);
+                Utils.PutInt32(outParStream, msgLen / 2);
 
                 outParStream.Write(namebytes, 0, nameLen);
                 outParStream.Write(new byte[32 - nameLen]);
