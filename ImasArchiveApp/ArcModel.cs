@@ -227,6 +227,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanNewFromFolder() => _arc_file == null;
+        AsyncCommand _extractCommusCommand;
+        public ICommand ExtractCommusCommand
+        {
+            get
+            {
+                if (_extractCommusCommand == null)
+                {
+                    _extractCommusCommand = new AsyncCommand(() => ExtractCommus(), () => CanExtractCommus());
+                }
+                return _extractCommusCommand;
+            }
+        }
+        public bool CanExtractCommus() => _arc_file != null;
         AsyncCommand _replaceCommusCommand;
         public ICommand ReplaceCommusCommand
         {
@@ -424,6 +437,19 @@ namespace ImasArchiveApp
             }
             _inPath = _outPath;
             OpenArc();
+        }
+        public async Task ExtractCommus()
+        {
+            try
+            {
+                ClearStatus();
+                await ArcFile.ExtractCommusDir(_outPath, new Progress<ProgressData>(ReportProgress));
+                StatusMessage = "Done.";
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
         }
         public async Task ReplaceCommus()
         {

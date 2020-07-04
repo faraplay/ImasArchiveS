@@ -43,6 +43,10 @@
             Command="local:CustomCommands.NewFromFolder"
             Executed="NewFromFolder_Executed" />
         <CommandBinding
+            CanExecute="ExtractCommus_CanExecute"
+            Command="local:CustomCommands.ExtractCommus"
+            Executed="ExtractCommus_Executed" />
+        <CommandBinding
             CanExecute="ReplaceCommus_CanExecute"
             Command="local:CustomCommands.ReplaceCommus"
             Executed="ReplaceCommus_Executed" />
@@ -62,6 +66,7 @@
                 <MenuItem Command="local:CustomCommands.NewFromFolder" />
                 <MenuItem Command="local:CustomCommands.ExtractAll" />
                 <Separator />
+                <MenuItem Command="local:CustomCommands.ExtractCommus" />
                 <MenuItem Command="local:CustomCommands.ReplaceCommus" />
                 <Separator />
                 <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />

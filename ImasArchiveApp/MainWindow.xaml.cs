@@ -46,7 +46,7 @@ namespace ImasArchiveApp
 
         private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (SaveDialog("Save As", "Arc file (*.arc)|*.arc"))
+            if (SaveDialog("Save As", "", "Arc file (*.arc)|*.arc"))
                 (DataContext as ArcModel).SaveAsCommand.Execute(null);
         }
         private void Import_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -76,7 +76,8 @@ namespace ImasArchiveApp
 
         private void ExtractAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (SaveDialog("Extract to..."))
+            string arcpath = (DataContext as ArcModel).ArcPath;
+            if (SaveDialog("Extract to...", arcpath?[0..^4]))
                 (DataContext as ArcModel).ExtractAllCommand.Execute(null);
         }
         private void NewFromFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -86,8 +87,23 @@ namespace ImasArchiveApp
 
         private void NewFromFolder_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (OpenFolderDialog("Choose folder") && SaveDialog("Save As", "Arc file (*.arc)|*.arc"))
-                (DataContext as ArcModel).NewFromFolderCommand.Execute(null);
+            if (OpenFolderDialog("Choose folder")) {
+                string chosenFolder = (DataContext as ArcModel).InPath;
+                if (SaveDialog("Save As", chosenFolder, "Arc file (*.arc)|*.arc"))
+                    (DataContext as ArcModel).NewFromFolderCommand.Execute(null);
+            }
+        }
+
+        private void ExtractCommus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (DataContext as ArcModel).ExtractCommusCommand.CanExecute(null);
+        }
+
+        private void ExtractCommus_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            string arcpath = (DataContext as ArcModel).ArcPath;
+            if (SaveDialog("Choose folder", arcpath[0..^4] + "commu"))
+                (DataContext as ArcModel).ExtractCommusCommand.Execute(null);
         }
 
         private void ReplaceCommus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -117,13 +133,18 @@ namespace ImasArchiveApp
             }
             return fileSelected;
         }
-        private bool SaveDialog(string title, string filter = "")
+        private bool SaveDialog(string title, string defaultPath = "", string filter = "")
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Title = title,
                 Filter = filter
             };
+            if (defaultPath != null && defaultPath.Contains('\\'))
+            {
+                saveFileDialog.FileName = defaultPath.Substring(defaultPath.LastIndexOf('\\') + 1);
+                saveFileDialog.InitialDirectory = defaultPath.Substring(0, defaultPath.LastIndexOf('\\'));
+            }
             bool fileSelected = (saveFileDialog.ShowDialog() == true);
             if (fileSelected)
             {
@@ -174,6 +195,13 @@ namespace ImasArchiveApp
             (
                 "New From Folder",
                 "NewFromFolder",
+                typeof(CustomCommands)
+            );
+
+        public static readonly RoutedUICommand ExtractCommus = new RoutedUICommand
+            (
+                "Extract Commus",
+                "ExtractCommus",
                 typeof(CustomCommands)
             );
 

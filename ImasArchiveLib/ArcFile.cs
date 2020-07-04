@@ -416,7 +416,7 @@ namespace ImasArchiveLib
             {
                 countProgress++;
                 progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.Filepath });
-                await entry.TryGetCommuText(outDirName);
+                await Task.Run(() => entry.TryGetCommuText(outDirName));
             }
         }
         public async Task ReplaceCommusDir(string commuDirName, IProgress<ProgressData> progress = null)
