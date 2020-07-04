@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Linq;
 
 [assembly: InternalsVisibleTo("ImasArchiveLibTest")]
 
@@ -30,7 +31,7 @@ namespace ImasArchiveLib
             if (!File.Exists(_arc_filename))
                 throw new FileNotFoundException("Arc file not found.");
             if (!File.Exists(_bin_filename))
-                throw new FileNotFoundException("Bin file not found.");
+                throw new FileNotFoundException("Bin file not found. Make sure you have a .bin file with the same name in the same folder as the .arc file.");
             _arcStream = new FileStream(_arc_filename, FileMode.Open, FileAccess.Read);
             _binStream = new FileStream(_bin_filename, FileMode.Open, FileAccess.Read);
             BuildEntries();
@@ -406,6 +407,18 @@ namespace ImasArchiveLib
         internal Substream GetSubstream(long offset, long length) => new Substream(_arcStream, offset, length);
 
         #region Commu
+        public async Task ExtractCommusDir(string outDirName, IProgress<ProgressData> progress = null)
+        {
+            Directory.CreateDirectory(outDirName);
+            totalProgress = Entries.Count;
+            countProgress = 0;
+            foreach (ArcEntry entry in Entries)
+            {
+                countProgress++;
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.Filepath });
+                await entry.TryGetCommuText(outDirName);
+            }
+        }
         public async Task ReplaceCommusDir(string commuDirName, IProgress<ProgressData> progress = null)
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(commuDirName);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ImasArchiveLib
@@ -64,7 +65,7 @@ namespace ImasArchiveLib
             return arcEntry;
         }
         #endregion
-
+        #region Stream Methods
 
         /// <summary>
         /// Opens a stream containing the raw file data of the entry for read access.
@@ -145,7 +146,7 @@ namespace ImasArchiveLib
             _memory_stream?.Dispose();
             _memory_stream = null;
         }
-
+        #endregion
         #region IDisposable
 
         public void Dispose()
@@ -175,7 +176,7 @@ namespace ImasArchiveLib
         /// </summary>
         /// <param name="destDir"></param>
         /// <returns></returns>
-        public bool TryGetCommuText(string destDir)
+        public async Task<bool> TryGetCommuText(string destDir)
         {
             try
             {
@@ -185,10 +186,16 @@ namespace ImasArchiveLib
                 int mbinPos = ParCommu.TryGetMBin(parStream, Name[0..^3]);
                 if (mbinPos != -1)
                 {
-                    using StreamWriter streamWriter = new StreamWriter(destDir + '/' + Name[0..^7] + "_m.txt");
-                    streamWriter.WriteLine(Filepath[0..^3]);
-                    parStream.Position = mbinPos;
-                    ParCommu.GetCommuText(parStream, streamWriter);
+                    using MemoryStream memStream = new MemoryStream();
+                    using (StreamWriter streamWriter = new StreamWriter(memStream, Encoding.Default, 65536, true))
+                    {
+                        streamWriter.WriteLine(Filepath[0..^3]);
+                        parStream.Position = mbinPos;
+                        ParCommu.GetCommuText(parStream, streamWriter);
+                    }
+                    memStream.Position = 0;
+                    using FileStream fileStream = new FileStream(destDir + '/' + Name[0..^7] + "_m.txt", FileMode.Create, FileAccess.Write);
+                    await memStream.CopyToAsync(fileStream);
                 }
                 return (mbinPos != -1);
             }

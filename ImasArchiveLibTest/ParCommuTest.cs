@@ -11,13 +11,13 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("hdd", "", "commu2/par/_week_00_002.par.gz", "hddcommu")]
-        public void ArcEntryCommuTest(string arcName, string extension, string searchFile, string expectedDir)
+        public async Task ArcEntryCommuTest(string arcName, string extension, string searchFile, string expectedDir)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
             ArcEntry arcEntry = arcFile.GetEntry(searchFile);
             Assert.IsNotNull(arcEntry);
             Directory.CreateDirectory("tempdir");
-            Assert.IsTrue(arcEntry.TryGetCommuText("tempdir"));
+            Assert.IsTrue(await arcEntry.TryGetCommuText("tempdir"));
             string filename = searchFile.Substring(searchFile.LastIndexOf('/'))[0..^7] + "_m.txt";
             bool eq = Compare.CompareFiles("tempdir/" + filename, expectedDir + "/" + filename);
             Directory.Delete("tempdir", true);
@@ -26,16 +26,10 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("hdd", "", "hddcommu")]
-        public void ArcFileCommuTest(string arcName, string extension, string expectedDir)
+        public async Task ArcFileCommuTest(string arcName, string extension, string expectedDir)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
-            var arcEntries = arcFile.Entries;
-            Directory.CreateDirectory("tempdir");
-            foreach (ArcEntry arcEntry in arcEntries)
-            {
-                Assert.IsNotNull(arcEntry);
-                arcEntry.TryGetCommuText("tempdir");
-            }
+            await arcFile.ExtractCommusDir("tempdir");
             bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
             Directory.Delete("tempdir", true);
             Assert.IsTrue(eq);
