@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Icons\favicon.ico</ApplicationIcon>
+    <Authors>faraplay</Authors>
+    <PackageProjectUrl>https://sites.google.com/view/ims-ofa-translation/home</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/faraplay/ImasArchiveS</RepositoryUrl>
+    <PackageIcon>haruka_ofa.png</PackageIcon>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Icons\Backwards_16x.png" />
+    <None Remove="Icons\Backwards_disabled_16x.png" />
+    <None Remove="Icons\FolderClosed_16x.png" />
+    <None Remove="Icons\Forwards_16x.png" />
+    <None Remove="Icons\Forwards_disabled_16x.png" />
+    <None Remove="Icons\TextFile_16x.png" />
+    <None Remove="Icons\Upload_16x.png" />
+    <None Remove="Icons\Upload_gray_16x.png" />
+    <None Include="Icons\haruka_ofa.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAPICodePack.Shell" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ImasArchiveLib\ImasArchiveLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Icons\Backwards_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\Backwards_disabled_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\FolderClosed_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\Forwards_16x.png" />
+    <Resource Include="Icons\Forwards_disabled_16x.png" />
+    <Resource Include="Icons\TextFile_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\Upload_16x.png" />
+    <Resource Include="Icons\Upload_gray_16x.png" />
+  </ItemGroup>
+
+</Project>

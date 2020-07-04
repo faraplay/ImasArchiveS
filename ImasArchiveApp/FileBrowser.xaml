@@ -1,0 +1,63 @@
+﻿<UserControl
+    x:Class="ImasArchiveApp.FileBrowser"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:ImasArchiveApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="220"
+    mc:Ignorable="d">
+    <UserControl.InputBindings>
+        <KeyBinding
+            Key="Left"
+            Command="{Binding Path=BrowseBackCommand}"
+            Modifiers="Alt" />
+        <KeyBinding
+            Key="Right"
+            Command="{Binding Path=BrowseForwardCommand}"
+            Modifiers="Alt" />
+        <KeyBinding
+            Key="Up"
+            Command="{Binding Path=GoUpCommand}"
+            Modifiers="Alt" />
+    </UserControl.InputBindings>
+    <DockPanel Margin="10">
+        <WrapPanel Background="White" DockPanel.Dock="Top">
+            <Button x:Name="btnBack" Command="{Binding Path=BrowseBackCommand}">
+                <Image Height="16" Source="/Icons/Backwards_16x.png" />
+            </Button>
+            <Button x:Name="Forward" Command="{Binding Path=BrowseForwardCommand}">
+                <Image Height="16" Source="/Icons/Forwards_16x.png" />
+            </Button>
+            <Button x:Name="Up" Command="{Binding Path=GoUpCommand}">
+                <Image Height="16" Source="/Icons/Upload_16x.png" />
+            </Button>
+        </WrapPanel>
+        <ListView
+            Name="lvBrowser"
+            DockPanel.Dock="Left"
+            ItemsSource="{Binding Path=Items}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Button HorizontalContentAlignment="Left">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <WrapPanel>
+                            <TextBlock Text="{Binding Path=Name}" />
+                        </WrapPanel>
+                    </Button>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </DockPanel>
+</UserControl>

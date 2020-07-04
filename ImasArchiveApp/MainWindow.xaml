@@ -1,0 +1,98 @@
+﻿<Window
+    x:Class="ImasArchiveApp.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ImasArchiveApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="im@s Archive App"
+    Width="1280"
+    Height="800"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:FileBrowserModel}">
+            <local:FileBrowser Width="220" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:HexViewModel}">
+            <local:HexViewer
+                x:Name="hxViewer"
+                FontFamily="Consolas"
+                FontSize="14" />
+        </DataTemplate>
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="Open" Executed="Open_Executed" />
+        <CommandBinding
+            CanExecute="Save_CanExecute"
+            Command="Save"
+            Executed="Save_Executed" />
+        <CommandBinding
+            CanExecute="Export_CanExecute"
+            Command="local:CustomCommands.Export"
+            Executed="Export_Executed" />
+        <CommandBinding
+            CanExecute="Import_CanExecute"
+            Command="local:CustomCommands.Import"
+            Executed="Import_Executed" />
+        <CommandBinding
+            CanExecute="ExtractAll_CanExecute"
+            Command="local:CustomCommands.ExtractAll"
+            Executed="ExtractAll_Executed" />
+        <CommandBinding
+            CanExecute="NewFromFolder_CanExecute"
+            Command="local:CustomCommands.NewFromFolder"
+            Executed="NewFromFolder_Executed" />
+        <CommandBinding
+            CanExecute="ReplaceCommus_CanExecute"
+            Command="local:CustomCommands.ReplaceCommus"
+            Executed="ReplaceCommus_Executed" />
+    </Window.CommandBindings>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Command="Open" Header="Open Arc" />
+                <MenuItem Command="Save" Header="Save Arc" />
+                <Separator />
+                <MenuItem Command="local:CustomCommands.Import" />
+                <MenuItem Command="local:CustomCommands.Export" />
+                <Separator />
+                <MenuItem Command="{Binding Path=CloseArcCommand}" Header="Close" />
+            </MenuItem>
+            <MenuItem Header="Arc">
+                <MenuItem Command="local:CustomCommands.NewFromFolder" />
+                <MenuItem Command="local:CustomCommands.ExtractAll" />
+                <Separator />
+                <MenuItem Command="local:CustomCommands.ReplaceCommus" />
+                <Separator />
+                <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
+            </MenuItem>
+        </Menu>
+        <TextBlock
+            Margin="10"
+            DockPanel.Dock="Bottom"
+            Text="{Binding Path=StatusMessage}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=StatusIsException}" Value="True">
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
+        <DockPanel Margin="10">
+            <Border
+                BorderBrush="#FFABADB3"
+                BorderThickness="1"
+                DockPanel.Dock="Top">
+                <TextBlock Name="tbFilename" Text="{Binding Path=CurrentFile}" />
+            </Border>
+            <Border BorderBrush="#FFABADB3" BorderThickness="1">
+                <ContentControl Content="{Binding Path=HexViewModel}" />
+            </Border>
+        </DockPanel>
+    </DockPanel>
+</Window>

@@ -98,6 +98,11 @@ namespace ImasArchiveLib
             return (xl, xr);
         }
 
+        /// <summary>
+        ///  Enciphers the buffer.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <exception cref="ArgumentException"/>
         public void Encipher(Span<byte> buffer)
         {
             if (buffer.Length % 8 != 0)
@@ -121,7 +126,11 @@ namespace ImasArchiveLib
                 buffer[i + 7] = (byte)((xr & 0x000000FFu) >> 0);
             }
         }
-
+        /// <summary>
+        /// Deciphers the buffer.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <exception cref="ArgumentException"/>
         public void Decipher(Span<byte> buffer)
         {
             if (buffer.Length % 8 != 0)
