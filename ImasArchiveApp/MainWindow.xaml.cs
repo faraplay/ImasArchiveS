@@ -66,7 +66,12 @@ namespace ImasArchiveApp
 
         private void Export_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (SaveDialog("Export"))
+            string arcpath = (DataContext as ArcModel).ArcPath;
+            string currentFile = (DataContext as ArcModel).CurrentFile;
+            if (SaveDialog("Export", 
+                arcpath.Substring(0, arcpath.LastIndexOf('\\')), 
+                currentFile.Substring(currentFile.LastIndexOf('/') + 1), 
+                ""))
                 (DataContext as ArcModel).ExportCommand.Execute(null);
         }
         private void ExtractAll_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -77,7 +82,7 @@ namespace ImasArchiveApp
         private void ExtractAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             string arcpath = (DataContext as ArcModel).ArcPath;
-            if (SaveDialog("Extract to...", arcpath?[0..^4]))
+            if (SaveDialog("Extract to...", arcpath?[0..^4], ""))
                 (DataContext as ArcModel).ExtractAllCommand.Execute(null);
         }
         private void NewFromFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -102,7 +107,7 @@ namespace ImasArchiveApp
         private void ExtractCommus_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             string arcpath = (DataContext as ArcModel).ArcPath;
-            if (SaveDialog("Choose folder", arcpath[0..^4] + "commu"))
+            if (SaveDialog("Choose folder", arcpath[0..^4] + "commu", ""))
                 (DataContext as ArcModel).ExtractCommusCommand.Execute(null);
         }
 
@@ -133,7 +138,7 @@ namespace ImasArchiveApp
             }
             return fileSelected;
         }
-        private bool SaveDialog(string title, string defaultPath = "", string filter = "")
+        private bool SaveDialog(string title, string defaultPath, string filter)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
@@ -151,6 +156,10 @@ namespace ImasArchiveApp
                 (DataContext as ArcModel).OutPath = saveFileDialog.FileName;
             }
             return fileSelected;
+        }
+        private bool SaveDialog(string title, string defaultDir, string defaultName, string filter)
+        {
+            return SaveDialog(title, defaultDir + '\\' + defaultName, filter);
         }
         private bool OpenFolderDialog(string title)
         {
