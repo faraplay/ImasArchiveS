@@ -53,16 +53,11 @@
     </Window.CommandBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
+            <MenuItem Header="Arc">
                 <MenuItem Command="Open" Header="Open Arc" />
                 <MenuItem Command="Save" Header="Save Arc" />
+                <MenuItem Command="{Binding Path=CloseArcCommand}" Header="Close Arc" />
                 <Separator />
-                <MenuItem Command="local:CustomCommands.Import" />
-                <MenuItem Command="local:CustomCommands.Export" />
-                <Separator />
-                <MenuItem Command="{Binding Path=CloseArcCommand}" Header="Close" />
-            </MenuItem>
-            <MenuItem Header="Arc">
                 <MenuItem Command="local:CustomCommands.NewFromFolder" />
                 <MenuItem Command="local:CustomCommands.ExtractAll" />
                 <Separator />
@@ -70,6 +65,10 @@
                 <MenuItem Command="local:CustomCommands.ReplaceCommus" />
                 <Separator />
                 <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
+            </MenuItem>
+            <MenuItem Header="File">
+                <MenuItem Command="local:CustomCommands.Import" />
+                <MenuItem Command="local:CustomCommands.Export" />
             </MenuItem>
         </Menu>
         <TextBlock
