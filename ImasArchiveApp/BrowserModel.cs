@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class FileBrowserModel : INotifyPropertyChanged
+    class BrowserModel : INotifyPropertyChanged
     {
         #region Fields
         private readonly ArcModel _parentModel;
@@ -88,7 +88,7 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public FileBrowserModel(ArcModel parentModel)
+        public BrowserModel(ArcModel parentModel)
         {
             _parentModel = parentModel;
         }
@@ -157,7 +157,7 @@ namespace ImasArchiveApp
                 MoveToTree(_current_dir.Parent);
         }
         #endregion
-        #region Methods
+        #region Other Methods
         public void UseTree(BrowserTree tree)
         {
             _history.Clear();
@@ -187,12 +187,6 @@ namespace ImasArchiveApp
             _history_index++;
             _history.Add(tree);
             CurrentDir = tree;
-        }
-
-        internal void MoveUp()
-        {
-            if (_current_dir.Parent != null)
-                MoveToTree(_current_dir.Parent);
         }
         #endregion
     }

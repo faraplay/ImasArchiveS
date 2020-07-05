@@ -106,7 +106,7 @@ namespace ImasArchiveLib
         {
             try
             {
-                FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name);
+                FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name + ".gz");
                 SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
                 return segsStream;
             }
@@ -125,7 +125,7 @@ namespace ImasArchiveLib
         {
             _memory_stream?.Dispose();
             _memory_stream = new MemoryStream();
-            using FlowbishStream flowbishStream = new FlowbishStream(_memory_stream, FlowbishStreamMode.Encipher, Name, true);
+            using FlowbishStream flowbishStream = new FlowbishStream(_memory_stream, FlowbishStreamMode.Encipher, Name + ".gz", true);
             await SegsStream.CompressStream(stream, flowbishStream);
         }
 
@@ -181,20 +181,20 @@ namespace ImasArchiveLib
             try
             {
                 using Stream parStream = this.Open();
-                if (!Name.EndsWith(".par.gz"))
+                if (!Name.EndsWith(".par"))
                     return false;
-                int mbinPos = ParCommu.TryGetMBin(parStream, Name[0..^3]);
+                int mbinPos = ParCommu.TryGetMBin(parStream, Name);
                 if (mbinPos != -1)
                 {
                     using MemoryStream memStream = new MemoryStream();
                     using (StreamWriter streamWriter = new StreamWriter(memStream, Encoding.Default, 65536, true))
                     {
-                        streamWriter.WriteLine(Filepath[0..^3]);
+                        streamWriter.WriteLine(Filepath);
                         parStream.Position = mbinPos;
                         ParCommu.GetCommuText(parStream, streamWriter);
                     }
                     memStream.Position = 0;
-                    using FileStream fileStream = new FileStream(destDir + '/' + Name[0..^7] + "_m.txt", FileMode.Create, FileAccess.Write);
+                    using FileStream fileStream = new FileStream(destDir + '/' + Name[0..^4] + "_m.txt", FileMode.Create, FileAccess.Write);
                     await memStream.CopyToAsync(fileStream);
                 }
                 return (mbinPos != -1);
@@ -212,7 +212,7 @@ namespace ImasArchiveLib
             using StreamReader commuReader = new StreamReader(commuFileName);
             try
             {
-                await ParCommu.ReplaceMBin(parStream, memoryStream, commuReader, Name[0..^3]);
+                await ParCommu.ReplaceMBin(parStream, memoryStream, commuReader, Name);
             }
             catch (InvalidDataException)
             {

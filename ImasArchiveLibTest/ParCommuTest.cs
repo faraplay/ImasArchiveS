@@ -10,7 +10,7 @@ namespace ImasArchiveLibTest
     {
 
         [DataTestMethod]
-        [DataRow("hdd", "", "commu2/par/_week_00_002.par.gz", "hddcommu")]
+        [DataRow("hdd", "", "commu2/par/_week_00_002.par", "hddcommu")]
         public async Task ArcEntryCommuTest(string arcName, string extension, string searchFile, string expectedDir)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
@@ -18,7 +18,7 @@ namespace ImasArchiveLibTest
             Assert.IsNotNull(arcEntry);
             Directory.CreateDirectory("tempdir");
             Assert.IsTrue(await arcEntry.TryGetCommuText("tempdir"));
-            string filename = searchFile.Substring(searchFile.LastIndexOf('/'))[0..^7] + "_m.txt";
+            string filename = searchFile.Substring(searchFile.LastIndexOf('/'))[0..^4] + "_m.txt";
             bool eq = Compare.CompareFiles("tempdir/" + filename, expectedDir + "/" + filename);
             Directory.Delete("tempdir", true);
             Assert.IsTrue(eq);
@@ -36,7 +36,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "commu2/par/_week_00_002.par.gz", "other/translated.txt", "other/translated.par")]
+        [DataRow("hdd", "", "commu2/par/_week_00_002.par", "other/translated.txt", "other/translated.par")]
         public async Task ArcEntryCommuReplaceTest(string arcName, string extension, string searchFile, 
             string replacementFile, string expectedFile)
         {

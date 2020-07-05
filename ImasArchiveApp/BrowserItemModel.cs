@@ -6,12 +6,12 @@ namespace ImasArchiveApp
 {
     class BrowserItemModel : INotifyPropertyChanged
     {
-        private FileBrowserModel _parent;
-        private BrowserTree _tree;
+        private readonly BrowserModel _parent;
+        private readonly BrowserTree _tree;
         private string _name;
         private BrowserEntryType _type;
 
-        internal BrowserItemModel(FileBrowserModel parent, BrowserTree tree)
+        internal BrowserItemModel(BrowserModel parent, BrowserTree tree)
         {
             _parent = parent;
             _tree = tree;

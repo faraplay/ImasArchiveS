@@ -109,7 +109,7 @@ namespace ImasArchiveLib
                 _entries = new List<ArcEntry>((int)_entry_count);
                 for (int i = 0; i < _entry_count; i++)
                 {
-                    _entries.Add(new ArcEntry(this, filePaths[i], offsets[i], lengths[i]));
+                    _entries.Add(new ArcEntry(this, filePaths[i][0..^3], offsets[i], lengths[i]));
                 }
             }
             catch (EndOfStreamException)
@@ -276,7 +276,7 @@ namespace ImasArchiveLib
                 {
                     arcEntry = _entries[i],
                     index = i,
-                    filepath = _entries[i].Filepath
+                    filepath = _entries[i].Filepath + ".gz"
                 });
             }
             arcTrees.Sort((a, b) => String.CompareOrdinal(a.filepath, b.filepath));
@@ -332,7 +332,7 @@ namespace ImasArchiveLib
         /// <exception cref="IOException"/>
         public async Task<ArcEntry> NewEntry(string filePath, Stream stream)
         {
-            string internalFilePath = filePath.Replace('\\', '/') + ".gz";
+            string internalFilePath = filePath.Replace('\\', '/');
             ArcEntry arcEntry = await ArcEntry.NewEntry(this, internalFilePath, stream);
             _entries.Add(arcEntry);
             return arcEntry;
@@ -344,28 +344,6 @@ namespace ImasArchiveLib
         }
         #endregion
         #region Export entries
-        public void ExtractAll(string destDir)
-        {
-            if (destDir.EndsWith('/'))
-                destDir = destDir[0..^1];
-            if (!Directory.Exists(destDir))
-                Directory.CreateDirectory(destDir);
-            DirectoryInfo directoryInfo = new DirectoryInfo(destDir);
-            foreach (ArcEntry arcEntry in _entries)
-            {
-                string dirs = arcEntry.Filepath.Substring(0, arcEntry.Filepath.LastIndexOf('/') + 1);
-                if (dirs != "")
-                    directoryInfo.CreateSubdirectory(dirs);
-                string outFile = directoryInfo.FullName + '/' + arcEntry.Filepath;
-                if (outFile.EndsWith(".gz"))
-                    outFile = outFile[0..^3];
-                else
-                    throw new InvalidDataException();
-                using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
-                using Stream stream = arcEntry.Open();
-                stream.CopyTo(fileStream);
-            }
-        }
 
         public async Task ExtractAllAsync(string destDir, IProgress<ProgressData> progress = null)
         {
@@ -374,14 +352,12 @@ namespace ImasArchiveLib
             if (!Directory.Exists(destDir))
                 Directory.CreateDirectory(destDir);
             DirectoryInfo directoryInfo = new DirectoryInfo(destDir);
-            //var tasks = new List<Task>();
             totalProgress = _entries.Count;
             countProgress = 0;
             foreach (ArcEntry arcEntry in _entries)
             {
                 await ExtractEntryAsync(arcEntry, directoryInfo, progress);
             }
-            //await Task.WhenAll(tasks);
 
         }
 
@@ -391,10 +367,6 @@ namespace ImasArchiveLib
             if (dirs != "")
                 directoryInfo.CreateSubdirectory(dirs);
             string outFile = directoryInfo.FullName + '/' + arcEntry.Filepath;
-            if (outFile.EndsWith(".gz"))
-                outFile = outFile[0..^3];
-            else
-                throw new InvalidDataException();
             using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
             using Stream stream = arcEntry.Open();
             await stream.CopyToAsync(fileStream);

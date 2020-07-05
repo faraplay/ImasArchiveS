@@ -18,7 +18,7 @@ namespace ImasArchiveApp
         private string _current_file;
         private ArcFile _arc_file;
         private BrowserTree _root;
-        private FileBrowserModel _browser_model;
+        private BrowserModel _browser_model;
         private HexViewModel _hexViewModel;
         private string _statusMessage;
         private bool _statusIsException;
@@ -63,7 +63,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public FileBrowserModel BrowserModel
+        public BrowserModel BrowserModel
         {
             get => _browser_model;
             set
@@ -128,7 +128,7 @@ namespace ImasArchiveApp
         #region Constructors
         public ArcModel()
         {
-            BrowserModel = new FileBrowserModel(this);
+            BrowserModel = new BrowserModel(this);
             HexViewModel = new HexViewModel();
         }
         #endregion
@@ -469,7 +469,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                ArcEntry fontEntry = ArcFile.GetEntry("im2nx_font.par.gz");
+                ArcEntry fontEntry = ArcFile.GetEntry("im2nx_font.par");
                 if (fontEntry == null)
                 {
                     throw new FileNotFoundException("File im2nx_font.par not found. Make sure you are opening disc.arc");

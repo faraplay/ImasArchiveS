@@ -10,7 +10,7 @@
     Height="800"
     mc:Ignorable="d">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type local:FileBrowserModel}">
+        <DataTemplate DataType="{x:Type local:BrowserModel}">
             <local:FileBrowser Width="220" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:HexViewModel}">

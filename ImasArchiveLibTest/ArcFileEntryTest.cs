@@ -36,7 +36,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "songinfo/songResource.bin.gz", "other/songResource.bin.gz.fbs")]
+        [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin.gz.fbs")]
         public void GetEntryRawAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
@@ -55,8 +55,8 @@ namespace ImasArchiveLibTest
 
 
         [DataTestMethod]
-        [DataRow("hdd", "", "songinfo/songResource.bin.gz", "other/songResource.bin")]
-        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par.gz", "other/ami_bs2_c01.par")]
+        [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin")]
+        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par", "other/ami_bs2_c01.par")]
         public void GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
@@ -104,7 +104,7 @@ namespace ImasArchiveLibTest
 
 
         [DataTestMethod]
-        [DataRow("disc", "", "system/chara_viewer_def.bin.gz", "other/songResource.bin", "other/disc_edited")]
+        [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "other/disc_edited")]
         public async Task EditThenSaveArcAsTwice(string filename, string extension, string entryPath, string replacementFile, string expectedFile)
         {
             using (ArcFile arcFile = new ArcFile(filename, extension))
@@ -134,7 +134,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("disc", "", "system/chara_viewer_def.bin.gz", "other/songResource.bin", "disc")]
+        [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "disc")]
         public async Task EditEntryReextractTest(string filename, string extension, string entryFilepath, string replacementFile, string expectedDir)
         {
 
@@ -153,11 +153,11 @@ namespace ImasArchiveLibTest
             {
                 await arcFile.ExtractAllAsync("tempdir", progress);
             }
-            File.Move(expectedDir + "/" + entryFilepath[0..^3], "backup");
-            File.Copy(replacementFile, expectedDir + "/" + entryFilepath[0..^3]);
+            File.Move(expectedDir + "/" + entryFilepath, "backup");
+            File.Copy(replacementFile, expectedDir + "/" + entryFilepath);
             bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
-            File.Delete(expectedDir + "/" + entryFilepath[0..^3]);
-            File.Move("backup", expectedDir + "/" + entryFilepath[0..^3]);
+            File.Delete(expectedDir + "/" + entryFilepath);
+            File.Move("backup", expectedDir + "/" + entryFilepath);
 
             DirectoryInfo directoryInfo = new DirectoryInfo("tempdir");
             directoryInfo.Delete(true);
