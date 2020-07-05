@@ -516,6 +516,22 @@ namespace ImasArchiveApp
 
         }
 
+        public static string RemoveArcExtension(string name)
+        {
+            if (name.EndsWith(".arc"))
+            {
+                return name[0..^4];
+            }
+            else if (name.EndsWith(".arc.dat"))
+            {
+                return name[0..^8];
+            }
+            else
+            {
+                return name;
+            }
+        }
+
         public void ClearStatus()
         {
             StatusMessage = "";

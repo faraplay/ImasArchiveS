@@ -82,7 +82,7 @@ namespace ImasArchiveApp
         private void ExtractAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             string arcpath = (DataContext as ArcModel).ArcPath;
-            if (SaveDialog("Extract to...", arcpath?[0..^4], ""))
+            if (SaveDialog("Extract to...", ArcModel.RemoveArcExtension(arcpath), ""))
                 (DataContext as ArcModel).ExtractAllCommand.Execute(null);
         }
         private void NewFromFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -107,7 +107,7 @@ namespace ImasArchiveApp
         private void ExtractCommus_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             string arcpath = (DataContext as ArcModel).ArcPath;
-            if (SaveDialog("Choose folder", arcpath[0..^4] + "commu", ""))
+            if (SaveDialog("Choose folder", ArcModel.RemoveArcExtension(arcpath) + "commu", ""))
                 (DataContext as ArcModel).ExtractCommusCommand.Execute(null);
         }
 
