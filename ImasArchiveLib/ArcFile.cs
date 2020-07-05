@@ -209,7 +209,7 @@ namespace ImasArchiveLib
             uint len = (uint)stream.Length;
             uint pad = (uint)((-len) & 15);
             await newArcStream.WriteAsync(new byte[pad]);
-            if (!arcEntry.Edited)
+            if (!arcEntry.UsesMemoryStream)
                 stream.Dispose();
         }
         /// <exception cref="IOException"/>

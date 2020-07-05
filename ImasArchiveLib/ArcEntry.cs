@@ -17,10 +17,10 @@ namespace ImasArchiveLib
         #region Properties
         public string Filepath { get; }
         public string Name { get; }
-        public long Length { get => Edited ? _memory_stream.Length : _originalLength; }
+        public long Length { get => UsesMemoryStream ? _memory_stream.Length : _originalLength; }
         internal long CreatedLength { get; private set; }
         internal long SaveAsOffset { get; set; }
-        internal bool Edited { get => _memory_stream != null; }
+        internal bool UsesMemoryStream { get => _memory_stream != null; }
         #endregion
         #region Constructors & Factory Methods
         /// <summary>
@@ -70,7 +70,7 @@ namespace ImasArchiveLib
         /// <summary>
         /// Opens a stream containing the raw file data of the entry for read access.
         /// If an exception occurs, returns null.
-        /// Do not dispose if there is a memory stream (Edited is true)
+        /// Do not dispose if there is a memory stream (UsesMemoryStream is true)
         /// </summary>
         /// <returns></returns>
         internal Stream OpenRaw()
@@ -100,13 +100,14 @@ namespace ImasArchiveLib
         /// <summary>
         /// Opens a stream containing the raw file data of the entry for read access.
         /// If an exception occurs, returns null.
+        /// Dispose after you have used the stream.
         /// </summary>
         /// <returns></returns>
         public Stream Open()
         {
             try
             {
-                FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name + ".gz");
+                FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name + ".gz", UsesMemoryStream);
                 SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
                 return segsStream;
             }
