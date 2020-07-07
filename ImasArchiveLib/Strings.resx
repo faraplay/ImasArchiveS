@@ -153,6 +153,9 @@
   <data name="InvalidData_FbsKey" xml:space="preserve">
     <value>Fbs key is incorrect.</value>
   </data>
+  <data name="InvalidData_ParHeader" xml:space="preserve">
+    <value>Par header is invalid.</value>
+  </data>
   <data name="InvalidData_Segs" xml:space="preserve">
     <value>Segs file contains invalid data.</value>
   </data>
