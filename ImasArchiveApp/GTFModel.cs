@@ -14,6 +14,7 @@ namespace ImasArchiveApp
     class GTFModel : IFileModel
     {
         private ImageSource _imageSource;
+        private MemoryStream ms;
 
         private bool disposed = false;
 
@@ -38,16 +39,24 @@ namespace ImasArchiveApp
         #region Constructors
         public GTFModel(Stream stream)
         {
-            using Bitmap bitmap = GTF.ReadGTF(stream);
-            MemoryStream ms = new MemoryStream();
-            bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-            BitmapImage image = new BitmapImage();
-            image.BeginInit();
-            ms.Seek(0, SeekOrigin.Begin);
-            image.StreamSource = ms;
-            image.EndInit();
+            try
+            {
+                using Bitmap bitmap = GTF.ReadGTF(stream);
+                ms = new MemoryStream();
+                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                BitmapImage image = new BitmapImage();
+                image.BeginInit();
+                ms.Seek(0, SeekOrigin.Begin);
+                image.StreamSource = ms;
+                image.EndInit();
 
-            ImageSource = image;
+                ImageSource = image;
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
         #endregion
         #region IDisposable
@@ -63,7 +72,7 @@ namespace ImasArchiveApp
         {
             if (disposing)
             {
-
+                ms?.Dispose();
             }
             disposed = true;
         }

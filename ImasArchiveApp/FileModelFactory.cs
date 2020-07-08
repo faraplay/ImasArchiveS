@@ -15,7 +15,15 @@ namespace ImasArchiveApp
                 case "gtf":
                 case "tex":
                 case "dds":
-                    return new GTFModel(stream);
+                    try
+                    {
+                        return new GTFModel(stream);
+                    }
+                    catch
+                    {
+                        stream.Position = 0;
+                        return new HexViewModel(stream);
+                    }
                 default:
                     return new HexViewModel(stream);
             }
