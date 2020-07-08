@@ -44,6 +44,7 @@ namespace ImasArchiveLibTest
         [DataTestMethod]
         [DataRow("hdd/ui/commonCursor/commonCursorComponent.par", ".")]
         [DataRow("hdd/bg3d/fes_001.par", ".")]
+        [DataRow("hdd/bg3d/gimmick.par", ".")]
         public async Task ParSaveTest(string inFile, string outDir)
         {
             using FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
@@ -53,7 +54,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd2", "hdd3")]
+        [DataRow("hdd", "hdd4")]
         public async Task ParSaveAll(string inDir, string outDir)
         {
             DirectoryInfo dInfo = new DirectoryInfo(inDir);

@@ -61,8 +61,13 @@ namespace ImasArchiveLib
 
             fileCount = reader.ReadInt32();
 
-            if (reader.ReadInt32() != 1)
-                throw new InvalidDataException(Strings.InvalidData_ParHeader);
+            bool lengthsKnown = _stream.ReadByte() switch
+            {
+                1 => true,
+                0 => false,
+                _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
+            };
+            _stream.Position += 3;
 
             int[] offsets = new int[fileCount];
             for (int i = 0; i < fileCount; i++)
@@ -91,9 +96,22 @@ namespace ImasArchiveLib
             _stream.Position += pad;
 
             int[] lengths = new int[fileCount];
-            for (int i = 0; i < fileCount; i++)
+            if (lengthsKnown)
             {
-                lengths[i] = reader.ReadInt32();
+                for (int i = 0; i < fileCount; i++)
+                {
+                    lengths[i] = reader.ReadInt32();
+                }
+                pad = (-_stream.Position) & 15;
+                _stream.Position += pad;
+            }
+            else
+            {
+                for (int i = 0; i < fileCount - 1; i++)
+                {
+                    lengths[i] = offsets[i + 1] - offsets[i];
+                }
+                lengths[fileCount - 1] = (int)_stream.Length - offsets[fileCount - 1];
             }
             pad = (-_stream.Position) & 15;
             _stream.Position += pad;
@@ -116,13 +134,14 @@ namespace ImasArchiveLib
             };
 
             fileCount = Utils.GetInt32(_stream);
-
-            bool lengthsKnown = Utils.GetInt32(_stream) switch
+            
+            bool lengthsKnown = _stream.ReadByte() switch
             {
-                0x03000000 => true,
-                0x02000000 => false,
+                3 => true,
+                2 => false,
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             };
+            _stream.Position += 3;
 
             int[] offsets = new int[fileCount];
             for (int i = 0; i < fileCount; i++)
@@ -186,13 +205,19 @@ namespace ImasArchiveLib
             WriteDotParInfo(destDir);
             foreach (ParEntry entry in _entries)
             {
-                //if (entry._name.EndsWith(".par"))
-                //{
-                //    using Stream stream = entry.Open();
-                //    ParFile parFile = new ParFile(stream);
-                //    await parFile.ExtractAll(destDir + "\\" + entry._name[0..^4] + "_par");
-                //}
-                //else
+                if (entry._name.EndsWith(".par"))
+                {
+                    using Stream stream = entry.Open();
+                    ParFile parFile = new ParFile(stream);
+                    await parFile.ExtractAll(destDir + "\\" + entry._name[0..^4] + "_par");
+                }
+                else if (entry._name.EndsWith(".pta"))
+                {
+                    using Stream stream = entry.Open();
+                    ParFile parFile = new ParFile(stream);
+                    await parFile.ExtractAll(destDir + "\\" + entry._name[0..^4] + "_pta");
+                }
+                else
                 {
                     using Stream stream = entry.Open();
                     using FileStream fileStream = new FileStream(destDir + "\\" + entry._name, FileMode.Create, FileAccess.Write);
