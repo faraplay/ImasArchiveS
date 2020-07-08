@@ -472,7 +472,7 @@ namespace ImasArchiveApp
                 ArcEntry arcEntry = ArcFile.GetEntry(path);
                 if (arcEntry != null)
                 {
-                    CurrentFileModel = FileModelFactory.CreateFileModel(arcEntry.Open());
+                    CurrentFileModel = FileModelFactory.CreateFileModel(arcEntry.Open(), path);
                 }
             } 
             else

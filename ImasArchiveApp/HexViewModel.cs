@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class HexViewModel : INotifyPropertyChanged, IFileModel
+    class HexViewModel : IFileModel
     {
         #region Fields
         private int _headerLength = 16;

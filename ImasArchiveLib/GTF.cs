@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
-    static class GTF
+    public static class GTF
     {
 
         public static Bitmap ReadGTF(Stream stream)
