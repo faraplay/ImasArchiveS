@@ -7,10 +7,10 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class BrowserModel : INotifyPropertyChanged, IFileModel
+    class BrowserModel : INotifyPropertyChanged, IDisposable
     {
         #region Fields
-        private readonly ArcModel _parentModel;
+        private readonly IContainerFileModel _parentModel;
         private BrowserTree _home_dir;
         private BrowserTree _current_dir;
         private readonly List<BrowserTree> _history = new List<BrowserTree>();
@@ -77,7 +77,7 @@ namespace ImasArchiveApp
             set
             {
                 _selectedFile = value;
-                _parentModel.CurrentFile = value;
+                _parentModel.LoadChildFileModel(_selectedFile);
                 OnPropertyChanged();
             }
         }

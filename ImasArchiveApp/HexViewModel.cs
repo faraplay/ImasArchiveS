@@ -109,6 +109,12 @@ namespace ImasArchiveApp
             UpdateHeaderText();
             UpdateDataText();
         }
+        public HexViewModel(Stream stream)
+        {
+            _stream = stream;
+            UpdateHeaderText();
+            UpdateDataText();
+        }
         #endregion
         #region IDisposable
         public void Dispose()

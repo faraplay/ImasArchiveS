@@ -67,7 +67,7 @@
                 <TextBlock Name="tbFilename" Text="{Binding Path=CurrentFile}" />
             </Border>
             <Border BorderBrush="#FFABADB3" BorderThickness="1">
-                <ContentControl Content="{Binding Path=HexViewModel}" />
+                <ContentControl Content="{Binding Path=CurrentFileModel}" />
             </Border>
         </DockPanel>
 

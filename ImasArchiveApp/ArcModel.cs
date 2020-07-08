@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class ArcModel : ModelWithReport, INotifyPropertyChanged, IFileModel
+    class ArcModel : ModelWithReport, INotifyPropertyChanged, IContainerFileModel
     {
         #region Fields
         private string _arcPath;
@@ -19,7 +19,7 @@ namespace ImasArchiveApp
         private ArcFile _arc_file;
         private BrowserTree _root;
         private BrowserModel _browser_model;
-        private HexViewModel _hexViewModel;
+        private IFileModel _currentFileModel;
         private string _inPath;
         private string _outPath;
         private bool disposed = false;
@@ -40,7 +40,7 @@ namespace ImasArchiveApp
             set
             {
                 _current_file = value;
-                LoadToHex(_current_file);
+                LoadChildFileModel(_current_file);
                 OnPropertyChanged();
             }
         }
@@ -71,12 +71,13 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public HexViewModel HexViewModel
+        public IFileModel CurrentFileModel
         {
-            get => _hexViewModel;
+            get => _currentFileModel;
             set
             {
-                _hexViewModel = value;
+                _currentFileModel?.Dispose();
+                _currentFileModel = value;
                 OnPropertyChanged();
             }
         }
@@ -115,7 +116,7 @@ namespace ImasArchiveApp
             ReportMessage = parent.ReportMessage;
             ReportException = parent.ReportException;
             BrowserModel = new BrowserModel(this);
-            HexViewModel = new HexViewModel();
+            _currentFileModel = null;
             OpenArc();
         }
         #endregion
@@ -132,7 +133,7 @@ namespace ImasArchiveApp
         {
             if (disposing)
             {
-                HexViewModel?.Dispose();
+                _currentFileModel?.Dispose();
                 BrowserModel?.Dispose();
                 _arc_file?.Dispose();
             }
@@ -283,7 +284,7 @@ namespace ImasArchiveApp
             }
             finally
             {
-                LoadToHex(_current_file);
+                LoadChildFileModel(_current_file);
             }
         }
         public async Task Export()
@@ -464,19 +465,19 @@ namespace ImasArchiveApp
             }
         }
 
-        private void LoadToHex(string path)
+        public void LoadChildFileModel(string path)
         {
             if (ArcFile != null && path != null)
             {
                 ArcEntry arcEntry = ArcFile.GetEntry(path);
                 if (arcEntry != null)
                 {
-                    HexViewModel.Stream = arcEntry.Open();
+                    CurrentFileModel = FileModelFactory.CreateFileModel(arcEntry.Open());
                 }
             } 
             else
             {
-                HexViewModel.Stream = null;
+                CurrentFileModel = null;
             }
 
         }
