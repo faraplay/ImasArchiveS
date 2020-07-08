@@ -32,95 +32,95 @@ namespace ImasArchiveApp
 
         private void Open_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if ((DataContext as ArcModel).CloseArcCommand.CanExecute(null))
-                (DataContext as ArcModel).CloseArcCommand.Execute(null);
+            if ((DataContext as MainWindowModel).CloseCommand.CanExecute(null))
+                (DataContext as MainWindowModel).CloseCommand.Execute(null);
             if (OpenDialog("Open archive", "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat"))
-                (DataContext as ArcModel).OpenArcCommand.Execute(null);
+                (DataContext as MainWindowModel).OpenCommand.Execute(null);
         }
 
 
-        private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (DataContext as ArcModel).SaveAsCommand.CanExecute(null);
-        }
+        //private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    e.CanExecute = (DataContext as ArcModel).SaveAsCommand.CanExecute(null);
+        //}
 
-        private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (SaveDialog("Save As", "", "Arc file (*.arc)|*.arc"))
-                (DataContext as ArcModel).SaveAsCommand.Execute(null);
-        }
-        private void Import_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (DataContext as ArcModel).ImportCommand.CanExecute(null);
-        }
+        //private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    if (SaveDialog("Save As", "", "Arc file (*.arc)|*.arc"))
+        //        (DataContext as ArcModel).SaveAsCommand.Execute(null);
+        //}
+        //private void Import_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    e.CanExecute = (DataContext as ArcModel).ImportCommand.CanExecute(null);
+        //}
 
-        private void Import_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (OpenDialog("Import", "All files (*.*)|*.*"))
-                (DataContext as ArcModel).ImportCommand.Execute(null);
-        }
-        private void Export_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (DataContext as ArcModel).ExportCommand.CanExecute(null);
-        }
+        //private void Import_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    if (OpenDialog("Import", "All files (*.*)|*.*"))
+        //        (DataContext as ArcModel).ImportCommand.Execute(null);
+        //}
+        //private void Export_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    e.CanExecute = (DataContext as ArcModel).ExportCommand.CanExecute(null);
+        //}
 
-        private void Export_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            string arcpath = (DataContext as ArcModel).ArcPath;
-            string currentFile = (DataContext as ArcModel).CurrentFile;
-            if (SaveDialog("Export", 
-                arcpath.Substring(0, arcpath.LastIndexOf('\\')), 
-                currentFile.Substring(currentFile.LastIndexOf('/') + 1), 
-                ""))
-                (DataContext as ArcModel).ExportCommand.Execute(null);
-        }
-        private void ExtractAll_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (DataContext as ArcModel).ExtractAllCommand.CanExecute(null);
-        }
+        //private void Export_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    string arcpath = (DataContext as ArcModel).ArcPath;
+        //    string currentFile = (DataContext as ArcModel).CurrentFile;
+        //    if (SaveDialog("Export", 
+        //        arcpath.Substring(0, arcpath.LastIndexOf('\\')), 
+        //        currentFile.Substring(currentFile.LastIndexOf('/') + 1), 
+        //        ""))
+        //        (DataContext as ArcModel).ExportCommand.Execute(null);
+        //}
+        //private void ExtractAll_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    e.CanExecute = (DataContext as ArcModel).ExtractAllCommand.CanExecute(null);
+        //}
 
-        private void ExtractAll_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            string arcpath = (DataContext as ArcModel).ArcPath;
-            if (SaveDialog("Extract to...", ArcModel.RemoveArcExtension(arcpath), ""))
-                (DataContext as ArcModel).ExtractAllCommand.Execute(null);
-        }
-        private void NewFromFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (DataContext as ArcModel).NewFromFolderCommand.CanExecute(null);
-        }
+        //private void ExtractAll_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    string arcpath = (DataContext as ArcModel).ArcPath;
+        //    if (SaveDialog("Extract to...", ArcModel.RemoveArcExtension(arcpath), ""))
+        //        (DataContext as ArcModel).ExtractAllCommand.Execute(null);
+        //}
+        //private void NewFromFolder_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    e.CanExecute = (DataContext as ArcModel).NewFromFolderCommand.CanExecute(null);
+        //}
 
-        private void NewFromFolder_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (OpenFolderDialog("Choose folder")) {
-                string chosenFolder = (DataContext as ArcModel).InPath;
-                if (SaveDialog("Save As", chosenFolder, "Arc file (*.arc)|*.arc"))
-                    (DataContext as ArcModel).NewFromFolderCommand.Execute(null);
-            }
-        }
+        //private void NewFromFolder_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    if (OpenFolderDialog("Choose folder")) {
+        //        string chosenFolder = (DataContext as ArcModel).InPath;
+        //        if (SaveDialog("Save As", chosenFolder, "Arc file (*.arc)|*.arc"))
+        //            (DataContext as ArcModel).NewFromFolderCommand.Execute(null);
+        //    }
+        //}
 
-        private void ExtractCommus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (DataContext as ArcModel).ExtractCommusCommand.CanExecute(null);
-        }
+        //private void ExtractCommus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    e.CanExecute = (DataContext as ArcModel).ExtractCommusCommand.CanExecute(null);
+        //}
 
-        private void ExtractCommus_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            string arcpath = (DataContext as ArcModel).ArcPath;
-            if (SaveDialog("Choose folder", ArcModel.RemoveArcExtension(arcpath) + "commu", ""))
-                (DataContext as ArcModel).ExtractCommusCommand.Execute(null);
-        }
+        //private void ExtractCommus_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    string arcpath = (DataContext as ArcModel).ArcPath;
+        //    if (SaveDialog("Choose folder", ArcModel.RemoveArcExtension(arcpath) + "commu", ""))
+        //        (DataContext as ArcModel).ExtractCommusCommand.Execute(null);
+        //}
 
-        private void ReplaceCommus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (DataContext as ArcModel).ReplaceCommusCommand.CanExecute(null);
-        }
+        //private void ReplaceCommus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    e.CanExecute = (DataContext as ArcModel).ReplaceCommusCommand.CanExecute(null);
+        //}
 
-        private void ReplaceCommus_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (OpenFolderDialog("Choose folder"))
-                (DataContext as ArcModel).ReplaceCommusCommand.Execute(null);
-        }
+        //private void ReplaceCommus_Executed(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    if (OpenFolderDialog("Choose folder"))
+        //        (DataContext as ArcModel).ReplaceCommusCommand.Execute(null);
+        //}
 
 
 
@@ -134,7 +134,7 @@ namespace ImasArchiveApp
             bool fileSelected = (openFileDialog.ShowDialog() == true);
             if (fileSelected)
             {
-                (DataContext as ArcModel).InPath = openFileDialog.FileName;
+                (DataContext as MainWindowModel).InPath = openFileDialog.FileName;
             }
             return fileSelected;
         }
@@ -175,50 +175,5 @@ namespace ImasArchiveApp
             }
             return fileSelected;
         }
-    }
-
-    public static class CustomCommands
-    {
-        public static readonly RoutedUICommand Export = new RoutedUICommand
-            (
-                "Export",
-                "Export",
-                typeof(CustomCommands)
-            );
-
-        public static readonly RoutedUICommand Import = new RoutedUICommand
-            (
-                "Import",
-                "Import",
-                typeof(CustomCommands)
-            );
-
-        public static readonly RoutedUICommand ExtractAll = new RoutedUICommand
-            (
-                "Extract All",
-                "ExtractAll",
-                typeof(CustomCommands)
-            );
-
-        public static readonly RoutedUICommand NewFromFolder = new RoutedUICommand
-            (
-                "New From Folder",
-                "NewFromFolder",
-                typeof(CustomCommands)
-            );
-
-        public static readonly RoutedUICommand ExtractCommus = new RoutedUICommand
-            (
-                "Extract Commus",
-                "ExtractCommus",
-                typeof(CustomCommands)
-            );
-
-        public static readonly RoutedUICommand ReplaceCommus = new RoutedUICommand
-            (
-                "Replace Commus",
-                "ReplaceCommus",
-                typeof(CustomCommands)
-            );
     }
 }

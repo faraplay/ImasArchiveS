@@ -19,7 +19,7 @@ namespace ImasArchiveApp
 
             var window = new MainWindow()
             {
-                DataContext = new ArcModel()
+                DataContext = new MainWindowModel()
             };
             window.Show();
         }

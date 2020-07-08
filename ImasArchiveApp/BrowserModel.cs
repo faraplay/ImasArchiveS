@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -6,7 +7,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class BrowserModel : INotifyPropertyChanged
+    class BrowserModel : INotifyPropertyChanged, IFileModel
     {
         #region Fields
         private readonly ArcModel _parentModel;
@@ -16,6 +17,7 @@ namespace ImasArchiveApp
         private int _history_index = 0;
         private ObservableCollection<BrowserItemModel> _items;
         private string _selectedFile;
+        private bool disposed = false;
         #endregion
         #region Properties
         public BrowserTree HomeDir
@@ -92,6 +94,25 @@ namespace ImasArchiveApp
         {
             _parentModel = parentModel;
         }
+        #endregion
+        #region IDisposable
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+        }
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+
+            }
+            disposed = true;
+        }
+        ~BrowserModel() => Dispose(false);
         #endregion
         #region Commands
         RelayCommand _browseBackCommand;

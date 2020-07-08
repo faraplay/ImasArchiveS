@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class HexViewModel : INotifyPropertyChanged
+    class HexViewModel : INotifyPropertyChanged, IFileModel
     {
         #region Fields
         private int _headerLength = 16;
@@ -24,6 +24,7 @@ namespace ImasArchiveApp
         private int streamLength;
         private const int DefaultBufferSize = 0x10000;
         private StringBuilder dataStringBuilder = new StringBuilder();
+        private bool disposed = false;
         #endregion
         #region Properties
         public int HeaderLength
@@ -108,6 +109,26 @@ namespace ImasArchiveApp
             UpdateHeaderText();
             UpdateDataText();
         }
+        #endregion
+        #region IDisposable
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+        }
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _stream?.Dispose();
+            }
+            disposed = true;
+        }
+        ~HexViewModel() => Dispose(false);
+
         #endregion
         #region Commands
         public void Scroll(object sender, MouseWheelEventArgs e)
