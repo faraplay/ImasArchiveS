@@ -15,7 +15,7 @@ namespace ImasArchiveApp
             {
                 case "par":
                 case "pta":
-                    return new ParModel(stream);
+                    return new ParModel(parent, stream);
                 case "gtf":
                 case "tex":
                 case "dds":
@@ -27,7 +27,6 @@ namespace ImasArchiveApp
 
         public static IFileModel CreateFileModel(string fileName)
         {
-            string extension = fileName.Substring(fileName.LastIndexOf('.') + 1);
             if (fileName.EndsWith(".arc") || fileName.EndsWith(".arc.dat"))
             {
                 return new ArcModel(parent, fileName);

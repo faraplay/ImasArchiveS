@@ -14,7 +14,6 @@ namespace ImasArchiveApp
         private BrowserTree _currentDir;
         private readonly List<BrowserTree> _history;
         private int _history_index = 0;
-        private ObservableCollection<BrowserItemModel> _items;
         private string _selectedFile;
         private bool disposed = false;
         #endregion
@@ -44,10 +43,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public ObservableCollection<BrowserItemModel> Items
-        {
-            get => _items;
-        }
+        public ObservableCollection<BrowserItemModel> Items { get; }
         public string SelectedFile
         {
             get => _selectedFile;
@@ -76,10 +72,10 @@ namespace ImasArchiveApp
             _history_index = 0;
             _history.Add(browserTree);
             _currentDir = browserTree;
-            _items = new ObservableCollection<BrowserItemModel>();
+            Items = new ObservableCollection<BrowserItemModel>();
             foreach (BrowserTree tree in _currentDir.Entries)
             {
-                _items.Add(new BrowserItemModel(this, tree));
+                Items.Add(new BrowserItemModel(this, tree));
             }
         }
         #endregion
@@ -170,12 +166,12 @@ namespace ImasArchiveApp
 
         internal void UpdateItems()
         {
-            _items.Clear();
+            Items.Clear();
             if (_currentDir != null)
             {
                 foreach (BrowserTree tree in _currentDir.Entries)
                 {
-                    _items.Add(new BrowserItemModel(this, tree));
+                    Items.Add(new BrowserItemModel(this, tree));
                 }
             }
         }

@@ -23,7 +23,7 @@ namespace ImasArchiveApp
         private int _bufferOffset;
         private int streamLength;
         private const int DefaultBufferSize = 0x10000;
-        private StringBuilder dataStringBuilder = new StringBuilder();
+        private readonly StringBuilder dataStringBuilder = new StringBuilder();
         private bool disposed = false;
         #endregion
         #region Properties

@@ -8,11 +8,10 @@ using System.Text;
 
 namespace ImasArchiveApp
 {
-    class ParModel : IContainerFileModel
+    class ParModel : ModelWithReport, IContainerFileModel
     {
         #region Fields
-        private ParFile _parFile;
-        private bool disposed;
+        private readonly ParFile _parFile;
 
         private BrowserModel _browserModel;
         private IFileModel _fileModel;
@@ -28,7 +27,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public IFileModel CurrentFileModel
+        public IFileModel FileModel
         {
             get => _fileModel;
             set
@@ -47,18 +46,31 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public ParModel(Stream stream)
+        public ParModel(ModelWithReport parent, Stream stream)
         {
-            _parFile = new ParFile(stream);
-            List<string> browserEntries = new List<string>();
-            foreach (ParEntry entry in _parFile.Entries)
+            ClearStatus = parent.ClearStatus;
+            ReportException = parent.ReportException;
+            ReportMessage = parent.ReportMessage;
+            ReportProgress = parent.ReportProgress;
+            try
             {
-                browserEntries.Add(entry._name);
+                _parFile = new ParFile(stream);
+                List<string> browserEntries = new List<string>();
+                foreach (ParEntry entry in _parFile.Entries)
+                {
+                    browserEntries.Add(entry._name);
+                }
+                BrowserModel = new BrowserModel(this, new BrowserTree("", browserEntries));
             }
-            BrowserModel = new BrowserModel(this, new BrowserTree("", browserEntries));
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
         #endregion
         #region IDisposable
+        private bool disposed;
         public void Dispose()
         {
             if (!disposed)
@@ -81,13 +93,22 @@ namespace ImasArchiveApp
 
         public void LoadChildFileModel(string fileName)
         {
+            ClearStatus();
             if (fileName != null)
             {
-                CurrentFileModel = FileModelFactory.CreateFileModel(_parFile.GetEntry(fileName).Open(), fileName);
+                try
+                {
+                    FileModel = FileModelFactory.CreateFileModel(_parFile.GetEntry(fileName).Open(), fileName);
+                }
+                catch (Exception ex)
+                {
+                    ReportException(ex);
+                    FileModel = null;
+                }
             }
             else
             {
-                CurrentFileModel = null;
+                FileModel = null;
             }
         }
     }

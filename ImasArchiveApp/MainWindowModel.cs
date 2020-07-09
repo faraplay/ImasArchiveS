@@ -25,6 +25,7 @@ namespace ImasArchiveApp
             get => _fileModel;
             set
             {
+                _fileModel?.Dispose();
                 _fileModel = value;
                 OnPropertyChanged();
             }
@@ -94,9 +95,9 @@ namespace ImasArchiveApp
         #region Command Methods
         public void Open()
         {
-            OpenArc(InPath);
+            Open(InPath);
         }
-        public void OpenArc(string inPath)
+        public void Open(string inPath)
         {
             try
             {
@@ -105,13 +106,11 @@ namespace ImasArchiveApp
             catch (Exception ex)
             {
                 ReportException(ex);
-                FileModel.Dispose();
                 FileModel = null;
             }
         }   
         public void Close()
         {
-            FileModel.Dispose();
             FileModel = null;
         }
         #endregion
@@ -135,7 +134,7 @@ namespace ImasArchiveApp
 
         public void MyReportException(Exception ex)
         {
-            StatusMessage = ex.GetType().ToString() + ": " + ex.Message;
+            StatusMessage = ex.ToString();
             StatusIsException = true;
         }
         #endregion

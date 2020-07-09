@@ -65,7 +65,7 @@
             </DockPanel>
         </Expander>
         <Border BorderBrush="#FFABADB3" BorderThickness="1">
-            <ContentControl Content="{Binding Path=CurrentFileModel}" />
+            <ContentControl Content="{Binding Path=FileModel}" />
         </Border>
 
     </DockPanel>

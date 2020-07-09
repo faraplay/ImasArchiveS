@@ -18,7 +18,7 @@ namespace ImasArchiveApp
         private string _current_file;
         private ArcFile _arc_file;
         private BrowserModel _browser_model;
-        private IFileModel _currentFileModel;
+        private IFileModel _fileModel;
         private string _inPath;
         private string _outPath;
         private bool disposed = false;
@@ -61,13 +61,13 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public IFileModel CurrentFileModel
+        public IFileModel FileModel
         {
-            get => _currentFileModel;
+            get => _fileModel;
             set
             {
-                _currentFileModel?.Dispose();
-                _currentFileModel = value;
+                _fileModel?.Dispose();
+                _fileModel = value;
                 OnPropertyChanged();
             }
         }
@@ -105,7 +105,7 @@ namespace ImasArchiveApp
             ReportProgress = parent.ReportProgress;
             ReportMessage = parent.ReportMessage;
             ReportException = parent.ReportException;
-            _currentFileModel = null;
+            _fileModel = null;
             OpenArc();
             List<string> browserEntries = new List<string>();
             foreach (ArcEntry entry in ArcFile.Entries)
@@ -128,7 +128,7 @@ namespace ImasArchiveApp
         {
             if (disposing)
             {
-                _currentFileModel?.Dispose();
+                _fileModel?.Dispose();
                 BrowserModel?.Dispose();
                 _arc_file?.Dispose();
             }
@@ -460,12 +460,21 @@ namespace ImasArchiveApp
                 ArcEntry arcEntry = ArcFile.GetEntry(path);
                 if (arcEntry != null)
                 {
-                    CurrentFileModel = FileModelFactory.CreateFileModel(arcEntry.Open(), path);
+                    ClearStatus();
+                    try
+                    {
+                        FileModel = FileModelFactory.CreateFileModel(arcEntry.Open(), path);
+                    }
+                    catch (Exception ex)
+                    {
+                        ReportException(ex);
+                        FileModel = null;
+                    }
                 }
             } 
             else
             {
-                CurrentFileModel = null;
+                FileModel = null;
             }
 
         }

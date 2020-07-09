@@ -14,7 +14,7 @@ namespace ImasArchiveApp
     class GTFModel : IFileModel
     {
         private ImageSource _imageSource;
-        private MemoryStream ms;
+        private readonly MemoryStream ms;
 
         private bool disposed = false;
 
@@ -55,10 +55,10 @@ namespace ImasArchiveApp
 
                 ImageSource = image;
             }
-            catch
+            catch (Exception ex)
             {
                 Dispose();
-                throw;
+                throw new InvalidDataException("Could not read file as GTF. Original exception:\n" + ex.ToString());
             }
         }
         #endregion
