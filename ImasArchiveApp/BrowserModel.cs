@@ -11,41 +11,25 @@ namespace ImasArchiveApp
     {
         #region Fields
         private readonly IContainerFileModel _parentModel;
-        private BrowserTree _home_dir;
-        private BrowserTree _current_dir;
-        private readonly List<BrowserTree> _history = new List<BrowserTree>();
+        private BrowserTree _currentDir;
+        private readonly List<BrowserTree> _history;
         private int _history_index = 0;
         private ObservableCollection<BrowserItemModel> _items;
         private string _selectedFile;
         private bool disposed = false;
         #endregion
         #region Properties
-        public BrowserTree HomeDir
-        {
-            get => _home_dir;
-            set
-            {
-                _home_dir = value;
-                _history.Clear();
-                _history_index = 0;
-                _history.Add(value);
-                OnPropertyChanged();
-                CurrentDir = value;
-            }
-        }
 
         public BrowserTree CurrentDir
         {
-            get => _current_dir; 
+            get => _currentDir; 
             set
             {
-                _current_dir = value;
+                _currentDir = value;
                 UpdateItems();
                 OnPropertyChanged();
             }
         }
-
-        public List<BrowserTree> History => _history;
 
         public int HistoryIndex
         {
@@ -55,21 +39,14 @@ namespace ImasArchiveApp
                 if (value >= 0 && value < _history.Count)
                 {
                     _history_index = value;
-                    CurrentDir = History[_history_index];
+                    CurrentDir = _history[_history_index];
                 }
                 OnPropertyChanged();
             }
         }
         public ObservableCollection<BrowserItemModel> Items
         {
-            get
-            {
-                if (_items == null)
-                {
-                    _items = new ObservableCollection<BrowserItemModel>();
-                }
-                return _items;
-            }
+            get => _items;
         }
         public string SelectedFile
         {
@@ -90,9 +67,20 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public BrowserModel(ArcModel parentModel)
+        public BrowserModel(IContainerFileModel parentModel, BrowserTree browserTree)
         {
+            if (browserTree == null)
+                throw new ArgumentNullException(nameof(browserTree));
             _parentModel = parentModel;
+            _history = new List<BrowserTree>();
+            _history_index = 0;
+            _history.Add(browserTree);
+            _currentDir = browserTree;
+            _items = new ObservableCollection<BrowserItemModel>();
+            foreach (BrowserTree tree in _currentDir.Entries)
+            {
+                _items.Add(new BrowserItemModel(this, tree));
+            }
         }
         #endregion
         #region IDisposable
@@ -159,7 +147,7 @@ namespace ImasArchiveApp
                 return _goUpCommand;
             }
         }
-        bool CanGoUp => _current_dir?.Parent != null;
+        bool CanGoUp => _currentDir?.Parent != null;
         #endregion
         #region Command Methods
         void BrowseBack()
@@ -174,27 +162,20 @@ namespace ImasArchiveApp
 
         void GoUp()
         {
-            if (_current_dir?.Parent != null)
-                MoveToTree(_current_dir.Parent);
+            if (_currentDir?.Parent != null)
+                MoveToTree(_currentDir.Parent);
         }
         #endregion
         #region Other Methods
-        public void UseTree(BrowserTree tree)
-        {
-            _history.Clear();
-            _history_index = 0;
-            _history.Add(tree);
-            CurrentDir = tree;
-        }
 
         internal void UpdateItems()
         {
-            Items.Clear();
-            if (_current_dir != null)
+            _items.Clear();
+            if (_currentDir != null)
             {
-                foreach (BrowserTree tree in _current_dir.Entries)
+                foreach (BrowserTree tree in _currentDir.Entries)
                 {
-                    Items.Add(new BrowserItemModel(this, tree));
+                    _items.Add(new BrowserItemModel(this, tree));
                 }
             }
         }

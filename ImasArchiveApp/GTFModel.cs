@@ -41,9 +41,12 @@ namespace ImasArchiveApp
         {
             try
             {
-                using Bitmap bitmap = GTF.ReadGTF(stream);
                 ms = new MemoryStream();
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                stream.CopyTo(ms);
+                ms.Position = 0;
+                using Bitmap bitmap = GTF.ReadGTF(ms);
+                ms.SetLength(0);
+                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                 BitmapImage image = new BitmapImage();
                 image.BeginInit();
                 ms.Seek(0, SeekOrigin.Begin);

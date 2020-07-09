@@ -59,17 +59,9 @@
             </Menu>
             <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
         </DockPanel>
-        <DockPanel Margin="10">
-            <Border
-                BorderBrush="#FFABADB3"
-                BorderThickness="1"
-                DockPanel.Dock="Top">
-                <TextBlock Name="tbFilename" Text="{Binding Path=CurrentFile}" />
-            </Border>
-            <Border BorderBrush="#FFABADB3" BorderThickness="1">
-                <ContentControl Content="{Binding Path=CurrentFileModel}" />
-            </Border>
-        </DockPanel>
+        <Border BorderBrush="#FFABADB3" BorderThickness="1">
+            <ContentControl Content="{Binding Path=CurrentFileModel}" />
+        </Border>
 
     </DockPanel>
 </UserControl>

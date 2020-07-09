@@ -17,7 +17,6 @@ namespace ImasArchiveApp
         private string _arcPath;
         private string _current_file;
         private ArcFile _arc_file;
-        private BrowserTree _root;
         private BrowserModel _browser_model;
         private IFileModel _currentFileModel;
         private string _inPath;
@@ -50,15 +49,6 @@ namespace ImasArchiveApp
             set
             {
                 _arc_file = value;
-                OnPropertyChanged();
-            }
-        }
-        public BrowserTree Root 
-        { 
-            get => _root;
-            set
-            {
-                _root = value;
                 OnPropertyChanged();
             }
         }
@@ -115,9 +105,14 @@ namespace ImasArchiveApp
             ReportProgress = parent.ReportProgress;
             ReportMessage = parent.ReportMessage;
             ReportException = parent.ReportException;
-            BrowserModel = new BrowserModel(this);
             _currentFileModel = null;
             OpenArc();
+            List<string> browserEntries = new List<string>();
+            foreach (ArcEntry entry in ArcFile.Entries)
+            {
+                browserEntries.Add(entry.Filepath);
+            }
+            BrowserModel = new BrowserModel(this, new BrowserTree("", browserEntries));
         }
         #endregion
         #region IDisposable
@@ -450,13 +445,6 @@ namespace ImasArchiveApp
                     throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
                 }
                 ArcFile = new ArcFile(truncFilename, extension);
-                List<string> browserEntries = new List<string>();
-                foreach (ArcEntry entry in ArcFile.Entries)
-                {
-                    browserEntries.Add(entry.Filepath);
-                }
-                Root = new BrowserTree("", browserEntries);
-                _browser_model.HomeDir = Root;
             }
             catch
             {

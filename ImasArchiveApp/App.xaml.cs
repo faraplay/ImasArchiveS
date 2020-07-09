@@ -17,10 +17,12 @@ namespace ImasArchiveApp
         {
             base.OnStartup(e);
 
+            var datacontext = new MainWindowModel();
             var window = new MainWindow()
             {
-                DataContext = new MainWindowModel()
+                DataContext = datacontext
             };
+            FileModelFactory.parent = datacontext;
             window.Show();
         }
     }

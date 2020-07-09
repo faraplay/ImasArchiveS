@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ImasArchiveLib
 {
-    class ParEntry
+    public class ParEntry
     {
         public string _name;
         public int _offset;

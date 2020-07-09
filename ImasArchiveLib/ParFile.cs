@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
-    class ParFile
+    public class ParFile : IDisposable
     {
         #region Fields
         readonly Stream _stream;
@@ -27,6 +27,19 @@ namespace ImasArchiveLib
             _stream = stream;
             ReadHeader();
         }
+        #endregion
+        #region IDisposable
+        private bool disposed = false;
+        public void Dispose() => Dispose(true);
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                _stream.Dispose();
+            }
+            disposed = true;
+        }
+        ~ParFile() => Dispose(false);
         #endregion
         #region Reading Header
         private void ReadHeader()
@@ -198,7 +211,7 @@ namespace ImasArchiveLib
         {
             return new Substream(_stream, offset, length);
         }
-        #region Save
+        #region Extract
         public async Task ExtractAll(string destDir)
         {
             Directory.CreateDirectory(destDir);
@@ -238,6 +251,11 @@ namespace ImasArchiveLib
             }
         }
         #endregion
+
+        public ParEntry GetEntry(string fileName)
+        {
+            return _entries.Find(e => e._name == fileName);
+        }
     }
 }
 
