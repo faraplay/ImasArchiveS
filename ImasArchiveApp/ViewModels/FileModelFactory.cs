@@ -15,7 +15,7 @@ namespace ImasArchiveApp
             {
                 case "par":
                 case "pta":
-                    return new ParModel(parent, stream);
+                    return new ParModel(parent, stream, fileName);
                 case "gtf":
                 case "tex":
                 case "dds":
@@ -33,7 +33,7 @@ namespace ImasArchiveApp
             }
             else
             {
-                return CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName);
+                return CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName.Substring(fileName.LastIndexOf('\\')));
             }
         }
     }

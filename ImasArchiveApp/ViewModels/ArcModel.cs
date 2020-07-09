@@ -24,6 +24,7 @@ namespace ImasArchiveApp
         private bool disposed = false;
         #endregion
         #region Properties
+        public string FileName { get; }
         public string ArcPath
         {
             get => _arcPath;
@@ -100,6 +101,7 @@ namespace ImasArchiveApp
         #region Constructors
         public ArcModel(ModelWithReport parent, string inPath)
         {
+            FileName = inPath.Substring(inPath.LastIndexOf('\\') + 1);
             _arcPath = inPath;
             ClearStatus = parent.ClearStatus;
             ReportProgress = parent.ReportProgress;

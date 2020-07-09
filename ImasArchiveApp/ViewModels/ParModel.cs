@@ -17,6 +17,7 @@ namespace ImasArchiveApp
         private IFileModel _fileModel;
         #endregion
         #region Properties
+        public string FileName { get; }
         public BrowserModel BrowserModel
         {
             get => _browserModel;
@@ -46,8 +47,9 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public ParModel(ModelWithReport parent, Stream stream)
+        public ParModel(ModelWithReport parent, Stream stream, string fileName)
         {
+            FileName = fileName;
             ClearStatus = parent.ClearStatus;
             ReportException = parent.ReportException;
             ReportMessage = parent.ReportMessage;
