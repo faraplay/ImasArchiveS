@@ -34,8 +34,8 @@ namespace ImasArchiveApp
         {
             if ((DataContext as MainWindowModel).CloseCommand.CanExecute(null))
                 (DataContext as MainWindowModel).CloseCommand.Execute(null);
-            //if (OpenDialog("Open archive", "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat"))
-            if (OpenDialog("Open archive", ""))
+            if (OpenDialog("Open archive", 
+                "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat|All files (*.*)|*.*"))
                 (DataContext as MainWindowModel).OpenCommand.Execute(null);
         }
 

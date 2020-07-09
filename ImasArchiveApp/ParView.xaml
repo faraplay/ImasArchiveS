@@ -9,9 +9,14 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <DockPanel>
-        <DockPanel DockPanel.Dock="Left">
+        <Expander
+            DockPanel.Dock="Left"
+            ExpandDirection="Right"
+            IsExpanded="True">
             <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
-        </DockPanel>
+
+        </Expander>
+        <DockPanel DockPanel.Dock="Left" />
         <Border BorderBrush="#FFABADB3" BorderThickness="1">
             <ContentControl Content="{Binding Path=CurrentFileModel}" />
         </Border>
