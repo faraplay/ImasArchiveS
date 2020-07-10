@@ -19,7 +19,7 @@ namespace ImasArchiveApp
                 case "gtf":
                 case "tex":
                 case "dds":
-                    return new GTFModel(stream);
+                    return new GTFModel(stream, fileName);
                 default:
                     return new HexViewModel(stream, fileName);
             }

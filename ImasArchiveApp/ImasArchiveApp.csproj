@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="Icons\Backwards_16x.png" />
     <None Remove="Icons\Backwards_disabled_16x.png" />
+    <None Remove="Icons\checkerboard.png" />
     <None Remove="Icons\FolderClosed_16x.png" />
     <None Remove="Icons\Forwards_16x.png" />
     <None Remove="Icons\Forwards_disabled_16x.png" />
@@ -43,6 +44,7 @@
     <Resource Include="Icons\Backwards_disabled_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Icons\checkerboard.png" />
     <Resource Include="Icons\FolderClosed_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

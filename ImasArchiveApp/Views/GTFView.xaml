@@ -8,7 +8,23 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid Background="#FFAA0000">
-        <Image  Source="{Binding Path=ImageSource}" OpacityMask="#FF9B0000" />
-    </Grid>
+    <DockPanel>
+        <Border
+            BorderBrush="#FFABADB3"
+            BorderThickness="1"
+            DockPanel.Dock="Left">
+            <TextBlock
+                Margin="2"
+                Text="{Binding Path=FileName}"
+                TextAlignment="Right">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBlock.LayoutTransform>
+            </TextBlock>
+        </Border>
+        <Grid>
+            <Image Source="/Icons/checkerboard.png" Stretch="UniformToFill" />
+            <Image Source="{Binding Path=ImageSource}" />
+        </Grid>
+    </DockPanel>
 </UserControl>

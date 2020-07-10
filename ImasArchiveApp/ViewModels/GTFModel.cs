@@ -18,6 +18,8 @@ namespace ImasArchiveApp
 
         private bool disposed = false;
 
+        public string FileName { get; }
+
         public ImageSource ImageSource
         {
             get => _imageSource;
@@ -37,10 +39,11 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public GTFModel(Stream stream)
+        public GTFModel(Stream stream, string fileName)
         {
             try
             {
+                FileName = fileName;
                 ms = new MemoryStream();
                 stream.CopyTo(ms);
                 ms.Position = 0;

@@ -11,7 +11,6 @@ namespace ImasArchiveApp
     class HexViewModel : IFileModel
     {
         #region Fields
-        private string _fileName;
         private int _headerLength = 16;
         private string _headerText;
         private string _dataText;
@@ -30,10 +29,7 @@ namespace ImasArchiveApp
         private bool disposed = false;
         #endregion
         #region Properties
-        public string FileName
-        {
-            get => _fileName;
-        }
+        public string FileName { get; }
         public int HeaderLength
         {
             get => _headerLength;
@@ -123,7 +119,7 @@ namespace ImasArchiveApp
         #region Constructors
         public HexViewModel(Stream stream, string fileName)
         {
-            _fileName = fileName;
+            FileName = fileName;
             _stream = stream;
             UpdateHeaderText();
             UpdateDataText();

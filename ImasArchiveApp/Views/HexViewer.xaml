@@ -22,7 +22,6 @@
                     <RotateTransform Angle="-90" />
                 </TextBlock.LayoutTransform>
             </TextBlock>
-
         </Border>
         <TextBlock
             x:Name="tbHeader"
