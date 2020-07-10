@@ -10,12 +10,30 @@
     d:DesignWidth="400"
     mc:Ignorable="d">
     <DockPanel>
+        <Border
+            BorderBrush="#FFABADB3"
+            BorderThickness="1"
+            DockPanel.Dock="Left">
+            <TextBlock
+                Margin="2"
+                Text="{Binding Path=FileName}"
+                TextAlignment="Right">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBlock.LayoutTransform>
+            </TextBlock>
+
+        </Border>
         <TextBlock
             x:Name="tbHeader"
             DockPanel.Dock="Top"
+            FontFamily="Consolas"
+            FontSize="14"
             Text="{Binding Path=HeaderText}" />
         <TextBlock
             x:Name="tbData"
+            FontFamily="Consolas"
+            FontSize="14"
             SizeChanged="DockPanel_SizeChanged"
             Text="{Binding Path=DataText}">
             <i:Interaction.Triggers>

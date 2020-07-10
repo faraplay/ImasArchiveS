@@ -21,7 +21,7 @@ namespace ImasArchiveApp
                 case "dds":
                     return new GTFModel(stream);
                 default:
-                    return new HexViewModel(stream);
+                    return new HexViewModel(stream, fileName);
             }
         }
 
