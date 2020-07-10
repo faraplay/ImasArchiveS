@@ -60,7 +60,7 @@ namespace ImasArchiveApp
                 List<string> browserEntries = new List<string>();
                 foreach (ParEntry entry in _parFile.Entries)
                 {
-                    browserEntries.Add(entry._name);
+                    browserEntries.Add(entry.Name);
                 }
                 BrowserModel = new BrowserModel(this, new BrowserTree("", browserEntries));
             }

@@ -30,10 +30,10 @@ namespace ImasArchiveLibTest
                     foreach (var en in parFile.Entries)
                     {
                         streamWriter.WriteLine("\t{0}\t{1}\t{2}\t{3}",
-                            en._offset.ToString("X"),
-                            en._length.ToString("X"),
-                            en._property,
-                            en._name);
+                            en.Offset.ToString("X"),
+                            en.Length.ToString("X"),
+                            en.Property,
+                            en.Name);
                     }
                     streamWriter.WriteLine();
                     streamWriter.Flush();

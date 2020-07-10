@@ -218,22 +218,22 @@ namespace ImasArchiveLib
             WriteDotParInfo(destDir);
             foreach (ParEntry entry in _entries)
             {
-                if (entry._name.EndsWith(".par"))
+                if (entry.Name.EndsWith(".par"))
                 {
                     using Stream stream = entry.Open();
                     ParFile parFile = new ParFile(stream);
-                    await parFile.ExtractAll(destDir + "\\" + entry._name[0..^4] + "_par");
+                    await parFile.ExtractAll(destDir + "\\" + entry.Name[0..^4] + "_par");
                 }
-                else if (entry._name.EndsWith(".pta"))
+                else if (entry.Name.EndsWith(".pta"))
                 {
                     using Stream stream = entry.Open();
                     ParFile parFile = new ParFile(stream);
-                    await parFile.ExtractAll(destDir + "\\" + entry._name[0..^4] + "_pta");
+                    await parFile.ExtractAll(destDir + "\\" + entry.Name[0..^4] + "_pta");
                 }
                 else
                 {
                     using Stream stream = entry.Open();
-                    using FileStream fileStream = new FileStream(destDir + "\\" + entry._name, FileMode.Create, FileAccess.Write);
+                    using FileStream fileStream = new FileStream(destDir + "\\" + entry.Name, FileMode.Create, FileAccess.Write);
                     await stream.CopyToAsync(fileStream);
                 }
             }
@@ -246,21 +246,15 @@ namespace ImasArchiveLib
             writer.WriteLine();
             foreach (ParEntry entry in _entries)
             {
-                writer.WriteLine(entry._property);
-                writer.WriteLine(entry._name);
+                writer.WriteLine(entry.Property);
+                writer.WriteLine(entry.Name);
             }
         }
         #endregion
 
         public ParEntry GetEntry(string fileName)
         {
-            return _entries.Find(e => e._name == fileName);
+            return _entries.Find(e => e.Name == fileName);
         }
     }
 }
-
-
-// shop/item
-// shop/shopIcons
-// ui/commu/arcWidget
-// ui/game/unitMiniGame

@@ -7,24 +7,24 @@ namespace ImasArchiveLib
 {
     public class ParEntry
     {
-        public string _name;
-        public int _offset;
-        public int _length;
-        public ParFile _parent;
-        public int _property;
+        public string Name { get; set; }
+        public int Offset { get; set; }
+        public int Length { get; set; }
+        public ParFile Parent { get; set; }
+        public int Property { get; set; }
 
         internal ParEntry(ParFile parent, string name, int offset, int length, int property)
         {
-            _parent = parent;
-            _name = name;
-            _offset = offset;
-            _length = length;
-            _property = property;
+            Parent = parent;
+            Name = name;
+            Offset = offset;
+            Length = length;
+            Property = property;
         }
 
         public Stream Open()
         {
-            return _parent.GetSubstream(_offset, _length);
+            return Parent.GetSubstream(Offset, Length);
         }
     }
 }
