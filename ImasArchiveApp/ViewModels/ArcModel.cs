@@ -15,12 +15,10 @@ namespace ImasArchiveApp
     {
         #region Fields
         private string _arcPath;
-        private string _current_file;
-        private ArcFile _arc_file;
-        private BrowserModel _browser_model;
+        private ArcFile _arcFile;
+        private BrowserModel _browserModel;
         private IFileModel _fileModel;
-        private string _inPath;
-        private string _outPath;
+        private readonly IGetFileName _getFileName;
         private bool disposed = false;
         #endregion
         #region Properties
@@ -36,29 +34,23 @@ namespace ImasArchiveApp
         }
         public string CurrentFile
         {
-            get => _current_file;
-            set
-            {
-                _current_file = value;
-                LoadChildFileModel(_current_file);
-                OnPropertyChanged();
-            }
+            get => FileModel.FileName;
         }
         public ArcFile ArcFile
         {
-            get => _arc_file;
+            get => _arcFile;
             set
             {
-                _arc_file = value;
+                _arcFile = value;
                 OnPropertyChanged();
             }
         }
         public BrowserModel BrowserModel
         {
-            get => _browser_model;
+            get => _browserModel;
             set
             {
-                _browser_model = value;
+                _browserModel = value;
                 OnPropertyChanged();
             }
         }
@@ -72,24 +64,6 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public string InPath
-        {
-            get => _inPath;
-            set
-            {
-                _inPath = value;
-                OnPropertyChanged();
-            }
-        }
-        public string OutPath
-        {
-            get => _outPath;
-            set
-            {
-                _outPath = value;
-                OnPropertyChanged();
-            }
-        }
         #endregion
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -99,8 +73,9 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public ArcModel(ModelWithReport parent, string inPath)
+        public ArcModel(ModelWithReport parent, string inPath, IGetFileName getFileName)
         {
+            _getFileName = getFileName;
             FileName = inPath.Substring(inPath.LastIndexOf('\\') + 1);
             _arcPath = inPath;
             ClearStatus = parent.ClearStatus;
@@ -132,7 +107,7 @@ namespace ImasArchiveApp
             {
                 _fileModel?.Dispose();
                 BrowserModel?.Dispose();
-                _arc_file?.Dispose();
+                _arcFile?.Dispose();
             }
             disposed = true;
         }
@@ -151,7 +126,7 @@ namespace ImasArchiveApp
                 return _importCommand;
             }
         }
-        public bool CanImport() => _arc_file != null && !string.IsNullOrEmpty(_current_file);
+        public bool CanImport() => _arcFile != null && FileModel != null;
         AsyncCommand _exportCommand;
         public ICommand ExportCommand
         {
@@ -164,7 +139,7 @@ namespace ImasArchiveApp
                 return _exportCommand;
             }
         }
-        public bool CanExport() => _arc_file != null && !string.IsNullOrEmpty(_current_file);
+        public bool CanExport() => _arcFile != null && FileModel != null;
         AsyncCommand _saveAsCommand;
         public ICommand SaveAsCommand
         {
@@ -177,7 +152,7 @@ namespace ImasArchiveApp
                 return _saveAsCommand;
             }
         }
-        public bool CanSaveAs() => _arc_file != null;
+        public bool CanSaveAs() => _arcFile != null;
         AsyncCommand _extractAllCommand;
         public ICommand ExtractAllCommand
         {
@@ -190,20 +165,7 @@ namespace ImasArchiveApp
                 return _extractAllCommand;
             }
         }
-        public bool CanExtractAll() => _arc_file != null;
-        AsyncCommand _newFromFolderCommand;
-        public ICommand NewFromFolderCommand
-        {
-            get
-            {
-                if (_newFromFolderCommand == null)
-                {
-                    _newFromFolderCommand = new AsyncCommand(() => CreateNewFromFolder(), () => CanNewFromFolder());
-                }
-                return _newFromFolderCommand;
-            }
-        }
-        public bool CanNewFromFolder() => _arc_file == null;
+        public bool CanExtractAll() => _arcFile != null;
         AsyncCommand _extractCommusCommand;
         public ICommand ExtractCommusCommand
         {
@@ -216,7 +178,7 @@ namespace ImasArchiveApp
                 return _extractCommusCommand;
             }
         }
-        public bool CanExtractCommus() => _arc_file != null;
+        public bool CanExtractCommus() => _arcFile != null;
         AsyncCommand _replaceCommusCommand;
         public ICommand ReplaceCommusCommand
         {
@@ -229,7 +191,7 @@ namespace ImasArchiveApp
                 return _replaceCommusCommand;
             }
         }
-        public bool CanReplaceCommus() => _arc_file != null;
+        public bool CanReplaceCommus() => _arcFile != null;
         AsyncCommand _patchFontCommand;
         public ICommand PatchFontCommand
         {
@@ -242,25 +204,30 @@ namespace ImasArchiveApp
                 return _patchFontCommand;
             }
         }
-        public bool CanPatchFont() => _arc_file != null;
+        public bool CanPatchFont() => _arcFile != null;
         #endregion
         #region Command Methods
         public async Task Import()
         {
+            string fileName;
             ArcEntry arcEntry;
             try
             {
                 ClearStatus();
-                if (_inPath == null)
-                    return;
-                if (!File.Exists(_inPath))
+                fileName = _getFileName.OpenGetFileName("Import", "All files (*.*)|*.*");
+                if (fileName != null)
                 {
-                    ReportMessage("Selected file not found.");
-                    return;
+                    if (!File.Exists(fileName))
+                    {
+                        ReportMessage("Selected file not found.");
+                        return;
+                    }
+                    arcEntry = ArcFile.GetEntry(CurrentFile);
+                    if (arcEntry == null)
+                        throw new ArgumentNullException("Could not find current file in archive.");
                 }
-                arcEntry = _arc_file.GetEntry(_current_file);
-                if (arcEntry == null)
-                    throw new ArgumentNullException("Could not find current file in archive.");
+                else
+                    return;
             }
             catch (Exception ex)
             {
@@ -269,7 +236,7 @@ namespace ImasArchiveApp
             }
             try
             {
-                using FileStream fileStream = new FileStream(_inPath, FileMode.Open, FileAccess.Read);
+                using FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
                 ReportMessage("Importing...");
                 await arcEntry.Replace(fileStream);
                 ReportMessage("Done.");
@@ -281,7 +248,7 @@ namespace ImasArchiveApp
             }
             finally
             {
-                LoadChildFileModel(_current_file);
+                LoadChildFileModel(CurrentFile);
             }
         }
         public async Task Export()
@@ -289,49 +256,42 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                ArcEntry arcEntry = _arc_file.GetEntry(_current_file);
-                if (arcEntry == null)
-                    throw new ArgumentNullException("Could not find current file in archive.");
-                using Stream stream = arcEntry.Open();
-                using FileStream fileStream = new FileStream(_outPath, FileMode.Create, FileAccess.Write);
-                ReportMessage("Exporting...");
-                await stream.CopyToAsync(fileStream);
-                ReportMessage("Done.");
+                string fileName = _getFileName.SaveGetFileName("Export",
+                    ArcPath.Substring(0, ArcPath.LastIndexOf('\\')),
+                    CurrentFile.Substring(CurrentFile.LastIndexOf('/') + 1),
+                    "");
+                if (fileName != null)
+                {
+                    ArcEntry arcEntry = ArcFile.GetEntry(CurrentFile);
+                    if (arcEntry == null)
+                        throw new ArgumentNullException("Could not find current file in archive.");
+                    using Stream stream = arcEntry.Open();
+                    using FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+                    ReportMessage("Exporting...");
+                    await stream.CopyToAsync(fileStream);
+                    ReportMessage("Done.");
+                }
             }
             catch (Exception ex)
             {
                 ReportException(ex);
-                try
-                {
-                    if (File.Exists(_outPath))
-                        File.Delete(_outPath);
-                }
-                catch { }
             }
         }
         public async Task SaveAs()
         {
             try
             {
-                ClearStatus();
-                await ArcFile.SaveAs(OutPath[0..^4], new Progress<ProgressData>(ReportProgress));
-                ReportMessage("Done.");
+                ClearStatus(); 
+                string fileName = _getFileName.SaveGetFileName("Save As", "", "Arc file (*.arc)|*.arc");
+                if (fileName != null)
+                {
+                    await ArcFile.SaveAs(fileName[0..^4], new Progress<ProgressData>(ReportProgress));
+                    ReportMessage("Done.");
+                }
             }
             catch (Exception ex)
             {
                 ReportException(ex);
-                try
-                {
-                    if (File.Exists(OutPath[0..^4] + ".arc"))
-                        File.Delete(OutPath[0..^4] + ".arc");
-                }
-                catch { }
-                try
-                {
-                    if (File.Exists(OutPath[0..^4] + ".bin"))
-                        File.Delete(OutPath[0..^4] + ".bin");
-                }
-                catch { }
             }
         }
         public async Task ExtractAll()
@@ -339,37 +299,29 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                await ArcFile.ExtractAllAsync(OutPath, new Progress<ProgressData>(ReportProgress));
-                ReportMessage("Done.");
+                string fileName = _getFileName.SaveGetFileName("Extract to...", RemoveArcExtension(ArcPath), "");
+                if (fileName != null)
+                {
+                    await ArcFile.ExtractAllAsync(fileName, new Progress<ProgressData>(ReportProgress));
+                    ReportMessage("Done.");
+                }
             }
             catch (Exception ex)
             {
                 ReportException(ex);
             }
-        }
-        public async Task CreateNewFromFolder()
-        {
-            try
-            {
-                ClearStatus();
-                await ArcFile.BuildFromDirectory(InPath, OutPath[0..^4], new Progress<ProgressData>(ReportProgress));
-                ReportMessage("Done.");
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-                return;
-            }
-            _inPath = _outPath;
-            OpenArc();
         }
         public async Task ExtractCommus()
         {
             try
             {
                 ClearStatus();
-                await ArcFile.ExtractCommusDir(_outPath, new Progress<ProgressData>(ReportProgress));
-                ReportMessage("Done.");
+                string fileName = _getFileName.SaveGetFileName("Choose folder", RemoveArcExtension(ArcPath) + "commu", "");
+                if (fileName != null)
+                {
+                    await ArcFile.ExtractCommusDir(fileName, new Progress<ProgressData>(ReportProgress));
+                    ReportMessage("Done.");
+                }
             }
             catch (Exception ex)
             {
@@ -381,8 +333,12 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                await ArcFile.ReplaceCommusDir(_inPath, new Progress<ProgressData>(ReportProgress));
-                ReportMessage("Done.");
+                string fileName = _getFileName.OpenGetFolderName("Choose folder");
+                if (fileName != null)
+                {
+                    await ArcFile.ReplaceCommusDir(fileName, new Progress<ProgressData>(ReportProgress));
+                    ReportMessage("Done.");
+                }
             }
             catch (Exception ex)
             {

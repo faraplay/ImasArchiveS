@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
@@ -16,8 +17,7 @@ namespace ImasArchiveApp
 
         private string _statusMessage;
         private bool _statusIsException;
-
-        public string InPath;
+        private readonly IGetFileName _getFileName;
         #endregion
         #region Properties
         public IFileModel FileModel
@@ -50,8 +50,9 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public MainWindowModel()
+        public MainWindowModel(IGetFileName getFileName)
         {
+            _getFileName = getFileName;
             ClearStatus = MyClearStatus;
             ReportProgress = MyReportProgress;
             ReportMessage = MyReportMessage;
@@ -91,11 +92,31 @@ namespace ImasArchiveApp
             }
         }
         public bool CanClose() => FileModel != null;
+        AsyncCommand _newFromFolderCommand;
+        public ICommand NewFromFolderCommand
+        {
+            get
+            {
+                if (_newFromFolderCommand == null)
+                {
+                    _newFromFolderCommand = new AsyncCommand(() => CreateNewFromFolder(), () => CanNewFromFolder());
+                }
+                return _newFromFolderCommand;
+            }
+        }
+        public bool CanNewFromFolder() => FileModel == null;
         #endregion
         #region Command Methods
         public void Open()
         {
-            Open(InPath);
+            if (CanClose())
+                Close();
+            string fileName = _getFileName.OpenGetFileName("Open archive",
+                "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat|All files (*.*)|*.*");
+            if (fileName != null)
+            {
+                Open(fileName);
+            }
         }
         public void Open(string inPath)
         {
@@ -112,6 +133,29 @@ namespace ImasArchiveApp
         public void Close()
         {
             FileModel = null;
+        }
+        public async Task CreateNewFromFolder()
+        {
+            try
+            {
+                ClearStatus();
+                string inFileName = _getFileName.OpenGetFolderName("Choose folder");
+                if (inFileName != null)
+                {
+                    string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc");
+                    if (outFileName != null)
+                    {
+                        await ArcFile.BuildFromDirectory(inFileName, outFileName[0..^4], new Progress<ProgressData>(ReportProgress));
+                        ReportMessage("Done.");
+                        Open(outFileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                return;
+            }
         }
         #endregion
         #region Progress

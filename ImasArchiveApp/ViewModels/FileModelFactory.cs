@@ -29,7 +29,7 @@ namespace ImasArchiveApp
         {
             if (fileName.EndsWith(".arc") || fileName.EndsWith(".arc.dat"))
             {
-                return new ArcModel(parent, fileName);
+                return new ArcModel(parent, fileName, new Dialogs());
             }
             else
             {

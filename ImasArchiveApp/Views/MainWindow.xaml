@@ -14,8 +14,7 @@
             <local:FileBrowser Width="220" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:HexViewModel}">
-            <local:HexViewer
-                x:Name="hxViewer" />
+            <local:HexViewer x:Name="hxViewer" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:ArcModel}">
             <local:ArcView />
@@ -27,14 +26,13 @@
             <local:GTFView />
         </DataTemplate>
     </Window.Resources>
-    <Window.CommandBindings>
-        <CommandBinding Command="Open" Executed="Open_Executed" />
-    </Window.CommandBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Command="Open" Header="Open" />
+                <MenuItem Command="{Binding Path=OpenCommand}" Header="Open" />
                 <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
+                <Separator />
+                <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />
             </MenuItem>
         </Menu>
         <TextBlock

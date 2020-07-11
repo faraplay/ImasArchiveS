@@ -8,36 +8,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.CommandBindings>
-        <CommandBinding
-            CanExecute="Save_CanExecute"
-            Command="Save"
-            Executed="Save_Executed" />
-        <CommandBinding
-            CanExecute="Export_CanExecute"
-            Command="local:CustomCommands.Export"
-            Executed="Export_Executed" />
-        <CommandBinding
-            CanExecute="Import_CanExecute"
-            Command="local:CustomCommands.Import"
-            Executed="Import_Executed" />
-        <CommandBinding
-            CanExecute="ExtractAll_CanExecute"
-            Command="local:CustomCommands.ExtractAll"
-            Executed="ExtractAll_Executed" />
-        <CommandBinding
-            CanExecute="NewFromFolder_CanExecute"
-            Command="local:CustomCommands.NewFromFolder"
-            Executed="NewFromFolder_Executed" />
-        <CommandBinding
-            CanExecute="ExtractCommus_CanExecute"
-            Command="local:CustomCommands.ExtractCommus"
-            Executed="ExtractCommus_Executed" />
-        <CommandBinding
-            CanExecute="ReplaceCommus_CanExecute"
-            Command="local:CustomCommands.ReplaceCommus"
-            Executed="ReplaceCommus_Executed" />
-    </UserControl.CommandBindings>
     <DockPanel>
         <Expander
             BorderBrush="#FFABADB3"
@@ -55,19 +25,18 @@
             <DockPanel>
                 <Menu DockPanel.Dock="Top">
                     <MenuItem Header="Arc">
-                        <MenuItem Command="Save" Header="Save Arc" />
+                        <MenuItem Command="{Binding Path=SaveAsCommand}" Header="Save Arc" />
                         <Separator />
-                        <MenuItem Command="local:CustomCommands.NewFromFolder" />
-                        <MenuItem Command="local:CustomCommands.ExtractAll" />
+                        <MenuItem Command="{Binding Path=ExtractAllCommand}" Header="Extract All" />
                         <Separator />
-                        <MenuItem Command="local:CustomCommands.ExtractCommus" />
-                        <MenuItem Command="local:CustomCommands.ReplaceCommus" />
+                        <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract Commus" />
+                        <MenuItem Command="{Binding Path=ReplaceCommusCommand}" Header="Replace Commus" />
                         <Separator />
                         <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
                     </MenuItem>
                     <MenuItem Header="File">
-                        <MenuItem Command="local:CustomCommands.Import" />
-                        <MenuItem Command="local:CustomCommands.Export" />
+                        <MenuItem Command="{Binding Path=ImportCommand}" Header="Import" />
+                        <MenuItem Command="{Binding Path=ExportCommand}" Header="Export" />
                     </MenuItem>
                 </Menu>
                 <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />

@@ -7,6 +7,7 @@ namespace ImasArchiveApp
 {
     interface IFileModel : INotifyPropertyChanged, IDisposable
     {
+        public string FileName { get; }
     }
 
     interface IContainerFileModel : IFileModel

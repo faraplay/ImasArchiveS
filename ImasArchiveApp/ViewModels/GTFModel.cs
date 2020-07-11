@@ -18,6 +18,7 @@ namespace ImasArchiveApp
 
         private bool disposed = false;
 
+        #region Properties
         public string FileName { get; }
 
         public ImageSource ImageSource
@@ -29,7 +30,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-
+        #endregion
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;

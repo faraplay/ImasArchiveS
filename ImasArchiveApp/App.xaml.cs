@@ -17,7 +17,7 @@ namespace ImasArchiveApp
         {
             base.OnStartup(e);
 
-            var datacontext = new MainWindowModel();
+            var datacontext = new MainWindowModel(new Dialogs());
             var window = new MainWindow()
             {
                 DataContext = datacontext
