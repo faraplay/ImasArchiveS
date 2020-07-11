@@ -11,50 +11,20 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class ArcModel : ModelWithReport, INotifyPropertyChanged, IContainerFileModel
+    class ArcModel : ContainerFileModel
     {
         #region Fields
-        private string _arcPath;
-        private ArcFile _arcFile;
-        private BrowserModel _browserModel;
         private IFileModel _fileModel;
         private readonly IGetFileName _getFileName;
-        private bool disposed = false;
         #endregion
         #region Properties
-        public string FileName { get; }
-        public string ArcPath
-        {
-            get => _arcPath;
-            set
-            {
-                _arcPath = value;
-                OnPropertyChanged();
-            }
-        }
+        public string ArcPath { get; }
         public string CurrentFile
         {
             get => FileModel.FileName;
         }
-        public ArcFile ArcFile
-        {
-            get => _arcFile;
-            set
-            {
-                _arcFile = value;
-                OnPropertyChanged();
-            }
-        }
-        public BrowserModel BrowserModel
-        {
-            get => _browserModel;
-            set
-            {
-                _browserModel = value;
-                OnPropertyChanged();
-            }
-        }
-        public IFileModel FileModel
+        public ArcFile ArcFile { get; }
+        public override IFileModel FileModel
         {
             get => _fileModel;
             set
@@ -65,25 +35,38 @@ namespace ImasArchiveApp
             }
         }
         #endregion
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
         #region Constructors
-        public ArcModel(ModelWithReport parent, string inPath, IGetFileName getFileName)
+        public ArcModel(IReport parent, string inPath, IGetFileName getFileName) : base(parent, inPath.Substring(inPath.LastIndexOf('\\') + 1))
         {
             _getFileName = getFileName;
-            FileName = inPath.Substring(inPath.LastIndexOf('\\') + 1);
-            _arcPath = inPath;
-            ClearStatus = parent.ClearStatus;
-            ReportProgress = parent.ReportProgress;
-            ReportMessage = parent.ReportMessage;
-            ReportException = parent.ReportException;
+            ArcPath = inPath;
             _fileModel = null;
-            OpenArc();
+            try
+            {
+                ClearStatus();
+                string truncFilename = ArcPath;
+                string extension;
+                if (truncFilename.EndsWith(".arc"))
+                {
+                    truncFilename = truncFilename.Remove(truncFilename.Length - 4);
+                    extension = "";
+                }
+                else if (truncFilename.EndsWith(".arc.dat"))
+                {
+                    truncFilename = truncFilename.Remove(truncFilename.Length - 8);
+                    extension = ".dat";
+                }
+                else
+                {
+                    throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
+                }
+                ArcFile = new ArcFile(truncFilename, extension);
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
             List<string> browserEntries = new List<string>();
             foreach (ArcEntry entry in ArcFile.Entries)
             {
@@ -93,25 +76,18 @@ namespace ImasArchiveApp
         }
         #endregion
         #region IDisposable
-        public void Dispose()
+        bool disposed = false;
+        protected override void Dispose(bool disposing)
         {
-            if (!disposed)
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-        }
-        protected void Dispose(bool disposing)
-        {
+            if (disposed)
+                return;
             if (disposing)
             {
-                _fileModel?.Dispose();
-                BrowserModel?.Dispose();
-                _arcFile?.Dispose();
+                ArcFile?.Dispose();
             }
             disposed = true;
+            base.Dispose(disposing);
         }
-        ~ArcModel() => Dispose(false);
         #endregion
         #region Commands
         AsyncCommand _importCommand;
@@ -126,7 +102,7 @@ namespace ImasArchiveApp
                 return _importCommand;
             }
         }
-        public bool CanImport() => _arcFile != null && FileModel != null;
+        public bool CanImport() => ArcFile != null && FileModel != null;
         AsyncCommand _exportCommand;
         public ICommand ExportCommand
         {
@@ -139,7 +115,7 @@ namespace ImasArchiveApp
                 return _exportCommand;
             }
         }
-        public bool CanExport() => _arcFile != null && FileModel != null;
+        public bool CanExport() => ArcFile != null && FileModel != null;
         AsyncCommand _saveAsCommand;
         public ICommand SaveAsCommand
         {
@@ -152,7 +128,7 @@ namespace ImasArchiveApp
                 return _saveAsCommand;
             }
         }
-        public bool CanSaveAs() => _arcFile != null;
+        public bool CanSaveAs() => ArcFile != null;
         AsyncCommand _extractAllCommand;
         public ICommand ExtractAllCommand
         {
@@ -165,7 +141,7 @@ namespace ImasArchiveApp
                 return _extractAllCommand;
             }
         }
-        public bool CanExtractAll() => _arcFile != null;
+        public bool CanExtractAll() => ArcFile != null;
         AsyncCommand _extractCommusCommand;
         public ICommand ExtractCommusCommand
         {
@@ -178,7 +154,7 @@ namespace ImasArchiveApp
                 return _extractCommusCommand;
             }
         }
-        public bool CanExtractCommus() => _arcFile != null;
+        public bool CanExtractCommus() => ArcFile != null;
         AsyncCommand _replaceCommusCommand;
         public ICommand ReplaceCommusCommand
         {
@@ -191,7 +167,7 @@ namespace ImasArchiveApp
                 return _replaceCommusCommand;
             }
         }
-        public bool CanReplaceCommus() => _arcFile != null;
+        public bool CanReplaceCommus() => ArcFile != null;
         AsyncCommand _patchFontCommand;
         public ICommand PatchFontCommand
         {
@@ -204,7 +180,7 @@ namespace ImasArchiveApp
                 return _patchFontCommand;
             }
         }
-        public bool CanPatchFont() => _arcFile != null;
+        public bool CanPatchFont() => ArcFile != null;
         #endregion
         #region Command Methods
         public async Task Import()
@@ -381,47 +357,17 @@ namespace ImasArchiveApp
         #endregion
         #region Other Methods
 
-        private void OpenArc()
+        public override void LoadChildFileModel(string fileName)
         {
-            try
+            ClearStatus();
+            if (fileName != null)
             {
-                ClearStatus();
-                string truncFilename = _arcPath;
-                string extension;
-                if (truncFilename.EndsWith(".arc"))
-                {
-                    truncFilename = truncFilename.Remove(truncFilename.Length - 4);
-                    extension = "";
-                }
-                else if (truncFilename.EndsWith(".arc.dat"))
-                {
-                    truncFilename = truncFilename.Remove(truncFilename.Length - 8);
-                    extension = ".dat";
-                }
-                else
-                {
-                    throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
-                }
-                ArcFile = new ArcFile(truncFilename, extension);
-            }
-            catch
-            {
-                Dispose();
-                throw;
-            }
-        }
-
-        public void LoadChildFileModel(string path)
-        {
-            if (ArcFile != null && path != null)
-            {
-                ArcEntry arcEntry = ArcFile.GetEntry(path);
+                ArcEntry arcEntry = ArcFile.GetEntry(fileName);
                 if (arcEntry != null)
                 {
-                    ClearStatus();
                     try
                     {
-                        FileModel = FileModelFactory.CreateFileModel(arcEntry.Open(), path);
+                        FileModel = FileModelFactory.CreateFileModel(arcEntry.Open(), fileName);
                     }
                     catch (Exception ex)
                     {

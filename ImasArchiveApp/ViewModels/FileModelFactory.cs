@@ -7,7 +7,7 @@ namespace ImasArchiveApp
 {
     static class FileModelFactory
     {
-        public static ModelWithReport parent;
+        public static IReport parent;
         public static IFileModel CreateFileModel(Stream stream, string fileName)
         {
             string extension = fileName.Substring(fileName.LastIndexOf('.') + 1);

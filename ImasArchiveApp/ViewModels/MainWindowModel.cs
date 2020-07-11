@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class MainWindowModel : ModelWithReport, INotifyPropertyChanged
+    class MainWindowModel : IReport, INotifyPropertyChanged
     {
         #region Fields
         private IFileModel _fileModel;
@@ -65,6 +65,12 @@ namespace ImasArchiveApp
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
+        #region IReport
+        public Action ClearStatus { get; }
+        public Action<ProgressData> ReportProgress { get; }
+        public Action<string> ReportMessage { get; }
+        public Action<Exception> ReportException { get; }
         #endregion
         #region Commands
         private RelayCommand _openCommand;

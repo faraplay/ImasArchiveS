@@ -8,27 +8,15 @@ using System.Text;
 
 namespace ImasArchiveApp
 {
-    class ParModel : ModelWithReport, IContainerFileModel
+    class ParModel : ContainerFileModel
     {
         #region Fields
         private readonly ParFile _parFile;
 
-        private BrowserModel _browserModel;
         private IFileModel _fileModel;
         #endregion
         #region Properties
-        public string FileName { get; }
-        public BrowserModel BrowserModel
-        {
-            get => _browserModel;
-            set
-            {
-                _browserModel?.Dispose();
-                _browserModel = value;
-                OnPropertyChanged();
-            }
-        }
-        public IFileModel FileModel
+        public override IFileModel FileModel
         {
             get => _fileModel;
             set
@@ -39,21 +27,9 @@ namespace ImasArchiveApp
             }
         }
         #endregion
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
         #region Constructors
-        public ParModel(ModelWithReport parent, Stream stream, string fileName)
+        public ParModel(IReport parent, Stream stream, string fileName) : base(parent, fileName)
         {
-            FileName = fileName;
-            ClearStatus = parent.ClearStatus;
-            ReportException = parent.ReportException;
-            ReportMessage = parent.ReportMessage;
-            ReportProgress = parent.ReportProgress;
             try
             {
                 _parFile = new ParFile(stream);
@@ -72,28 +48,20 @@ namespace ImasArchiveApp
         }
         #endregion
         #region IDisposable
-        private bool disposed;
-        public void Dispose()
+        bool disposed = false;
+        protected override void Dispose(bool disposing)
         {
-            if (!disposed)
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-        }
-        protected virtual void Dispose(bool disposing)
-        {
+            if (disposed)
+                return;
             if (disposing)
             {
                 _parFile?.Dispose();
-                _fileModel?.Dispose();
             }
             disposed = true;
+            base.Dispose(disposing);
         }
-        ~ParModel() => Dispose(false);
         #endregion
-
-        public void LoadChildFileModel(string fileName)
+        public override void LoadChildFileModel(string fileName)
         {
             ClearStatus();
             if (fileName != null)

@@ -7,15 +7,14 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class BrowserModel : INotifyPropertyChanged, IDisposable
+    class BrowserModel : INotifyPropertyChanged
     {
         #region Fields
-        private readonly IContainerFileModel _parentModel;
+        private readonly ContainerFileModel _parentModel;
         private BrowserTree _currentDir;
         private readonly List<BrowserTree> _history;
         private int _history_index = 0;
         private string _selectedFile;
-        private bool disposed = false;
         #endregion
         #region Properties
 
@@ -63,7 +62,7 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public BrowserModel(IContainerFileModel parentModel, BrowserTree browserTree)
+        public BrowserModel(ContainerFileModel parentModel, BrowserTree browserTree)
         {
             if (browserTree == null)
                 throw new ArgumentNullException(nameof(browserTree));
@@ -78,25 +77,6 @@ namespace ImasArchiveApp
                 Items.Add(new BrowserItemModel(this, tree));
             }
         }
-        #endregion
-        #region IDisposable
-        public void Dispose()
-        {
-            if (!disposed)
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-        }
-        protected void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-
-            }
-            disposed = true;
-        }
-        ~BrowserModel() => Dispose(false);
         #endregion
         #region Commands
         RelayCommand _browseBackCommand;
