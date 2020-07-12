@@ -26,6 +26,16 @@ namespace ImasArchiveApp
 
         private void DockPanel_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            SetLineCount();
+        }
+
+        private void DataTextBlock_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is HexViewModel)
+                SetLineCount();
+        }
+        private void SetLineCount()
+        {
             double lineHeight = tbData.LineHeight;
             if (double.IsNaN(lineHeight))
                 lineHeight = tbData.FontSize * tbData.FontFamily.LineSpacing;

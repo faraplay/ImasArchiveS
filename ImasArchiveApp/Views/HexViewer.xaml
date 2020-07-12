@@ -9,7 +9,7 @@
     d:DesignHeight="450"
     d:DesignWidth="400"
     mc:Ignorable="d">
-    <DockPanel>
+    <DockPanel SizeChanged="DockPanel_SizeChanged">
         <Border
             BorderBrush="#FFABADB3"
             BorderThickness="1"
@@ -31,9 +31,9 @@
             Text="{Binding Path=HeaderText}" />
         <TextBlock
             x:Name="tbData"
+            DataContextChanged="DataTextBlock_DataContextChanged"
             FontFamily="Consolas"
             FontSize="14"
-            SizeChanged="DockPanel_SizeChanged"
             Text="{Binding Path=DataText}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseWheel">
