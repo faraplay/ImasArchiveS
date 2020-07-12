@@ -220,19 +220,19 @@ namespace ImasArchiveLib
             {
                 if (entry.Name.EndsWith(".par"))
                 {
-                    using Stream stream = entry.Open();
+                    using Stream stream = await entry.GetData();
                     ParFile parFile = new ParFile(stream);
                     await parFile.ExtractAll(destDir + "\\" + entry.Name[0..^4] + "_par");
                 }
                 else if (entry.Name.EndsWith(".pta"))
                 {
-                    using Stream stream = entry.Open();
+                    using Stream stream = await entry.GetData();
                     ParFile parFile = new ParFile(stream);
                     await parFile.ExtractAll(destDir + "\\" + entry.Name[0..^4] + "_pta");
                 }
                 else
                 {
-                    using Stream stream = entry.Open();
+                    using Stream stream = await entry.GetData();
                     using FileStream fileStream = new FileStream(destDir + "\\" + entry.Name, FileMode.Create, FileAccess.Write);
                     await stream.CopyToAsync(fileStream);
                 }

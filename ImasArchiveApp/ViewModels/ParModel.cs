@@ -62,7 +62,7 @@ namespace ImasArchiveApp
             base.Dispose(disposing);
         }
         #endregion
-        public override Task LoadChildFileModel(string fileName)
+        public override async Task LoadChildFileModel(string fileName)
         {
             ClearStatus();
             if (fileName != null)
@@ -70,7 +70,7 @@ namespace ImasArchiveApp
                 try
                 {
                     ReportMessage("Loading " + fileName);
-                    FileModel = FileModelFactory.CreateFileModel(_parFile.GetEntry(fileName).Open(), fileName);
+                    FileModel = FileModelFactory.CreateFileModel(await _parFile.GetEntry(fileName).GetData(), fileName);
                     ReportMessage("Loaded.");
                 }
                 catch (Exception ex)
@@ -83,7 +83,6 @@ namespace ImasArchiveApp
             {
                 FileModel = null;
             }
-            return Task.CompletedTask;
         }
     }
 }
