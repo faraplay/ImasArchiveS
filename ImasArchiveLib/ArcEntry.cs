@@ -11,16 +11,16 @@ namespace ImasArchiveLib
         private ArcFile _parent_file;
         private readonly long _base_offset;
         private long _originalLength;
-        private MemoryStream _memory_stream;
+        private MemoryStream _newData;
         private bool disposed = false;
         #endregion
         #region Properties
         public string Filepath { get; }
         public string Name { get; }
-        public long Length { get => UsesMemoryStream ? _memory_stream.Length : _originalLength; }
+        public long Length { get => UsesMemoryStream ? _newData.Length : _originalLength; }
         internal long CreatedLength { get; private set; }
         internal long SaveAsOffset { get; set; }
-        internal bool UsesMemoryStream { get => _memory_stream != null; }
+        internal bool UsesMemoryStream { get => _newData != null; }
         #endregion
         #region Constructors & Factory Methods
         /// <summary>
@@ -38,7 +38,7 @@ namespace ImasArchiveLib
             _base_offset = baseOffset;
             SaveAsOffset = baseOffset;
             _originalLength = length;
-            _memory_stream = null;
+            _newData = null;
         }
 
         private ArcEntry(ArcFile parent, string filepath)
@@ -60,8 +60,8 @@ namespace ImasArchiveLib
         internal static async Task<ArcEntry> NewEntry(ArcFile parent, string filepath, Stream stream)
         {
             ArcEntry arcEntry = new ArcEntry(parent, filepath);
-            await arcEntry.Replace(stream);
-            arcEntry._originalLength = arcEntry._memory_stream.Length;
+            await arcEntry.SetData(stream);
+            arcEntry._originalLength = arcEntry._newData.Length;
             return arcEntry;
         }
         #endregion
@@ -77,10 +77,10 @@ namespace ImasArchiveLib
         {
             try
             {
-                if (_memory_stream != null)
+                if (_newData != null)
                 {
-                    _memory_stream.Seek(0, SeekOrigin.Begin);
-                    return _memory_stream;
+                    _newData.Seek(0, SeekOrigin.Begin);
+                    return _newData;
                 }
                 else if (_base_offset >= 0)
                 {
@@ -98,18 +98,21 @@ namespace ImasArchiveLib
         }
 
         /// <summary>
-        /// Opens a stream containing the raw file data of the entry for read access.
+        /// Creates a new stream containing the raw file data of the entry for read access.
+        /// Changes in this new stream will not affect the ArcEntry.
         /// If an exception occurs, returns null.
-        /// Dispose after you have used the stream.
         /// </summary>
         /// <returns></returns>
-        public Stream Open()
+        public async Task<Stream> GetData()
         {
             try
             {
-                FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name + ".gz", UsesMemoryStream);
-                SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
-                return segsStream;
+                using FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name + ".gz", UsesMemoryStream);
+                using SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
+                MemoryStream memoryStream = new MemoryStream();
+                await segsStream.CopyToAsync(memoryStream).ConfigureAwait(false);
+                memoryStream.Position = 0;
+                return memoryStream;
             }
             catch
             {
@@ -122,11 +125,11 @@ namespace ImasArchiveLib
         /// </summary>
         /// <param name="stream">The stream to copy from</param>
         /// <exception cref="IOException"/>
-        public async Task Replace(Stream stream)
+        public async Task SetData(Stream stream)
         {
-            _memory_stream?.Dispose();
-            _memory_stream = new MemoryStream();
-            using FlowbishStream flowbishStream = new FlowbishStream(_memory_stream, FlowbishStreamMode.Encipher, Name + ".gz", true);
+            _newData?.Dispose();
+            _newData = new MemoryStream();
+            using FlowbishStream flowbishStream = new FlowbishStream(_newData, FlowbishStreamMode.Encipher, Name + ".gz", true);
             await SegsStream.CompressStream(stream, flowbishStream);
         }
 
@@ -144,8 +147,8 @@ namespace ImasArchiveLib
         }
         internal void ClearMemoryStream()
         {
-            _memory_stream?.Dispose();
-            _memory_stream = null;
+            _newData?.Dispose();
+            _newData = null;
         }
         #endregion
         #region IDisposable
@@ -165,7 +168,7 @@ namespace ImasArchiveLib
 
             if (disposing)
             {
-                _memory_stream?.Dispose();
+                _newData?.Dispose();
             }
 
             disposed = true;
@@ -181,7 +184,7 @@ namespace ImasArchiveLib
         {
             try
             {
-                using Stream parStream = this.Open();
+                using Stream parStream = await GetData();
                 if (!Name.EndsWith(".par"))
                     return false;
                 int mbinPos = ParCommu.TryGetMBin(parStream, Name);
@@ -208,7 +211,7 @@ namespace ImasArchiveLib
 
         public async Task TryReplaceCommuText(string commuFileName)
         {
-            using Stream parStream = this.Open();
+            using Stream parStream = await GetData();
             MemoryStream memoryStream = new MemoryStream();
             using StreamReader commuReader = new StreamReader(commuFileName);
             try
@@ -220,7 +223,7 @@ namespace ImasArchiveLib
                 return;
             }
             memoryStream.Position = 0;
-            await Replace(memoryStream);
+            await SetData(memoryStream);
         }
         #endregion
     }

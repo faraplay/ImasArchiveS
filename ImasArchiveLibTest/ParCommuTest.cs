@@ -47,7 +47,7 @@ namespace ImasArchiveLibTest
 
             using (FileStream fileStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
             {
-                using Stream stream = arcEntry.Open();
+                using Stream stream = await arcEntry.GetData();
                 stream.CopyTo(fileStream);
             }
 

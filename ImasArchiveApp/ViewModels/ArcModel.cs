@@ -214,7 +214,7 @@ namespace ImasArchiveApp
             {
                 using FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
                 ReportMessage("Importing...");
-                await arcEntry.Replace(fileStream);
+                await arcEntry.SetData(fileStream);
                 ReportMessage("Done.");
             }
             catch (Exception ex)
@@ -241,7 +241,7 @@ namespace ImasArchiveApp
                     ArcEntry arcEntry = ArcFile.GetEntry(CurrentFile);
                     if (arcEntry == null)
                         throw new ArgumentNullException("Could not find current file in archive.");
-                    using Stream stream = arcEntry.Open();
+                    using Stream stream = arcEntry.GetData();
                     using FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
                     ReportMessage("Exporting...");
                     await stream.CopyToAsync(fileStream);
@@ -333,7 +333,7 @@ namespace ImasArchiveApp
                 }
                 using (Font font = new Font())
                 {
-                    using (Stream parStream = fontEntry.Open())
+                    using (Stream parStream = fontEntry.GetData())
                     {
                         ReportMessage("Reading im2nx_font.par...");
                         await Task.Run(() => font.ReadFontPar(parStream));
@@ -345,7 +345,7 @@ namespace ImasArchiveApp
                     using MemoryStream memStream = new MemoryStream();
                     await font.WriteFontPar(memStream, false);
                     memStream.Position = 0;
-                    await fontEntry.Replace(memStream);
+                    await fontEntry.SetData(memStream);
                 }
                 ReportMessage("Done.");
             }
@@ -367,7 +367,7 @@ namespace ImasArchiveApp
                 {
                     try
                     {
-                        FileModel = FileModelFactory.CreateFileModel(arcEntry.Open(), fileName);
+                        FileModel = FileModelFactory.CreateFileModel(arcEntry.GetData(), fileName);
                     }
                     catch (Exception ex)
                     {

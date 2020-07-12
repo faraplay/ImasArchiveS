@@ -368,7 +368,7 @@ namespace ImasArchiveLib
                 directoryInfo.CreateSubdirectory(dirs);
             string outFile = directoryInfo.FullName + '/' + arcEntry.Filepath;
             using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
-            using Stream stream = arcEntry.Open();
+            using Stream stream = await arcEntry.GetData();
             await stream.CopyToAsync(fileStream);
             countProgress++;
             progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.Filepath });

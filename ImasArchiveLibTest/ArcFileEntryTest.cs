@@ -57,13 +57,13 @@ namespace ImasArchiveLibTest
         [DataTestMethod]
         [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin")]
         [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par", "other/ami_bs2_c01.par")]
-        public void GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
+        public async Task GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
             ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
             if (arcEntry == null)
                 Assert.Fail("Entry not found.");
-            using (Stream stream = arcEntry.Open())
+            using (Stream stream = await arcEntry.GetData())
             {
                 using FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
                 stream.CopyTo(fileStream);
@@ -114,7 +114,7 @@ namespace ImasArchiveLibTest
                     Assert.Fail("Entry not found.");
                 using (FileStream fileStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
                 {
-                    await arcEntry.Replace(fileStream);
+                    await arcEntry.SetData(fileStream);
                 }
                 await arcFile.SaveAs("temp1", progress);
                 await arcFile.SaveAs("temp2", progress);
@@ -145,7 +145,7 @@ namespace ImasArchiveLibTest
                     Assert.Fail("Entry not found.");
                 using (FileStream fileStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
                 {
-                    await arcEntry.Replace(fileStream);
+                    await arcEntry.SetData(fileStream);
                 }
                 await arcFile.SaveAs("temp", progress);
             }
