@@ -34,6 +34,7 @@ namespace ImasArchiveLib
             MemoryStream memoryStream = new MemoryStream();
             using Stream stream = Parent.GetSubstream(Offset, Length);
             await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
+            memoryStream.Position = 0;
             return memoryStream;
         }
 

@@ -5,8 +5,10 @@ using System.Text;
 
 namespace ImasArchiveLib
 {
-    static class Utils
+    class Utils
     {
+        Stream stream;
+        public Utils(Stream stream) => this.stream = stream;
         /// <summary>
         /// Returns a 32-bit unsigned integer from the stream.
         /// </summary>
@@ -26,6 +28,7 @@ namespace ImasArchiveLib
                 ((uint)data[2] << 8) |
                 ((uint)data[3]);
         }
+        public uint GetUInt() => GetUInt(stream);
         /// <summary>
         /// Returns a 32-bit signed integer from the stream.
         /// </summary>
@@ -36,6 +39,7 @@ namespace ImasArchiveLib
         {
             return (int)GetUInt(stream);
         }
+        public int GetInt32() => (int)GetUInt(stream);
         /// <summary>
         /// Returns a 16-bit unsigned integer from the stream.
         /// </summary>
@@ -52,6 +56,7 @@ namespace ImasArchiveLib
             }
             return (ushort)((data[0] << 8) | (data[1]));
         }
+        public ushort GetUShort() => GetUShort(stream);
         /// <summary>
         /// Returns a 16-bit signed integer from the stream.
         /// </summary>
@@ -62,6 +67,7 @@ namespace ImasArchiveLib
         {
             return (short)GetUShort(stream);
         }
+        public short GetInt16() => (short)GetUShort(stream);
         /// <summary>
         /// Returns a byte from the stream.
         /// </summary>
@@ -77,6 +83,7 @@ namespace ImasArchiveLib
             }
             return (byte)n;
         }
+        public byte GetByte() => GetByte(stream);
         /// <summary>
         /// Writes a 32-bit unsigned integer to the stream.
         /// </summary>
@@ -95,6 +102,7 @@ namespace ImasArchiveLib
             x <<= 8;
             stream.WriteByte((byte)(x >> 24));
         }
+        public void PutUInt(uint x) => PutUInt(stream, x);
         /// <summary>
         /// Writes a 32-bit signed integer to the stream.
         /// </summary>
@@ -107,6 +115,7 @@ namespace ImasArchiveLib
         {
             PutUInt(stream, (uint)x);
         }
+        public void PutInt32(int x) => PutUInt(stream, (uint)x);
         /// <summary>
         /// Writes a 16-bit unsigned integer to the stream.
         /// </summary>
@@ -121,6 +130,7 @@ namespace ImasArchiveLib
             x <<= 8;
             stream.WriteByte((byte)(x >> 8));
         }
+        public void PutUShort(ushort x) => PutUShort(stream, x);
         /// <summary>
         /// Writes a 16-bit signed integer to the stream.
         /// </summary>
@@ -133,6 +143,7 @@ namespace ImasArchiveLib
         {
             PutUShort(stream, (ushort)x);
         }
+        public void PutInt16(short x) => PutUShort(stream, (ushort)x);
         /// <summary>
         /// Writes a byte to the stream.
         /// </summary>
@@ -145,5 +156,6 @@ namespace ImasArchiveLib
         {
             stream.WriteByte(x);
         }
+        public void PutByte(byte x) => PutByte(stream, x);
     }
 }

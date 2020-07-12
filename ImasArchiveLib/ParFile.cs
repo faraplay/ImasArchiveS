@@ -139,14 +139,15 @@ namespace ImasArchiveLib
 
         private void ReadHeaderBigEndian()
         {
-            int nameLength = Utils.GetInt32(_stream) switch
+            Utils binary = new Utils(_stream);
+            int nameLength = binary.GetInt32() switch
             {
                 2 => 0x20,
                 3 => 0x80,
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             };
 
-            fileCount = Utils.GetInt32(_stream);
+            fileCount = binary.GetInt32();
             
             bool lengthsKnown = _stream.ReadByte() switch
             {
@@ -159,7 +160,7 @@ namespace ImasArchiveLib
             int[] offsets = new int[fileCount];
             for (int i = 0; i < fileCount; i++)
             {
-                offsets[i] = Utils.GetInt32(_stream);
+                offsets[i] = binary.GetInt32();
             }
 
             long pad = (-_stream.Position) & 15;
@@ -177,7 +178,7 @@ namespace ImasArchiveLib
             int[] props = new int[fileCount];
             for (int i = 0; i < fileCount; i++)
             {
-                props[i] = Utils.GetInt32(_stream);
+                props[i] = binary.GetInt32();
             }
             pad = (-_stream.Position) & 15;
             _stream.Position += pad;
@@ -186,7 +187,7 @@ namespace ImasArchiveLib
             if (lengthsKnown) {
                 for (int i = 0; i < fileCount; i++)
                 {
-                    lengths[i] = Utils.GetInt32(_stream);
+                    lengths[i] = binary.GetInt32();
                 }
                 pad = (-_stream.Position) & 15;
                 _stream.Position += pad;

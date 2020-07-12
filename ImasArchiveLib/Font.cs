@@ -21,18 +21,19 @@ namespace ImasArchiveLib
             using MemoryStream memStream = new MemoryStream();
             await stream.CopyToAsync(memStream);
             memStream.Position = 0;
+            Utils binary = new Utils(memStream);
             parHeader = new byte[16];
             memStream.Read(parHeader);
-            int gtfPos = Utils.GetInt32(memStream);
-            _ = Utils.GetInt32(memStream);
-            int nxpPos = Utils.GetInt32(memStream);
+            int gtfPos = binary.GetInt32();
+            _ = binary.GetInt32();
+            int nxpPos = binary.GetInt32();
 
             memStream.Position = gtfPos;
             BigBitmap = GTF.ReadGTF(memStream);
 
             memStream.Position = nxpPos + 8;
-            int charCount = Utils.GetInt32(memStream);
-            root = Utils.GetInt32(memStream);
+            int charCount = binary.GetInt32();
+            root = binary.GetInt32();
             chars = new CharData[charCount];
             memStream.Position = nxpPos + 48;
             for (int i = 0; i < charCount; i++)
@@ -40,18 +41,18 @@ namespace ImasArchiveLib
                 chars[i] = new CharData
                 {
                     index = i,
-                    key = Utils.GetUShort(memStream),
-                    datawidth = Utils.GetByte(memStream),
-                    dataheight = Utils.GetByte(memStream),
-                    datax = Utils.GetInt16(memStream),
-                    datay = Utils.GetInt16(memStream),
-                    offsetx = Utils.GetInt16(memStream),
-                    offsety = Utils.GetInt16(memStream),
-                    width = Utils.GetInt16(memStream),
-                    blank = Utils.GetInt16(memStream),
-                    left = Utils.GetInt32(memStream),
-                    right = Utils.GetInt32(memStream),
-                    isEmoji = Utils.GetUShort(memStream)
+                    key = binary.GetUShort(),
+                    datawidth = binary.GetByte(),
+                    dataheight = binary.GetByte(),
+                    datax = binary.GetInt16(),
+                    datay = binary.GetInt16(),
+                    offsetx = binary.GetInt16(),
+                    offsety = binary.GetInt16(),
+                    width = binary.GetInt16(),
+                    blank = binary.GetInt16(),
+                    left = binary.GetInt32(),
+                    right = binary.GetInt32(),
+                    isEmoji = binary.GetUShort()
                 };
                 memStream.Position += 6;
             }
@@ -77,10 +78,12 @@ namespace ImasArchiveLib
                 int nxpLen = 0x30 + 0x20 * chars.Length;
                 nxpPad = (-nxpLen) & 0x7F;
 
-                Utils.PutInt32(memStream, gtfPos);
-                Utils.PutInt32(memStream, nxPos);
-                Utils.PutInt32(memStream, nxpPos);
-                Utils.PutInt32(memStream, 0);
+                Utils binary = new Utils(memStream);
+
+                binary.PutInt32(gtfPos);
+                binary.PutInt32(nxPos);
+                binary.PutInt32(nxpPos);
+                binary.PutInt32(0);
 
                 string gtfName = "im2nx.gtf";
                 string nxName = "im2nx.paf";
@@ -92,15 +95,15 @@ namespace ImasArchiveLib
                 memStream.Write(Encoding.ASCII.GetBytes(nxpName));
                 memStream.Write(zeros, 0, 0x80 - nxpName.Length);
 
-                Utils.PutUInt(memStream, 0);
-                Utils.PutUInt(memStream, 1);
-                Utils.PutUInt(memStream, 2);
-                Utils.PutUInt(memStream, 0);
+                binary.PutUInt(0);
+                binary.PutUInt(1);
+                binary.PutUInt(2);
+                binary.PutUInt(0);
 
-                Utils.PutInt32(memStream, gtfLen);
-                Utils.PutInt32(memStream, nxLen);
-                Utils.PutInt32(memStream, nxpLen);
-                Utils.PutInt32(memStream, 0);
+                binary.PutInt32(gtfLen);
+                binary.PutInt32(nxLen);
+                binary.PutInt32(nxpLen);
+                binary.PutInt32(0);
 
                 int pad = (int)(pos - memStream.Position) & 0x7F;
                 memStream.Write(zeros, 0, pad);
@@ -122,10 +125,11 @@ namespace ImasArchiveLib
         private async Task WritePaf(Stream stream, bool isNxp, bool nxFixedWidth = true)
         {
             using MemoryStream memStream = new MemoryStream();
-            Utils.PutUInt(memStream, 0x70616601);
-            Utils.PutUInt(memStream, 0x0201001D);
-            Utils.PutInt32(memStream, chars.Length);
-            Utils.PutInt32(memStream, root);
+            Utils binary = new Utils(memStream);
+            binary.PutUInt(0x70616601);
+            binary.PutUInt(0x0201001D);
+            binary.PutInt32(chars.Length);
+            binary.PutInt32(root);
             memStream.Write(Encoding.ASCII.GetBytes("im2nx"));
             if (isNxp)
                 memStream.WriteByte(0x70);
@@ -133,24 +137,24 @@ namespace ImasArchiveLib
                 memStream.WriteByte(0);
             memStream.Write(zeros, 0, 0xA);
 
-            Utils.PutInt16(memStream, 0x30);
-            Utils.PutInt16(memStream, 0x100);
+            binary.PutInt16(0x30);
+            binary.PutInt16(0x100);
             memStream.Write(zeros, 0, 0xC);
 
             foreach (CharData c in chars)
             {
-                Utils.PutUShort(memStream, c.key);
-                Utils.PutByte(memStream, c.datawidth);
-                Utils.PutByte(memStream, c.dataheight);
-                Utils.PutInt16(memStream, c.datax);
-                Utils.PutInt16(memStream, c.datay);
-                Utils.PutInt16(memStream, c.offsetx);
-                Utils.PutInt16(memStream, c.offsety);
-                Utils.PutInt16(memStream, (isNxp || !nxFixedWidth) ? c.width : (short)0x20);
-                Utils.PutInt16(memStream, c.blank);
-                Utils.PutInt32(memStream, c.left);
-                Utils.PutInt32(memStream, c.right);
-                Utils.PutUShort(memStream, c.isEmoji);
+                binary.PutUShort(c.key);
+                binary.PutByte(c.datawidth);
+                binary.PutByte(c.dataheight);
+                binary.PutInt16(c.datax);
+                binary.PutInt16(c.datay);
+                binary.PutInt16(c.offsetx);
+                binary.PutInt16(c.offsety);
+                binary.PutInt16((isNxp || !nxFixedWidth) ? c.width : (short)0x20);
+                binary.PutInt16(c.blank);
+                binary.PutInt32(c.left);
+                binary.PutInt32(c.right);
+                binary.PutUShort(c.isEmoji);
                 memStream.Write(zeros, 0, 6);
             }
 
@@ -450,14 +454,15 @@ namespace ImasArchiveLib
         private void SaveCharBitmapExtraData(string outFile)
         {
             using FileStream stream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
-            Utils.PutInt32(stream, chars.Length);
+            Utils binary = new Utils(stream);
+            binary.PutInt32(chars.Length);
             foreach (CharData c in chars)
             {
-                Utils.PutUShort(stream, c.key);
-                Utils.PutInt16(stream, c.offsetx);
-                Utils.PutInt16(stream, c.offsety);
-                Utils.PutInt16(stream, c.width);
-                Utils.PutUShort(stream, c.isEmoji);
+                binary.PutUShort(c.key);
+                binary.PutInt16(c.offsetx);
+                binary.PutInt16(c.offsety);
+                binary.PutInt16(c.width);
+                binary.PutUShort(c.isEmoji);
             }
         }
 
@@ -480,17 +485,18 @@ namespace ImasArchiveLib
         private void LoadCharBitmapExtraData(string inFile)
         {
             using FileStream stream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
-            int charCount = Utils.GetInt32(stream);
+            Utils binary = new Utils(stream);
+            int charCount = binary.GetInt32();
             chars = new CharData[charCount];
             for (int i = 0; i < charCount; i++)
             {
                 chars[i] = new CharData
                 {
-                    key = Utils.GetUShort(stream),
-                    offsetx = Utils.GetInt16(stream),
-                    offsety = Utils.GetInt16(stream),
-                    width = Utils.GetInt16(stream),
-                    isEmoji = Utils.GetUShort(stream)
+                    key = binary.GetUShort(),
+                    offsetx = binary.GetInt16(),
+                    offsety = binary.GetInt16(),
+                    width = binary.GetInt16(),
+                    isEmoji = binary.GetUShort()
                 };
             }
         }
