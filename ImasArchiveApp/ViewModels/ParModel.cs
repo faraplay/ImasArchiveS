@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImasArchiveApp
 {
@@ -61,14 +62,16 @@ namespace ImasArchiveApp
             base.Dispose(disposing);
         }
         #endregion
-        public override void LoadChildFileModel(string fileName)
+        public override Task LoadChildFileModel(string fileName)
         {
             ClearStatus();
             if (fileName != null)
             {
                 try
                 {
+                    ReportMessage("Loading " + fileName);
                     FileModel = FileModelFactory.CreateFileModel(_parFile.GetEntry(fileName).Open(), fileName);
+                    ReportMessage("Loaded.");
                 }
                 catch (Exception ex)
                 {
@@ -80,6 +83,7 @@ namespace ImasArchiveApp
             {
                 FileModel = null;
             }
+            return Task.CompletedTask;
         }
     }
 }

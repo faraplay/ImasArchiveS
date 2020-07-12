@@ -222,10 +222,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
                 arcEntry.RevertToOriginal();
             }
-            finally
-            {
-                LoadChildFileModel(CurrentFile);
-            }
+            await LoadChildFileModel(CurrentFile);
         }
         public async Task Export()
         {
@@ -241,7 +238,7 @@ namespace ImasArchiveApp
                     ArcEntry arcEntry = ArcFile.GetEntry(CurrentFile);
                     if (arcEntry == null)
                         throw new ArgumentNullException("Could not find current file in archive.");
-                    using Stream stream = arcEntry.GetData();
+                    using Stream stream = await arcEntry.GetData();
                     using FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
                     ReportMessage("Exporting...");
                     await stream.CopyToAsync(fileStream);
@@ -333,7 +330,7 @@ namespace ImasArchiveApp
                 }
                 using (Font font = new Font())
                 {
-                    using (Stream parStream = fontEntry.GetData())
+                    using (Stream parStream = await fontEntry.GetData())
                     {
                         ReportMessage("Reading im2nx_font.par...");
                         await Task.Run(() => font.ReadFontPar(parStream));
@@ -357,7 +354,7 @@ namespace ImasArchiveApp
         #endregion
         #region Other Methods
 
-        public override void LoadChildFileModel(string fileName)
+        public override async Task LoadChildFileModel(string fileName)
         {
             ClearStatus();
             if (fileName != null)
@@ -367,7 +364,9 @@ namespace ImasArchiveApp
                 {
                     try
                     {
-                        FileModel = FileModelFactory.CreateFileModel(arcEntry.GetData(), fileName);
+                        ReportMessage("Loading " + fileName);
+                        FileModel = FileModelFactory.CreateFileModel(await arcEntry.GetData(), fileName);
+                        ReportMessage("Loaded.");
                     }
                     catch (Exception ex)
                     {
