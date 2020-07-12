@@ -128,6 +128,16 @@ namespace ImasArchiveLib
             return result;
         }
 
+        public override int ReadByte()
+        {
+            lock (_lock)
+            {
+                _stream.Seek(_base_offset + _position, SeekOrigin.Begin);
+                _position++;
+                return _stream.ReadByte();
+            }
+        }
+
         public override void SetLength(long value)
         {
             throw new NotSupportedException(Strings.NotSupported);

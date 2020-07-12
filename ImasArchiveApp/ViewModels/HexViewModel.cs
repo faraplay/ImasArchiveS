@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class HexViewModel : INotifyPropertyChanged
+    class HexViewModel : IFileModel
     {
         #region Fields
         private int _headerLength = 16;
@@ -17,15 +17,19 @@ namespace ImasArchiveApp
         private Stream _stream;
         private int _offset = 0;
         private int _lineCount = 10;
+        private HexViewerEncoding _encoding = HexViewerEncoding.Latin1;
 
         private byte[] _dataBuffer;
         private int _bufferSize;
         private int _bufferOffset;
         private int streamLength;
         private const int DefaultBufferSize = 0x10000;
-        private StringBuilder dataStringBuilder = new StringBuilder();
+        private readonly StringBuilder dataStringBuilder = new StringBuilder();
+        private int scrollDelta = 0;
+        private bool disposed = false;
         #endregion
         #region Properties
+        public string FileName { get; }
         public int HeaderLength
         {
             get => _headerLength;
@@ -94,6 +98,16 @@ namespace ImasArchiveApp
                 }
             }
         }
+        public HexViewerEncoding Encoding
+        {
+            get => _encoding;
+            set
+            {
+                _encoding = value;
+                UpdateDataText();
+                OnPropertyChanged();
+            }
+        }
         #endregion
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -103,23 +117,50 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public HexViewModel()
+        public HexViewModel(Stream stream, string fileName)
         {
+            FileName = fileName;
+            _stream = stream;
             UpdateHeaderText();
             UpdateDataText();
         }
+        #endregion
+        #region IDisposable
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+        }
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _stream?.Dispose();
+            }
+            disposed = true;
+        }
+        ~HexViewModel() => Dispose(false);
+
         #endregion
         #region Commands
         public void Scroll(object sender, MouseWheelEventArgs e)
         {
             if (_stream != null)
             {
-                int delta = e.Delta / 120;
-                int newOffset = _offset + (_headerLength * -delta);
-                if (newOffset < 0)
-                    newOffset = 0;
-                if (newOffset < _stream.Length)
-                    Offset = newOffset;
+                scrollDelta += e.Delta;
+                int delta = scrollDelta / 120;
+                if (delta != 0)
+                {
+                    scrollDelta -= delta * 120;
+                    int newOffset = _offset + (_headerLength * -delta);
+                    if (newOffset < 0)
+                        newOffset = 0;
+                    if (newOffset < _stream.Length)
+                        Offset = newOffset;
+                }
             }
         }
         #endregion
@@ -193,13 +234,38 @@ namespace ImasArchiveApp
                             dataStringBuilder.Append("   ");
                         }
                     }
-                    for (int i = 0; i < _headerLength; i++)
+                    switch (Encoding)
                     {
-                        index = lineOffset + i - _bufferOffset;
-                        if (index >= _bufferSize)
+                        case HexViewerEncoding.ASCII:
+                            for (int i = 0; i < _headerLength; i++)
+                            {
+                                index = lineOffset + i - _bufferOffset;
+                                if (index >= _bufferSize)
+                                    break;
+                                char c = Convert.ToChar(_dataBuffer[index] & 0x7F);
+                                dataStringBuilder.Append(Char.IsControl(c) ? '.' : c);
+                            }
                             break;
-                        char c = Convert.ToChar(_dataBuffer[index]);
-                        dataStringBuilder.Append(Char.IsControl(c) ? '.' : c);
+                        case HexViewerEncoding.Latin1:
+                            for (int i = 0; i < _headerLength; i++)
+                            {
+                                index = lineOffset + i - _bufferOffset;
+                                if (index >= _bufferSize)
+                                    break;
+                                char c = Convert.ToChar(_dataBuffer[index]);
+                                dataStringBuilder.Append(Char.IsControl(c) ? '.' : c);
+                            }
+                            break;
+                        case HexViewerEncoding.UTF16BE:
+                            for (int i = 0; i < _headerLength; i += 2)
+                            {
+                                index = lineOffset + i - _bufferOffset;
+                                if (index >= _bufferSize)
+                                    break;
+                                char c = Convert.ToChar(_dataBuffer[index] * 0x100 + _dataBuffer[index + 1]);
+                                dataStringBuilder.Append(Char.IsControl(c) ? '.' : c);
+                            }
+                            break;
                     }
                     if (index >= _bufferSize)
                         break;
@@ -221,5 +287,11 @@ namespace ImasArchiveApp
             _offset = 0;
         }
         #endregion
+    }
+    public enum HexViewerEncoding
+    {
+        ASCII,
+        Latin1,
+        UTF16BE
     }
 }

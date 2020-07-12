@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -9,41 +10,24 @@ namespace ImasArchiveApp
     class BrowserModel : INotifyPropertyChanged
     {
         #region Fields
-        private readonly ArcModel _parentModel;
-        private BrowserTree _home_dir;
-        private BrowserTree _current_dir;
-        private readonly List<BrowserTree> _history = new List<BrowserTree>();
+        private readonly ContainerFileModel _parentModel;
+        private BrowserTree _currentDir;
+        private readonly List<BrowserTree> _history;
         private int _history_index = 0;
-        private ObservableCollection<BrowserItemModel> _items;
         private string _selectedFile;
         #endregion
         #region Properties
-        public BrowserTree HomeDir
-        {
-            get => _home_dir;
-            set
-            {
-                _home_dir = value;
-                _history.Clear();
-                _history_index = 0;
-                _history.Add(value);
-                OnPropertyChanged();
-                CurrentDir = value;
-            }
-        }
 
         public BrowserTree CurrentDir
         {
-            get => _current_dir; 
+            get => _currentDir; 
             set
             {
-                _current_dir = value;
+                _currentDir = value;
                 UpdateItems();
                 OnPropertyChanged();
             }
         }
-
-        public List<BrowserTree> History => _history;
 
         public int HistoryIndex
         {
@@ -53,29 +37,19 @@ namespace ImasArchiveApp
                 if (value >= 0 && value < _history.Count)
                 {
                     _history_index = value;
-                    CurrentDir = History[_history_index];
+                    CurrentDir = _history[_history_index];
                 }
                 OnPropertyChanged();
             }
         }
-        public ObservableCollection<BrowserItemModel> Items
-        {
-            get
-            {
-                if (_items == null)
-                {
-                    _items = new ObservableCollection<BrowserItemModel>();
-                }
-                return _items;
-            }
-        }
+        public ObservableCollection<BrowserItemModel> Items { get; }
         public string SelectedFile
         {
             get => _selectedFile;
             set
             {
                 _selectedFile = value;
-                _parentModel.CurrentFile = value;
+                _parentModel.LoadChildFileModel(_selectedFile);
                 OnPropertyChanged();
             }
         }
@@ -88,9 +62,20 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Constructors
-        public BrowserModel(ArcModel parentModel)
+        public BrowserModel(ContainerFileModel parentModel, BrowserTree browserTree)
         {
+            if (browserTree == null)
+                throw new ArgumentNullException(nameof(browserTree));
             _parentModel = parentModel;
+            _history = new List<BrowserTree>();
+            _history_index = 0;
+            _history.Add(browserTree);
+            _currentDir = browserTree;
+            Items = new ObservableCollection<BrowserItemModel>();
+            foreach (BrowserTree tree in _currentDir.Entries)
+            {
+                Items.Add(new BrowserItemModel(this, tree));
+            }
         }
         #endregion
         #region Commands
@@ -138,7 +123,7 @@ namespace ImasArchiveApp
                 return _goUpCommand;
             }
         }
-        bool CanGoUp => _current_dir?.Parent != null;
+        bool CanGoUp => _currentDir?.Parent != null;
         #endregion
         #region Command Methods
         void BrowseBack()
@@ -153,25 +138,18 @@ namespace ImasArchiveApp
 
         void GoUp()
         {
-            if (_current_dir?.Parent != null)
-                MoveToTree(_current_dir.Parent);
+            if (_currentDir?.Parent != null)
+                MoveToTree(_currentDir.Parent);
         }
         #endregion
         #region Other Methods
-        public void UseTree(BrowserTree tree)
-        {
-            _history.Clear();
-            _history_index = 0;
-            _history.Add(tree);
-            CurrentDir = tree;
-        }
 
         internal void UpdateItems()
         {
             Items.Clear();
-            if (_current_dir != null)
+            if (_currentDir != null)
             {
-                foreach (BrowserTree tree in _current_dir.Entries)
+                foreach (BrowserTree tree in _currentDir.Entries)
                 {
                     Items.Add(new BrowserItemModel(this, tree));
                 }

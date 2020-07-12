@@ -9,14 +9,31 @@
     d:DesignHeight="450"
     d:DesignWidth="400"
     mc:Ignorable="d">
-    <DockPanel>
+    <DockPanel SizeChanged="DockPanel_SizeChanged">
+        <Border
+            BorderBrush="#FFABADB3"
+            BorderThickness="1"
+            DockPanel.Dock="Left">
+            <TextBlock
+                Margin="2"
+                Text="{Binding Path=FileName}"
+                TextAlignment="Right">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBlock.LayoutTransform>
+            </TextBlock>
+        </Border>
         <TextBlock
             x:Name="tbHeader"
             DockPanel.Dock="Top"
+            FontFamily="Consolas"
+            FontSize="14"
             Text="{Binding Path=HeaderText}" />
         <TextBlock
             x:Name="tbData"
-            SizeChanged="DockPanel_SizeChanged"
+            DataContextChanged="DataTextBlock_DataContextChanged"
+            FontFamily="Consolas"
+            FontSize="14"
             Text="{Binding Path=DataText}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseWheel">

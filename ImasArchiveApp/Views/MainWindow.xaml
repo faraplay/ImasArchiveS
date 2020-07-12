@@ -1,0 +1,55 @@
+﻿<Window
+    x:Class="ImasArchiveApp.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ImasArchiveApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="im@s Archive App"
+    Width="1280"
+    Height="800"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:BrowserModel}">
+            <local:FileBrowser Width="220" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:HexViewModel}">
+            <local:HexViewer x:Name="hxViewer" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ArcModel}">
+            <local:ArcView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:ParModel}">
+            <local:ParView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:GTFModel}">
+            <local:GTFView />
+        </DataTemplate>
+    </Window.Resources>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Command="{Binding Path=OpenCommand}" Header="Open" />
+                <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
+                <Separator />
+                <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />
+            </MenuItem>
+        </Menu>
+        <TextBlock
+            Margin="10"
+            DockPanel.Dock="Bottom"
+            Text="{Binding Path=StatusMessage}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=StatusIsException}" Value="True">
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <ContentControl Content="{Binding Path=FileModel}" />
+    </DockPanel>
+</Window>

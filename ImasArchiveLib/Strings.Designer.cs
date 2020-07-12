@@ -169,6 +169,15 @@ namespace ImasArchiveLib {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Par header is invalid..
+        /// </summary>
+        internal static string InvalidData_ParHeader {
+            get {
+                return ResourceManager.GetString("InvalidData_ParHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Segs file contains invalid data..
         /// </summary>
         internal static string InvalidData_Segs {

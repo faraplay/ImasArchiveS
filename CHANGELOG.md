@@ -1,4 +1,19 @@
 
+## Version 0.2.0
+
+### Added
+Special viewers for gtf/dds (images) and par/pta files
+
+New panel system for viewing par files
+
+The name of the current file is displayed to the left of the window
+
+### Changed
+Menus have been rearranged again
+
+The list of files to the left is now collapsible
+
+
 ## Version 0.1.1
 
 ### Added

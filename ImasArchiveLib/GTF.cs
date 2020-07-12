@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
-    static class GTF
+    public static class GTF
     {
 
         public static Bitmap ReadGTF(Stream stream)
@@ -98,17 +98,25 @@ namespace ImasArchiveLib
             stream.Position = pos + 128;
 
             int size = width;
-            int p = -1;
+            int p1 = -1;
             while (size > 0)
             {
                 size >>= 1;
-                p++;
+                p1++;
+            }
+
+            size = height;
+            int p2 = -1;
+            while (size > 0)
+            {
+                size >>= 1;
+                p2++;
             }
 
             for (int n = 0; n < width * height; n++)
             {
                 int x, y;
-                (x, y) = GetXY(n, p);
+                (x, y) = GetXY(n, p1, p2);
                 int b0 = stream.ReadByte();
                 bitmap.SetPixel(x, y, colors[b0]);
             }
@@ -120,17 +128,25 @@ namespace ImasArchiveLib
         {
             Bitmap bitmap = new Bitmap(width, height);
             int size = width;
-            int p = -1;
+            int p1 = -1;
             while (size > 0)
             {
                 size >>= 1;
-                p++;
+                p1++;
+            }
+
+            size = height;
+            int p2 = -1;
+            while (size > 0)
+            {
+                size >>= 1;
+                p2++;
             }
 
             for (int n = 0; n < width * height; n++)
             {
                 int x, y;
-                (x, y) = GetXY(n, p);
+                (x, y) = GetXY(n, p1, p2);
                 int b = (int)Utils.GetUInt(stream);
                 Color color = Color.FromArgb(b);
                 bitmap.SetPixel(x, y, color);
@@ -160,11 +176,19 @@ namespace ImasArchiveLib
             Bitmap bitmap = new Bitmap(width, height);
 
             int size = width;
-            int p = -1;
+            int p1 = -1;
             while (size > 0)
             {
                 size >>= 1;
-                p++;
+                p1++;
+            }
+
+            size = height;
+            int p2 = -1;
+            while (size > 0)
+            {
+                size >>= 1;
+                p2++;
             }
 
             for (int n = 0; n < width * height; n++)
@@ -177,7 +201,7 @@ namespace ImasArchiveLib
                 int b = (b1 % 16) * 17;
                 Color color = Color.FromArgb(a, r, g, b);
                 int x, y;
-                (x, y) = GetXY(n, p);
+                (x, y) = GetXY(n, p1, p2);
                 bitmap.SetPixel(x, y, color);
             }
 
@@ -211,7 +235,7 @@ namespace ImasArchiveLib
             for (int n = 0; n < pixelCount; n++)
             {
                 int x, y;
-                (x, y) = GetXY(n, 11);
+                (x, y) = GetXY(n, 11, 11);
                 Color color = bitmap.GetPixel(x, y);
                 Utils.PutUShort(memStream, ColorHelp.To4444(color));
             }
@@ -220,21 +244,22 @@ namespace ImasArchiveLib
             await memStream.CopyToAsync(stream);
         }
 
-        private static (int, int) GetXY(int n, int p)
+        private static (int, int) GetXY(int n, int p1, int p2)
         {
-            int[] d = new int[2 * p];
-            for (int i = 0; i < 2 * p; i++)
-            {
-                d[i] = n % 2;
-                n >>= 1;
-            }
             int x = 0, y = 0;
-            for (int i = p - 1; i >= 0; i--)
+            for (int j = 0; j < p1 || j < p2;)
             {
-                x <<= 1;
-                y <<= 1;
-                x += d[2 * i];
-                y += d[2 * i + 1];
+                if (j < p1)
+                {
+                    x += (n % 2) << j;
+                    n >>= 1;
+                }
+                if (j < p2)
+                {
+                    y += (n % 2) << j;
+                    n >>= 1;
+                }
+                j++;
             }
             return (x, y);
         }
