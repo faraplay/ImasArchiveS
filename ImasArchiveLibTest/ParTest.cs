@@ -53,51 +53,51 @@ namespace ImasArchiveLibTest
 
         }
 
-        [DataTestMethod]
-        [DataRow("hdd", "hdd4")]
-        public async Task ParSaveAll(string inDir, string outDir)
-        {
-            DirectoryInfo dInfo = new DirectoryInfo(inDir);
-            FileInfo[] files = dInfo.GetFiles("*", SearchOption.AllDirectories);
+        //[DataTestMethod]
+        //[DataRow("hdd", "hdd4")]
+        //public async Task ParSaveAll(string inDir, string outDir)
+        //{
+        //    DirectoryInfo dInfo = new DirectoryInfo(inDir);
+        //    FileInfo[] files = dInfo.GetFiles("*", SearchOption.AllDirectories);
 
 
-            foreach (FileInfo file in files)
-            {
-                if (file.Name.EndsWith(".par"))
-                {
-                    try
-                    {
-                        using FileStream fileStream = file.OpenRead();
-                        ParFile parFile = new ParFile(fileStream);
-                        await parFile.ExtractAll(outDir + file.FullName.Substring(dInfo.FullName.Length)[0..^4] + "_par");
-                    }
-                    catch (InvalidDataException)
-                    {
-                        continue;
-                    }
+        //    foreach (FileInfo file in files)
+        //    {
+        //        if (file.Name.EndsWith(".par"))
+        //        {
+        //            try
+        //            {
+        //                using FileStream fileStream = file.OpenRead();
+        //                ParFile parFile = new ParFile(fileStream);
+        //                await parFile.ExtractAll(outDir + file.FullName.Substring(dInfo.FullName.Length)[0..^4] + "_par");
+        //            }
+        //            catch (InvalidDataException)
+        //            {
+        //                continue;
+        //            }
 
-                }
-                else if (file.Name.EndsWith(".pta"))
-                {
-                    try
-                    {
-                        using FileStream fileStream = file.OpenRead();
-                        ParFile parFile = new ParFile(fileStream);
-                        await parFile.ExtractAll(outDir + file.FullName.Substring(dInfo.FullName.Length)[0..^4] + "_pta");
-                    }
-                    catch (InvalidDataException)
-                    {
-                        continue;
-                    }
+        //        }
+        //        else if (file.Name.EndsWith(".pta"))
+        //        {
+        //            try
+        //            {
+        //                using FileStream fileStream = file.OpenRead();
+        //                ParFile parFile = new ParFile(fileStream);
+        //                await parFile.ExtractAll(outDir + file.FullName.Substring(dInfo.FullName.Length)[0..^4] + "_pta");
+        //            }
+        //            catch (InvalidDataException)
+        //            {
+        //                continue;
+        //            }
 
-                }
-                //else
-                //{
-                //    Directory.CreateDirectory(outDir + file.DirectoryName.Substring(dInfo.FullName.Length));
-                //    File.Copy(file.FullName, outDir + file.FullName.Substring(dInfo.FullName.Length));
-                //}
-            }
+        //        }
+        //        //else
+        //        //{
+        //        //    Directory.CreateDirectory(outDir + file.DirectoryName.Substring(dInfo.FullName.Length));
+        //        //    File.Copy(file.FullName, outDir + file.FullName.Substring(dInfo.FullName.Length));
+        //        //}
+        //    }
 
-        }
+        //}
     }
 }
