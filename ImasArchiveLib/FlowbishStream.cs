@@ -150,7 +150,7 @@ namespace ImasArchiveLib
         {
             try
             {
-                Utils binary = new Utils(_stream);
+                Binary binary = new Binary(_stream, true);
                 if (binary.GetUInt() != 0x00464253)
                     throw new InvalidDataException(Strings.InvalidData_FbsHeader);
                 if (binary.GetUInt() != 0)
@@ -189,7 +189,7 @@ namespace ImasArchiveLib
         /// <exception cref="ObjectDisposedException"/>
         private void WriteHeader()
         {
-            Utils binary = new Utils(_stream);
+            Binary binary = new Binary(_stream, true);
             int keyLength = _key.Length + 1;
             binary.PutUInt(0x00464253);
             binary.PutUInt(0);
@@ -212,7 +212,7 @@ namespace ImasArchiveLib
         {
             long pos = _stream.Position;
             _stream.Seek(8, SeekOrigin.Begin);
-            Utils.PutUInt(_stream, (uint)_length);
+            Binary.PutUInt(_stream, true, (uint)_length);
             _stream.Position = pos;
         }
 

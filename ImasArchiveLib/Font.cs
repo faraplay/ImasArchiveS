@@ -21,7 +21,7 @@ namespace ImasArchiveLib
             using MemoryStream memStream = new MemoryStream();
             await stream.CopyToAsync(memStream);
             memStream.Position = 0;
-            Utils binary = new Utils(memStream);
+            Binary binary = new Binary(memStream, true);
             parHeader = new byte[16];
             memStream.Read(parHeader);
             int gtfPos = binary.GetInt32();
@@ -78,7 +78,7 @@ namespace ImasArchiveLib
                 int nxpLen = 0x30 + 0x20 * chars.Length;
                 nxpPad = (-nxpLen) & 0x7F;
 
-                Utils binary = new Utils(memStream);
+                Binary binary = new Binary(memStream, true);
 
                 binary.PutInt32(gtfPos);
                 binary.PutInt32(nxPos);
@@ -125,7 +125,7 @@ namespace ImasArchiveLib
         private async Task WritePaf(Stream stream, bool isNxp, bool nxFixedWidth = true)
         {
             using MemoryStream memStream = new MemoryStream();
-            Utils binary = new Utils(memStream);
+            Binary binary = new Binary(memStream, true);
             binary.PutUInt(0x70616601);
             binary.PutUInt(0x0201001D);
             binary.PutInt32(chars.Length);
@@ -454,7 +454,7 @@ namespace ImasArchiveLib
         private void SaveCharBitmapExtraData(string outFile)
         {
             using FileStream stream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
-            Utils binary = new Utils(stream);
+            Binary binary = new Binary(stream, true);
             binary.PutInt32(chars.Length);
             foreach (CharData c in chars)
             {
@@ -485,7 +485,7 @@ namespace ImasArchiveLib
         private void LoadCharBitmapExtraData(string inFile)
         {
             using FileStream stream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
-            Utils binary = new Utils(stream);
+            Binary binary = new Binary(stream, true);
             int charCount = binary.GetInt32();
             chars = new CharData[charCount];
             for (int i = 0; i < charCount; i++)

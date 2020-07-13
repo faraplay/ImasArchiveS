@@ -19,15 +19,15 @@ namespace ImasArchiveLib
             try
             {
                 parStream.Position = 0;
-                if (Utils.GetUInt(parStream) != 0x50415202 ||
-                    Utils.GetUInt(parStream) != 3)
+                if (Binary.GetUInt(parStream, true) != 0x50415202 ||
+                    Binary.GetUInt(parStream, true) != 3)
                 {
                     return -1;
                 }
 
-                int filecount = (int)Utils.GetUInt(parStream);
+                int filecount = Binary.GetInt32(parStream, true);
 
-                if (Utils.GetUInt(parStream) != 0x03000000)
+                if (Binary.GetUInt(parStream, true) != 0x03000000)
                 {
                     return -1;
                 }
@@ -36,7 +36,7 @@ namespace ImasArchiveLib
                 List<uint> fileOffsets = new List<uint>();
                 for (int i = 0; i < filecount; i++)
                 {
-                    fileOffsets.Add(Utils.GetUInt(parStream));
+                    fileOffsets.Add(Binary.GetUInt(parStream, true));
                 }
 
                 int blank = (-filecount) & 3;
@@ -57,14 +57,14 @@ namespace ImasArchiveLib
                 List<uint> fileProperty = new List<uint>();
                 for (int i = 0; i < filecount; i++)
                 {
-                    fileProperty.Add(Utils.GetUInt(parStream));
+                    fileProperty.Add(Binary.GetUInt(parStream, true));
                 }
                 parStream.Position += 4 * blank;
 
                 List<uint> fileSizes = new List<uint>();
                 for (int i = 0; i < filecount; i++)
                 {
-                    fileSizes.Add(Utils.GetUInt(parStream));
+                    fileSizes.Add(Binary.GetUInt(parStream, true));
                 }
                 parStream.Position += 4 * blank;
 
@@ -86,31 +86,32 @@ namespace ImasArchiveLib
         {
             try
             {
-                if (Utils.GetUInt(parStream) != 0x004D0053 ||
-                    Utils.GetUInt(parStream) != 0x00470000)
+                Binary binary = new Binary(parStream, true);
+                if (binary.GetUInt() != 0x004D0053 ||
+                    binary.GetUInt() != 0x00470000)
                 {
                     throw new InvalidDataException();
                 }
 
-                int msgCount = (int)Utils.GetUInt(parStream);
+                int msgCount = (int)binary.GetUInt();
 
-                Utils.GetUInt(parStream);
+                binary.GetUInt();
 
                 byte[] namebuf = new byte[32];
                 byte[] msgbuf = new byte[128];
                 for (int i = 0; i < msgCount; i++)
                 {
-                    uint lineID = Utils.GetUInt(parStream);
-                    uint flags = Utils.GetUInt(parStream);
-                    if (Utils.GetUInt(parStream) != 0 ||
-                        Utils.GetUInt(parStream) != 0 ||
-                        Utils.GetUInt(parStream) != 0 ||
-                        Utils.GetUInt(parStream) != 0)
+                    uint lineID = binary.GetUInt();
+                    uint flags = binary.GetUInt();
+                    if (binary.GetUInt() != 0 ||
+                        binary.GetUInt() != 0 ||
+                        binary.GetUInt() != 0 ||
+                        binary.GetUInt() != 0)
                     {
                         throw new InvalidDataException();
                     }
-                    uint nameLen = Utils.GetUInt(parStream);
-                    uint msgLen = Utils.GetUInt(parStream);
+                    uint nameLen = binary.GetUInt();
+                    uint msgLen = binary.GetUInt();
 
                     parStream.Read(namebuf);
                     parStream.Read(msgbuf);
@@ -147,8 +148,8 @@ namespace ImasArchiveLib
             await refParStream.CopyToAsync(outParStream);
 
             outParStream.Position = mbinPos + 8;
-            int msgCount = (int)Utils.GetUInt(outParStream);
-            Utils.GetUInt(outParStream);
+            int msgCount = Binary.GetInt32(outParStream, true);
+            Binary.GetUInt(outParStream, true);
 
             for (int i = 0; i < msgCount; i++)
             {
@@ -157,7 +158,7 @@ namespace ImasArchiveLib
                 {
                     throw new InvalidDataException();
                 }
-                int expectedMsgIndex = (int)Utils.GetUInt(outParStream);
+                int expectedMsgIndex = Binary.GetInt32(outParStream, true);
                 if (lineID != expectedMsgIndex)
                 {
                     throw new InvalidDataException();
@@ -182,8 +183,8 @@ namespace ImasArchiveLib
                 int nameLen = Math.Min(namebytes.Length, 30);
                 int msgLen = Math.Min(msgbytes.Length, 126);
 
-                Utils.PutInt32(outParStream, nameLen / 2);
-                Utils.PutInt32(outParStream, msgLen / 2);
+                Binary.PutInt32(outParStream, true, nameLen / 2);
+                Binary.PutInt32(outParStream, true, msgLen / 2);
 
                 outParStream.Write(namebytes, 0, nameLen);
                 outParStream.Write(new byte[32 - nameLen]);

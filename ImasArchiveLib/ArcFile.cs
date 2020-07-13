@@ -46,7 +46,7 @@ namespace ImasArchiveLib
         {
             try
             {
-                Utils binary = new Utils(_binStream);
+                Binary binary = new Binary(_binStream, true);
                 if (binary.GetUInt() != 0x50414100u)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
@@ -242,7 +242,7 @@ namespace ImasArchiveLib
             int offsetsPad = (-stringsStart) & 15;
             stringsStart += offsetsPad;
 
-            Utils binary = new Utils(newBinStream);
+            Binary binary = new Binary(newBinStream, true);
 
             binary.PutUInt(0x50414100u);
             binary.PutUInt(0x00010000u);

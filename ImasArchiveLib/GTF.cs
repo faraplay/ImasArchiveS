@@ -17,11 +17,11 @@ namespace ImasArchiveLib
             int type = stream.ReadByte();
 
             stream.Position = pos + 32;
-            int width = Utils.GetUShort(stream);
-            int height = Utils.GetUShort(stream);
+            int width = Binary.GetUShort(stream, true);
+            int height = Binary.GetUShort(stream, true);
 
             stream.Position = pos + 52;
-            int paletteData = (int)Utils.GetUInt(stream);
+            int paletteData = Binary.GetInt32(stream, true);
             stream.Position = pos + 128;
             return type switch
             {
@@ -147,7 +147,7 @@ namespace ImasArchiveLib
             {
                 int x, y;
                 (x, y) = GetXY(n, p1, p2);
-                int b = (int)Utils.GetUInt(stream);
+                int b = Binary.GetInt32(stream, true);
                 Color color = Color.FromArgb(b);
                 bitmap.SetPixel(x, y, color);
             }
@@ -162,7 +162,7 @@ namespace ImasArchiveLib
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int b = (int)Utils.GetUInt(stream);
+                    int b = Binary.GetInt32(stream, true);
                     Color color = Color.FromArgb(b);
                     bitmap.SetPixel(x, y, color);
                 }
@@ -211,25 +211,26 @@ namespace ImasArchiveLib
         private static async Task WriteGTF4444MixXY(Stream stream, Bitmap bitmap)
         {
             using MemoryStream memStream = new MemoryStream();
+            Binary binary = new Binary(memStream, true);
             int pixelCount = bitmap.Width * bitmap.Height;
             int size = pixelCount * 2;
 
-            Utils.PutUInt(memStream, 0x02020000);
-            Utils.PutInt32(memStream, size);
-            Utils.PutUInt(memStream, 1);
-            Utils.PutUInt(memStream, 0);
+            binary.PutUInt(0x02020000);
+            binary.PutInt32(size);
+            binary.PutUInt(1);
+            binary.PutUInt(0);
 
-            Utils.PutUInt(memStream, 0x80);
-            Utils.PutInt32(memStream, size);
-            Utils.PutByte(memStream, 0x83);
-            Utils.PutByte(memStream, 1);
-            Utils.PutByte(memStream, 2);
-            Utils.PutByte(memStream, 0);
-            Utils.PutUInt(memStream, 0xAAE4);
+            binary.PutUInt(0x80);
+            binary.PutInt32(size);
+            binary.PutByte(0x83);
+            binary.PutByte(1);
+            binary.PutByte(2);
+            binary.PutByte(0);
+            binary.PutUInt(0xAAE4);
 
-            Utils.PutInt16(memStream, (short)bitmap.Width);
-            Utils.PutInt16(memStream, (short)bitmap.Height);
-            Utils.PutUInt(memStream, 0x10000);
+            binary.PutInt16((short)bitmap.Width);
+            binary.PutInt16((short)bitmap.Height);
+            binary.PutUInt(0x10000);
             memStream.Write(new byte[0x58]);
 
             for (int n = 0; n < pixelCount; n++)
@@ -237,7 +238,7 @@ namespace ImasArchiveLib
                 int x, y;
                 (x, y) = GetXY(n, 11, 11);
                 Color color = bitmap.GetPixel(x, y);
-                Utils.PutUShort(memStream, ColorHelp.To4444(color));
+                binary.PutUShort(ColorHelp.To4444(color));
             }
 
             memStream.Position = 0;
