@@ -9,19 +9,23 @@ namespace ImasArchiveLib
     public class ParEntry
     {
         private MemoryStream _newData;
+        private readonly int _originalLength;
+        private readonly int _originalOffset;
 
         public string Name { get; set; }
-        public int Offset { get; set; }
-        public int Length { get; set; }
+        internal int Offset { get; set; }
+        internal int Length => UsesMemoryStream ? (int)_newData.Length : _originalLength;
         public ParFile Parent { get; set; }
         public int Property { get; set; }
+        internal bool UsesMemoryStream => _newData != null;
 
         internal ParEntry(ParFile parent, string name, int offset, int length, int property)
         {
             Parent = parent;
             Name = name;
+            _originalOffset = offset;
             Offset = offset;
-            Length = length;
+            _originalLength = length;
             Property = property;
         }
 
@@ -32,7 +36,7 @@ namespace ImasArchiveLib
         public async Task<Stream> GetData()
         {
             MemoryStream memoryStream = new MemoryStream();
-            using Stream stream = Parent.GetSubstream(Offset, Length);
+            using Stream stream = Parent.GetSubstream(_originalOffset, _originalLength);
             await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
             memoryStream.Position = 0;
             return memoryStream;

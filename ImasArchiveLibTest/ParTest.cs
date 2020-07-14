@@ -42,15 +42,42 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd/ui/commonCursor/commonCursorComponent.par", ".")]
-        [DataRow("hdd/bg3d/fes_001.par", ".")]
-        [DataRow("hdd/bg3d/gimmick.par", ".")]
-        public async Task ParSaveTest(string inFile, string outDir)
+        [DataRow("hdd/ui/commonCursor/commonCursorComponent.par", "par")]
+        [DataRow("hdd/bg3d/fes_001.par", "par")]
+        [DataRow("hdd/bg3d/gimmick.par", "par")]
+        public async Task ParExtractTest(string inFile, string expectedDirParent)
         {
             using FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
             ParFile parFile = new ParFile(fileStream);
-            await parFile.ExtractAll(outDir + inFile.Substring(inFile.LastIndexOf('/'))[0..^4] + "_par");
+            await parFile.ExtractAll("temp_par");
+            bool eq = Compare.CompareDirectories(expectedDirParent + inFile.Substring(inFile.LastIndexOf('/'))[0..^4] + "_par", "temp_par");
+            Directory.Delete("temp_par", true);
+            Assert.IsTrue(eq);
+        }
 
+        [DataTestMethod]
+        [DataRow("hdd/ui/commonCursor/commonCursorComponent.par", ".")]
+        public async Task WriteParTest(string inFile, string outDir)
+        {
+            using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                await parFile.ExtractAll("temp1_par");
+                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
+                {
+                    await parFile.SaveTo(outStream).ConfigureAwait(false);
+                }
+            }
+            using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                await parFile.ExtractAll("temp2_par");
+            }
+            bool eq = Compare.CompareDirectories("temp1_par", "temp2_par");
+            File.Delete("temp.par");
+            Directory.Delete("temp1_par", true);
+            Directory.Delete("temp2_par", true);
+            Assert.IsTrue(eq);
         }
 
         //[DataTestMethod]

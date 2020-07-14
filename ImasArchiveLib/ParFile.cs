@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,14 +42,18 @@ namespace ImasArchiveLib
         }
         ~ParFile() => Dispose(false);
         #endregion
-        #region Reading Header
+        #region Header
+        private byte parVersion;
+        private int nameLength;
+        private bool lengthsKnown;
         private void ReadHeader()
         {
             if (_stream.ReadByte() != 0x50 ||
                 _stream.ReadByte() != 0x41 ||
                 _stream.ReadByte() != 0x52)
                 throw new InvalidDataException(Strings.InvalidData_ParHeader);
-            bool isBigEndian = _stream.ReadByte() switch
+            parVersion = (byte)_stream.ReadByte();
+            bool isBigEndian = parVersion switch
             {
                 0 => false,
                 1 => true,
@@ -56,7 +61,7 @@ namespace ImasArchiveLib
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             };
             Binary binary = new Binary(_stream, isBigEndian);
-            int nameLength = binary.GetInt32() switch
+            nameLength = binary.GetInt32() switch
             {
                 2 => 0x20,
                 3 => 0x80,
@@ -65,10 +70,12 @@ namespace ImasArchiveLib
 
             fileCount = binary.GetInt32();
 
-            bool lengthsKnown = _stream.ReadByte() switch
+            lengthsKnown = binary.GetByte() switch
             {
+                // v1/2
                 3 => true,
                 2 => false,
+                // v0
                 1 => true,
                 0 => false,
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
@@ -127,6 +134,83 @@ namespace ImasArchiveLib
             }
         }
 
+        private void WriteHeader(Stream stream)
+        {
+            stream.WriteByte(0x50);
+            stream.WriteByte(0x41);
+            stream.WriteByte(0x52);
+            stream.WriteByte(parVersion);
+            bool isBigEndian = parVersion switch
+            {
+                0 => false,
+                1 => true,
+                2 => true,
+                _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
+            };
+            Binary binary = new Binary(stream, isBigEndian);
+            binary.PutInt32(nameLength switch
+            {
+                0x20 => 2,
+                0x80 => 3,
+                _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
+            });
+            binary.PutInt32(fileCount);
+
+            byte lengthsByte = (byte)(
+                (isBigEndian ? 2 : 0) | (lengthsKnown ? 1 : 0));
+            binary.PutByte(lengthsByte);
+            binary.PutByte(0);
+            binary.PutByte(0);
+            binary.PutByte(0);
+
+            for (int i = 0; i < fileCount; i++)
+            {
+                binary.PutInt32(Entries[i].Offset);
+            }
+            long pad = (-stream.Position) & 15;
+            stream.Write(new byte[pad]);
+
+            byte[] namebuf = new byte[nameLength];
+            for (int i = 0; i < fileCount; i++)
+            {
+                Array.Clear(namebuf, 0, nameLength);
+                Encoding.ASCII.GetBytes(Entries[i].Name, namebuf);
+                stream.Write(namebuf);
+            }
+
+            for (int i = 0; i < fileCount; i++)
+            {
+                binary.PutInt32(Entries[i].Property);
+            }
+            pad = (-stream.Position) & 15;
+            stream.Write(new byte[pad]);
+
+            if (lengthsKnown)
+            {
+                for (int i = 0; i < fileCount; i++)
+                {
+                    binary.PutInt32(Entries[i].Length);
+                }
+                pad = (-stream.Position) & 15;
+                stream.Write(new byte[pad]);
+            }
+
+            Debug.Assert(stream.Position == 16 + nameLength * fileCount +
+                (lengthsKnown ? 12 : 8) * ((fileCount + 3) & -4));
+        }
+
+        private async Task WriteEntries(Stream stream)
+        {
+            long pad = (-stream.Position) & 0x7F;
+            stream.Write(new byte[pad]);
+            foreach (ParEntry parEntry in Entries)
+            {
+                parEntry.Offset = (int)stream.Position;
+                using Stream entryStream = await parEntry.GetData().ConfigureAwait(false);
+                await entryStream.CopyToAsync(stream).ConfigureAwait(false); pad = (-stream.Position) & 0x7F;
+                stream.Write(new byte[pad]);
+            }
+        }
         #endregion
         internal Substream GetSubstream(int offset, int length)
         {
@@ -170,6 +254,23 @@ namespace ImasArchiveLib
                 writer.WriteLine(entry.Property);
                 writer.WriteLine(entry.Name);
             }
+        }
+        #endregion
+        #region Save to Stream
+        /// <summary>
+        /// Writes par file to a stream.
+        /// Make sure the stream is at position 0 before using.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public async Task SaveTo(Stream stream)
+        {
+            int headerLength = 16 + nameLength * fileCount +
+                (lengthsKnown ? 12 : 8) * ((fileCount + 3) & -4);
+            stream.Write(new byte[headerLength]);
+            await WriteEntries(stream).ConfigureAwait(false);
+            stream.Position = 0;
+            WriteHeader(stream);
         }
         #endregion
 
