@@ -8,19 +8,11 @@ using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
-    public class ParFile : IDisposable
+    public class ParFile : ContainerFile<ParEntry>
     {
         #region Fields
-        readonly Stream _stream;
         int fileCount;
-        List<ParEntry> _entries;
 
-        #endregion
-        #region Properties
-        public ReadOnlyCollection<ParEntry> Entries
-        {
-            get => new ReadOnlyCollection<ParEntry>(_entries);
-        }
         #endregion
         #region Constructors
         public ParFile(Stream stream)
@@ -29,19 +21,7 @@ namespace ImasArchiveLib
             ReadHeader();
         }
         #endregion
-        #region IDisposable
-        private bool disposed = false;
-        public void Dispose() => Dispose(true);
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                _stream.Dispose();
-            }
-            disposed = true;
-        }
-        ~ParFile() => Dispose(false);
-        #endregion
+
         #region Header
         private byte parVersion;
         private int nameLength;
@@ -165,7 +145,7 @@ namespace ImasArchiveLib
 
             for (int i = 0; i < fileCount; i++)
             {
-                binary.PutInt32(Entries[i].Offset);
+                binary.PutUInt((uint)Entries[i].Offset);
             }
             long pad = (-stream.Position) & 15;
             stream.Write(new byte[pad]);
@@ -174,7 +154,7 @@ namespace ImasArchiveLib
             for (int i = 0; i < fileCount; i++)
             {
                 Array.Clear(namebuf, 0, nameLength);
-                Encoding.ASCII.GetBytes(Entries[i].Name, namebuf);
+                Encoding.ASCII.GetBytes(Entries[i].FileName, namebuf);
                 stream.Write(namebuf);
             }
 
@@ -189,7 +169,7 @@ namespace ImasArchiveLib
             {
                 for (int i = 0; i < fileCount; i++)
                 {
-                    binary.PutInt32(Entries[i].Length);
+                    binary.PutUInt((uint)Entries[i].Length);
                 }
                 pad = (-stream.Position) & 15;
                 stream.Write(new byte[pad]);
@@ -212,10 +192,6 @@ namespace ImasArchiveLib
             }
         }
         #endregion
-        internal Substream GetSubstream(int offset, int length)
-        {
-            return new Substream(_stream, offset, length);
-        }
         #region Extract
         public async Task ExtractAll(string destDir)
         {
@@ -223,22 +199,22 @@ namespace ImasArchiveLib
             WriteDotParInfo(destDir);
             foreach (ParEntry entry in _entries)
             {
-                if (entry.Name.EndsWith(".par"))
+                if (entry.FileName.EndsWith(".par"))
                 {
                     using Stream stream = await entry.GetData();
                     ParFile parFile = new ParFile(stream);
-                    await parFile.ExtractAll(destDir + "\\" + entry.Name[0..^4] + "_par");
+                    await parFile.ExtractAll(destDir + "\\" + entry.FileName[0..^4] + "_par");
                 }
-                else if (entry.Name.EndsWith(".pta"))
+                else if (entry.FileName.EndsWith(".pta"))
                 {
                     using Stream stream = await entry.GetData();
                     ParFile parFile = new ParFile(stream);
-                    await parFile.ExtractAll(destDir + "\\" + entry.Name[0..^4] + "_pta");
+                    await parFile.ExtractAll(destDir + "\\" + entry.FileName[0..^4] + "_pta");
                 }
                 else
                 {
                     using Stream stream = await entry.GetData();
-                    using FileStream fileStream = new FileStream(destDir + "\\" + entry.Name, FileMode.Create, FileAccess.Write);
+                    using FileStream fileStream = new FileStream(destDir + "\\" + entry.FileName, FileMode.Create, FileAccess.Write);
                     await stream.CopyToAsync(fileStream);
                 }
             }
@@ -252,7 +228,7 @@ namespace ImasArchiveLib
             foreach (ParEntry entry in _entries)
             {
                 writer.WriteLine(entry.Property);
-                writer.WriteLine(entry.Name);
+                writer.WriteLine(entry.FileName);
             }
         }
         #endregion
@@ -276,7 +252,7 @@ namespace ImasArchiveLib
 
         public ParEntry GetEntry(string fileName)
         {
-            return _entries.Find(e => e.Name == fileName);
+            return _entries.Find(e => e.FileName == fileName);
         }
     }
 }

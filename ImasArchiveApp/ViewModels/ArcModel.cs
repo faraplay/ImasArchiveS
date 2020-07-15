@@ -70,7 +70,7 @@ namespace ImasArchiveApp
             List<string> browserEntries = new List<string>();
             foreach (ArcEntry entry in ArcFile.Entries)
             {
-                browserEntries.Add(entry.Filepath);
+                browserEntries.Add(entry.FileName);
             }
             BrowserModel = new BrowserModel(this, new BrowserTree("", browserEntries));
         }

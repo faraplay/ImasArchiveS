@@ -33,7 +33,7 @@ namespace ImasArchiveLibTest
                             en.Offset.ToString("X"),
                             en.Length.ToString("X"),
                             en.Property,
-                            en.Name);
+                            en.FileName);
                     }
                     streamWriter.WriteLine();
                     streamWriter.Flush();
