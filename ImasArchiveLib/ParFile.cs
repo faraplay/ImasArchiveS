@@ -14,6 +14,10 @@ namespace ImasArchiveLib
         int fileCount;
 
         #endregion
+
+        private int HeaderLength => 16 + nameLength * fileCount +
+                (lengthsKnown ? 12 : 8) * ((fileCount + 3) & -4);
+
         #region Constructors
         public ParFile(Stream stream)
         {
@@ -28,6 +32,7 @@ namespace ImasArchiveLib
         private bool lengthsKnown;
         private void ReadHeader()
         {
+            _stream.Position = 0;
             if (_stream.ReadByte() != 0x50 ||
                 _stream.ReadByte() != 0x41 ||
                 _stream.ReadByte() != 0x52)
@@ -114,7 +119,7 @@ namespace ImasArchiveLib
             }
         }
 
-        private void WriteHeader(Stream stream)
+        private void WriteHeader(Stream stream, long baseOffset)
         {
             stream.WriteByte(0x50);
             stream.WriteByte(0x41);
@@ -147,7 +152,7 @@ namespace ImasArchiveLib
             {
                 binary.PutUInt((uint)Entries[i].Offset);
             }
-            long pad = (-stream.Position) & 15;
+            long pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
 
             byte[] namebuf = new byte[nameLength];
@@ -162,7 +167,7 @@ namespace ImasArchiveLib
             {
                 binary.PutInt32(Entries[i].Property);
             }
-            pad = (-stream.Position) & 15;
+            pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
 
             if (lengthsKnown)
@@ -171,12 +176,11 @@ namespace ImasArchiveLib
                 {
                     binary.PutUInt((uint)Entries[i].Length);
                 }
-                pad = (-stream.Position) & 15;
+                pad = (baseOffset - stream.Position) & 15;
                 stream.Write(new byte[pad]);
             }
 
-            Debug.Assert(stream.Position == 16 + nameLength * fileCount +
-                (lengthsKnown ? 12 : 8) * ((fileCount + 3) & -4));
+            Debug.Assert(stream.Position - baseOffset == HeaderLength);
         }
         #endregion
         #region Extract
@@ -222,34 +226,113 @@ namespace ImasArchiveLib
         #region Save to Stream
         /// <summary>
         /// Writes par file to a stream.
-        /// Make sure the stream is at position 0 before using.
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
         public async Task SaveTo(Stream stream)
         {
-            int headerLength = 16 + nameLength * fileCount +
-                (lengthsKnown ? 12 : 8) * ((fileCount + 3) & -4);
-            stream.Write(new byte[headerLength]);
-            await WriteEntries(stream).ConfigureAwait(false);
-            stream.Position = 0;
-            WriteHeader(stream);
+            long baseOffset = stream.Position;
+            stream.Write(new byte[HeaderLength]);
+            await WriteEntries(stream, baseOffset).ConfigureAwait(false);
+            stream.Position = baseOffset;
+            WriteHeader(stream, baseOffset);
         }
 
-        private async Task WriteEntries(Stream stream)
+        private async Task WriteEntries(Stream stream, long baseOffset)
         {
-            long pad = (-stream.Position) & 0x7F;
+            long pad = (baseOffset - stream.Position) & 0x7F;
             stream.Write(new byte[pad]);
             foreach (ParEntry parEntry in Entries)
             {
-                parEntry.Offset = (int)stream.Position;
+                parEntry.Offset = (int)(stream.Position - baseOffset);
                 using Stream entryStream = await parEntry.GetData().ConfigureAwait(false);
                 await entryStream.CopyToAsync(stream).ConfigureAwait(false); 
-                pad = (-stream.Position) & 0x7F;
+                pad = (baseOffset - stream.Position) & 0x7F;
                 stream.Write(new byte[pad]);
             }
         }
         #endregion
+
+        /// <summary>
+        /// Replaces contents of the par file with files in the directory 
+        /// with matching name.
+        /// </summary>
+        /// <param name="outStream"></param>
+        /// <param name="dirName"></param>
+        /// <returns></returns>
+        public async Task ReplaceEntries(string dirName)
+        {
+            foreach (ParEntry parEntry in Entries)
+            {
+                string path = dirName + "\\" + parEntry.FileName;
+
+                if (File.Exists(path))
+                {
+                    using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    await parEntry.SetData(fileStream).ConfigureAwait(false);
+                }
+                else if (parEntry.FileName.EndsWith(".par") || parEntry.FileName.EndsWith(".pta"))
+                {
+                    string childDir = path[0..^4] + '_' + path[^3..];
+                    if (Directory.Exists(childDir))
+                    {
+                        using Stream entryStream1 = await parEntry.GetData().ConfigureAwait(false);
+                        using ParFile childPar = new ParFile(entryStream1);
+                        await childPar.ReplaceEntries(childDir).ConfigureAwait(false);
+                        parEntry.NewData.SetLength(0);
+                        await childPar.SaveTo(parEntry.NewData).ConfigureAwait(false);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Replaces contents of the par file with files in the directory 
+        /// with matching name, and saves to a stream.
+        /// </summary>
+        /// <param name="outStream"></param>
+        /// <param name="dirName"></param>
+        /// <returns></returns>
+        public async Task ReplaceEntriesAndSaveTo(Stream outStream, string dirName)
+        {
+            long baseOffset = outStream.Position;
+            outStream.Write(new byte[HeaderLength]);
+            long pad = (-HeaderLength) & 0x7F;
+            outStream.Write(new byte[pad]);
+
+            foreach (ParEntry parEntry in Entries)
+            {
+                parEntry.Offset = (int)(outStream.Position - baseOffset);
+                string path = dirName + "\\" + parEntry.FileName;
+
+                if (File.Exists(path))
+                {
+                    using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    await parEntry.SetData(fileStream).ConfigureAwait(false);
+                }
+                else
+                {
+                    if (parEntry.FileName.EndsWith(".par") || parEntry.FileName.EndsWith(".pta"))
+                    {
+                        string childDir = path[0..^4] + '_' + path[^3..];
+                        if (Directory.Exists(childDir))
+                        {
+                            using Stream entryStream1 = await parEntry.GetData().ConfigureAwait(false);
+                            using ParFile childPar = new ParFile(entryStream1);
+                            parEntry.NewData.SetLength(0);
+                            await childPar.ReplaceEntriesAndSaveTo(parEntry.NewData, childDir).ConfigureAwait(false);
+                        }
+                    }
+                }
+                using Stream entryStream = await parEntry.GetData().ConfigureAwait(false);
+                await entryStream.CopyToAsync(outStream).ConfigureAwait(false);
+                pad = (baseOffset - outStream.Position) & 0x7F;
+                outStream.Write(new byte[pad]);
+            }
+
+            outStream.Position = baseOffset;
+            WriteHeader(outStream, baseOffset);
+        }
 
         public ParEntry GetEntry(string fileName)
         {

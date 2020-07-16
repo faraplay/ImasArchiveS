@@ -107,51 +107,53 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
-        //[DataTestMethod]
-        //[DataRow("hdd", "hdd4")]
-        //public async Task ParSaveAll(string inDir, string outDir)
-        //{
-        //    DirectoryInfo dInfo = new DirectoryInfo(inDir);
-        //    FileInfo[] files = dInfo.GetFiles("*", SearchOption.AllDirectories);
+        [DataTestMethod]
+        [DataRow("hdd/bg3d/fes_001.par", "par/fes_replace1", "par/fes_001_edited_par")]
+        [DataRow("hdd/bg3d/fes_001.par", "par/fes_replace2", "par/fes_001_replace2_par")]
+        public async Task ReplaceEntriesAndSaveToParTest(string inFile, string replacementDir, string expectedDir)
+        {
+            using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
+                {
+                    await parFile.ReplaceEntriesAndSaveTo(outStream, replacementDir).ConfigureAwait(false);
+                }
+            }
+            using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                await parFile.ExtractAll("temp_par").ConfigureAwait(false);
+            }
+            bool eq = Compare.CompareDirectories("temp_par", expectedDir);
+            File.Delete("temp.par");
+            Directory.Delete("temp_par", true);
+            Assert.IsTrue(eq);
+        }
 
-
-        //    foreach (FileInfo file in files)
-        //    {
-        //        if (file.Name.EndsWith(".par"))
-        //        {
-        //            try
-        //            {
-        //                using FileStream fileStream = file.OpenRead();
-        //                ParFile parFile = new ParFile(fileStream);
-        //                await parFile.ExtractAll(outDir + file.FullName.Substring(dInfo.FullName.Length)[0..^4] + "_par");
-        //            }
-        //            catch (InvalidDataException)
-        //            {
-        //                continue;
-        //            }
-
-        //        }
-        //        else if (file.Name.EndsWith(".pta"))
-        //        {
-        //            try
-        //            {
-        //                using FileStream fileStream = file.OpenRead();
-        //                ParFile parFile = new ParFile(fileStream);
-        //                await parFile.ExtractAll(outDir + file.FullName.Substring(dInfo.FullName.Length)[0..^4] + "_pta");
-        //            }
-        //            catch (InvalidDataException)
-        //            {
-        //                continue;
-        //            }
-
-        //        }
-        //        //else
-        //        //{
-        //        //    Directory.CreateDirectory(outDir + file.DirectoryName.Substring(dInfo.FullName.Length));
-        //        //    File.Copy(file.FullName, outDir + file.FullName.Substring(dInfo.FullName.Length));
-        //        //}
-        //    }
-
-        //}
+        [DataTestMethod]
+        [DataRow("hdd/bg3d/fes_001.par", "par/fes_replace1", "par/fes_001_edited_par")]
+        [DataRow("hdd/bg3d/fes_001.par", "par/fes_replace2", "par/fes_001_replace2_par")]
+        public async Task ReplaceEntriesParTest(string inFile, string replacementDir, string expectedDir)
+        {
+            using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
+                {
+                    await parFile.ReplaceEntries(replacementDir).ConfigureAwait(false);
+                    await parFile.SaveTo(outStream).ConfigureAwait(false);
+                }
+            }
+            using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                await parFile.ExtractAll("temp_par").ConfigureAwait(false);
+            }
+            bool eq = Compare.CompareDirectories("temp_par", expectedDir);
+            File.Delete("temp.par");
+            Directory.Delete("temp_par", true);
+            Assert.IsTrue(eq);
+        }
     }
 }

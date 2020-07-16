@@ -11,6 +11,17 @@ namespace ImasArchiveLib
 
         public ParFile Parent { get; set; }
         public int Property { get; set; }
+        internal MemoryStream NewData
+        {
+            get
+            {
+                if (_newData == null)
+                {
+                    _newData = new MemoryStream();
+                }
+                return _newData;
+            }
+        }
         #region Constructors
         internal ParEntry(ParFile parent, string fileName, int offset, int length, int property) :
             base(fileName, length, offset)
