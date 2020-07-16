@@ -343,7 +343,7 @@ namespace ImasArchiveLib
         #endregion
         #region Export entries
 
-        public async Task ExtractAllAsync(string destDir, IProgress<ProgressData> progress = null)
+        public async Task ExtractAllAsync(string destDir, bool extractPar, IProgress<ProgressData> progress = null)
         {
             if (destDir.EndsWith('/'))
                 destDir = destDir[0..^1];
@@ -354,25 +354,118 @@ namespace ImasArchiveLib
             countProgress = 0;
             foreach (ArcEntry arcEntry in _entries)
             {
-                await ExtractEntryAsync(arcEntry, directoryInfo, progress);
+                countProgress++;
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
+                await ExtractEntryAsync(arcEntry, directoryInfo, extractPar);
             }
 
         }
 
-        private async Task ExtractEntryAsync(ArcEntry arcEntry, DirectoryInfo directoryInfo, IProgress<ProgressData> progress = null)
+        private async Task ExtractEntryAsync(ArcEntry arcEntry, DirectoryInfo directoryInfo, bool extractPar)
         {
             string dirs = arcEntry.FileName.Substring(0, arcEntry.FileName.LastIndexOf('/') + 1);
             if (dirs != "")
                 directoryInfo.CreateSubdirectory(dirs);
             string outFile = directoryInfo.FullName + '/' + arcEntry.FileName;
-            using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
-            using Stream stream = await arcEntry.GetData();
-            await stream.CopyToAsync(fileStream);
-            countProgress++;
-            progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
+            if (extractPar && (outFile.EndsWith(".par") || outFile.EndsWith(".pta")))
+            {
+                string outDir = outFile[0..^4] + "_" + outFile[^3..];
+                using ParFile parFile = new ParFile(await arcEntry.GetData().ConfigureAwait(false));
+                await parFile.ExtractAll(outDir).ConfigureAwait(false);
+            }
+            else
+            {
+                using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
+                using Stream stream = await arcEntry.GetData();
+                await stream.CopyToAsync(fileStream);
+            }
         }
         #endregion
+        #region Replace
+        public async Task ReplaceEntries(string dirName, IProgress<ProgressData> progress = null)
+        {
+            totalProgress = Entries.Count;
+            countProgress = 0;
+            foreach (ArcEntry entry in Entries)
+            {
+                countProgress++;
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
+                string path = dirName + "\\" + entry.FileName;
 
+                if (File.Exists(path))
+                {
+                    using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    await entry.SetData(fileStream);
+                }
+                else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
+                {
+                    string childDir = path[0..^4] + '_' + path[^3..];
+                    if (Directory.Exists(childDir))
+                    {
+                        using Stream entryStream1 = await entry.GetData();
+                        using ParFile childPar = new ParFile(entryStream1);
+                        await childPar.ReplaceEntries(childDir);
+                        using MemoryStream memStream = new MemoryStream();
+                        await childPar.SaveTo(memStream);
+                        memStream.Position = 0;
+                        await entry.SetData(memStream);
+                    }
+                }
+            }
+        }
+
+        public static async Task OpenReplaceAndSave(string inName, string inExt, string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
+        {
+            using (ArcFile arcFile = new ArcFile(inName, inExt))
+            {
+                await arcFile.ReplaceAndSaveTo(dirName, outName, outExt, progress);
+            }
+        }
+        private async Task ReplaceAndSaveTo(string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
+        {
+            using (FileStream newArcStream = new FileStream(outName + ".arc" + outExt, FileMode.Create, FileAccess.Write))
+            {
+                totalProgress = Entries.Count;
+                countProgress = 0;
+                foreach (ArcEntry entry in Entries)
+                {
+                    countProgress++;
+                    progress?.Report(new ProgressData
+                    {
+                        count = countProgress,
+                        total = totalProgress,
+                        filename = entry.FileName
+                    });
+                    string path = dirName + "\\" + entry.FileName;
+                    if (File.Exists(path))
+                    {
+                        using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                        await entry.SetData(fileStream);
+                    }
+                    else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
+                    {
+                        string childDir = path[0..^4] + '_' + path[^3..];
+                        if (Directory.Exists(childDir))
+                        {
+                            using Stream entryStream1 = await entry.GetData();
+                            using ParFile childPar = new ParFile(entryStream1);
+                            await childPar.ReplaceEntries(childDir);
+                            using MemoryStream memStream = new MemoryStream();
+                            await childPar.SaveTo(memStream);
+                            memStream.Position = 0;
+                            await entry.SetData(memStream);
+                        }
+                    }
+
+                    await AppendEntry(newArcStream, entry);
+                    entry.ClearMemoryStream();
+                }
+            }
+            using FileStream newBinStream = new FileStream(outName + ".bin" + outExt, FileMode.Create, FileAccess.Write);
+            BuildBin(newBinStream);
+        }
+
+        #endregion
         #region Commu
         public async Task ExtractCommusDir(string outDirName, IProgress<ProgressData> progress = null)
         {

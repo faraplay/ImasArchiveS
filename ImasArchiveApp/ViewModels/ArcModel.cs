@@ -275,7 +275,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Extract to...", RemoveArcExtension(ArcPath), "");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractAllAsync(fileName, new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.ExtractAllAsync(fileName, false, new Progress<ProgressData>(ReportProgress));
                     ReportMessage("Done.");
                 }
             }

@@ -94,19 +94,12 @@ namespace ImasArchiveLib
         /// <returns></returns>
         public override async Task<Stream> GetData()
         {
-            try
-            {
                 using FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, ShortName + ".gz", UsesMemoryStream);
                 using SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
                 MemoryStream memoryStream = new MemoryStream();
                 await segsStream.CopyToAsync(memoryStream).ConfigureAwait(false);
                 memoryStream.Position = 0;
                 return memoryStream;
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -129,10 +122,13 @@ namespace ImasArchiveLib
         }
         internal void ClearMemoryStream()
         {
-            rememberPastLength = true;
-            _pastLength = _newData.Length;
-            _newData?.Dispose();
-            _newData = null;
+            if (UsesMemoryStream)
+            {
+                rememberPastLength = true;
+                _pastLength = _newData.Length;
+                _newData?.Dispose();
+                _newData = null;
+            }
         }
         #endregion
         #region Commu

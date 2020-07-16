@@ -373,6 +373,8 @@ namespace ImasArchiveLib
                     break;
 
                 FillBuffer();
+                if (_avail_in == 0)
+                    break;
                 if (_buffer_size == 0)
                     break;
             }

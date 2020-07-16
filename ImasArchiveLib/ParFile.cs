@@ -262,25 +262,25 @@ namespace ImasArchiveLib
         /// <returns></returns>
         public async Task ReplaceEntries(string dirName)
         {
-            foreach (ParEntry parEntry in Entries)
+            foreach (ParEntry entry in Entries)
             {
-                string path = dirName + "\\" + parEntry.FileName;
+                string path = dirName + "\\" + entry.FileName;
 
                 if (File.Exists(path))
                 {
                     using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-                    await parEntry.SetData(fileStream).ConfigureAwait(false);
+                    await entry.SetData(fileStream).ConfigureAwait(false);
                 }
-                else if (parEntry.FileName.EndsWith(".par") || parEntry.FileName.EndsWith(".pta"))
+                else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
                 {
                     string childDir = path[0..^4] + '_' + path[^3..];
                     if (Directory.Exists(childDir))
                     {
-                        using Stream entryStream1 = await parEntry.GetData().ConfigureAwait(false);
+                        using Stream entryStream1 = await entry.GetData().ConfigureAwait(false);
                         using ParFile childPar = new ParFile(entryStream1);
                         await childPar.ReplaceEntries(childDir).ConfigureAwait(false);
-                        parEntry.NewData.SetLength(0);
-                        await childPar.SaveTo(parEntry.NewData).ConfigureAwait(false);
+                        entry.NewData.SetLength(0);
+                        await childPar.SaveTo(entry.NewData).ConfigureAwait(false);
                     }
                 }
             }
