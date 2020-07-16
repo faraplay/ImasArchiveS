@@ -80,6 +80,33 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
+        [DataTestMethod]
+        [DataRow("hdd/bg3d/fes_001.par", "fes_001.bin__", "other/week4-3.bin", "par/fes_001_edited_par")]
+        public async Task EditParTest(string inFile, string nameToReplace, string replacementFile, string expectedDir)
+        {
+            using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                using (FileStream replaceStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
+                {
+                    await parFile.GetEntry(nameToReplace).SetData(replaceStream).ConfigureAwait(false);
+                }
+                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
+                {
+                    await parFile.SaveTo(outStream).ConfigureAwait(false);
+                }
+            }
+            using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                await parFile.ExtractAll("temp_par").ConfigureAwait(false);
+            }
+            bool eq = Compare.CompareDirectories("temp_par", expectedDir);
+            File.Delete("temp.par");
+            Directory.Delete("temp_par", true);
+            Assert.IsTrue(eq);
+        }
+
         //[DataTestMethod]
         //[DataRow("hdd", "hdd4")]
         //public async Task ParSaveAll(string inDir, string outDir)

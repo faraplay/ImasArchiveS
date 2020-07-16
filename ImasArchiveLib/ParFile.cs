@@ -178,19 +178,6 @@ namespace ImasArchiveLib
             Debug.Assert(stream.Position == 16 + nameLength * fileCount +
                 (lengthsKnown ? 12 : 8) * ((fileCount + 3) & -4));
         }
-
-        private async Task WriteEntries(Stream stream)
-        {
-            long pad = (-stream.Position) & 0x7F;
-            stream.Write(new byte[pad]);
-            foreach (ParEntry parEntry in Entries)
-            {
-                parEntry.Offset = (int)stream.Position;
-                using Stream entryStream = await parEntry.GetData().ConfigureAwait(false);
-                await entryStream.CopyToAsync(stream).ConfigureAwait(false); pad = (-stream.Position) & 0x7F;
-                stream.Write(new byte[pad]);
-            }
-        }
         #endregion
         #region Extract
         public async Task ExtractAll(string destDir)
@@ -247,6 +234,20 @@ namespace ImasArchiveLib
             await WriteEntries(stream).ConfigureAwait(false);
             stream.Position = 0;
             WriteHeader(stream);
+        }
+
+        private async Task WriteEntries(Stream stream)
+        {
+            long pad = (-stream.Position) & 0x7F;
+            stream.Write(new byte[pad]);
+            foreach (ParEntry parEntry in Entries)
+            {
+                parEntry.Offset = (int)stream.Position;
+                using Stream entryStream = await parEntry.GetData().ConfigureAwait(false);
+                await entryStream.CopyToAsync(stream).ConfigureAwait(false); 
+                pad = (-stream.Position) & 0x7F;
+                stream.Write(new byte[pad]);
+            }
         }
         #endregion
 

@@ -26,8 +26,16 @@ namespace ImasArchiveLib
         public override async Task<Stream> GetData()
         {
             MemoryStream memoryStream = new MemoryStream();
-            using Stream stream = Parent.GetSubstream(_originalOffset, _originalLength);
-            await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
+            if (UsesMemoryStream)
+            {
+                _newData.Position = 0;
+                await _newData.CopyToAsync(memoryStream).ConfigureAwait(false);
+            }
+            else
+            {
+                using Stream stream = Parent.GetSubstream(_originalOffset, _originalLength);
+                await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
+            }
             memoryStream.Position = 0;
             return memoryStream;
         }
