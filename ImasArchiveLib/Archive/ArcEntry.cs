@@ -113,7 +113,17 @@ namespace Imas.Archive
             _newData?.Dispose();
             _newData = new MemoryStream();
             using FlowbishStream flowbishStream = new FlowbishStream(_newData, FlowbishStreamMode.Encipher, ShortName + ".gz", true);
-            await SegsStream.CompressStream(stream, flowbishStream);
+            if (stream.CanSeek)
+            {
+                await SegsStream.CompressStream(stream, flowbishStream);
+            }
+            else
+            {
+                using MemoryStream memStream = new MemoryStream();
+                await stream.CopyToAsync(memStream);
+                memStream.Position = 0;
+                await SegsStream.CompressStream(memStream, flowbishStream);
+            }
         }
 
         public void RevertToOriginal()

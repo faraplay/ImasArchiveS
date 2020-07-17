@@ -148,5 +148,28 @@ namespace ImasArchiveLibTest
             Directory.Delete("temp_par", true);
             Assert.IsTrue(eq);
         }
+
+        [DataTestMethod]
+        [DataRow("hdd/bg3d/fes_001.par", "par/fes_replace1.zip", "par/fes_001_edited_par")]
+        [DataRow("hdd/bg3d/fes_001.par", "par/fes_replace2.zip", "par/fes_001_replace2_par")]
+        public async Task ReplaceEntriesZipAndSaveToParTest(string inFile, string replacementZip, string expectedDir)
+        {
+            using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
+                using ZipSourceParent parent = new ZipSourceParent(replacementZip);
+                await parFile.ReplaceEntriesAndSaveTo(outStream, parent.GetZipSource()).ConfigureAwait(false);
+            }
+            using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
+            {
+                ParFile parFile = new ParFile(fileStream);
+                await parFile.ExtractAll("temp_par").ConfigureAwait(false);
+            }
+            bool eq = Compare.CompareDirectories("temp_par", expectedDir);
+            File.Delete("temp.par");
+            Directory.Delete("temp_par", true);
+            Assert.IsTrue(eq);
+        }
     }
 }

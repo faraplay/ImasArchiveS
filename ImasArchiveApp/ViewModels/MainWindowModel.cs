@@ -206,7 +206,13 @@ namespace ImasArchiveApp
                             {
                                 throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
                             }
-                            await Imas.Archive.ArcFile.OpenReplaceAndSave(inFileName, extension, repFolderName, outFileName[0..^4], "", new Progress<ProgressData>(ReportProgress));
+                            await Imas.Archive.ArcFile.OpenReplaceAndSave(
+                                inFileName, 
+                                extension, 
+                                new Imas.Archive.FileSource(repFolderName), 
+                                outFileName[0..^4], 
+                                "", 
+                                new Progress<ProgressData>(ReportProgress));
                             ReportMessage("Done.");
                             Open(outFileName);
                         }
