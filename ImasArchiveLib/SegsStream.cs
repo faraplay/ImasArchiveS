@@ -97,13 +97,14 @@ namespace ImasArchiveLib
         {
             try
             {
-                if (Utils.GetUInt(_stream) != 0x73656773u)
+                Binary binary = new Binary(_stream, true);
+                if (binary.GetUInt() != 0x73656773u)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-                if (Utils.GetUShort(_stream) != 5)
+                if (binary.GetUShort() != 5)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-                _block_count = Utils.GetUShort(_stream);
-                _length = Utils.GetUInt(_stream);
-                if (Utils.GetUInt(_stream) != _stream.Length)
+                _block_count = binary.GetUShort();
+                _length = binary.GetUInt();
+                if (binary.GetUInt() != _stream.Length)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
 
                 blockOffsets = new long[_block_count];
@@ -112,15 +113,15 @@ namespace ImasArchiveLib
                 blockIsCompressed = new bool[_block_count];
                 for (int i = 0; i < _block_count; i++)
                 {
-                    blockCompSizes[i] = Utils.GetUShort(_stream);
+                    blockCompSizes[i] = binary.GetUShort();
                     if (blockCompSizes[i] == 0)
                         blockCompSizes[i] = MaxBlockSize;
-                    blockUncompSizes[i] = Utils.GetUShort(_stream);
+                    blockUncompSizes[i] = binary.GetUShort();
                     if (blockUncompSizes[i] != 0 && i != _block_count - 1)
                         throw new InvalidDataException(Strings.InvalidData_SegsHeader);
                     if (blockUncompSizes[i] == 0)
                         blockUncompSizes[i] = MaxBlockSize;
-                    uint blockOffset = Utils.GetUInt(_stream);
+                    uint blockOffset = binary.GetUInt();
                     blockIsCompressed[i] = (blockOffset % 2 == 1);
                     blockOffsets[i] = blockOffset & -2;
                 }
@@ -372,6 +373,8 @@ namespace ImasArchiveLib
                     break;
 
                 FillBuffer();
+                if (_avail_in == 0)
+                    break;
                 if (_buffer_size == 0)
                     break;
             }
@@ -454,12 +457,13 @@ namespace ImasArchiveLib
         /// <exception cref="ObjectDisposedException"/>
         private void WriteHeader(int fileLength)
         {
+            Binary binary = new Binary(_stream, true);
             _block_count = (fileLength + 0xFFFF) / 0x10000;
-            Utils.PutUInt(_stream, 0x73656773u);
-            Utils.PutUShort(_stream, 5);
-            Utils.PutUShort(_stream, (ushort)_block_count);
-            Utils.PutUInt(_stream, (uint)fileLength);
-            Utils.PutUInt(_stream, 0);
+            binary.PutUInt(0x73656773u);
+            binary.PutUShort(5);
+            binary.PutUShort((ushort)_block_count);
+            binary.PutUInt((uint)fileLength);
+            binary.PutUInt(0);
 
             _stream.Write(new byte[8 * _block_count]);
 
@@ -521,23 +525,24 @@ namespace ImasArchiveLib
         private void UpdateHeader(int fileLength)
         {
             _stream.Seek(0, SeekOrigin.Begin);
-            Utils.PutUInt(_stream, 0x73656773u);
-            Utils.PutUShort(_stream, 5);
-            Utils.PutUShort(_stream, (ushort)_block_count);
-            Utils.PutUInt(_stream, (uint)fileLength);
-            Utils.PutUInt(_stream, (uint)_offset);
+            Binary binary = new Binary(_stream, true);
+            binary.PutUInt(0x73656773u);
+            binary.PutUShort(5);
+            binary.PutUShort((ushort)_block_count);
+            binary.PutInt32(fileLength);
+            binary.PutUInt((uint)_offset);
 
             for (int i = 0; i < _block_count; i++)
             {
                 if (blockCompSizes[i] == MaxBlockSize)
                     blockCompSizes[i] = 0;
-                Utils.PutUShort(_stream, (ushort)blockCompSizes[i]);
+                binary.PutUShort((ushort)blockCompSizes[i]);
                 if (blockUncompSizes[i] == MaxBlockSize)
                     blockUncompSizes[i] = 0;
-                Utils.PutUShort(_stream, (ushort)blockUncompSizes[i]);
+                binary.PutUShort((ushort)blockUncompSizes[i]);
                 if (blockIsCompressed[i])
                     blockOffsets[i] += 1;
-                Utils.PutUInt(_stream, (uint)blockOffsets[i]);
+                binary.PutUInt((uint)blockOffsets[i]);
             }
         }
     }

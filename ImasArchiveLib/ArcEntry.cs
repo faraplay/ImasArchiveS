@@ -5,48 +5,38 @@ using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
-    public class ArcEntry : IDisposable
+    public class ArcEntry : ContainerEntry
     {
         #region Fields
         private ArcFile _parent_file;
-        private readonly long _base_offset;
-        private long _originalLength;
-        private MemoryStream _newData;
-        private bool disposed = false;
         #endregion
         #region Properties
-        public string Filepath { get; }
-        public string Name { get; }
-        public long Length { get => UsesMemoryStream ? _newData.Length : _originalLength; }
-        internal long CreatedLength { get; private set; }
-        internal long SaveAsOffset { get; set; }
-        internal bool UsesMemoryStream { get => _newData != null; }
+        private string ShortName { get; }
+        private bool rememberPastLength = false;
+        private long _pastLength;
+        internal long PastLength => rememberPastLength ? _pastLength : Length;
         #endregion
         #region Constructors & Factory Methods
         /// <summary>
         /// Create an ArcEntry based on an ArcFile.
         /// </summary>
         /// <param name="parent"></param>
-        /// <param name="filepath"></param>
-        /// <param name="baseOffset"></param>
+        /// <param name="fileName"></param>
+        /// <param name="offset"></param>
         /// <param name="length"></param>
-        internal ArcEntry(ArcFile parent, string filepath, long baseOffset, long length)
+        internal ArcEntry(ArcFile parent, string fileName, long offset, long length) :
+            base(fileName, length, offset)
         {
             _parent_file = parent;
-            Filepath = filepath;
-            Name = Filepath.Substring(Filepath.LastIndexOf('/') + 1);
-            _base_offset = baseOffset;
-            SaveAsOffset = baseOffset;
-            _originalLength = length;
+            ShortName = FileName.Substring(FileName.LastIndexOf('/') + 1);
             _newData = null;
         }
 
-        private ArcEntry(ArcFile parent, string filepath)
+        private ArcEntry(ArcFile parent, string fileName) :
+            base(fileName, 0, -1)
         {
             _parent_file = parent;
-            Filepath = filepath;
-            _base_offset = -1;
-            Name = Filepath.Substring(Filepath.LastIndexOf('/') + 1);
+            ShortName = FileName.Substring(FileName.LastIndexOf('/') + 1);
         }
 
         /// <summary>
@@ -61,7 +51,6 @@ namespace ImasArchiveLib
         {
             ArcEntry arcEntry = new ArcEntry(parent, filepath);
             await arcEntry.SetData(stream);
-            arcEntry._originalLength = arcEntry._newData.Length;
             return arcEntry;
         }
         #endregion
@@ -82,9 +71,9 @@ namespace ImasArchiveLib
                     _newData.Seek(0, SeekOrigin.Begin);
                     return _newData;
                 }
-                else if (_base_offset >= 0)
+                else if (_originalOffset >= 0)
                 {
-                    return new BufferedStream(_parent_file.GetSubstream(_base_offset, _originalLength));
+                    return new BufferedStream(_parent_file.GetSubstream(_originalOffset, _originalLength));
                 }
                 else
                 {
@@ -103,21 +92,14 @@ namespace ImasArchiveLib
         /// If an exception occurs, returns null.
         /// </summary>
         /// <returns></returns>
-        public async Task<Stream> GetData()
+        public override async Task<Stream> GetData()
         {
-            try
-            {
-                using FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, Name + ".gz", UsesMemoryStream);
+                using FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, ShortName + ".gz", UsesMemoryStream);
                 using SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
                 MemoryStream memoryStream = new MemoryStream();
                 await segsStream.CopyToAsync(memoryStream).ConfigureAwait(false);
                 memoryStream.Position = 0;
                 return memoryStream;
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -125,53 +107,28 @@ namespace ImasArchiveLib
         /// </summary>
         /// <param name="stream">The stream to copy from</param>
         /// <exception cref="IOException"/>
-        public async Task SetData(Stream stream)
+        public override async Task SetData(Stream stream)
         {
             _newData?.Dispose();
             _newData = new MemoryStream();
-            using FlowbishStream flowbishStream = new FlowbishStream(_newData, FlowbishStreamMode.Encipher, Name + ".gz", true);
+            using FlowbishStream flowbishStream = new FlowbishStream(_newData, FlowbishStreamMode.Encipher, ShortName + ".gz", true);
             await SegsStream.CompressStream(stream, flowbishStream);
-        }
-
-        public void Delete()
-        {
-            _parent_file.RemoveEntry(this);
-            _parent_file = null;
         }
 
         public void RevertToOriginal()
         {
             ClearMemoryStream();
-            if (_base_offset == -1)
-                _originalLength = 0;
+            rememberPastLength = false;
         }
         internal void ClearMemoryStream()
         {
-            _newData?.Dispose();
-            _newData = null;
-        }
-        #endregion
-        #region IDisposable
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~ArcEntry() => Dispose(false);
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            if (disposing)
+            if (UsesMemoryStream)
             {
+                rememberPastLength = true;
+                _pastLength = _newData.Length;
                 _newData?.Dispose();
+                _newData = null;
             }
-
-            disposed = true;
         }
         #endregion
         #region Commu
@@ -185,20 +142,20 @@ namespace ImasArchiveLib
             try
             {
                 using Stream parStream = await GetData();
-                if (!Name.EndsWith(".par"))
+                if (!ShortName.EndsWith(".par"))
                     return false;
-                int mbinPos = ParCommu.TryGetMBin(parStream, Name);
+                int mbinPos = ParCommu.TryGetMBin(parStream, ShortName);
                 if (mbinPos != -1)
                 {
                     using MemoryStream memStream = new MemoryStream();
                     using (StreamWriter streamWriter = new StreamWriter(memStream, Encoding.Default, 65536, true))
                     {
-                        streamWriter.WriteLine(Filepath);
+                        streamWriter.WriteLine(FileName);
                         parStream.Position = mbinPos;
                         ParCommu.GetCommuText(parStream, streamWriter);
                     }
                     memStream.Position = 0;
-                    using FileStream fileStream = new FileStream(destDir + '/' + Name[0..^4] + "_m.txt", FileMode.Create, FileAccess.Write);
+                    using FileStream fileStream = new FileStream(destDir + '/' + ShortName[0..^4] + "_m.txt", FileMode.Create, FileAccess.Write);
                     await memStream.CopyToAsync(fileStream);
                 }
                 return (mbinPos != -1);
@@ -216,7 +173,7 @@ namespace ImasArchiveLib
             using StreamReader commuReader = new StreamReader(commuFileName);
             try
             {
-                await ParCommu.ReplaceMBin(parStream, memoryStream, commuReader, Name);
+                await ParCommu.ReplaceMBin(parStream, memoryStream, commuReader, ShortName);
             }
             catch (InvalidDataException)
             {

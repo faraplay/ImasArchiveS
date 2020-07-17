@@ -2,29 +2,64 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLib
 {
-    public class ParEntry
+    public class ParEntry : ContainerEntry
     {
-        public string Name { get; set; }
-        public int Offset { get; set; }
-        public int Length { get; set; }
+
         public ParFile Parent { get; set; }
         public int Property { get; set; }
-
-        internal ParEntry(ParFile parent, string name, int offset, int length, int property)
+        internal MemoryStream NewData
+        {
+            get
+            {
+                if (_newData == null)
+                {
+                    _newData = new MemoryStream();
+                }
+                return _newData;
+            }
+        }
+        #region Constructors
+        internal ParEntry(ParFile parent, string fileName, int offset, int length, int property) :
+            base(fileName, length, offset)
         {
             Parent = parent;
-            Name = name;
-            Offset = offset;
-            Length = length;
             Property = property;
         }
-
-        public Stream Open()
+        #endregion
+        /// <summary>
+        /// Creates a new stream containing the raw file data of the entry for read access.
+        /// Changes in this new stream will not affect the ParEntry.
+        /// </summary>
+        public override async Task<Stream> GetData()
         {
-            return Parent.GetSubstream(Offset, Length);
+            MemoryStream memoryStream = new MemoryStream();
+            if (UsesMemoryStream)
+            {
+                _newData.Position = 0;
+                await _newData.CopyToAsync(memoryStream).ConfigureAwait(false);
+            }
+            else
+            {
+                using Stream stream = Parent.GetSubstream(_originalOffset, _originalLength);
+                await stream.CopyToAsync(memoryStream).ConfigureAwait(false);
+            }
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+
+        /// <summary>
+        /// Writes the contents of a stream into the entry, overwriting any previous data.
+        /// </summary>
+        /// <param name="stream">The stream to copy from</param>
+        public override async Task SetData(Stream stream)
+        {
+            _newData?.Dispose();
+            _newData = new MemoryStream();
+            await stream.CopyToAsync(_newData).ConfigureAwait(false);
         }
     }
 }

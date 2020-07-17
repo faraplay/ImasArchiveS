@@ -111,6 +111,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanNewFromFolder() => FileModel == null;
+        AsyncCommand _replaceSaveCommand;
+        public ICommand ReplaceSaveCommand
+        {
+            get
+            {
+                if (_replaceSaveCommand == null)
+                {
+                    _replaceSaveCommand = new AsyncCommand(() => OpenReplaceAndSave(), () => CanReplaceSave());
+                }
+                return _replaceSaveCommand;
+            }
+        }
+        public bool CanReplaceSave() => FileModel == null;
         #endregion
         #region Command Methods
         public void Open()
@@ -154,6 +167,49 @@ namespace ImasArchiveApp
                         await ArcFile.BuildFromDirectory(inFileName, outFileName[0..^4], new Progress<ProgressData>(ReportProgress));
                         ReportMessage("Done.");
                         Open(outFileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                return;
+            }
+        }
+
+        public async Task OpenReplaceAndSave()
+        {
+            try
+            {
+                ClearStatus();
+                string inFileName = _getFileName.OpenGetFileName("Choose folder", "Arc file (*.arc;*.arc.dat)|*.arc;*.arc.dat");
+                if (inFileName != null)
+                {
+                    string repFolderName = _getFileName.OpenGetFolderName("Choose patch folder");
+                    if (repFolderName != null)
+                    {
+                        string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc");
+                        if (outFileName != null)
+                        {
+                            string extension;
+                            if (inFileName.EndsWith(".arc"))
+                            {
+                                inFileName = inFileName[0..^4];
+                                extension = "";
+                            }
+                            else if (inFileName.EndsWith(".arc.dat"))
+                            {
+                                inFileName = inFileName[0..^8];
+                                extension = ".dat";
+                            }
+                            else
+                            {
+                                throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
+                            }
+                            await ArcFile.OpenReplaceAndSave(inFileName, extension, repFolderName, outFileName[0..^4], "", new Progress<ProgressData>(ReportProgress));
+                            ReportMessage("Done.");
+                            Open(outFileName);
+                        }
                     }
                 }
             }

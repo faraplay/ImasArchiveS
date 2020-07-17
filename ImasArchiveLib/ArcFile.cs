@@ -11,15 +11,10 @@ using System.Linq;
 
 namespace ImasArchiveLib
 {
-    public class ArcFile : IDisposable
+    public class ArcFile : ContainerFile<ArcEntry>
     {
-        private readonly Stream _arcStream;
         private readonly Stream _binStream;
-        private List<ArcEntry> _entries;
-        private bool _disposed = false;
 
-
-        public ReadOnlyCollection<ArcEntry> Entries { get { return new ReadOnlyCollection<ArcEntry>(_entries); } }
         private int totalProgress;
         private int countProgress;
 
@@ -32,7 +27,7 @@ namespace ImasArchiveLib
                 throw new FileNotFoundException("Arc file not found.");
             if (!File.Exists(_bin_filename))
                 throw new FileNotFoundException("Bin file not found. Make sure you have a .bin file with the same name in the same folder as the .arc file.");
-            _arcStream = new FileStream(_arc_filename, FileMode.Open, FileAccess.Read);
+            _stream = new FileStream(_arc_filename, FileMode.Open, FileAccess.Read);
             _binStream = new FileStream(_bin_filename, FileMode.Open, FileAccess.Read);
             BuildEntries();
         }
@@ -46,30 +41,31 @@ namespace ImasArchiveLib
         {
             try
             {
-                if (Utils.GetUInt(_binStream) != 0x50414100u)
+                Binary binary = new Binary(_binStream, true);
+                if (binary.GetUInt() != 0x50414100u)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
 
-                if (Utils.GetUInt(_binStream) != 0x00010000u)
+                if (binary.GetUInt() != 0x00010000u)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                uint _entry_count = Utils.GetUInt(_binStream);
-                if (Utils.GetUInt(_binStream) != 32)
+                uint _entry_count = binary.GetUInt();
+                if (binary.GetUInt() != 32)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                if (Utils.GetUInt(_binStream) != 16 * _entry_count + 32)
+                if (binary.GetUInt() != 16 * _entry_count + 32)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                Utils.GetUInt(_binStream);
-                if (Utils.GetUInt(_binStream) != 0)
+                binary.GetUInt();
+                if (binary.GetUInt() != 0)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                if (Utils.GetUInt(_binStream) != 0)
+                if (binary.GetUInt() != 0)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
@@ -81,15 +77,15 @@ namespace ImasArchiveLib
 
                 for (int i = 0; i < _entry_count; i++)
                 {
-                    filePathOffsets[i] = Utils.GetUInt(_binStream);
-                    lengths[i] = Utils.GetUInt(_binStream);
-                    Utils.GetUInt(_binStream);
-                    Utils.GetUInt(_binStream);
+                    filePathOffsets[i] = binary.GetUInt();
+                    lengths[i] = binary.GetUInt();
+                    binary.GetUInt();
+                    binary.GetUInt();
                 }
 
                 for (int i = 0; i < _entry_count; i++)
                 {
-                    offsets[i] = Utils.GetUInt(_binStream);
+                    offsets[i] = binary.GetUInt();
                 }
 
                 for (int i = 0; i < _entry_count; i++)
@@ -151,7 +147,7 @@ namespace ImasArchiveLib
                     progress?.Report(new ProgressData { 
                         count = arcFile.countProgress, 
                         total = arcFile.totalProgress, 
-                        filename = arcEntry.Filepath 
+                        filename = arcEntry.FileName 
                     });
                 }
             }
@@ -182,7 +178,7 @@ namespace ImasArchiveLib
         {
             if (newArcStream == null)
                 throw new ArgumentNullException(nameof(newArcStream));
-            _entries.Sort((a, b) => String.CompareOrdinal(a.Filepath.ToUpper(), b.Filepath.ToUpper()));
+            _entries.Sort((a, b) => String.CompareOrdinal(a.FileName.ToUpper(), b.FileName.ToUpper()));
 
             newArcStream.Write(new byte[16]);
             totalProgress = _entries.Count;
@@ -191,7 +187,7 @@ namespace ImasArchiveLib
             {
                 await AppendEntry(newArcStream, arcEntry);
                 countProgress++;
-                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.Filepath });
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
             }
         }
         /// <exception cref="ArgumentNullException"/>
@@ -203,7 +199,7 @@ namespace ImasArchiveLib
             if (newArcStream == null || arcEntry == null)
                 throw new ArgumentNullException();
             Stream stream = arcEntry.OpenRaw();
-            arcEntry.SaveAsOffset = newArcStream.Position;
+            arcEntry.Offset = newArcStream.Position;
             stream.Position = 0;
             await stream.CopyToAsync(newArcStream);
             uint len = (uint)stream.Length;
@@ -241,27 +237,29 @@ namespace ImasArchiveLib
             int offsetsPad = (-stringsStart) & 15;
             stringsStart += offsetsPad;
 
-            Utils.PutUInt(newBinStream, 0x50414100u);
-            Utils.PutUInt(newBinStream, 0x00010000u);
-            Utils.PutUInt(newBinStream, (uint)Entries.Count);
-            Utils.PutUInt(newBinStream, 32);
+            Binary binary = new Binary(newBinStream, true);
 
-            Utils.PutUInt(newBinStream, 16 * (uint)Entries.Count + 32);
-            Utils.PutUInt(newBinStream, (uint)root);
-            Utils.PutUInt(newBinStream, 0);
-            Utils.PutUInt(newBinStream, 0);
+            binary.PutUInt(0x50414100u);
+            binary.PutUInt(0x00010000u);
+            binary.PutInt32(Entries.Count);
+            binary.PutUInt(32);
+
+            binary.PutInt32(16 * Entries.Count + 32);
+            binary.PutInt32(root);
+            binary.PutUInt(0);
+            binary.PutUInt(0);
 
             for (int i = 0; i < arcTrees.Count; i++)
             {
-                Utils.PutUInt(newBinStream, (uint)(stringsStart + arcTrees[i].stringOffset));
-                Utils.PutUInt(newBinStream, (uint)arcTrees[i].arcEntry.Length);
-                Utils.PutUInt(newBinStream, (uint)arcTrees[i].left);
-                Utils.PutUInt(newBinStream, (uint)arcTrees[i].right);
+                binary.PutInt32(stringsStart + arcTrees[i].stringOffset);
+                binary.PutUInt((uint)arcTrees[i].arcEntry.PastLength);
+                binary.PutInt32(arcTrees[i].left);
+                binary.PutInt32(arcTrees[i].right);
             }
 
             for (int i = 0; i < arcTrees.Count; i++)
             {
-                Utils.PutUInt(newBinStream, (uint)arcTrees[i].arcEntry.SaveAsOffset);
+                binary.PutUInt((uint)arcTrees[i].arcEntry.Offset);
             }
             newBinStream.Write(new byte[offsetsPad]);
             filepaths.Position = 0;
@@ -276,7 +274,7 @@ namespace ImasArchiveLib
                 {
                     arcEntry = _entries[i],
                     index = i,
-                    filepath = _entries[i].Filepath + ".gz"
+                    filepath = _entries[i].FileName + ".gz"
                 });
             }
             arcTrees.Sort((a, b) => String.CompareOrdinal(a.filepath, b.filepath));
@@ -301,7 +299,7 @@ namespace ImasArchiveLib
         #region Entry Operations
         public ArcEntry GetEntry(string filePath)
         {
-            return _entries.Find(entry => entry.Filepath == filePath);
+            return _entries.Find(entry => entry.FileName == filePath);
         }
         /// <summary>
         /// Creates a new entry in the ArcFile with no data.
@@ -345,7 +343,7 @@ namespace ImasArchiveLib
         #endregion
         #region Export entries
 
-        public async Task ExtractAllAsync(string destDir, IProgress<ProgressData> progress = null)
+        public async Task ExtractAllAsync(string destDir, bool extractPar, IProgress<ProgressData> progress = null)
         {
             if (destDir.EndsWith('/'))
                 destDir = destDir[0..^1];
@@ -356,28 +354,118 @@ namespace ImasArchiveLib
             countProgress = 0;
             foreach (ArcEntry arcEntry in _entries)
             {
-                await ExtractEntryAsync(arcEntry, directoryInfo, progress);
+                countProgress++;
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
+                await ExtractEntryAsync(arcEntry, directoryInfo, extractPar);
             }
 
         }
 
-        private async Task ExtractEntryAsync(ArcEntry arcEntry, DirectoryInfo directoryInfo, IProgress<ProgressData> progress = null)
+        private async Task ExtractEntryAsync(ArcEntry arcEntry, DirectoryInfo directoryInfo, bool extractPar)
         {
-            string dirs = arcEntry.Filepath.Substring(0, arcEntry.Filepath.LastIndexOf('/') + 1);
+            string dirs = arcEntry.FileName.Substring(0, arcEntry.FileName.LastIndexOf('/') + 1);
             if (dirs != "")
                 directoryInfo.CreateSubdirectory(dirs);
-            string outFile = directoryInfo.FullName + '/' + arcEntry.Filepath;
-            using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
-            using Stream stream = await arcEntry.GetData();
-            await stream.CopyToAsync(fileStream);
-            countProgress++;
-            progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.Filepath });
+            string outFile = directoryInfo.FullName + '/' + arcEntry.FileName;
+            if (extractPar && (outFile.EndsWith(".par") || outFile.EndsWith(".pta")))
+            {
+                string outDir = outFile[0..^4] + "_" + outFile[^3..];
+                using ParFile parFile = new ParFile(await arcEntry.GetData().ConfigureAwait(false));
+                await parFile.ExtractAll(outDir).ConfigureAwait(false);
+            }
+            else
+            {
+                using FileStream fileStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
+                using Stream stream = await arcEntry.GetData();
+                await stream.CopyToAsync(fileStream);
+            }
         }
         #endregion
+        #region Replace
+        public async Task ReplaceEntries(string dirName, IProgress<ProgressData> progress = null)
+        {
+            totalProgress = Entries.Count;
+            countProgress = 0;
+            foreach (ArcEntry entry in Entries)
+            {
+                countProgress++;
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
+                string path = dirName + "\\" + entry.FileName;
 
-        /// <exception cref="ArgumentOutOfRangeException"/>
-        internal Substream GetSubstream(long offset, long length) => new Substream(_arcStream, offset, length);
+                if (File.Exists(path))
+                {
+                    using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    await entry.SetData(fileStream);
+                }
+                else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
+                {
+                    string childDir = path[0..^4] + '_' + path[^3..];
+                    if (Directory.Exists(childDir))
+                    {
+                        using Stream entryStream1 = await entry.GetData();
+                        using ParFile childPar = new ParFile(entryStream1);
+                        await childPar.ReplaceEntries(childDir);
+                        using MemoryStream memStream = new MemoryStream();
+                        await childPar.SaveTo(memStream);
+                        memStream.Position = 0;
+                        await entry.SetData(memStream);
+                    }
+                }
+            }
+        }
 
+        public static async Task OpenReplaceAndSave(string inName, string inExt, string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
+        {
+            using (ArcFile arcFile = new ArcFile(inName, inExt))
+            {
+                await arcFile.ReplaceAndSaveTo(dirName, outName, outExt, progress);
+            }
+        }
+        private async Task ReplaceAndSaveTo(string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
+        {
+            using (FileStream newArcStream = new FileStream(outName + ".arc" + outExt, FileMode.Create, FileAccess.Write))
+            {
+                totalProgress = Entries.Count;
+                countProgress = 0;
+                foreach (ArcEntry entry in Entries)
+                {
+                    countProgress++;
+                    progress?.Report(new ProgressData
+                    {
+                        count = countProgress,
+                        total = totalProgress,
+                        filename = entry.FileName
+                    });
+                    string path = dirName + "\\" + entry.FileName;
+                    if (File.Exists(path))
+                    {
+                        using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                        await entry.SetData(fileStream);
+                    }
+                    else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
+                    {
+                        string childDir = path[0..^4] + '_' + path[^3..];
+                        if (Directory.Exists(childDir))
+                        {
+                            using Stream entryStream1 = await entry.GetData();
+                            using ParFile childPar = new ParFile(entryStream1);
+                            await childPar.ReplaceEntries(childDir);
+                            using MemoryStream memStream = new MemoryStream();
+                            await childPar.SaveTo(memStream);
+                            memStream.Position = 0;
+                            await entry.SetData(memStream);
+                        }
+                    }
+
+                    await AppendEntry(newArcStream, entry);
+                    entry.ClearMemoryStream();
+                }
+            }
+            using FileStream newBinStream = new FileStream(outName + ".bin" + outExt, FileMode.Create, FileAccess.Write);
+            BuildBin(newBinStream);
+        }
+
+        #endregion
         #region Commu
         public async Task ExtractCommusDir(string outDirName, IProgress<ProgressData> progress = null)
         {
@@ -387,7 +475,7 @@ namespace ImasArchiveLib
             foreach (ArcEntry entry in Entries)
             {
                 countProgress++;
-                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.Filepath });
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
                 await Task.Run(() => entry.TryGetCommuText(outDirName));
             }
         }
@@ -426,30 +514,22 @@ namespace ImasArchiveLib
         }
         #endregion
         #region IDisposable
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~ArcFile() => Dispose(false);
-
-        protected virtual void Dispose(bool disposing)
+        private bool _disposed = false;
+        protected override void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
 
             if (disposing)
             {
-                _arcStream?.Dispose();
                 _binStream?.Dispose();
                 foreach (ArcEntry arcEntry in _entries)
                 {
                     arcEntry.Dispose();
                 }
             }
-
             _disposed = true;
+            base.Dispose(disposing);
         }
         #endregion
 
