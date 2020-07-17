@@ -113,7 +113,7 @@ namespace ImasArchiveLibTest
             {
                 ParFile parFile = new ParFile(fileStream);
                 using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
-                await parFile.ReplaceEntriesAndSaveTo(outStream, replacementDir).ConfigureAwait(false);
+                await parFile.ReplaceEntriesAndSaveTo(outStream, new FileSource(replacementDir)).ConfigureAwait(false);
             }
             using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
             {
@@ -135,7 +135,7 @@ namespace ImasArchiveLibTest
             {
                 ParFile parFile = new ParFile(fileStream);
                 using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
-                await parFile.ReplaceEntries(replacementDir).ConfigureAwait(false);
+                await parFile.ReplaceEntries(new FileSource(replacementDir)).ConfigureAwait(false);
                 await parFile.SaveTo(outStream).ConfigureAwait(false);
             }
             using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))

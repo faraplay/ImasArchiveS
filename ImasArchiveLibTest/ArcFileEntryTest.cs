@@ -95,7 +95,7 @@ namespace ImasArchiveLibTest
         {
             using (ArcFile arcFile = new ArcFile(filename, extension))
             {
-                await arcFile.ReplaceEntries(replacementFolder, progress);
+                await arcFile.ReplaceEntries(new FileSource(replacementFolder), progress);
                 await arcFile.SaveAs("temp");
             }
             using (ArcFile arcFile = new ArcFile("temp"))
@@ -114,7 +114,7 @@ namespace ImasArchiveLibTest
         [DataRow("little", "", "little_replace", "little_exp")]
         public async Task ReplaceSaveTest(string filename, string extension, string replacementFolder, string expectedFolder)
         {
-            await ArcFile.OpenReplaceAndSave(filename, extension, replacementFolder, "temp", "", progress);
+            await ArcFile.OpenReplaceAndSave(filename, extension, new FileSource(replacementFolder), "temp", "", progress);
             using (ArcFile arcFile = new ArcFile("temp"))
             {
                 await arcFile.ExtractAllAsync("tempdir", true, progress);

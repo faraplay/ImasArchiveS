@@ -382,7 +382,7 @@ namespace Imas.Archive
         }
         #endregion
         #region Replace
-        public async Task ReplaceEntries(string dirName, IProgress<ProgressData> progress = null)
+        public async Task ReplaceEntries(IFileSource fileSource, IProgress<ProgressData> progress = null)
         {
             totalProgress = Entries.Count;
             countProgress = 0;
@@ -390,21 +390,20 @@ namespace Imas.Archive
             {
                 countProgress++;
                 progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
-                string path = dirName + "\\" + entry.FileName;
 
-                if (File.Exists(path))
+                if (fileSource.FileExists(entry.FileName))
                 {
-                    using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    using Stream fileStream = fileSource.OpenFile(entry.FileName);
                     await entry.SetData(fileStream);
                 }
                 else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
                 {
-                    string childDir = path[0..^4] + '_' + path[^3..];
-                    if (Directory.Exists(childDir))
+                    string childDir = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
+                    if (fileSource.DirectoryExists(childDir))
                     {
                         using Stream entryStream1 = await entry.GetData();
                         using ParFile childPar = new ParFile(entryStream1);
-                        await childPar.ReplaceEntries(childDir);
+                        await childPar.ReplaceEntries(fileSource.OpenDirectory(childDir));
                         using MemoryStream memStream = new MemoryStream();
                         await childPar.SaveTo(memStream);
                         memStream.Position = 0;
@@ -414,12 +413,12 @@ namespace Imas.Archive
             }
         }
 
-        public static async Task OpenReplaceAndSave(string inName, string inExt, string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
+        public static async Task OpenReplaceAndSave(string inName, string inExt, IFileSource fileSource, string outName, string outExt, IProgress<ProgressData> progress = null)
         {
             using ArcFile arcFile = new ArcFile(inName, inExt);
-            await arcFile.ReplaceAndSaveTo(dirName, outName, outExt, progress);
+            await arcFile.ReplaceAndSaveTo(fileSource, outName, outExt, progress);
         }
-        private async Task ReplaceAndSaveTo(string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
+        private async Task ReplaceAndSaveTo(IFileSource fileSource, string outName, string outExt, IProgress<ProgressData> progress = null)
         {
             using (FileStream newArcStream = new FileStream(outName + ".arc" + outExt, FileMode.Create, FileAccess.Write))
             {
@@ -434,20 +433,19 @@ namespace Imas.Archive
                         total = totalProgress,
                         filename = entry.FileName
                     });
-                    string path = dirName + "\\" + entry.FileName;
-                    if (File.Exists(path))
+                    if (fileSource.FileExists(entry.FileName))
                     {
-                        using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                        using Stream fileStream = fileSource.OpenFile(entry.FileName);
                         await entry.SetData(fileStream);
                     }
                     else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
                     {
-                        string childDir = path[0..^4] + '_' + path[^3..];
-                        if (Directory.Exists(childDir))
+                        string childDir = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
+                        if (fileSource.DirectoryExists(childDir))
                         {
                             using Stream entryStream1 = await entry.GetData();
                             using ParFile childPar = new ParFile(entryStream1);
-                            await childPar.ReplaceEntries(childDir);
+                            await childPar.ReplaceEntries(fileSource.OpenDirectory(childDir));
                             using MemoryStream memStream = new MemoryStream();
                             await childPar.SaveTo(memStream);
                             memStream.Position = 0;
