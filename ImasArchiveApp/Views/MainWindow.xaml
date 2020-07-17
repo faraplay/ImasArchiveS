@@ -33,6 +33,7 @@
                 <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
                 <Separator />
                 <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />
+                <MenuItem Command="{Binding Path=ReplaceSaveCommand}" Header="Patch Arc" />
             </MenuItem>
         </Menu>
         <TextBlock
