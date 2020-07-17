@@ -1,9 +1,9 @@
 ﻿
 using System;
 
-namespace ImasArchiveLib
+namespace Imas.Streams
 {
-    public class FlowbishBox
+    internal class FlowbishBox
     {
         public const int keyUIntLength = 18;
         public UInt32[] PBox = new UInt32[keyUIntLength];

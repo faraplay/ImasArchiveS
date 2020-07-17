@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ImasArchiveLib;
+using Imas;
+using Imas.Archive;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace ImasArchiveLibTest
             pair => Console.WriteLine(" {0} of {1}: {2} ", pair.count, pair.total, pair.filename));
 
         [AssemblyInitialize]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Specific signature needed for AssemblyInitialise>")]
         public static void SetupDirectory(TestContext testContext)
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(System.Environment.CurrentDirectory + @"\..\..\..\..\..\test");

@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImasArchiveLib
+namespace Imas.Streams
 {
     internal class SegsStream : Stream
     {

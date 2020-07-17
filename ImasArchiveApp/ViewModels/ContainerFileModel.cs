@@ -1,4 +1,4 @@
-﻿using ImasArchiveLib;
+﻿using Imas;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;

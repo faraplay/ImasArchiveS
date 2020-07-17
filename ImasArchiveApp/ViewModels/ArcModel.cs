@@ -1,4 +1,5 @@
-﻿using ImasArchiveLib;
+﻿using Imas;
+using Imas.Archive;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

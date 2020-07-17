@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImasArchiveLib
+namespace Imas.Archive
 {
     public class ParFile : ContainerFile<ParEntry>
     {

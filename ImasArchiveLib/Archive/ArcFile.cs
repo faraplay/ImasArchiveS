@@ -9,7 +9,7 @@ using System.Linq;
 
 [assembly: InternalsVisibleTo("ImasArchiveLibTest")]
 
-namespace ImasArchiveLib
+namespace Imas.Archive
 {
     public class ArcFile : ContainerFile<ArcEntry>
     {
@@ -416,10 +416,8 @@ namespace ImasArchiveLib
 
         public static async Task OpenReplaceAndSave(string inName, string inExt, string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
         {
-            using (ArcFile arcFile = new ArcFile(inName, inExt))
-            {
-                await arcFile.ReplaceAndSaveTo(dirName, outName, outExt, progress);
-            }
+            using ArcFile arcFile = new ArcFile(inName, inExt);
+            await arcFile.ReplaceAndSaveTo(dirName, outName, outExt, progress);
         }
         private async Task ReplaceAndSaveTo(string dirName, string outName, string outExt, IProgress<ProgressData> progress = null)
         {

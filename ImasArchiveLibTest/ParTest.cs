@@ -1,4 +1,5 @@
-﻿using ImasArchiveLib;
+﻿using Imas;
+using Imas.Archive;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -56,17 +57,15 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd/ui/commonCursor/commonCursorComponent.par", ".")]
-        public async Task WriteParTest(string inFile, string outDir)
+        [DataRow("hdd/ui/commonCursor/commonCursorComponent.par")]
+        public async Task WriteParTest(string inFile)
         {
             using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
             {
                 ParFile parFile = new ParFile(fileStream);
                 await parFile.ExtractAll("temp1_par");
-                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
-                {
-                    await parFile.SaveTo(outStream).ConfigureAwait(false);
-                }
+                using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
+                await parFile.SaveTo(outStream).ConfigureAwait(false);
             }
             using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
             {
@@ -91,10 +90,8 @@ namespace ImasArchiveLibTest
                 {
                     await parFile.GetEntry(nameToReplace).SetData(replaceStream).ConfigureAwait(false);
                 }
-                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
-                {
-                    await parFile.SaveTo(outStream).ConfigureAwait(false);
-                }
+                using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
+                await parFile.SaveTo(outStream).ConfigureAwait(false);
             }
             using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
             {
@@ -115,10 +112,8 @@ namespace ImasArchiveLibTest
             using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
             {
                 ParFile parFile = new ParFile(fileStream);
-                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
-                {
-                    await parFile.ReplaceEntriesAndSaveTo(outStream, replacementDir).ConfigureAwait(false);
-                }
+                using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
+                await parFile.ReplaceEntriesAndSaveTo(outStream, replacementDir).ConfigureAwait(false);
             }
             using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
             {
@@ -139,11 +134,9 @@ namespace ImasArchiveLibTest
             using (FileStream fileStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
             {
                 ParFile parFile = new ParFile(fileStream);
-                using (FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write))
-                {
-                    await parFile.ReplaceEntries(replacementDir).ConfigureAwait(false);
-                    await parFile.SaveTo(outStream).ConfigureAwait(false);
-                }
+                using FileStream outStream = new FileStream("temp.par", FileMode.Create, FileAccess.Write);
+                await parFile.ReplaceEntries(replacementDir).ConfigureAwait(false);
+                await parFile.SaveTo(outStream).ConfigureAwait(false);
             }
             using (FileStream fileStream = new FileStream("temp.par", FileMode.Open, FileAccess.Read))
             {

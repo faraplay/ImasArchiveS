@@ -1,4 +1,4 @@
-﻿using ImasArchiveLib;
+﻿using Imas.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 

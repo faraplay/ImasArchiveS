@@ -1,4 +1,5 @@
-﻿using ImasArchiveLib;
+﻿using Imas;
+using Imas.Archive;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Threading.Tasks;

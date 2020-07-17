@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace ImasArchiveLib
+namespace Imas.Streams
 {
     internal class Substream: Stream
     {

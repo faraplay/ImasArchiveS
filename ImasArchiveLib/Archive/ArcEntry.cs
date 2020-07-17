@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Imas.Streams;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImasArchiveLib
+namespace Imas.Archive
 {
     public class ArcEntry : ContainerEntry
     {
         #region Fields
-        private ArcFile _parent_file;
+        private readonly ArcFile _parent_file;
         #endregion
         #region Properties
         private string ShortName { get; }

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Imas.Streams;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImasArchiveLib
+namespace Imas.Archive
 {
     public abstract class ContainerFile<T> : IDisposable where T : ContainerEntry 
     {

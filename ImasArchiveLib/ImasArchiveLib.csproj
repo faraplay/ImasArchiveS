@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Imas</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="FlowbishData.Designer.cs">
+    <Compile Update="Streams\FlowbishData.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>FlowbishData.resx</DependentUpon>
@@ -22,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="FlowbishData.resx">
+    <EmbeddedResource Update="Streams\FlowbishData.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>FlowbishData.Designer.cs</LastGenOutput>
     </EmbeddedResource>

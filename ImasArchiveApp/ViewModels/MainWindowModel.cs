@@ -1,4 +1,4 @@
-﻿using ImasArchiveLib;
+﻿using Imas;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -164,7 +164,7 @@ namespace ImasArchiveApp
                     string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc");
                     if (outFileName != null)
                     {
-                        await ArcFile.BuildFromDirectory(inFileName, outFileName[0..^4], new Progress<ProgressData>(ReportProgress));
+                        await Imas.Archive.ArcFile.BuildFromDirectory(inFileName, outFileName[0..^4], new Progress<ProgressData>(ReportProgress));
                         ReportMessage("Done.");
                         Open(outFileName);
                     }
@@ -206,7 +206,7 @@ namespace ImasArchiveApp
                             {
                                 throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
                             }
-                            await ArcFile.OpenReplaceAndSave(inFileName, extension, repFolderName, outFileName[0..^4], "", new Progress<ProgressData>(ReportProgress));
+                            await Imas.Archive.ArcFile.OpenReplaceAndSave(inFileName, extension, repFolderName, outFileName[0..^4], "", new Progress<ProgressData>(ReportProgress));
                             ReportMessage("Done.");
                             Open(outFileName);
                         }

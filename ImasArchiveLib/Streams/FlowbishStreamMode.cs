@@ -1,12 +1,12 @@
-﻿namespace ImasArchiveLib
+﻿namespace Imas.Streams
 {
-    public enum FlowbishStreamMode
+    internal enum FlowbishStreamMode
     {
         Encipher = 0,
         Decipher = 1
     }
 
-    public enum SegsStreamMode
+    internal enum SegsStreamMode
     {
         Compress = 0,
         Decompress = 1

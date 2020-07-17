@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ImasArchiveLib {
+namespace Imas.Streams {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ImasArchiveLib {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ImasArchiveLib.FlowbishData", typeof(FlowbishData).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Imas.Streams.FlowbishData", typeof(FlowbishData).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

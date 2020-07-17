@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace ImasArchiveLib
+namespace Imas.Streams
 {
     internal class FlowbishStream : Stream
     {
