@@ -333,10 +333,5 @@ namespace Imas.Archive
             outStream.Position = baseOffset;
             WriteHeader(outStream, baseOffset);
         }
-
-        public ParEntry GetEntry(string fileName)
-        {
-            return _entries.Find(e => e.FileName == fileName);
-        }
     }
 }

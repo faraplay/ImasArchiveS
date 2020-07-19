@@ -297,10 +297,6 @@ namespace Imas.Archive
         }
         #endregion
         #region Entry Operations
-        public ArcEntry GetEntry(string filePath)
-        {
-            return _entries.Find(entry => entry.FileName == filePath);
-        }
         /// <summary>
         /// Creates a new entry in the ArcFile with no data.
         /// </summary>

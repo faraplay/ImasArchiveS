@@ -75,6 +75,23 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
+        [DataTestMethod]
+        [DataRow("hdd", "", "commu2/par/ami_bs2_c01_par/ami_bs2_c01_m.bin", "other/ami_bs2_c01_m.bin")]
+        public async Task GetEntryRecursiveAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
+        {
+            using ArcFile arcFile = new ArcFile(filename, extension);
+            using EntryStack stack = await arcFile.GetEntryRecursive(entryFilepath);
+            if (stack == null)
+                Assert.Fail("Entry not found.");
+            using (Stream stream = await stack.Entry.GetData())
+            {
+                using FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
+                stream.CopyTo(fileStream);
+            }
+            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
+            File.Delete("temp.dat");
+            Assert.IsTrue(eq);
+        }
 
         [DataTestMethod]
         [DataRow("disc", "", false, "disc")]
