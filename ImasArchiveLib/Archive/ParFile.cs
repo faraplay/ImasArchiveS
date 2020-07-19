@@ -260,25 +260,24 @@ namespace Imas.Archive
         /// <param name="outStream"></param>
         /// <param name="dirName"></param>
         /// <returns></returns>
-        public async Task ReplaceEntries(string dirName)
+        public async Task ReplaceEntries(IFileSource fileSource)
         {
             foreach (ParEntry entry in Entries)
             {
-                string path = dirName + "\\" + entry.FileName;
 
-                if (File.Exists(path))
+                if (fileSource.FileExists(entry.FileName))
                 {
-                    using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    using Stream fileStream = fileSource.OpenFile(entry.FileName);
                     await entry.SetData(fileStream).ConfigureAwait(false);
                 }
                 else if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
                 {
-                    string childDir = path[0..^4] + '_' + path[^3..];
-                    if (Directory.Exists(childDir))
+                    string childDir = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
+                    if (fileSource.DirectoryExists(childDir))
                     {
                         using Stream entryStream1 = await entry.GetData().ConfigureAwait(false);
                         using ParFile childPar = new ParFile(entryStream1);
-                        await childPar.ReplaceEntries(childDir).ConfigureAwait(false);
+                        await childPar.ReplaceEntries(fileSource.OpenDirectory(childDir)).ConfigureAwait(false);
                         entry.NewData.SetLength(0);
                         await childPar.SaveTo(entry.NewData).ConfigureAwait(false);
                     }
@@ -293,38 +292,37 @@ namespace Imas.Archive
         /// <param name="outStream"></param>
         /// <param name="dirName"></param>
         /// <returns></returns>
-        public async Task ReplaceEntriesAndSaveTo(Stream outStream, string dirName)
+        public async Task ReplaceEntriesAndSaveTo(Stream outStream, IFileSource fileSource)
         {
             long baseOffset = outStream.Position;
             outStream.Write(new byte[HeaderLength]);
             long pad = (-HeaderLength) & 0x7F;
             outStream.Write(new byte[pad]);
 
-            foreach (ParEntry parEntry in Entries)
+            foreach (ParEntry entry in Entries)
             {
-                parEntry.Offset = (int)(outStream.Position - baseOffset);
-                string path = dirName + "\\" + parEntry.FileName;
+                entry.Offset = (int)(outStream.Position - baseOffset);
 
-                if (File.Exists(path))
+                if (fileSource.FileExists(entry.FileName))
                 {
-                    using FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-                    await parEntry.SetData(fileStream).ConfigureAwait(false);
+                    using Stream fileStream = fileSource.OpenFile(entry.FileName);
+                    await entry.SetData(fileStream).ConfigureAwait(false);
                 }
                 else
                 {
-                    if (parEntry.FileName.EndsWith(".par") || parEntry.FileName.EndsWith(".pta"))
+                    if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
                     {
-                        string childDir = path[0..^4] + '_' + path[^3..];
-                        if (Directory.Exists(childDir))
+                        string childDir = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
+                        if (fileSource.DirectoryExists(childDir))
                         {
-                            using Stream entryStream1 = await parEntry.GetData().ConfigureAwait(false);
+                            using Stream entryStream1 = await entry.GetData().ConfigureAwait(false);
                             using ParFile childPar = new ParFile(entryStream1);
-                            parEntry.NewData.SetLength(0);
-                            await childPar.ReplaceEntriesAndSaveTo(parEntry.NewData, childDir).ConfigureAwait(false);
+                            entry.NewData.SetLength(0);
+                            await childPar.ReplaceEntriesAndSaveTo(entry.NewData, fileSource.OpenDirectory(childDir)).ConfigureAwait(false);
                         }
                     }
                 }
-                using Stream entryStream = await parEntry.GetData().ConfigureAwait(false);
+                using Stream entryStream = await entry.GetData().ConfigureAwait(false);
                 await entryStream.CopyToAsync(outStream).ConfigureAwait(false);
                 pad = (baseOffset - outStream.Position) & 0x7F;
                 outStream.Write(new byte[pad]);
