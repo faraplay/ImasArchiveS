@@ -20,6 +20,44 @@ namespace Imas.Archive
         }
         #endregion
 
+        public Task ForAll(Action<ContainerEntry, string> action) => ForAll(action, "");
+
+        private async Task ForAll(Action<ContainerEntry, string> action, string prefix)
+        {
+            foreach (ContainerEntry entry in Entries)
+            {
+                if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
+                {
+                    string dirName = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
+                    using Stream stream = await entry.GetData();
+                    using ParFile parFile = new ParFile(stream);
+                    await parFile.ForAll(action, prefix + dirName + '/');
+                }
+                else
+                {
+                    action(entry, prefix + entry.FileName);
+                }
+            }
+        }
+
+        public Task ForAllTask(Func<ContainerEntry, string, Task> action) => ForAllTask(action, "");
+        private async Task ForAllTask(Func<ContainerEntry, string, Task> action, string prefix)
+        {
+            foreach (ContainerEntry entry in Entries)
+            {
+                if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
+                {
+                    string dirName = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
+                    using Stream stream = await entry.GetData();
+                    using ParFile parFile = new ParFile(stream);
+                    await parFile.ForAllTask(action, prefix + dirName + '/');
+                }
+                else
+                {
+                    await action(entry, prefix + entry.FileName);
+                }
+            }
+        }
 
         internal Substream GetSubstream(long offset, long length)
         {

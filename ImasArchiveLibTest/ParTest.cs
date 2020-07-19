@@ -57,6 +57,16 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
+        [DataRow("hdd/bg3d/fes_001.par")]
+        public async Task ParListFilenamesTest(string inFile)
+        {
+            using FileStream parStream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
+            ParFile parFile = new ParFile(parStream);
+            using TextWriter textWriter = new StreamWriter("log_parnames.txt");
+            await parFile.ForAll((entry, name) => textWriter.WriteLine(name));
+        }
+
+        [DataTestMethod]
         [DataRow("hdd/ui/commonCursor/commonCursorComponent.par")]
         public async Task WriteParTest(string inFile)
         {

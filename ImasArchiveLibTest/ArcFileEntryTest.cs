@@ -90,6 +90,15 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
+        [DataRow("disc", "")]
+        public async Task ListFileNamesTest(string filename, string extension)
+        {
+            using ArcFile arcFile = new ArcFile(filename, extension);
+            using TextWriter textWriter = new StreamWriter("log_arcnames.txt");
+            await arcFile.ForAll((entry, name) => textWriter.WriteLine(name));
+        }
+
+        [DataTestMethod]
         [DataRow("little", "", "little_replace", "little_exp")]
         public async Task ReplaceTest(string filename, string extension, string replacementFolder, string expectedFolder)
         {
