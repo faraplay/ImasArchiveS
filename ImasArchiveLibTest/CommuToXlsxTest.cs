@@ -26,5 +26,14 @@ namespace ImasArchiveLibTest
                 commu.WriteCommuToXlsx();
             }
         }
+
+        [DataTestMethod]
+        [DataRow("../data/editedcommus.xlsx", "../data/tlcommus.zip")]
+        [DataRow("../data/hddcommus.xlsx", "../data/nocommus.zip")]
+        public async Task WriteCommuTest(string xlsxName, string zipName)
+        {
+            using CommuFromXlsx commu = new CommuFromXlsx(xlsxName, zipName);
+            commu.GetAndWriteAllCommus();
+        }
     }
 }

@@ -95,8 +95,8 @@ namespace Imas
                         messageID = lineID,
                         flag1 = flag1,
                         flag2 = flag2,
-                        name = name,
-                        message = msg,
+                        name_raw = name,
+                        message_raw = msg,
                     });
                 }
             }
@@ -115,8 +115,8 @@ namespace Imas
                 messageID = 1001,
                 flag1 = 1,
                 flag2 = 1,
-                name = "Ami",
-                message = "Hello there"
+                name_raw = "Ami",
+                message_raw = "Hello there"
             };
             AppendRow("ami", line);
         }
@@ -155,6 +155,7 @@ namespace Imas
             };
             sheets.Append(sheet);
             worksheets.Add(sheetName, worksheetPart);
+            WriteFirstRow(worksheetPart);
             return worksheetPart;
         }
 
@@ -208,8 +209,26 @@ namespace Imas
             AppendCell(row, "B", rowIndex, line.messageID);
             AppendCell(row, "C", rowIndex, line.flag1 == 1);
             AppendCell(row, "D", rowIndex, line.flag2 == 1);
-            AppendCell(row, "E", rowIndex, line.name);
-            AppendCell(row, "F", rowIndex, line.message);
+            AppendCell(row, "E", rowIndex, line.name_raw);
+            AppendCell(row, "F", rowIndex, line.message_raw);
+        }
+        private void WriteFirstRow(WorksheetPart sheet)
+        {
+            SheetData sheetData = sheet.Worksheet.GetFirstChild<SheetData>();
+            Row row = new Row { RowIndex = 1 };
+            sheetData.Append(row);
+
+            AppendCell(row, "A", 1, "File");
+            AppendCell(row, "B", 1, "Message ID");
+            AppendCell(row, "C", 1, "Flag 1");
+            AppendCell(row, "D", 1, "Flag 2");
+            AppendCell(row, "E", 1, "Name (raw)");
+            AppendCell(row, "F", 1, "Message (raw)");
+            AppendCell(row, "G", 1, "Name");
+            AppendCell(row, "H", 1, "Message Line 1");
+            AppendCell(row, "I", 1, "Width");
+            AppendCell(row, "J", 1, "Message Line 2");
+            AppendCell(row, "K", 1, "Width");
         }
     }
 
@@ -219,6 +238,8 @@ namespace Imas
         public int messageID;
         public byte flag1;
         public byte flag2;
+        public string name_raw;
+        public string message_raw;
         public string name;
         public string message;
     }
