@@ -294,6 +294,13 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
+        [DataTestMethod]
+        [DataRow("hdd", "", "other/commus.xlsx")]
+        public async Task ArcFileCommuTest(string arcName, string extension, string outputXlsx)
+        {
+            using ArcFile arcFile = new ArcFile(arcName, extension);
+            await arcFile.ExtractCommusToXlsx(outputXlsx, progress);
+        }
     }
 }
 

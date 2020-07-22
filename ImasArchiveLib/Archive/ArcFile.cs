@@ -459,16 +459,49 @@ namespace Imas.Archive
 
         #endregion
         #region Commu
-        public async Task ExtractCommusDir(string outDirName, IProgress<ProgressData> progress = null)
+        public async Task<List<string>> GetCommuNames(IProgress<ProgressData> progress)
         {
-            Directory.CreateDirectory(outDirName);
+            List<string> fileNames = new List<string>();
             totalProgress = Entries.Count;
             countProgress = 0;
-            foreach (ArcEntry entry in Entries)
+            foreach (ArcEntry arcEntry in Entries)
             {
                 countProgress++;
-                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
-                await Task.Run(() => entry.TryGetCommuText(outDirName));
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
+                if (arcEntry.FileName.StartsWith("commu2/par/"))
+                {
+                    string shortName = arcEntry.FileName.Substring(arcEntry.FileName.LastIndexOf('/') + 1);
+                    string mBinName = shortName[0..^4] + "_m.bin";
+                    using Stream parStream = await arcEntry.GetData();
+                    ParFile parFile = new ParFile(parStream);
+                    if (parFile.Entries.Any(entry => entry.FileName == mBinName))
+                    {
+                        fileNames.Add(arcEntry.FileName[0..^4] + "_" + arcEntry.FileName[^3..] + "/" + mBinName);
+                    }
+                }
+            }
+            return fileNames;
+        }
+        public async Task ExtractCommusToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
+        {
+            using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName);
+            IEnumerable<ArcEntry> commuEntries = Entries.Where(entry => entry.FileName.StartsWith("commu2/par/"));
+            totalProgress = commuEntries.Count();
+            countProgress = 0;
+            foreach (ArcEntry arcEntry in commuEntries)
+            {
+                countProgress++;
+                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
+
+                using Stream parStream = await arcEntry.GetData();
+                ParFile parFile = new ParFile(parStream);
+                ParEntry binEntry = parFile.Entries.FirstOrDefault(entry => entry.FileName.EndsWith("_m.bin"));
+                if (binEntry != null)
+                {
+                    using Stream stream = await binEntry.GetData();
+                    commuToXlsx.AddCommuFromBin(stream, arcEntry.FileName[0..^4] + "_" + arcEntry.FileName[^3..] + "/" + binEntry.FileName);
+                    commuToXlsx.WriteCommuToXlsx();
+                }
             }
         }
         public async Task ReplaceCommusDir(string commuDirName, IProgress<ProgressData> progress = null)

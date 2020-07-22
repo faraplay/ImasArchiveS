@@ -290,10 +290,10 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Choose folder", RemoveArcExtension(ArcPath) + "commu", "");
+                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath) + "commus.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractCommusDir(fileName, new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.ExtractCommusToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
                     ReportMessage("Done.");
                 }
             }

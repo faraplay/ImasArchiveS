@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
+    [TestClass]
     public class CommuToXlsxTest
     {
         [DataTestMethod]
         [DataRow("other/commus.xlsx", "hdd", "other/commulist.txt")]
         public async Task WriteXlsxTest(string xlsxName, string arcName, string commuList)
         {
-            using CommuToXlsx commu = new CommuToXlsx(xlsxName, FileMode.Create);
+            using CommuToXlsx commu = new CommuToXlsx(xlsxName);
             using StreamReader streamReader = new StreamReader(commuList);
             using ArcFile arcFile = new ArcFile(arcName);
             while (!streamReader.EndOfStream)

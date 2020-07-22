@@ -35,24 +35,14 @@ namespace Imas
         }
         #endregion
 
-        public CommuToXlsx() { }
-
-        public CommuToXlsx(string fileName, FileMode fileMode)
+        public CommuToXlsx(string fileName)
         {
-            switch (fileMode)
-            {
-                case FileMode.Create:
-                    doc = SpreadsheetDocument.Create(fileName, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook);
-                    workbookPart = doc.AddWorkbookPart();
-                    workbookPart.Workbook = new Workbook();
-                    sheets = doc.WorkbookPart.Workbook.AppendChild(new Sheets());
-                    sharedStringTablePart = workbookPart.AddNewPart<SharedStringTablePart>();
-                    sharedStringTablePart.SharedStringTable = new SharedStringTable();
-                    break;
-                case FileMode.Open:
-                    doc = SpreadsheetDocument.Open(fileName, false);
-                    break;
-            }
+            doc = SpreadsheetDocument.Create(fileName, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook);
+            workbookPart = doc.AddWorkbookPart();
+            workbookPart.Workbook = new Workbook();
+            sheets = doc.WorkbookPart.Workbook.AppendChild(new Sheets());
+            sharedStringTablePart = workbookPart.AddNewPart<SharedStringTablePart>();
+            sharedStringTablePart.SharedStringTable = new SharedStringTable();
         }
 
         public void AddCommuFromBin(Stream binStream, string fileName)
@@ -198,6 +188,13 @@ namespace Imas
             cell.CellValue = new CellValue(value.ToString());
             cell.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.Number);
         }
+        private void AppendCell(Row row, string colName, uint rowIndex, bool value)
+        {
+            Cell cell = new Cell { CellReference = colName + rowIndex.ToString() };
+            row.Append(cell);
+            cell.CellValue = new CellValue(value ? "1" : "0");
+            cell.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.Boolean);
+        }
 
         private void AppendRow(string sheetName, CommuLine line)
         {
@@ -209,8 +206,8 @@ namespace Imas
 
             AppendCell(row, "A", rowIndex, line.file);
             AppendCell(row, "B", rowIndex, line.messageID);
-            AppendCell(row, "C", rowIndex, line.flag1);
-            AppendCell(row, "D", rowIndex, line.flag2);
+            AppendCell(row, "C", rowIndex, line.flag1 == 1);
+            AppendCell(row, "D", rowIndex, line.flag2 == 1);
             AppendCell(row, "E", rowIndex, line.name);
             AppendCell(row, "F", rowIndex, line.message);
         }

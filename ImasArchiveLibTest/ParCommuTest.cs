@@ -25,16 +25,16 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
-        [DataTestMethod]
-        [DataRow("hdd", "", "hddcommu")]
-        public async Task ArcFileCommuTest(string arcName, string extension, string expectedDir)
-        {
-            using ArcFile arcFile = new ArcFile(arcName, extension);
-            await arcFile.ExtractCommusDir("tempdir");
-            bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
-            Directory.Delete("tempdir", true);
-            Assert.IsTrue(eq);
-        }
+        //[DataTestMethod]
+        //[DataRow("hdd", "", "hddcommu")]
+        //public async Task ArcFileCommuTest(string arcName, string extension, string expectedDir)
+        //{
+        //    using ArcFile arcFile = new ArcFile(arcName, extension);
+        //    await arcFile.ExtractCommusDir("tempdir");
+        //    bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
+        //    Directory.Delete("tempdir", true);
+        //    Assert.IsTrue(eq);
+        //}
 
         [DataTestMethod]
         [DataRow("hdd", "", "commu2/par/_week_00_002.par", "other/translated.txt", "other/translated.par")]
