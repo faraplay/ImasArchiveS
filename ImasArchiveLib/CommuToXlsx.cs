@@ -231,16 +231,4 @@ namespace Imas
             AppendCell(row, "K", 1, "Width");
         }
     }
-
-    class CommuLine
-    {
-        public string file;
-        public int messageID;
-        public byte flag1;
-        public byte flag2;
-        public string name_raw;
-        public string message_raw;
-        public string name;
-        public string message;
-    }
 }
