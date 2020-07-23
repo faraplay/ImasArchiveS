@@ -1,3 +1,15 @@
+## Version 0.3.0
+
+### Added
+New patch command is added - arcs can now be patched with a zip file or folder
+
+New command "Create Commu Patch" to create a zip file containing all translated commus from an Excel spreadsheet
+
+### Changed
+Extracting commus now outputs the commus into a single Excel spreadsheet
+
+### Removed
+Replace Commu command has been removed - use new patch method instead
 
 ## Version 0.2.0
 
