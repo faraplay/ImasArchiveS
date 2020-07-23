@@ -459,29 +459,6 @@ namespace Imas.Archive
 
         #endregion
         #region Commu
-        public async Task<List<string>> GetCommuNames(IProgress<ProgressData> progress)
-        {
-            List<string> fileNames = new List<string>();
-            totalProgress = Entries.Count;
-            countProgress = 0;
-            foreach (ArcEntry arcEntry in Entries)
-            {
-                countProgress++;
-                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
-                if (arcEntry.FileName.StartsWith("commu2/par/"))
-                {
-                    string shortName = arcEntry.FileName.Substring(arcEntry.FileName.LastIndexOf('/') + 1);
-                    string mBinName = shortName[0..^4] + "_m.bin";
-                    using Stream parStream = await arcEntry.GetData();
-                    ParFile parFile = new ParFile(parStream);
-                    if (parFile.Entries.Any(entry => entry.FileName == mBinName))
-                    {
-                        fileNames.Add(arcEntry.FileName[0..^4] + "_" + arcEntry.FileName[^3..] + "/" + mBinName);
-                    }
-                }
-            }
-            return fileNames;
-        }
         public async Task ExtractCommusToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
         {
             using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName);
@@ -503,39 +480,6 @@ namespace Imas.Archive
                     commuToXlsx.WriteCommuToXlsx();
                 }
             }
-        }
-        public async Task ReplaceCommusDir(string commuDirName, IProgress<ProgressData> progress = null)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(commuDirName);
-            if (!directoryInfo.Exists)
-            {
-                throw new DirectoryNotFoundException();
-            }
-            var files = directoryInfo.GetFiles("*.txt", SearchOption.AllDirectories);
-            totalProgress = files.Length;
-            countProgress = 0;
-            foreach (FileInfo file in files)
-            {
-                await ReplaceCommu(file.FullName);
-                countProgress++;
-                progress.Report(new ProgressData { count = countProgress, filename = file.FullName, total = totalProgress });
-            }
-        }
-        public async Task ReplaceCommu(string commuFileName)
-        {
-            string parPath;
-            if (!File.Exists(commuFileName))
-            {
-                throw new FileNotFoundException("Could not find file" ,commuFileName);
-            }
-            using (StreamReader reader = new StreamReader(commuFileName))
-            {
-                parPath = reader.ReadLine();
-            }
-            ArcEntry arcEntry = GetEntry(parPath + ".gz");
-            if (arcEntry == null)
-                return;
-            await arcEntry.TryReplaceCommuText(commuFileName);
         }
         #endregion
         #region IDisposable

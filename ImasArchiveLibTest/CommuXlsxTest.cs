@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ImasArchiveLibTest
 {
     [TestClass]
-    public class CommuToXlsxTest
+    public class CommuXlsxTest
     {
         [DataTestMethod]
         [DataRow("other/commus.xlsx", "hdd", "other/commulist.txt")]
@@ -33,7 +33,7 @@ namespace ImasArchiveLibTest
         public async Task WriteCommuTest(string xlsxName, string zipName)
         {
             using CommuFromXlsx commu = new CommuFromXlsx(xlsxName, zipName);
-            commu.GetAndWriteAllCommus();
+            await commu.GetAndWriteAllCommus();
         }
     }
 }

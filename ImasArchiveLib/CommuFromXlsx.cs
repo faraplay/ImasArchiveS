@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Imas
 {
@@ -15,7 +16,6 @@ namespace Imas
         readonly WorkbookPart workbookPart;
         readonly Sheets sheets;
         readonly SharedStringTablePart sharedStringTablePart;
-        readonly List<WorksheetPart> worksheetParts = new List<WorksheetPart>();
         readonly List<string> commuFilenames = new List<string>();
 
         readonly ZipArchive zipArchive;
@@ -56,12 +56,16 @@ namespace Imas
                 GetCommuLines(sheet);
             }
         }
-        private void GetCommuLines(Sheet sheet)
+        private void GetCommuLines(Sheet sheet, IProgress<ProgressData> progress = null)
         {
             WorksheetPart worksheetPart = (WorksheetPart)(workbookPart.GetPartById(sheet.Id));
             var rows = worksheetPart.Worksheet.Descendants<Row>();
+            int total = rows.Count();
+            int count = 0;
             foreach (Row row in rows)
             {
+                count++;
+                progress?.Report(new ProgressData { count = count, total = total });
                 GetCommuLine(row);
             }
         }
@@ -115,13 +119,11 @@ namespace Imas
                 }
                 else
                 {
-                    switch (cell.DataType.Value)
+                    return cell.DataType.Value switch
                     {
-                        case CellValues.SharedString:
-                            return sharedStringTablePart.SharedStringTable.ElementAt(int.Parse(cell.InnerText)).InnerText;
-                        default:
-                            throw new InvalidDataException("Expected a string in cell" + address);
-                    }
+                        CellValues.SharedString => sharedStringTablePart.SharedStringTable.ElementAt(int.Parse(cell.InnerText)).InnerText,
+                        _ => throw new InvalidDataException("Expected a string in cell" + address),
+                    };
                 }
             }
             else
@@ -157,14 +159,22 @@ namespace Imas
         }
         #endregion
         #region Write Commus
-        public void GetAndWriteAllCommus()
+        public async Task GetAndWriteAllCommus(IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
         {
+            int total1 = sheets.Descendants<Sheet>().Count();
+            int count1 = 0;
             foreach (Sheet sheet in sheets.Descendants<Sheet>())
             {
-                GetCommuLines(sheet);
+                count1++;
+                progress1?.Report(new ProgressData { count = count1, total = total1, filename = sheet.Name });
+                await Task.Run(() => GetCommuLines(sheet, progress2));
+                int total2 = commuFilenames.Count;
+                int count2 = 0;
                 foreach (string filename in commuFilenames)
                 {
-                    WriteBin(filename);
+                    count2++;
+                    progress2?.Report(new ProgressData { count = count2, total = total2, filename = sheet.Name });
+                    await Task.Run(() => WriteBin(filename));
                 }
                 lines.Clear();
                 commuFilenames.Clear();

@@ -142,57 +142,5 @@ namespace Imas.Archive
             }
         }
         #endregion
-        #region Commu
-        /// <summary>
-        /// Tries to output commu text from the entry to a new file in the specified directory.
-        /// </summary>
-        /// <param name="destDir"></param>
-        /// <returns></returns>
-        public async Task<bool> TryGetCommuText(string destDir)
-        {
-            try
-            {
-                using Stream parStream = await GetData();
-                if (!ShortName.EndsWith(".par"))
-                    return false;
-                int mbinPos = ParCommu.TryGetMBin(parStream, ShortName);
-                if (mbinPos != -1)
-                {
-                    using MemoryStream memStream = new MemoryStream();
-                    using (StreamWriter streamWriter = new StreamWriter(memStream, Encoding.Default, 65536, true))
-                    {
-                        streamWriter.WriteLine(FileName);
-                        parStream.Position = mbinPos;
-                        ParCommu.GetCommuText(parStream, streamWriter);
-                    }
-                    memStream.Position = 0;
-                    using FileStream fileStream = new FileStream(destDir + '/' + ShortName[0..^4] + "_m.txt", FileMode.Create, FileAccess.Write);
-                    await memStream.CopyToAsync(fileStream);
-                }
-                return (mbinPos != -1);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task TryReplaceCommuText(string commuFileName)
-        {
-            using Stream parStream = await GetData();
-            MemoryStream memoryStream = new MemoryStream();
-            using StreamReader commuReader = new StreamReader(commuFileName);
-            try
-            {
-                await ParCommu.ReplaceMBin(parStream, memoryStream, commuReader, ShortName);
-            }
-            catch (InvalidDataException)
-            {
-                return;
-            }
-            memoryStream.Position = 0;
-            await SetData(memoryStream);
-        }
-        #endregion
     }
 }

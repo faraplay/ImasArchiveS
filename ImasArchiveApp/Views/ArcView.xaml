@@ -30,7 +30,6 @@
                         <MenuItem Command="{Binding Path=ExtractAllCommand}" Header="Extract All" />
                         <Separator />
                         <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract Commus" />
-                        <MenuItem Command="{Binding Path=ReplaceCommusCommand}" Header="Replace Commus" />
                         <Separator />
                         <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
                     </MenuItem>

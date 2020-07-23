@@ -33,10 +33,13 @@
                 <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
                 <Separator />
                 <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />
+            </MenuItem>
+            <MenuItem Header="Patch">
                 <MenuItem Header="Patch Arc">
                     <MenuItem Command="{Binding Path=ReplaceSaveFolderCommand}" Header="From Folder" />
                     <MenuItem Command="{Binding Path=ReplaceSaveZipCommand}" Header="From Zip" />
                 </MenuItem>
+                <MenuItem Command="{Binding Path=CreateCommuPatchCommand}" Header="Create Commu Patch" />
             </MenuItem>
         </Menu>
         <TextBlock

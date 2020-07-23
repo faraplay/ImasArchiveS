@@ -58,6 +58,9 @@ namespace ImasArchiveApp
             ReportProgress = MyReportProgress;
             ReportMessage = MyReportMessage;
             ReportException = MyReportException;
+            progress = new Progress<ProgressData>(ReportProgress);
+            duoProgress1 = new Progress<ProgressData>(ReportLine1);
+            duoProgress2 = new Progress<ProgressData>(ReportLine2);
         }
         #endregion
         #region INotifyPropertyChanged
@@ -72,6 +75,9 @@ namespace ImasArchiveApp
         public Action<ProgressData> ReportProgress { get; }
         public Action<string> ReportMessage { get; }
         public Action<Exception> ReportException { get; }
+        private readonly Progress<ProgressData> progress;
+        private readonly Progress<ProgressData> duoProgress1;
+        private readonly Progress<ProgressData> duoProgress2;
         #endregion
         #region Commands
         private RelayCommand _openCommand;
@@ -137,6 +143,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanReplaceSave() => FileModel == null;
+        AsyncCommand _createCommuPatchCommand;
+        public ICommand CreateCommuPatchCommand
+        {
+            get
+            {
+                if (_createCommuPatchCommand == null)
+                {
+                    _createCommuPatchCommand = new AsyncCommand(() => CreateCommuPatch(), () => CanCreateCommuPatch());
+                }
+                return _createCommuPatchCommand;
+            }
+        }
+        public bool CanCreateCommuPatch() => FileModel == null;
         #endregion
         #region Command Methods
         public void Open()
@@ -177,7 +196,7 @@ namespace ImasArchiveApp
                     string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc");
                     if (outFileName != null)
                     {
-                        await Imas.Archive.ArcFile.BuildFromDirectory(inFileName, outFileName[0..^4], new Progress<ProgressData>(ReportProgress));
+                        await Imas.Archive.ArcFile.BuildFromDirectory(inFileName, outFileName[0..^4], progress);
                         ReportMessage("Done.");
                         Open(outFileName);
                     }
@@ -234,7 +253,7 @@ namespace ImasArchiveApp
                         zipSourceParent.GetZipSource(),
                         outFileName[0..^4],
                         "",
-                        new Progress<ProgressData>(ReportProgress));
+                        progress);
                 }
                 else
                 {
@@ -244,7 +263,7 @@ namespace ImasArchiveApp
                         new FileSource(replacementName),
                         outFileName[0..^4],
                         "",
-                        new Progress<ProgressData>(ReportProgress));
+                        progress);
                 }
                 ReportMessage("Done.");
                 Open(outFileName);
@@ -254,6 +273,31 @@ namespace ImasArchiveApp
                 ReportException(ex);
                 return;
             }
+        }
+
+        public async Task CreateCommuPatch()
+        {
+            try
+            {
+                ClearStatus();
+                string inFileName = _getFileName.OpenGetFileName("Choose spreadsheet", "Excel spreadsheet (*.xlsx)|*.xlsx");
+                if (inFileName != null)
+                {
+                    string outFileName = _getFileName.SaveGetFileName("Save As", inFileName[0..^5], "Zip file (*.zip)|*.zip");
+                    if (outFileName != null)
+                    {
+                        using CommuFromXlsx commuFromXlsx = new CommuFromXlsx(inFileName, outFileName);
+                        await commuFromXlsx.GetAndWriteAllCommus(duoProgress1, duoProgress2);
+                        ReportMessage("Done.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                return;
+            }
+
         }
         #endregion
         #region Progress
@@ -266,6 +310,22 @@ namespace ImasArchiveApp
         public void MyReportProgress(ProgressData data)
         {
             StatusMessage = string.Format("{0} of {1}: {2}", data.count, data.total, data.filename);
+            StatusIsException = false;
+        }
+
+        string duoProgressLine1 = "";
+        string duoProgressLine2 = "";
+        public void ReportLine1(ProgressData data)
+        {
+            duoProgressLine1 = string.Format("{0} of {1}: {2}", data.count, data.total, data.filename);
+            duoProgressLine2 = "";
+            StatusMessage = duoProgressLine1 + "\n" + duoProgressLine2;
+            StatusIsException = false;
+        }
+        public void ReportLine2(ProgressData data)
+        {
+            duoProgressLine2 = string.Format("{0} of {1}: {2}", data.count, data.total, data.filename);
+            StatusMessage = duoProgressLine1 + "\n" + duoProgressLine2;
             StatusIsException = false;
         }
 
