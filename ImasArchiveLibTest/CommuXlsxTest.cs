@@ -22,8 +22,7 @@ namespace ImasArchiveLibTest
                 using EntryStack entryStack = await arcFile.GetEntryRecursive(fileName);
                 ContainerEntry entry = entryStack.Entry;
                 using Stream memStream = await entry.GetData();
-                commu.AddCommuFromBin(memStream, fileName);
-                commu.WriteCommuToXlsx();
+                commu.GetAndWriteCommu(memStream, fileName);
             }
         }
 

@@ -54,7 +54,7 @@ namespace Imas.Spreadsheet
                 if (row.RowIndex == 1)
                     continue;
                 T record = new T();
-                record.ReadRow(row, this);
+                record.ReadRow(this, row);
                 list.Add(record);
             }
             return list;

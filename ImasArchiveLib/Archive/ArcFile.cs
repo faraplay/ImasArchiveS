@@ -476,8 +476,7 @@ namespace Imas.Archive
                 if (binEntry != null)
                 {
                     using Stream stream = await binEntry.GetData();
-                    commuToXlsx.AddCommuFromBin(stream, arcEntry.FileName[0..^4] + "_" + arcEntry.FileName[^3..] + "/" + binEntry.FileName);
-                    commuToXlsx.WriteCommuToXlsx();
+                    commuToXlsx.GetAndWriteCommu(stream, arcEntry.FileName[0..^4] + "_" + arcEntry.FileName[^3..] + "/" + binEntry.FileName);
                 }
             }
         }

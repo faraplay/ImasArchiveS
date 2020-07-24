@@ -12,9 +12,6 @@ namespace Imas
 {
     public class CommuFromXlsx : IDisposable
     {
-        readonly List<CommuLine> lines = new List<CommuLine>();
-        readonly List<string> commuFilenames = new List<string>();
-
         readonly XlsxReader xlsx;
         readonly ZipArchive zipArchive;
 

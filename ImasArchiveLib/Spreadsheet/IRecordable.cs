@@ -8,7 +8,10 @@ namespace Imas.Spreadsheet
 {
     interface IRecordable
     {
+        public void Deserialise(Stream inStream);
         public void Serialise(Stream outStream);
-        public void ReadRow(Row row, XlsxReader xlsx);
+        public void ReadRow(XlsxReader xlsx, Row row);
+        public void WriteRow(XlsxWriter xlsx, Row row);
+        public void WriteFirstRow(XlsxWriter xlsx, Row row);
     }
 }

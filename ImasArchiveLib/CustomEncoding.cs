@@ -93,7 +93,6 @@ namespace Imas
                 int code = inSpan[j] * 256 + inSpan[j + 1];
                 if (code == 0)
                     break;
-                char c;
                 if (code >= 0xA000 && code < 0xFEFF)
                 {
                     chars.Add((char)((code / 256) - 128));

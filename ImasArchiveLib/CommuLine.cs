@@ -15,6 +15,38 @@ namespace Imas
         public string name;
         public string message;
 
+        public void Deserialise(Stream inStream)
+        {
+            try
+            {
+                Binary binary = new Binary(inStream, true);
+                messageID = binary.GetInt32();
+                flag1 = binary.GetByte();
+                flag2 = binary.GetByte();
+                if (binary.GetUShort() != 0 ||
+                    binary.GetUInt() != 0 ||
+                    binary.GetUInt() != 0 ||
+                    binary.GetUInt() != 0 ||
+                    binary.GetUInt() != 0)
+                {
+                    throw new InvalidDataException();
+                }
+                binary.GetUInt();
+                binary.GetUInt();
+
+                byte[] namebuf = new byte[32];
+                byte[] msgbuf = new byte[128];
+                inStream.Read(namebuf);
+                inStream.Read(msgbuf);
+                name_raw = CustomEncoding.FromCustomEncoding(namebuf);
+                message_raw = CustomEncoding.FromCustomEncoding(msgbuf);
+            }
+            catch (EndOfStreamException)
+            {
+                throw new InvalidDataException();
+            }
+        }
+
         public void Serialise(Stream outStream)
         {
             Binary binary = new Binary(outStream, true);
@@ -49,7 +81,7 @@ namespace Imas
             outStream.Write(msgbytes);
         }
 
-        public void ReadRow(Row row, XlsxReader xlsx)
+        public void ReadRow(XlsxReader xlsx, Row row)
         {
             file = xlsx.GetString(row, "A");
             messageID = xlsx.GetInt(row, "B");
@@ -63,6 +95,31 @@ namespace Imas
             message = message1;
             if (!string.IsNullOrWhiteSpace(message2))
                 message += '\n' + message2;
+        }
+
+        public void WriteRow(XlsxWriter xlsx, Row row)
+        {
+            xlsx.AppendCell(row, "A", file);
+            xlsx.AppendCell(row, "B", messageID);
+            xlsx.AppendCell(row, "C", flag1 == 1);
+            xlsx.AppendCell(row, "D", flag2 == 1);
+            xlsx.AppendCell(row, "E", name_raw);
+            xlsx.AppendCell(row, "F", message_raw);
+        }
+
+        public void WriteFirstRow(XlsxWriter xlsx, Row row)
+        {
+            xlsx.AppendCell(row, "A",  "File");
+            xlsx.AppendCell(row, "B",  "Message ID");
+            xlsx.AppendCell(row, "C",  "Flag 1");
+            xlsx.AppendCell(row, "D",  "Flag 2");
+            xlsx.AppendCell(row, "E",  "Name (raw)");
+            xlsx.AppendCell(row, "F",  "Message (raw)");
+            xlsx.AppendCell(row, "G",  "Name");
+            xlsx.AppendCell(row, "H",  "Message Line 1");
+            xlsx.AppendCell(row, "I",  "Width");
+            xlsx.AppendCell(row, "J",  "Message Line 2");
+            xlsx.AppendCell(row, "K",  "Width");
         }
     }
 }
