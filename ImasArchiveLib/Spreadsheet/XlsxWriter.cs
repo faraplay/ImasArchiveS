@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Imas.Records;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -113,6 +114,10 @@ namespace Imas.Spreadsheet
         {
             WorksheetPart worksheetPart = GetWorksheet(sheetName);
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            AppendRow<T>(sheetData, record);
+        }
+        private void AppendRow<T>(SheetData sheetData, T record) where T : IRecordable
+        {
             uint rowIndex = (uint)(sheetData.Elements<Row>().Count() + 1);
             if (rowIndex == 1)
             {
@@ -125,6 +130,15 @@ namespace Imas.Spreadsheet
             Row row = new Row { RowIndex = rowIndex };
             sheetData.Append(row);
             record.WriteRow(this, row);
+        }
+        public void AppendRows<T>(string sheetName, IEnumerable<T> records) where T : IRecordable
+        {
+            WorksheetPart worksheetPart = GetWorksheet(sheetName);
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            foreach (T record in records)
+            {
+                AppendRow(sheetData, record);
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 using Imas.Spreadsheet;
 using System.IO;
 
-namespace Imas
+namespace Imas.Records
 {
     class CommuLine : IRecordable
     {
@@ -38,8 +38,8 @@ namespace Imas
                 byte[] msgbuf = new byte[128];
                 inStream.Read(namebuf);
                 inStream.Read(msgbuf);
-                name_raw = CustomEncoding.FromCustomEncoding(namebuf);
-                message_raw = CustomEncoding.FromCustomEncoding(msgbuf);
+                name_raw = ImasEncoding.Custom.GetString(namebuf);
+                message_raw = ImasEncoding.Custom.GetString(msgbuf);
             }
             catch (EndOfStreamException)
             {
@@ -64,8 +64,8 @@ namespace Imas
 
             byte[] namebytes = new byte[32];
             byte[] msgbytes = new byte[128];
-            CustomEncoding.ToCustomEncoding(outName, namebytes);
-            CustomEncoding.ToCustomEncoding(outMessage, msgbytes);
+            ImasEncoding.Custom.GetBytes(outName, namebytes);
+            ImasEncoding.Custom.GetBytes(outMessage, msgbytes);
 
             int nameLen = 0;
             while (nameLen < 32 / 2 && (namebytes[2 * nameLen] != 0 || namebytes[2 * nameLen + 1] != 0))

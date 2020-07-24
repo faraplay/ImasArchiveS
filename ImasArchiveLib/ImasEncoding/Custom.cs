@@ -2,18 +2,22 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Imas
+namespace Imas.ImasEncoding
 {
-    class CustomEncoding
+    static class Custom
     {
-        public static void ToCustomEncoding(string s, Span<byte> outBuffer)
+        public static void GetBytes(string s, Span<byte> outBuffer)
         {
             int maxLen = (outBuffer.Length & -2) - 2;
             int j = 0;
             NextByteOptions next = NextByteOptions.None;
-            for (int i = 0; i < s.Length && j < maxLen; i++)
+            for (int i = 0; i < s.Length && j < maxLen; )
             {
-                char c = s[i];
+                char c;
+                do
+                {
+                    c = s[i++];
+                } while (c == 0xD);
                 switch (next)
                 {
                     case NextByteOptions.AllASCII:
@@ -84,7 +88,7 @@ namespace Imas
             }
         }
 
-        public static string FromCustomEncoding(ReadOnlySpan<byte> inSpan)
+        public static string GetString(ReadOnlySpan<byte> inSpan)
         {
             int maxLen = inSpan.Length & -2;
             List<char> chars = new List<char>();

@@ -1,10 +1,8 @@
-﻿using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using Imas;
-using Imas.Archive;
+﻿using Imas.Records;
+using Imas.Spreadsheet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
@@ -12,27 +10,37 @@ namespace ImasArchiveLibTest
     public class ParameterTest
     {
         [DataTestMethod]
-        [DataRow("disc/parameter/profile.bin")]
-        public void ReadProfileTest(string fileName)
+        [DataRow("disc/parameter/profile.bin", "other/profile.xlsx")]
+        public void ReadProfileTest(string profileFileName, string xlsxName)
         {
-            List<ProfileParameter> list = new List<ProfileParameter>();
-            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            List<Profile> list = new List<Profile>();
+            using (FileStream fileStream = new FileStream(profileFileName, FileMode.Open, FileAccess.Read))
             {
                 while (fileStream.Position < fileStream.Length)
                 {
-                    list.Add(ProfileParameter.Deserialise(fileStream));
+                    Profile record = new Profile();
+                    record.Deserialise(fileStream);
+                    list.Add(record);
                 }
             }
-            using (FileStream outStream = new FileStream("temp.bin", FileMode.Create, FileAccess.Write))
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            xlsx.AppendRows("profile", list);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/profile.xlsx")]
+        public void WriteProfileTest(string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            var records = xlsx.GetRows<Profile>("profile");
+            using (FileStream fileStream = new FileStream("profile.bin", FileMode.Create, FileAccess.Write))
             {
-                foreach (ProfileParameter record in list)
+                foreach (Profile record in records)
                 {
-                    record.Serialise(outStream);
+                    record.Serialise(fileStream);
                 }
             }
-            bool eq = Compare.CompareFiles("temp.bin", fileName);
-            File.Delete("temp.bin");
-            Assert.IsTrue(eq);
+            File.Delete("profile.bin");
         }
     }
 }

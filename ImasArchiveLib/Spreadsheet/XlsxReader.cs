@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Imas.Records;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -59,6 +60,14 @@ namespace Imas.Spreadsheet
             }
             return list;
         }
+        public IEnumerable<T> GetRows<T>(string sheetName) where T : IRecordable, new()
+        {
+            Sheet sheet = sheets.Descendants<Sheet>().FirstOrDefault(sheet => sheet.Name == sheetName);
+            if (sheet != null)
+                return GetRows<T>(sheet, null);
+            else
+                return Enumerable.Empty<T>();
+        }
 
         #region Get Cell Value
         public string GetString(Row row, string colName)
@@ -75,7 +84,8 @@ namespace Imas.Spreadsheet
                 {
                     return cell.DataType.Value switch
                     {
-                        CellValues.SharedString => sharedStringTablePart.SharedStringTable.ElementAt(int.Parse(cell.InnerText)).InnerText,
+                        CellValues.SharedString => sharedStringTablePart.SharedStringTable.ElementAt(int.Parse(cell.InnerText))
+                            .InnerText.Replace("_x000D_", ""),
                         _ => throw new InvalidDataException("Expected a string in cell" + address),
                     };
                 }
@@ -92,6 +102,34 @@ namespace Imas.Spreadsheet
             if (cell != null && (cell.DataType == null || cell.DataType.Value == CellValues.Number))
             {
                 if (int.TryParse(cell.InnerText, out int result))
+                    return result;
+                else
+                    throw new InvalidDataException("Could not parse contents of " + address + " as integer");
+            }
+            else
+                throw new InvalidDataException("Expected a number in cell " + address);
+        }
+        public short GetShort(Row row, string colName)
+        {
+            string address = colName + row.RowIndex.ToString();
+            Cell cell = row.Descendants<Cell>().FirstOrDefault(cell => cell.CellReference == address);
+            if (cell != null && (cell.DataType == null || cell.DataType.Value == CellValues.Number))
+            {
+                if (short.TryParse(cell.InnerText, out short result))
+                    return result;
+                else
+                    throw new InvalidDataException("Could not parse contents of " + address + " as integer");
+            }
+            else
+                throw new InvalidDataException("Expected a number in cell " + address);
+        }
+        public byte GetByte(Row row, string colName)
+        {
+            string address = colName + row.RowIndex.ToString();
+            Cell cell = row.Descendants<Cell>().FirstOrDefault(cell => cell.CellReference == address);
+            if (cell != null && (cell.DataType == null || cell.DataType.Value == CellValues.Number))
+            {
+                if (byte.TryParse(cell.InnerText, out byte result))
                     return result;
                 else
                     throw new InvalidDataException("Could not parse contents of " + address + " as integer");

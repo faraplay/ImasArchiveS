@@ -1,10 +1,8 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
-using System;
-using System.Collections.Generic;
+using Imas.Spreadsheet;
 using System.IO;
-using System.Text;
 
-namespace Imas.Spreadsheet
+namespace Imas.Records
 {
     interface IRecordable
     {
