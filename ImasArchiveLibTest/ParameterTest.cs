@@ -42,5 +42,39 @@ namespace ImasArchiveLibTest
             }
             File.Delete("profile.bin");
         }
+
+        [DataTestMethod]
+        [DataRow("disc/parameter/accessory.bin", "other/accessory.xlsx")]
+        public void ReadAccessoryTest(string accessoryFileName, string xlsxName)
+        {
+            List<Accessory> list = new List<Accessory>();
+            using (FileStream fileStream = new FileStream(accessoryFileName, FileMode.Open, FileAccess.Read))
+            {
+                while (fileStream.Position < fileStream.Length)
+                {
+                    Accessory record = new Accessory();
+                    record.Deserialise(fileStream);
+                    list.Add(record);
+                }
+            }
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            xlsx.AppendRows("accessory", list);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/accessory.xlsx")]
+        public void WriteAccessoryTest(string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            var records = xlsx.GetRows<Accessory>("accessory");
+            using (FileStream fileStream = new FileStream("accessory.bin", FileMode.Create, FileAccess.Write))
+            {
+                foreach (Accessory record in records)
+                {
+                    record.Serialise(fileStream);
+                }
+            }
+            File.Delete("accessory.bin");
+        }
     }
 }
