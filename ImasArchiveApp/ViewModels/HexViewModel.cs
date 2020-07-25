@@ -14,7 +14,7 @@ namespace ImasArchiveApp
         private int _headerLength = 16;
         private string _headerText;
         private string _dataText;
-        private Stream _stream;
+        private readonly Stream _stream;
         private int _offset = 0;
         private int _lineCount = 10;
         private HexViewerEncoding _encoding = HexViewerEncoding.Latin1;
@@ -22,7 +22,6 @@ namespace ImasArchiveApp
         private byte[] _dataBuffer;
         private int _bufferSize;
         private int _bufferOffset;
-        private int streamLength;
         private const int DefaultBufferSize = 0x10000;
         private readonly StringBuilder dataStringBuilder = new StringBuilder();
         private int scrollDelta = 0;
@@ -59,19 +58,6 @@ namespace ImasArchiveApp
             set
             {
                 _dataText = value;
-                OnPropertyChanged();
-            }
-        }
-        public Stream Stream
-        {
-            get => _stream;
-            set
-            {
-                _stream?.Dispose();
-                _stream = value;
-                streamLength = (int)(_stream == null ? 0 : _stream.Length);
-                ClearBuffer();
-                UpdateDataText();
                 OnPropertyChanged();
             }
         }
@@ -178,6 +164,46 @@ namespace ImasArchiveApp
                 return _updateDataTextCommand;
             }
         }
+        private RelayCommand _selectAsciiEncodingCommand;
+        private RelayCommand _selectLatin1EncodingCommand;
+        private RelayCommand _selectUTF16BEEncodingCommand;
+        public ICommand SelectAsciiEncodingCommand
+        {
+            get
+            {
+                if (_selectAsciiEncodingCommand == null)
+                {
+                    _selectAsciiEncodingCommand = new RelayCommand(
+                        _ => Encoding = HexViewerEncoding.ASCII);
+                }
+                return _selectAsciiEncodingCommand;
+            }
+        }
+        public ICommand SelectLatin1EncodingCommand
+        {
+            get
+            {
+                if (_selectLatin1EncodingCommand == null)
+                {
+                    _selectLatin1EncodingCommand = new RelayCommand(
+                        _ => Encoding = HexViewerEncoding.Latin1);
+                }
+                return _selectLatin1EncodingCommand;
+            }
+        }
+        public ICommand SelectUTF16BEEncodingCommand
+        {
+            get
+            {
+                if (_selectUTF16BEEncodingCommand == null)
+                {
+                    _selectUTF16BEEncodingCommand = new RelayCommand(
+                        _ => Encoding = HexViewerEncoding.UTF16BE);
+                }
+                return _selectUTF16BEEncodingCommand;
+            }
+        }
+
         #endregion
         #region Methods
         private void UpdateHeaderText()
@@ -196,9 +222,9 @@ namespace ImasArchiveApp
 
                 int totalBytes = _headerLength * _lineCount;
                 if (_dataBuffer == null || 
-                    (_bufferSize < 2 * totalBytes && 2 * totalBytes < streamLength) ||
+                    (_bufferSize < 2 * totalBytes && 2 * totalBytes < _stream.Length) ||
                     _offset < _bufferOffset || 
-                    (_offset + totalBytes > _bufferOffset + _bufferSize && _bufferOffset + _bufferSize < streamLength)
+                    (_offset + totalBytes > _bufferOffset + _bufferSize && _bufferOffset + _bufferSize < _stream.Length)
                     )
                 {
                     _bufferSize = (2 * totalBytes > DefaultBufferSize) ? 2 * totalBytes : DefaultBufferSize;
@@ -278,13 +304,6 @@ namespace ImasArchiveApp
             {
                 DataText = "            Could not read stream.";
             }
-        }
-        private void ClearBuffer()
-        {
-            _dataBuffer = null;
-            _bufferOffset = 0;
-            _bufferSize = 0;
-            _offset = 0;
         }
         #endregion
     }

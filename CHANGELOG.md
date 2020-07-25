@@ -1,3 +1,14 @@
+
+### Added
+Hex viewer now has different encoding options
+
+### Fixed
+Patching a currently open arc is now possible.
+
+The current file is no longer closed if you choose to open a file and select "Cancel".
+
+The hex viewer now properly displays data past offset 0x10000.
+
 ## Version 0.3.0
 
 ### Added

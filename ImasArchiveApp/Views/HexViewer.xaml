@@ -23,6 +23,13 @@
                 </TextBlock.LayoutTransform>
             </TextBlock>
         </Border>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="Encoding">
+                <MenuItem Command="{Binding Path=SelectAsciiEncodingCommand}" Header="ASCII" />
+                <MenuItem Command="{Binding Path=SelectLatin1EncodingCommand}" Header="Latin-1" />
+                <MenuItem Command="{Binding Path=SelectUTF16BEEncodingCommand}" Header="UTF16-BE" />
+            </MenuItem>
+        </Menu>
         <TextBlock
             x:Name="tbHeader"
             DockPanel.Dock="Top"
