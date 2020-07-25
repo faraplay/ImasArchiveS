@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 
 namespace ImasArchiveApp
 {
     static class FileModelFactory
     {
-        public static IReport parent;
+        public static IReport report;
+        public static IGetFileName getFileName;
         public static IFileModel CreateFileModel(Stream stream, string fileName)
         {
             string extension = fileName.Substring(fileName.LastIndexOf('.') + 1);
@@ -15,13 +13,13 @@ namespace ImasArchiveApp
             {
                 case "par":
                 case "pta":
-                    return new ParModel(parent, stream, fileName);
+                    return new ParModel(report, stream, fileName);
                 case "gtf":
                 case "tex":
                 case "dds":
-                    return new GTFModel(stream, fileName);
+                    return new GTFModel(report, fileName, getFileName, stream);
                 default:
-                    return new HexViewModel(stream, fileName);
+                    return new HexViewModel(report, fileName, stream);
             }
         }
 
@@ -29,7 +27,7 @@ namespace ImasArchiveApp
         {
             if (fileName.EndsWith(".arc") || fileName.EndsWith(".arc.dat"))
             {
-                return new ArcModel(parent, fileName, new Dialogs());
+                return new ArcModel(report, fileName, new Dialogs());
             }
             else
             {

@@ -22,6 +22,9 @@
                 </TextBlock.LayoutTransform>
             </TextBlock>
         </Border>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Command="{Binding Path=SavePngCommand}" Header="Save" />
+        </Menu>
         <Grid>
             <Image Source="/Icons/checkerboard.png" Stretch="UniformToFill" />
             <Image Source="{Binding Path=ImageSource}" />

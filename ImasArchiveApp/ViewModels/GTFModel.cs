@@ -1,26 +1,20 @@
 ﻿using Imas;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace ImasArchiveApp
 {
-    class GTFModel : IFileModel
+    class GTFModel : FileModel
     {
         private ImageSource _imageSource;
         private readonly MemoryStream ms;
-
-        private bool disposed = false;
+        private readonly IGetFileName getFileName;
 
         #region Properties
-        public string FileName { get; }
-
         public ImageSource ImageSource
         {
             get => _imageSource;
@@ -32,19 +26,12 @@ namespace ImasArchiveApp
         }
         #endregion
 
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
         #region Constructors
-        public GTFModel(Stream stream, string fileName)
+        public GTFModel(IReport report, string fileName, IGetFileName getFileName, Stream stream) : base(report, fileName)
         {
             try
             {
-                FileName = fileName;
+                this.getFileName = getFileName;
                 ms = new MemoryStream();
                 stream.CopyTo(ms);
                 ms.Position = 0;
@@ -67,23 +54,53 @@ namespace ImasArchiveApp
         }
         #endregion
         #region IDisposable
-        public void Dispose()
+        private bool disposed = false;
+        protected override void Dispose(bool disposing)
         {
-            if (!disposed)
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-        }
-        protected void Dispose(bool disposing)
-        {
+            if (disposed)
+                return;
             if (disposing)
             {
                 ms?.Dispose();
             }
             disposed = true;
+            base.Dispose(disposing);
         }
-        ~GTFModel() => Dispose(false);
+        #endregion
+        #region Commands
+        private AsyncCommand _savePngCommand;
+        public IAsyncCommand SavePngCommand
+        {
+            get
+            {
+                if (_savePngCommand == null)
+                {
+                    _savePngCommand = new AsyncCommand(() => SavePng());
+                }
+                return _savePngCommand;
+            }
+        }
+        #endregion
+        #region Command Methods
+        public async Task SavePng()
+        {
+            try
+            {
+                ClearStatus();
+                string name = FileName.Substring(FileName.LastIndexOf('/') + 1);
+                string nameNoExtension = name.Contains('.') ? name.Substring(0, name.LastIndexOf('.')) : name;
+                string pngName = getFileName.SaveGetFileName("Save As Png", "", nameNoExtension, "PNG file (*.png)|*.png");
+
+                using FileStream fileStream = new FileStream(pngName, FileMode.Create, FileAccess.Write);
+                ms.Position = 0;
+                await ms.CopyToAsync(fileStream);
+                ReportMessage("Saved to " + pngName);
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+        }
         #endregion
     }
 }

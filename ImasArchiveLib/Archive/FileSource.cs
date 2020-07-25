@@ -7,7 +7,7 @@ namespace Imas.Archive
 {
     public class FileSource : IFileSource
     {
-        private DirectoryInfo dInfo;
+        private readonly DirectoryInfo dInfo;
 
         public FileSource(string dirName)
         {

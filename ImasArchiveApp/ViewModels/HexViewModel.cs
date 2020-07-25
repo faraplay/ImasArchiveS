@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class HexViewModel : IFileModel
+    class HexViewModel : FileModel, IDisposable
     {
         #region Fields
         private int _headerLength = 16;
@@ -25,10 +22,8 @@ namespace ImasArchiveApp
         private const int DefaultBufferSize = 0x10000;
         private readonly StringBuilder dataStringBuilder = new StringBuilder();
         private int scrollDelta = 0;
-        private bool disposed = false;
         #endregion
         #region Properties
-        public string FileName { get; }
         public int HeaderLength
         {
             get => _headerLength;
@@ -95,41 +90,27 @@ namespace ImasArchiveApp
             }
         }
         #endregion
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
         #region Constructors
-        public HexViewModel(Stream stream, string fileName)
+        public HexViewModel(IReport report, string fileName, Stream stream) : base(report, fileName)
         {
-            FileName = fileName;
             _stream = stream;
             UpdateHeaderText();
             UpdateDataText();
         }
         #endregion
         #region IDisposable
-        public void Dispose()
+        private bool disposed = false;
+        protected override void Dispose(bool disposing)
         {
-            if (!disposed)
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-        }
-        protected void Dispose(bool disposing)
-        {
+            if (disposed)
+                return;
             if (disposing)
             {
                 _stream?.Dispose();
             }
             disposed = true;
+            base.Dispose(disposing);
         }
-        ~HexViewModel() => Dispose(false);
-
         #endregion
         #region Commands
         public void Scroll(object sender, MouseWheelEventArgs e)

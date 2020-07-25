@@ -12,6 +12,7 @@ namespace ImasArchiveLibTest
     public static class Compare
     {
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<DLL signature>")]
         static extern int memcmp(byte[] b1, byte[] b2, long count);
 
         public static bool CompareFiles(string file1, string file2)

@@ -16,13 +16,14 @@ namespace ImasArchiveApp
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
-            var datacontext = new MainWindowModel(new Dialogs());
+            Dialogs dialogs = new Dialogs();
+            var datacontext = new MainWindowModel(dialogs);
             var window = new MainWindow()
             {
                 DataContext = datacontext
             };
-            FileModelFactory.parent = datacontext;
+            FileModelFactory.report = datacontext;
+            FileModelFactory.getFileName = dialogs;
             window.Show();
         }
     }

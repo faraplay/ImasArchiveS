@@ -2,6 +2,8 @@
 ### Added
 Hex viewer now has different encoding options
 
+GTF viewer now has option to save image as a .png
+
 ### Fixed
 Patching a currently open arc is now possible.
 
