@@ -142,7 +142,7 @@ namespace ImasArchiveApp
                 return _replaceSaveZipCommand;
             }
         }
-        public bool CanReplaceSave() => FileModel == null;
+        public bool CanReplaceSave() => FileModel == null || FileModel is ArcModel;
         AsyncCommand _createCommuPatchCommand;
         public ICommand CreateCommuPatchCommand
         {
@@ -214,21 +214,27 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string inFileName = _getFileName.OpenGetFileName("Choose folder", "Arc file (*.arc;*.arc.dat)|*.arc;*.arc.dat");
-                if (inFileName == null)
+                string inFileName;
+                bool fileOpened = FileModel != null;
+                if (fileOpened)
                 {
-                    return;
+                    if (FileModel is ArcModel arcModel)
+                    {
+                        inFileName = arcModel.ArcPath;
+                    }
+                    else
+                        throw new InvalidOperationException("Cannot patch non-arc file.");
+                }
+                else
+                {
+                    inFileName = _getFileName.OpenGetFileName("Choose arc", "Arc file (*.arc;*.arc.dat)|*.arc;*.arc.dat");
+                    if (inFileName == null) return;
                 }
                 string replacementName = fromZip ? _getFileName.OpenGetFileName("Choose patch zip", "Zip file (*.zip)|*.zip") : _getFileName.OpenGetFolderName("Choose patch folder");
-                if (replacementName == null)
-                {
-                    return;
-                }
+                if (replacementName == null) return;
                 string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc");
-                if (outFileName == null)
-                {
-                    return;
-                }
+                if (outFileName == null) return;
+
                 string extension;
                 if (inFileName.EndsWith(".arc"))
                 {
@@ -241,9 +247,9 @@ namespace ImasArchiveApp
                     extension = ".dat";
                 }
                 else
-                {
                     throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
-                }
+                if (fileOpened)
+                    Close();
                 if (fromZip)
                 {
                     using ZipSourceParent zipSourceParent = new ZipSourceParent(replacementName);
