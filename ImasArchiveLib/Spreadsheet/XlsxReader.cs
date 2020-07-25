@@ -68,6 +68,22 @@ namespace Imas.Spreadsheet
             else
                 return Enumerable.Empty<T>();
         }
+        public IEnumerable<Record> GetRows(string format, string sheetName)
+        {
+            Sheet sheet = sheets.Descendants<Sheet>().FirstOrDefault(sheet => sheet.Name == sheetName);
+            WorksheetPart worksheetPart = (WorksheetPart)(workbookPart.GetPartById(sheet.Id));
+            var rows = worksheetPart.Worksheet.Descendants<Row>();
+            List<Record> list = new List<Record>();
+            foreach (Row row in rows)
+            {
+                if (row.RowIndex == 1)
+                    continue;
+                Record record = new Record(format);
+                record.ReadRow(this, row);
+                list.Add(record);
+            }
+            return list;
+        }
 
         #region Get Cell Value
         public string GetString(Row row, string colName)
