@@ -160,16 +160,16 @@ namespace ImasArchiveApp
         #region Command Methods
         public void Open()
         {
-            if (CanClose())
-                Close();
             string fileName = _getFileName.OpenGetFileName("Open archive",
                 "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat|All files (*.*)|*.*");
             if (fileName != null)
             {
+                if (FileModel != null)
+                    Close();
                 Open(fileName);
             }
         }
-        public void Open(string inPath)
+        private void Open(string inPath)
         {
             try
             {
