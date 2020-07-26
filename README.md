@@ -1,5 +1,5 @@
 # ImasArchiveS
-App to read, edit and extract files from the game Idolmaster: One For All (PS3).
+App to read, edit, extract and patch files from the game Idolmaster: One For All (PS3).
 
 ## Instructions for usage
 ### Opening
@@ -17,7 +17,8 @@ To close the currently open file, click on "File >> Close". Note that no changes
 ### Patching
 To patch an arc file, click on "Patch >> Patch Arc >> From Zip". Then select the arc file to patch
 and the .zip file containing the new files.
-When patching the game, make sure to patch each of the arc files.
+When patching the game, make sure to patch each of the arc files. This includes the DLC (though you'll have to decrypt those first, 
+using another program).
 
 ### Patch creation
 You can create the patch file containing all the translated commus yourself. First, download the spreadsheet 
@@ -42,10 +43,33 @@ Note that renaming the file is not supported.
 To save your changes to the arc, select "Arc >> Save Arc". Then input a new name for the arc. Note that overwriting the currently 
 open arc is not allowed.
 
-#### Commu Extracting
+#### Extracting Specific Data
 To extract all commus from the arc, choose "Arc >> Extract Commus", then input a name for the new spreadsheet.
 All the text and data for the commu messages will be outputted into a new spreadsheet.
+
+Data in the parameter folder can also be extracted. Choose "Arc >> Extract Parameter Data" to extract to a 
+spreadsheet. Note that research into the types of data is still ongoing and not all data in the parameter folder 
+will be extracted.
 
 #### Font patching
 To patch the font (stored in disc.arc) for the patched commus, choose "Arc >> Patch Font"
 while disc.arc is opened.
+
+### Other file options
+
+#### GTF (image) viewer
+Clicking the "Save" menu option allows you to export the GTF file as a PNG file.
+
+#### Hex viewer
+You can select the encoding for the text view on the the right by choosing from the Encoding menu 
+header. There are three options:
+
+* ASCII: Uses the basic ASCII character set. This charset has only 128 characters, therefore 
+bytes that differ by a value of 128 will be displayed as the same character. The translation patch 
+uses character codes with ASCII offset by 128, so use this to read patched text.
+
+* Latin-1: Uses the ISO-8859-1 charset (which coincides with the first 256 chars of Unicode). 
+This is probably the charset used in most hex editors.
+
+* UTF16-BE: This groups bytes into 16-bit big-endian words and displays the Unicode character with that 
+number. This is the encoding used in-game for most text, so use this to read any text in the files.

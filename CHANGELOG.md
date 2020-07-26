@@ -1,5 +1,8 @@
+## Version 0.3.1
 
 ### Added
+New command to extract parameter data from an arc file
+
 Hex viewer now has different encoding options
 
 GTF viewer now has option to save image as a .png
