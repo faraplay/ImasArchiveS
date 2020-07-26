@@ -91,10 +91,13 @@ namespace ImasArchiveApp
                 string nameNoExtension = name.Contains('.') ? name.Substring(0, name.LastIndexOf('.')) : name;
                 string pngName = getFileName.SaveGetFileName("Save As Png", "", nameNoExtension, "PNG file (*.png)|*.png");
 
-                using FileStream fileStream = new FileStream(pngName, FileMode.Create, FileAccess.Write);
-                ms.Position = 0;
-                await ms.CopyToAsync(fileStream);
-                ReportMessage("Saved to " + pngName);
+                if (pngName != null)
+                {
+                    using FileStream fileStream = new FileStream(pngName, FileMode.Create, FileAccess.Write);
+                    ms.Position = 0;
+                    await ms.CopyToAsync(fileStream);
+                    ReportMessage("Saved to " + pngName);
+                }
             }
             catch (Exception ex)
             {
