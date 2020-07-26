@@ -25,6 +25,11 @@ namespace Imas.Archive
             return _entries.Find(e => e.FileName == fileName);
         }
 
+        /// <summary>
+        /// Recursively searches the ContainerFile for the filename string.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns>An EntryStack containing the entry with that filename, or null if no entry is found.</returns>
         public async Task<EntryStack> GetEntryRecursive(string fileName)
         {
             return await GetEntryRecursive(fileName, new EntryStack());

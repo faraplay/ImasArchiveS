@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Linq;
+using Imas.Spreadsheet;
+using Imas.Records;
 
 [assembly: InternalsVisibleTo("ImasArchiveLibTest")]
 
@@ -476,8 +478,48 @@ namespace Imas.Archive
                 if (binEntry != null)
                 {
                     using Stream stream = await binEntry.GetData();
-                    commuToXlsx.AddCommuFromBin(stream, arcEntry.FileName[0..^4] + "_" + arcEntry.FileName[^3..] + "/" + binEntry.FileName);
-                    commuToXlsx.WriteCommuToXlsx();
+                    commuToXlsx.GetAndWriteCommu(stream, arcEntry.FileName[0..^4] + "_" + arcEntry.FileName[^3..] + "/" + binEntry.FileName);
+                }
+            }
+        }
+
+        class RecordFormat
+        {
+            public string fileName;
+            public string sheetName;
+            public string format;
+
+            public RecordFormat(string fileName, string sheetName, string format)
+            {
+                this.fileName = fileName;
+                this.sheetName = sheetName;
+                this.format = format;
+            }
+        }
+
+        static readonly RecordFormat[] formats = {
+            new RecordFormat("parameter/accessory.bin", "accessory", "iiiiibbbbiic020c080bbbbbbbbii"),
+            new RecordFormat("parameter/item.bin", "item", "isbbiic020c080c080ssssssiiiibbbb"),
+            new RecordFormat("parameter/profile.bin", "profile", "sbbbbbbbbbbbbbba010c020c020c020c020c020c020c020c040c080c080"),
+            new RecordFormat("parameter/album.bin", "album", "ssbbsbbsssa010c020c020c020"),
+            new RecordFormat("parameter/season/seasonText.bin", "seasonText", "bbsc040c020c020"),
+            new RecordFormat("parameter/mail_system_par/mail_system.bin", "mail_system", "ssic020c800"),
+        };
+
+        public async Task ExtractParameterToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
+        {
+            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+            foreach (RecordFormat format in formats)
+            {
+                using EntryStack entryStack = await GetEntryRecursive(format.fileName);
+                if (entryStack != null)
+                {
+                    List<Record> records = new List<Record>();
+                    using (Stream stream = await entryStack.Entry.GetData())
+                    {
+                        records = Record.GetRecords(stream, format.format);
+                    }
+                    xlsxWriter.AppendRows(format.sheetName, records);
                 }
             }
         }

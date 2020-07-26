@@ -156,6 +156,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanExtractCommus() => ArcFile != null;
+        AsyncCommand _extractParameterCommand;
+        public ICommand ExtractParameterCommand
+        {
+            get
+            {
+                if (_extractParameterCommand == null)
+                {
+                    _extractParameterCommand = new AsyncCommand(() => ExtractParameter(), () => CanExtractParameter());
+                }
+                return _extractParameterCommand;
+            }
+        }
+        public bool CanExtractParameter() => ArcFile != null;
         AsyncCommand _patchFontCommand;
         public ICommand PatchFontCommand
         {
@@ -281,6 +294,23 @@ namespace ImasArchiveApp
                 if (fileName != null)
                 {
                     await ArcFile.ExtractCommusToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+        }
+        public async Task ExtractParameter()
+        {
+            try
+            {
+                ClearStatus();
+                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath) + "_parameter.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
+                if (fileName != null)
+                {
+                    await ArcFile.ExtractParameterToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
                     ReportMessage("Done.");
                 }
             }

@@ -301,6 +301,13 @@ namespace ImasArchiveLibTest
             using ArcFile arcFile = new ArcFile(arcName, extension);
             await arcFile.ExtractCommusToXlsx(outputXlsx, progress);
         }
+        [DataTestMethod]
+        [DataRow("disc", "", "other/parameter.xlsx")]
+        public async Task ArcParameterTest(string arcName, string extension, string outputXlsx)
+        {
+            using ArcFile arcFile = new ArcFile(arcName, extension);
+            await arcFile.ExtractParameterToXlsx(outputXlsx, progress);
+        }
     }
 }
 
