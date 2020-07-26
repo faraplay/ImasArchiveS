@@ -12,6 +12,7 @@ namespace Imas.Records
         readonly List<object> list = new List<object>();
         readonly List<FormatElement> format;
 
+        #region IRecordable
         public Record(string formatString)
         {
             format = new List<FormatElement>();
@@ -158,6 +159,20 @@ namespace Imas.Records
                 }
             }
         }
+        #endregion
+
+        public static List<Record> GetRecords(Stream stream, string format)
+        {
+            List<Record> records = new List<Record>();
+            while (stream.Position < stream.Length)
+            {
+                Record record = new Record(format);
+                record.Deserialise(stream);
+                records.Add(record);
+            }
+            return records;
+        }
+
 
         class FormatElement
         {

@@ -18,14 +18,9 @@ namespace ImasArchiveLibTest
         public void ReadRecordTest(string binName, string xlsxName, string sheetName, string format)
         {
             List<Record> list = new List<Record>();
-            using (FileStream fileStream = new FileStream(binName, FileMode.Open, FileAccess.Read))
+            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
             {
-                while (fileStream.Position < fileStream.Length)
-                {
-                    Record record = new Record(format);
-                    record.Deserialise(fileStream);
-                    list.Add(record);
-                }
+                list = Record.GetRecords(stream, format);
             }
             using XlsxWriter xlsx = new XlsxWriter(xlsxName);
             xlsx.AppendRows(sheetName, list);
