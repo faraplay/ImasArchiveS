@@ -22,18 +22,25 @@ namespace Imas
 
             stream.Position = pos + 52;
             int paletteData = Binary.GetInt32(stream, true);
+            int paletteSize = Binary.GetInt32(stream, true);
             stream.Position = pos + 128;
             return type switch
             {
-                0x81 => GTFPaletteInterlace(stream, width, height, paletteData),
-                0xA1 => GTFPalette(stream, width, height, paletteData),
-                0x83 => GTF12ColorInterlace(stream, width, height),
-                0x85 => GTFInterlace(stream, width, height),
-                0xA5 => GTFNormal(stream, width, height),
-                0x86 => GTF4x4(stream, width, height),
-                0xA6 => GTF4x4(stream, width, height),
-                0x88 => GTF4x4Alpha(stream, width, height),
-                0xA8 => GTF4x4Alpha(stream, width, height),
+                0x81 => ReadGTFPaletteMixXY(stream, width, height, paletteData, paletteSize),
+                0xA1 => ReadGTFPalette(stream, width, height, paletteData, paletteSize),
+                0x82 => ReadGTF1555MixXY(stream, width, height),
+                0x83 => ReadGTF4444MixXY(stream, width, height),
+                0xA3 => ReadGTF4444(stream, width, height),
+                0x85 => ReadGTF8888MixXY(stream, width, height),
+                0xA5 => ReadGTF8888(stream, width, height),
+                0x86 => ReadGTF565Block4x4(stream, width, height),
+                0xA6 => ReadGTF565Block4x4(stream, width, height),
+                0x87 => ReadGTF565Block4x4MixAlphaMipmap(stream, width, height),
+                0xA7 => ReadGTF565Block4x4MixAlphaMipmap(stream, width, height),
+                0x88 => ReadGTF565Block4x4Alpha(stream, width, height),
+                0xA8 => ReadGTF565Block4x4Alpha(stream, width, height),
+
+                0xBE => ReadGTF8888(stream, width, height),
                 _ => throw new NotSupportedException()
             };
         }
@@ -50,20 +57,21 @@ namespace Imas
             }
         }
 
-        private static Bitmap GTFPalette(Stream stream, int width, int height, int paletteData)
+        private static Bitmap ReadGTFPalette(Stream stream, int width, int height, int paletteData, int paletteSize)
         {
             long pos = stream.Position - 128;
             Bitmap bitmap = new Bitmap(width, height);
 
+            int paletteRepeat = paletteSize / 0x400;
             Color[] colors = new Color[0x100];
             stream.Position = pos + paletteData;
-            for (int n = 0; n < 0x400; n++)
+            for (int n = 0; n < paletteRepeat * 0x100; n++)
             {
                 int b0 = stream.ReadByte();
                 int b1 = stream.ReadByte();
                 int b2 = stream.ReadByte();
                 int b3 = stream.ReadByte();
-                colors[n / 4] = Color.FromArgb(b0, b3, b2, b1);
+                colors[n / paletteRepeat] = Color.FromArgb(b0, b3, b2, b1);
             }
 
             stream.Position = pos + 128;
@@ -79,20 +87,21 @@ namespace Imas
             return bitmap;
         }
 
-        private static Bitmap GTFPaletteInterlace(Stream stream, int width, int height, int paletteData)
+        private static Bitmap ReadGTFPaletteMixXY(Stream stream, int width, int height, int paletteData, int paletteSize)
         {
             long pos = stream.Position - 128;
             Bitmap bitmap = new Bitmap(width, height);
 
+            int paletteRepeat = paletteSize / 0x400;
             Color[] colors = new Color[0x100];
             stream.Position = pos + paletteData;
-            for (int n = 0; n < 0x400; n++)
+            for (int n = 0; n < paletteRepeat * 0x100; n++)
             {
                 int b0 = stream.ReadByte();
                 int b1 = stream.ReadByte();
                 int b2 = stream.ReadByte();
                 int b3 = stream.ReadByte();
-                colors[n / 4] = Color.FromArgb(b0, b3, b2, b1);
+                colors[n / paletteRepeat] = Color.FromArgb(b0, b3, b2, b1);
             }
 
             stream.Position = pos + 128;
@@ -124,7 +133,7 @@ namespace Imas
             return bitmap;
         }
 
-        private static Bitmap GTFInterlace(Stream stream, int width, int height)
+        private static Bitmap ReadGTF8888MixXY(Stream stream, int width, int height)
         {
             Bitmap bitmap = new Bitmap(width, height);
             int size = width;
@@ -154,7 +163,7 @@ namespace Imas
 
             return bitmap;
         }
-        private static Bitmap GTFNormal(Stream stream, int width, int height)
+        private static Bitmap ReadGTF8888(Stream stream, int width, int height)
         {
             Bitmap bitmap = new Bitmap(width, height);
 
@@ -171,7 +180,7 @@ namespace Imas
             return bitmap;
         }
 
-        private static Bitmap GTF12ColorInterlace(Stream stream, int width, int height)
+        private static Bitmap ReadGTF4444MixXY(Stream stream, int width, int height)
         {
             Bitmap bitmap = new Bitmap(width, height);
 
@@ -203,6 +212,38 @@ namespace Imas
                 int x, y;
                 (x, y) = GetXY(n, p1, p2);
                 bitmap.SetPixel(x, y, color);
+            }
+
+            return bitmap;
+        }
+        private static Bitmap ReadGTF4444(Stream stream, int width, int height)
+        {
+            Bitmap bitmap = new Bitmap(width, height);
+
+            int size = width;
+            int p1 = -1;
+            while (size > 0)
+            {
+                size >>= 1;
+                p1++;
+            }
+
+            size = height;
+            int p2 = -1;
+            while (size > 0)
+            {
+                size >>= 1;
+                p2++;
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    ushort m = Binary.GetUShort(stream, true);
+                    Color color = ColorHelp.From4444(m);
+                    bitmap.SetPixel(x, y, color);
+                }
             }
 
             return bitmap;
@@ -244,6 +285,37 @@ namespace Imas
             memStream.Position = 0;
             await memStream.CopyToAsync(stream);
         }
+        private static Bitmap ReadGTF1555MixXY(Stream stream, int width, int height)
+        {
+            Bitmap bitmap = new Bitmap(width, height);
+
+            int size = width;
+            int p1 = -1;
+            while (size > 0)
+            {
+                size >>= 1;
+                p1++;
+            }
+
+            size = height;
+            int p2 = -1;
+            while (size > 0)
+            {
+                size >>= 1;
+                p2++;
+            }
+
+            for (int n = 0; n < width * height; n++)
+            {
+                ushort m = Binary.GetUShort(stream, true);
+                Color color = ColorHelp.From1555(m);
+                int x, y;
+                (x, y) = GetXY(n, p1, p2);
+                bitmap.SetPixel(x, y, color);
+            }
+
+            return bitmap;
+        }
 
         private static (int, int) GetXY(int n, int p1, int p2)
         {
@@ -265,7 +337,7 @@ namespace Imas
             return (x, y);
         }
 
-        private static Bitmap GTF4x4(Stream stream, int width, int height)
+        private static Bitmap ReadGTF565Block4x4(Stream stream, int width, int height)
         {
             BinaryReader binaryReader = new BinaryReader(stream);
 
@@ -306,7 +378,7 @@ namespace Imas
             return bitmap;
         }
 
-        private static Bitmap GTF4x4Alpha(Stream stream, int width, int height)
+        private static Bitmap ReadGTF565Block4x4Alpha(Stream stream, int width, int height)
         {
             BinaryReader binaryReader = new BinaryReader(stream);
 
@@ -378,6 +450,49 @@ namespace Imas
             return bitmap;
         }
 
+        private static Bitmap ReadGTF565Block4x4MixAlphaMipmap(Stream stream, int width, int height)
+        {
+            BinaryReader binaryReader = new BinaryReader(stream);
+
+            Bitmap bitmap = new Bitmap(width, height);
+
+            for (int y = 0; y < height / 4; y++)
+                for (int x = 0; x < width / 4; x++)
+                {
+                    ulong n = binaryReader.ReadUInt64();
+                    int[,] alphas = new int[4, 4];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        for (int j = 0; j < 4; j++)
+                        {
+                            alphas[j, i] = (int)((n & 15) * 17);
+                            n >>= 4;
+                        }
+                    }
+
+                    int c0 = binaryReader.ReadUInt16();
+                    int c1 = binaryReader.ReadUInt16();
+
+                    Color[] color = new Color[4];
+                    color[0] = ColorHelp.From565(c0);
+                    color[1] = ColorHelp.From565(c1);
+                    color[2] = ColorHelp.MixRatio(color[0], color[1], 2, 1);
+                    color[3] = ColorHelp.MixRatio(color[0], color[1], 1, 2);
+
+                    for (int yy = 0; yy < 4; yy++)
+                    {
+                        byte k = binaryReader.ReadByte();
+                        for (int xx = 0; xx < 4; xx++)
+                        {
+                            int t = k & 3;
+                            bitmap.SetPixel(4 * x + xx, 4 * y + yy, Color.FromArgb(alphas[xx, yy], color[t]));
+                            k >>= 2;
+                        }
+                    }
+                }
+
+            return bitmap;
+        }
 
         private static class ColorHelp
         {
@@ -387,6 +502,14 @@ namespace Imas
                 int g0 = ((x >> 5) & 0x3F) * 4;
                 int b0 = (x & 0x1F) * 8;
                 return Color.FromArgb(r0, g0, b0);
+            }
+            public static Color From1555(ushort x)
+            {
+                int a0 = (x >> 15) * 255;
+                int r0 = ((x >> 10) & 0x1F) * 8;
+                int g0 = ((x >> 5) & 0x1F) * 8;
+                int b0 = (x & 0x1F) * 8;
+                return Color.FromArgb(a0, r0, g0, b0);
             }
 
             public static Color From4444(int x)
