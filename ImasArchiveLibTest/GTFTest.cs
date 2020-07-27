@@ -1,4 +1,6 @@
 ﻿using Imas;
+using Imas.Records;
+using Imas.Spreadsheet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -50,6 +52,30 @@ namespace ImasArchiveLibTest
             using FileStream inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             using Bitmap bitmap = GTF.ReadGTF(inStream);
             bitmap.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
+        }
+
+        [DataTestMethod]
+        [DataRow("../data/hdd4", "*.dds", "../data/hdd4_dds.xlsx")]
+        [DataRow("../data/hdd4", "*.gtf", "../data/hdd4_gtf.xlsx")]
+        public void GetGtfDataTest(string dirName, string filter, string outDir)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
+            var files = directoryInfo.GetFiles(filter, SearchOption.AllDirectories);
+            int i = 0;
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir);
+            foreach (var file in files)
+            {
+                i++;
+                Record record = new Record("XXIssiiiiibbsissiiiiiibbsissiii");
+                record[0] = file.FullName;
+                record[1] = file.Name;
+                record[2] = (int)file.Length;
+                using (FileStream stream = file.OpenRead())
+                {
+                    record.Deserialise(stream);
+                }
+                xlsxWriter.AppendRow("gtf", record);
+            }
         }
     }
 }

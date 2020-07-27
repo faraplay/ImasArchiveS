@@ -13,151 +13,115 @@ namespace Imas
         public static Bitmap ReadGTF(Stream stream)
         {
             long pos = stream.Position;
-            stream.Position = pos + 24;
-            int type = stream.ReadByte();
+            Binary binary = new Binary(stream, true);
 
-            stream.Position = pos + 32;
-            int width = Binary.GetUShort(stream, true);
-            int height = Binary.GetUShort(stream, true);
+            binary.GetUInt(); // version (1.1.0.0, 2.2.0.-1 or 2.2.0.0)
+            binary.GetUInt(); // size of file minus header
+            int partCount = binary.GetInt32();
 
-            stream.Position = pos + 52;
-            int paletteData = Binary.GetInt32(stream, true);
-            int paletteSize = Binary.GetInt32(stream, true);
-            stream.Position = pos + 128;
-            return type switch
+            binary.GetUInt(); // 0 : index of first part
+            binary.GetUInt(); // 0x80 : offset of first part
+            binary.GetUInt(); // size of first part
+            int type = binary.GetByte();
+            binary.GetByte(); // mipmap count
+            binary.GetUShort(); // 0x0200
+            binary.GetUInt(); // part type??
+            int width = binary.GetUShort();
+            int height = binary.GetUShort();
+            binary.GetUShort(); // 1
+            binary.GetUShort(); // 0
+            binary.GetUInt(); // stride
+            binary.GetUInt(); // 0
+
+            binary.GetUInt(); // 1 : index of second part
+            int paletteData = binary.GetInt32(); // offset of second part
+            binary.GetInt32(); // size of second part
+            binary.GetByte(); // 0x85 : type of second part
+            binary.GetByte(); // 1 : mipmap count
+            binary.GetUShort(); // 0x0200
+            binary.GetUInt(); // 0xAA6C : part type??
+            int paletteWidth = binary.GetUShort();
+            binary.GetUShort(); // 1 : height
+            binary.GetUShort(); // 1
+            binary.GetUShort(); // 0
+            binary.GetUInt(); // 0 : stride
+            binary.GetUInt(); // 0
+
+            stream.Position += 0x2C;
+
+            Color[] palette = null;
+            if (partCount == 2)
             {
-                0x81 => ReadGTFPaletteMixXY(stream, width, height, paletteData, paletteSize),
-                0xA1 => ReadGTFPalette(stream, width, height, paletteData, paletteSize),
-                0x82 => ReadGTF1555MixXY(stream, width, height),
-                0x83 => ReadGTF4444MixXY(stream, width, height),
-                0xA3 => ReadGTF4444(stream, width, height),
-                0x85 => ReadGTF8888MixXY(stream, width, height),
-                0xA5 => ReadGTF8888(stream, width, height),
-                0x86 => ReadGTF565Block4x4(stream, width, height),
-                0xA6 => ReadGTF565Block4x4(stream, width, height),
-                0x87 => ReadGTF565Block4x4MixAlphaMipmap(stream, width, height),
-                0xA7 => ReadGTF565Block4x4MixAlphaMipmap(stream, width, height),
-                0x88 => ReadGTF565Block4x4Alpha(stream, width, height),
-                0xA8 => ReadGTF565Block4x4Alpha(stream, width, height),
+                int paletteRepeat = paletteWidth / 0x100;
+                palette = new Color[0x100];
+                stream.Position = pos + paletteData;
+                for (int n = 0; n < paletteWidth; n++)
+                {
+                    int b0 = stream.ReadByte();
+                    int b1 = stream.ReadByte();
+                    int b2 = stream.ReadByte();
+                    int b3 = stream.ReadByte();
+                    palette[n / paletteRepeat] = Color.FromArgb(b0, b3, b2, b1);
+                }
+                stream.Position = pos + 128;
+            }
 
-                0xBE => ReadGTF8888(stream, width, height),
+            return (type & 15) switch
+            {
+                1 => ReadGTFPalette(stream, width, height, palette),
+                2 => ReadGTF1555(stream, width, height),
+                3 => ReadGTF4444(stream, width, height),
+                5 => ReadGTF8888(stream, width, height),
+                6 => ReadGTF565Block4Color(stream, width, height),
+                7 => ReadGTF565Block8Alpha4Color(stream, width, height),
+                8 => ReadGTF565Block8RelAlpha4Color(stream, width, height),
+
+                0xE => ReadGTF8888(stream, width, height),
                 _ => throw new NotSupportedException()
             };
         }
 
-        public static async Task WriteGTF(Stream stream, Bitmap bitmap, int encodingType)
+        public static async Task WriteGTF(Stream stream, Bitmap bitmap, byte encodingType)
         {
+            WriteHeader(stream, encodingType, bitmap.Width, bitmap.Height);
             switch (encodingType)
             {
                 case 0x83:
-                    await WriteGTF4444MixXY(stream, bitmap);
+                    await WriteGTF4444(stream, bitmap, true);
                     break;
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        private static Bitmap ReadGTFPalette(Stream stream, int width, int height, int paletteData, int paletteSize)
+        #region Read GTF
+        private static Bitmap ReadGTFPalette(Stream stream, int width, int height, Color[] palette)
         {
-            long pos = stream.Position - 128;
             Bitmap bitmap = new Bitmap(width, height);
+            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
-            int paletteRepeat = paletteSize / 0x400;
-            Color[] colors = new Color[0x100];
-            stream.Position = pos + paletteData;
-            for (int n = 0; n < paletteRepeat * 0x100; n++)
+            for (int n = 0; n < width * height; n++)
             {
                 int b0 = stream.ReadByte();
-                int b1 = stream.ReadByte();
-                int b2 = stream.ReadByte();
-                int b3 = stream.ReadByte();
-                colors[n / paletteRepeat] = Color.FromArgb(b0, b3, b2, b1);
-            }
-
-            stream.Position = pos + 128;
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int b0 = stream.ReadByte();
-                    bitmap.SetPixel(x, y, colors[b0]);
-                }
+                Color color = palette[b0];
+                int x, y;
+                (x, y) = order.GetXY(n);
+                bitmap.SetPixel(x, y, color);
             }
 
             return bitmap;
         }
-
-        private static Bitmap ReadGTFPaletteMixXY(Stream stream, int width, int height, int paletteData, int paletteSize)
+        private static Bitmap ReadGTF1555(Stream stream, int width, int height)
         {
-            long pos = stream.Position - 128;
             Bitmap bitmap = new Bitmap(width, height);
-
-            int paletteRepeat = paletteSize / 0x400;
-            Color[] colors = new Color[0x100];
-            stream.Position = pos + paletteData;
-            for (int n = 0; n < paletteRepeat * 0x100; n++)
-            {
-                int b0 = stream.ReadByte();
-                int b1 = stream.ReadByte();
-                int b2 = stream.ReadByte();
-                int b3 = stream.ReadByte();
-                colors[n / paletteRepeat] = Color.FromArgb(b0, b3, b2, b1);
-            }
-
-            stream.Position = pos + 128;
-
-            int size = width;
-            int p1 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p1++;
-            }
-
-            size = height;
-            int p2 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p2++;
-            }
+            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
             for (int n = 0; n < width * height; n++)
             {
+                ushort b = Binary.GetUShort(stream, true);
+                Color color = ColorHelp.From1555(b);
                 int x, y;
-                (x, y) = GetXY(n, p1, p2);
-                int b0 = stream.ReadByte();
-                bitmap.SetPixel(x, y, colors[b0]);
-            }
-
-            return bitmap;
-        }
-
-        private static Bitmap ReadGTF8888MixXY(Stream stream, int width, int height)
-        {
-            Bitmap bitmap = new Bitmap(width, height);
-            int size = width;
-            int p1 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p1++;
-            }
-
-            size = height;
-            int p2 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p2++;
-            }
-
-            for (int n = 0; n < width * height; n++)
-            {
-                int x, y;
-                (x, y) = GetXY(n, p1, p2);
-                int b = Binary.GetInt32(stream, true);
-                Color color = Color.FromArgb(b);
+                (x, y) = order.GetXY(n);
                 bitmap.SetPixel(x, y, color);
             }
 
@@ -166,51 +130,14 @@ namespace Imas
         private static Bitmap ReadGTF8888(Stream stream, int width, int height)
         {
             Bitmap bitmap = new Bitmap(width, height);
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int b = Binary.GetInt32(stream, true);
-                    Color color = Color.FromArgb(b);
-                    bitmap.SetPixel(x, y, color);
-                }
-            }
-
-            return bitmap;
-        }
-
-        private static Bitmap ReadGTF4444MixXY(Stream stream, int width, int height)
-        {
-            Bitmap bitmap = new Bitmap(width, height);
-
-            int size = width;
-            int p1 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p1++;
-            }
-
-            size = height;
-            int p2 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p2++;
-            }
+            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
             for (int n = 0; n < width * height; n++)
             {
-                int b0 = stream.ReadByte();
-                int b1 = stream.ReadByte();
-                int a = (b0 / 16) * 17;
-                int r = (b0 % 16) * 17;
-                int g = (b1 / 16) * 17;
-                int b = (b1 % 16) * 17;
-                Color color = Color.FromArgb(a, r, g, b);
+                int b = Binary.GetInt32(stream, true);
+                Color color = Color.FromArgb(b);
                 int x, y;
-                (x, y) = GetXY(n, p1, p2);
+                (x, y) = order.GetXY(n);
                 bitmap.SetPixel(x, y, color);
             }
 
@@ -219,125 +146,21 @@ namespace Imas
         private static Bitmap ReadGTF4444(Stream stream, int width, int height)
         {
             Bitmap bitmap = new Bitmap(width, height);
-
-            int size = width;
-            int p1 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p1++;
-            }
-
-            size = height;
-            int p2 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p2++;
-            }
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    ushort m = Binary.GetUShort(stream, true);
-                    Color color = ColorHelp.From4444(m);
-                    bitmap.SetPixel(x, y, color);
-                }
-            }
-
-            return bitmap;
-        }
-
-        private static async Task WriteGTF4444MixXY(Stream stream, Bitmap bitmap)
-        {
-            using MemoryStream memStream = new MemoryStream();
-            Binary binary = new Binary(memStream, true);
-            int pixelCount = bitmap.Width * bitmap.Height;
-            int size = pixelCount * 2;
-
-            binary.PutUInt(0x02020000);
-            binary.PutInt32(size);
-            binary.PutUInt(1);
-            binary.PutUInt(0);
-
-            binary.PutUInt(0x80);
-            binary.PutInt32(size);
-            binary.PutByte(0x83);
-            binary.PutByte(1);
-            binary.PutByte(2);
-            binary.PutByte(0);
-            binary.PutUInt(0xAAE4);
-
-            binary.PutInt16((short)bitmap.Width);
-            binary.PutInt16((short)bitmap.Height);
-            binary.PutUInt(0x10000);
-            memStream.Write(new byte[0x58]);
-
-            for (int n = 0; n < pixelCount; n++)
-            {
-                int x, y;
-                (x, y) = GetXY(n, 11, 11);
-                Color color = bitmap.GetPixel(x, y);
-                binary.PutUShort(ColorHelp.To4444(color));
-            }
-
-            memStream.Position = 0;
-            await memStream.CopyToAsync(stream);
-        }
-        private static Bitmap ReadGTF1555MixXY(Stream stream, int width, int height)
-        {
-            Bitmap bitmap = new Bitmap(width, height);
-
-            int size = width;
-            int p1 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p1++;
-            }
-
-            size = height;
-            int p2 = -1;
-            while (size > 0)
-            {
-                size >>= 1;
-                p2++;
-            }
+            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
             for (int n = 0; n < width * height; n++)
             {
-                ushort m = Binary.GetUShort(stream, true);
-                Color color = ColorHelp.From1555(m);
+                ushort b = Binary.GetUShort(stream, true);
+                Color color = ColorHelp.From4444(b);
                 int x, y;
-                (x, y) = GetXY(n, p1, p2);
+                (x, y) = order.GetXY(n);
                 bitmap.SetPixel(x, y, color);
             }
 
             return bitmap;
         }
 
-        private static (int, int) GetXY(int n, int p1, int p2)
-        {
-            int x = 0, y = 0;
-            for (int j = 0; j < p1 || j < p2;)
-            {
-                if (j < p1)
-                {
-                    x += (n % 2) << j;
-                    n >>= 1;
-                }
-                if (j < p2)
-                {
-                    y += (n % 2) << j;
-                    n >>= 1;
-                }
-                j++;
-            }
-            return (x, y);
-        }
-
-        private static Bitmap ReadGTF565Block4x4(Stream stream, int width, int height)
+        private static Bitmap ReadGTF565Block4Color(Stream stream, int width, int height)
         {
             BinaryReader binaryReader = new BinaryReader(stream);
 
@@ -378,7 +201,7 @@ namespace Imas
             return bitmap;
         }
 
-        private static Bitmap ReadGTF565Block4x4Alpha(Stream stream, int width, int height)
+        private static Bitmap ReadGTF565Block8RelAlpha4Color(Stream stream, int width, int height)
         {
             BinaryReader binaryReader = new BinaryReader(stream);
 
@@ -450,7 +273,7 @@ namespace Imas
             return bitmap;
         }
 
-        private static Bitmap ReadGTF565Block4x4MixAlphaMipmap(Stream stream, int width, int height)
+        private static Bitmap ReadGTF565Block8Alpha4Color(Stream stream, int width, int height)
         {
             BinaryReader binaryReader = new BinaryReader(stream);
 
@@ -492,6 +315,117 @@ namespace Imas
                 }
 
             return bitmap;
+        }
+        #endregion
+
+        private static void WriteHeader(Stream stream, byte type, int width, int height)
+        {
+            Binary binary = new Binary(stream, true);
+            int pixelCount = width * height;
+            int pixelSize = type switch
+            {
+                0x83 => 16,
+                _ => throw new NotSupportedException()
+            };
+            int size = (pixelCount * pixelSize) / 8;
+
+            binary.PutUInt(0x02020000);
+            binary.PutInt32(size);
+            binary.PutUInt(1);
+
+            binary.PutUInt(0);
+            binary.PutUInt(0x80);
+            binary.PutInt32(size);
+            binary.PutByte(type);
+            binary.PutByte(1);
+            binary.PutByte(2);
+            binary.PutByte(0);
+            binary.PutUInt(0xAAE4);
+            binary.PutInt16((short)width);
+            binary.PutInt16((short)height);
+            binary.PutUShort(1);
+            binary.PutUShort(0);
+            binary.PutUInt(0);
+            binary.PutUInt(0);
+
+            stream.Write(new byte[0x50]);
+
+        }
+        private static async Task WriteGTF4444(Stream stream, Bitmap bitmap, bool zOrder)
+        {
+            using MemoryStream memStream = new MemoryStream();
+            Binary binary = new Binary(memStream, true);
+            int pixelCount = bitmap.Width * bitmap.Height;
+
+            Order order = new Order(bitmap.Width, bitmap.Height, zOrder);
+            for (int n = 0; n < pixelCount; n++)
+            {
+                int x, y;
+                (x, y) = order.GetXY(n);
+                Color color = bitmap.GetPixel(x, y);
+                binary.PutUShort(ColorHelp.To4444(color));
+            }
+
+            memStream.Position = 0;
+            await memStream.CopyToAsync(stream);
+        }
+
+        private static bool IsPow2(int n) => (n & (n - 1)) == 0;
+
+        private class Order
+        {
+            readonly int width;
+            readonly int p1;
+            readonly int p2;
+            readonly bool zOrder;
+            public Order(int width, int height, bool isZOrder)
+            {
+                this.width = width;
+                zOrder = isZOrder;
+                if (zOrder)
+                {
+                    p1 = -1;
+                    while (width > 0)
+                    {
+                        width >>= 1;
+                        p1++;
+                    }
+
+                    p2 = -1;
+                    while (height > 0)
+                    {
+                        height >>= 1;
+                        p2++;
+                    }
+                }
+            }
+            public (int, int) GetXY(int n)
+            {
+                if (zOrder)
+                {
+                    int x = 0, y = 0;
+                    for (int j = 0; j < p1 || j < p2;)
+                    {
+                        if (j < p1)
+                        {
+                            x += (n % 2) << j;
+                            n >>= 1;
+                        }
+                        if (j < p2)
+                        {
+                            y += (n % 2) << j;
+                            n >>= 1;
+                        }
+                        j++;
+                    }
+                    return (x, y);
+                }
+                else
+                {
+                    return (n % width, n / width);
+                }
+            }
+
         }
 
         private static class ColorHelp
