@@ -169,6 +169,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanExtractParameter() => ArcFile != null;
+        AsyncCommand _extractImagesCommand;
+        public ICommand ExtractImagesCommand
+        {
+            get
+            {
+                if (_extractImagesCommand == null)
+                {
+                    _extractImagesCommand = new AsyncCommand(() => ExtractImages(), () => CanExtractImages());
+                }
+                return _extractImagesCommand;
+            }
+        }
+        public bool CanExtractImages() => ArcFile != null;
         AsyncCommand _patchFontCommand;
         public ICommand PatchFontCommand
         {
@@ -311,6 +324,23 @@ namespace ImasArchiveApp
                 if (fileName != null)
                 {
                     await ArcFile.ExtractParameterToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+        }
+        public async Task ExtractImages()
+        {
+            try
+            {
+                ClearStatus();
+                string fileName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath) + "_image", "");
+                if (fileName != null)
+                {
+                    await ArcFile.ExtractAllImages(fileName, new Progress<ProgressData>(ReportProgress));
                     ReportMessage("Done.");
                 }
             }

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using Imas.Spreadsheet;
 using Imas.Records;
+using System.Drawing;
+using System.Security.Cryptography;
 
 [assembly: InternalsVisibleTo("ImasArchiveLibTest")]
 
@@ -460,7 +462,7 @@ namespace Imas.Archive
         }
 
         #endregion
-        #region Commu
+        #region Extracting
         public async Task ExtractCommusToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
         {
             using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName);
@@ -532,6 +534,80 @@ namespace Imas.Archive
                     xlsxWriter.AppendRows(format.sheetName, records);
                 }
             }
+        }
+
+        public async Task ExtractAllImages(string outDir, IProgress<ProgressData> progress = null)
+        {
+            Dictionary<string, string> hashFileName = new Dictionary<string, string>();
+            Dictionary<string, int> fileNameCount = new Dictionary<string, int>();
+            List<Record> records = new List<Record>();
+
+            Directory.CreateDirectory(outDir);
+            await ForAllTask((entry, filename) => ExtractImage(entry, filename, hashFileName, fileNameCount, outDir, records), progress);
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx");
+            xlsxWriter.AppendRows("filenames", records);
+        }
+
+        private async Task ExtractImage(ContainerEntry entry, string filename, 
+            Dictionary<string, string> hashFileName, Dictionary<string, int> fileNameCount, string outDir, List<Record> records)
+        {
+            try
+            {
+                if (filename.EndsWith(".gtf") || filename.EndsWith(".dds") || filename.EndsWith(".tex"))
+                {
+                    using Stream inStream = await entry.GetData();
+                    using Bitmap bitmap = GTF.ReadGTF(inStream);
+                    string name = filename.Substring(filename.LastIndexOf('/') + 1);
+                    string outNameNoExtend = name[0..^4];
+                    using MemoryStream memStream = new MemoryStream();
+                    bitmap.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+                    memStream.Position = 0;
+
+                    string hashString;
+                    using (SHA256 sha = SHA256.Create())
+                    {
+                        byte[] hash = sha.ComputeHash(memStream);
+                        hashString = "";
+                        foreach (byte b in hash)
+                        {
+                            hashString += b.ToString("X2");
+                        }
+                    }
+
+                    string outName;
+                    if (hashFileName.ContainsKey(hashString))
+                    {
+                        outName = hashFileName[hashString] + ".png";
+                    }
+                    else
+                    {
+                        if (fileNameCount.ContainsKey(outNameNoExtend))
+                        {
+                            fileNameCount[outNameNoExtend]++;
+                            outNameNoExtend += "(" + fileNameCount[outNameNoExtend].ToString() + ")";
+                        }
+                        else
+                        {
+                            fileNameCount.Add(outNameNoExtend, 1);
+                        }
+                        hashFileName.Add(hashString, outNameNoExtend);
+                        outName = outNameNoExtend + ".png";
+
+                        string outPath = outDir + "/" + outNameNoExtend + ".png";
+                        using FileStream outStream = new FileStream(outPath, FileMode.Create, FileAccess.Write);
+                        memStream.Position = 0;
+                        await memStream.CopyToAsync(outStream).ConfigureAwait(false);
+                    }
+
+                    Record record = new Record("XX");
+                    record[0] = filename;
+                    record[1] = outName;
+                    records.Add(record);
+
+                }
+            }
+            catch (NotSupportedException)
+            { }
         }
         #endregion
         #region IDisposable

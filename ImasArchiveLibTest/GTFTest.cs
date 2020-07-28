@@ -6,32 +6,79 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
     [TestClass]
     public class GTFTest
     {
-        [DataTestMethod]
-        [DataRow("../data/hdd4", "*.dds", "../data/gtf/hdd4_dds")]
-        [DataRow("../data/hdd4", "*.gtf", "../data/gtf/hdd4_gtf")]
-        public void ReadAllGtfTest(string dirName, string filter, string outDir)
+        //[DataTestMethod]
+        //[DataRow("../data/hdd4", "*.dds", "../data/gtf/hdd4_dds")]
+        //[DataRow("../data/hdd4", "*.gtf", "../data/gtf/hdd4_gtf")]
+        public async Task ReadAllGtfTest(string dirName, string filter, string outDir)
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
             var files = directoryInfo.GetFiles(filter, SearchOption.AllDirectories);
+            Dictionary<string, string> hashFileName = new Dictionary<string, string>();
+            Dictionary<string, int> fileNameCount = new Dictionary<string, int>();
+
+            Directory.CreateDirectory(outDir);
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx");
+            using SHA256 sha = SHA256.Create();
+
             int i = 0;
             foreach (var file in files)
             {
                 i++;
                 try
                 {
-                    string relPath = file.FullName.Substring(directoryInfo.FullName.Length);
                     using FileStream inStream = file.OpenRead();
                     using Bitmap bitmap = GTF.ReadGTF(inStream);
-                    string outPath = outDir + relPath[0..^4] + ".png";
-                    Directory.CreateDirectory(outPath.Substring(0, outPath.LastIndexOf("\\")));
-                    bitmap.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
+                    string outNameNoExtend = file.Name[0..^4];
+                    using MemoryStream memStream = new MemoryStream();
+                    bitmap.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+                    memStream.Position = 0;
+
+                    byte[] hash = sha.ComputeHash(memStream);
+                    string hashString = "";
+                    foreach (byte b in hash)
+                    {
+                        hashString += b.ToString("X2");
+                    }
+
+                    string outName;
+                    if (hashFileName.ContainsKey(hashString))
+                    {
+                        outName = hashFileName[hashString] + ".png";
+                    }
+                    else
+                    {
+                        if (fileNameCount.ContainsKey(outNameNoExtend))
+                        {
+                            fileNameCount[outNameNoExtend]++;
+                            outNameNoExtend += "(" + fileNameCount[outNameNoExtend].ToString() + ")";
+                        }
+                        else
+                        {
+                            fileNameCount.Add(outNameNoExtend, 1);
+                        }
+                        hashFileName.Add(hashString, outNameNoExtend);
+                        outName = outNameNoExtend + ".png";
+
+                        string outPath = outDir + "/" + outNameNoExtend + ".png";
+                        using FileStream outStream = new FileStream(outPath, FileMode.Create, FileAccess.Write);
+                        memStream.Position = 0;
+                        await memStream.CopyToAsync(outStream).ConfigureAwait(false);
+                    }
+
+                    Record record = new Record("XX");
+                    record[0] = file.FullName.Substring(directoryInfo.FullName.Length);
+                    record[1] = outName;
+                    xlsxWriter.AppendRow("filenames", record);
+
                 }
                 catch (NotSupportedException)
                 {
@@ -48,6 +95,7 @@ namespace ImasArchiveLibTest
         [DataRow(@"..\data\hdd4\ui\menu\commonRankUp\commonRankUpComponent_par\idolRnkUp_pta\commonRankUp.gtf", "../data/gtf/commonRankUp.png")]
         [DataRow(@"..\data\hdd4\bg3d\commu_006_par\Bg3dModel_par\model.TrueeGtf_pta\ps_com004_books01_d1.gtf", "../data/gtf/books.png")]
         [DataRow(@"..\data\hdd4\tutorial\panel\panel_01_par\tutorial_01_1.gtf", "../data/gtf/tutorial.png")]
+        [DataRow(@"..\data\hdd4\character\acc\acc_body\acc2_body_035_par\acc2_body_035_par\acc2_body_035_pta\acc2_body_035_sdw.gtf", "../data/gtf/acc2.png")]
         public void ReadGtfTest(string fileName, string outPath)
         {
             using FileStream inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
@@ -76,6 +124,36 @@ namespace ImasArchiveLibTest
                     record.Deserialise(stream);
                 }
                 xlsxWriter.AppendRow("gtf", record);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("../data/gtf/hdd4_dds", "*.png", "../data/hdd4_dds_png.xlsx")]
+        [DataRow("../data/gtf/hdd4_gtf", "*.png", "../data/hdd4_gtf_png.xlsx")]
+        public void GetPngDataTest(string dirName, string filter, string outDir)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
+            var files = directoryInfo.GetFiles(filter, SearchOption.AllDirectories);
+            int i = 0;
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir);
+            using SHA256 sha = SHA256.Create();
+            foreach (var file in files)
+            {
+                i++;
+                Record record = new Record("XXX");
+                record[0] = file.FullName;
+                record[1] = file.Name;
+                using (FileStream stream = file.OpenRead())
+                {
+                    byte[] hash = sha.ComputeHash(stream);
+                    string s = "";
+                    foreach (byte b in hash)
+                    {
+                        s += b.ToString("X2");
+                    }
+                    record[2] = s;
+                }
+                xlsxWriter.AppendRow("png", record);
             }
         }
     }

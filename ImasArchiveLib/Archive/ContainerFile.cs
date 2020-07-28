@@ -93,17 +93,21 @@ namespace Imas.Archive
             }
         }
 
-        public Task ForAllTask(Func<ContainerEntry, string, Task> action) => ForAllTask(action, "");
-        private async Task ForAllTask(Func<ContainerEntry, string, Task> action, string prefix)
+        public Task ForAllTask(Func<ContainerEntry, string, Task> action, IProgress<ProgressData> progress = null) => ForAllTask(action, "", progress);
+        private async Task ForAllTask(Func<ContainerEntry, string, Task> action, string prefix, IProgress<ProgressData> progress = null)
         {
+            int total = Entries.Count;
+            int count = 0;
             foreach (ContainerEntry entry in Entries)
             {
+                count++;
+                progress?.Report(new ProgressData { count = count, total = total, filename = entry.FileName });
                 if (entry.FileName.EndsWith(".par") || entry.FileName.EndsWith(".pta"))
                 {
                     string dirName = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
                     using Stream stream = await entry.GetData();
                     using ParFile parFile = new ParFile(stream);
-                    await parFile.ForAllTask(action, prefix + dirName + '/');
+                    await parFile.ForAllTask(action, prefix + dirName + '/', null);
                 }
                 else
                 {
