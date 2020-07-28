@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -97,55 +99,94 @@ namespace Imas
         #region Read GTF
         private static Bitmap ReadGTFIndexed(Stream stream, int width, int height, Color[] palette)
         {
-            Bitmap bitmap = new Bitmap(width, height);
+            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format8bppIndexed);
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            int stride = bitmapData.Stride;
+            byte[] bitmapArray = new byte[stride * height];
+
             Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
             for (int n = 0; n < width * height; n++)
             {
-                int b0 = stream.ReadByte();
-                Color color = palette[b0];
+                byte b0 = Binary.ReadByte(stream, true);
                 int x, y;
                 (x, y) = order.GetXY(n);
-                bitmap.SetPixel(x, y, color);
+                bitmapArray[y * stride + x] = b0;
             }
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            bitmap.UnlockBits(bitmapData);
+
+            ColorPalette colorPalette = bitmap.Palette;
+            for (int i = 0; i < 0x100; i++)
+                colorPalette.Entries[i] = palette[i];
+            bitmap.Palette = colorPalette;
 
             return bitmap;
         }
         private static Bitmap ReadGTF1555(Stream stream, int width, int height)
         {
-            Bitmap bitmap = new Bitmap(width, height);
+            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format16bppArgb1555);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format16bppArgb1555);
+            int stride = bitmapData.Stride / 2;
+            short[] bitmapArray = new short[stride * height];
+
             Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
             for (int n = 0; n < width * height; n++)
             {
                 ushort b = Binary.ReadUInt16(stream, true);
-                Color color = ColorHelp.From1555(b);
                 int x, y;
                 (x, y) = order.GetXY(n);
-                bitmap.SetPixel(x, y, color);
+                bitmapArray[y * stride + x] = (short)b;
             }
+
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            bitmap.UnlockBits(bitmapData);
 
             return bitmap;
         }
         private static Bitmap ReadGTF8888(Stream stream, int width, int height)
         {
-            Bitmap bitmap = new Bitmap(width, height);
+            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+            int stride = bitmapData.Stride / 4;
+            int[] bitmapArray = new int[stride * height];
             Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
             for (int n = 0; n < width * height; n++)
             {
                 int b = Binary.ReadInt32(stream, true);
-                Color color = Color.FromArgb(b);
                 int x, y;
                 (x, y) = order.GetXY(n);
-                bitmap.SetPixel(x, y, color);
+                bitmapArray[y * stride + x] = b;
             }
+
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            bitmap.UnlockBits(bitmapData);
 
             return bitmap;
         }
         private static Bitmap ReadGTF4444(Stream stream, int width, int height)
         {
-            Bitmap bitmap = new Bitmap(width, height);
+            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+            int stride = bitmapData.Stride / 4;
+            int[] bitmapArray = new int[stride * height];
             Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
 
             for (int n = 0; n < width * height; n++)
@@ -154,8 +195,12 @@ namespace Imas
                 Color color = ColorHelp.From4444(b);
                 int x, y;
                 (x, y) = order.GetXY(n);
-                bitmap.SetPixel(x, y, color);
+                bitmapArray[y * stride + x] = color.ToArgb();
             }
+
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            bitmap.UnlockBits(bitmapData);
 
             return bitmap;
         }
@@ -163,7 +208,13 @@ namespace Imas
         private static Bitmap ReadGTF565Block4Color(Stream stream, int width, int height)
         {
             Binary binary = new Binary(stream, false);
-            Bitmap bitmap = new Bitmap(width, height);
+            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+            int stride = bitmapData.Stride / 4;
+            int[] bitmapArray = new int[stride * height];
 
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
@@ -184,6 +235,9 @@ namespace Imas
                         color[2] = ColorHelp.MixRatio(color[0], color[1], 2, 1);
                         color[3] = ColorHelp.MixRatio(color[0], color[1], 1, 2);
                     }
+                    int[] colorVals = new int[4];
+                    for (int i = 0; i < 4; i++)
+                        colorVals[i] = color[i].ToArgb();
 
                     for (int yy = 0; yy < 4; yy++)
                     {
@@ -191,11 +245,15 @@ namespace Imas
                         for (int xx = 0; xx < 4; xx++)
                         {
                             int t = k & 3;
-                            bitmap.SetPixel(4 * x + xx, 4 * y + yy, color[t]);
+                            bitmapArray[(4 * y + yy) * stride + 4 * x + xx] = colorVals[t];
                             k >>= 2;
                         }
                     }
                 }
+
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            bitmap.UnlockBits(bitmapData);
 
             return bitmap;
         }
@@ -203,8 +261,13 @@ namespace Imas
         private static Bitmap ReadGTF565Block8RelAlpha4Color(Stream stream, int width, int height)
         {
             Binary binary = new Binary(stream, false);
-
-            Bitmap bitmap = new Bitmap(width, height);
+            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+            int stride = bitmapData.Stride / 4;
+            int[] bitmapArray = new int[stride * height];
 
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
@@ -256,6 +319,9 @@ namespace Imas
                     color[1] = ColorHelp.From565(c1);
                     color[2] = ColorHelp.MixRatio(color[0], color[1], 2, 1);
                     color[3] = ColorHelp.MixRatio(color[0], color[1], 1, 2);
+                    int[] colorVals = new int[4];
+                    for (int i = 0; i < 4; i++)
+                        colorVals[i] = color[i].ToArgb() & 0x00FFFFFF;
 
                     for (int yy = 0; yy < 4; yy++)
                     {
@@ -263,11 +329,15 @@ namespace Imas
                         for (int xx = 0; xx < 4; xx++)
                         {
                             int t = k & 3;
-                            bitmap.SetPixel(4 * x + xx, 4 * y + yy, Color.FromArgb(alphas[xx, yy], color[t]));
+                            bitmapArray[(4 * y + yy) * stride + 4 * x + xx] = (alphas[xx, yy] << 24) | colorVals[t];
                             k >>= 2;
                         }
                     }
                 }
+
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            bitmap.UnlockBits(bitmapData);
 
             return bitmap;
         }
@@ -275,8 +345,13 @@ namespace Imas
         private static Bitmap ReadGTF565Block8Alpha4Color(Stream stream, int width, int height)
         {
             Binary binary = new Binary(stream, false);
-
-            Bitmap bitmap = new Bitmap(width, height);
+            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+            int stride = bitmapData.Stride / 4;
+            int[] bitmapArray = new int[stride * height];
 
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
@@ -300,6 +375,9 @@ namespace Imas
                     color[1] = ColorHelp.From565(c1);
                     color[2] = ColorHelp.MixRatio(color[0], color[1], 2, 1);
                     color[3] = ColorHelp.MixRatio(color[0], color[1], 1, 2);
+                    int[] colorVals = new int[4];
+                    for (int i = 0; i < 4; i++)
+                        colorVals[i] = color[i].ToArgb() & 0x00FFFFFF;
 
                     for (int yy = 0; yy < 4; yy++)
                     {
@@ -307,11 +385,15 @@ namespace Imas
                         for (int xx = 0; xx < 4; xx++)
                         {
                             int t = k & 3;
-                            bitmap.SetPixel(4 * x + xx, 4 * y + yy, Color.FromArgb(alphas[xx, yy], color[t]));
+                            bitmapArray[(4 * y + yy) * stride + 4 * x + xx] = (alphas[xx, yy] << 24) | colorVals[t];
                             k >>= 2;
                         }
                     }
                 }
+
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            bitmap.UnlockBits(bitmapData);
 
             return bitmap;
         }

@@ -46,6 +46,7 @@ namespace ImasArchiveLibTest
         [DataRow(@"..\data\hdd4\character\acc\present\acc2_hand_047_pre_par\acc2_hand_047_pre_pta\acc2_hand047_baton_har_argb16.gtf", "../data/gtf/baton.png")]
         [DataRow(@"..\data\hdd4\effect\live\twi_eff_par\pat_par\teff_pfall01s_del_pta\ss_sakura_01.gtf", "../data/gtf/sakura.png")]
         [DataRow(@"..\data\hdd4\ui\menu\commonRankUp\commonRankUpComponent_par\idolRnkUp_pta\commonRankUp.gtf", "../data/gtf/commonRankUp.png")]
+        [DataRow(@"..\data\hdd4\bg3d\commu_006_par\Bg3dModel_par\model.TrueeGtf_pta\ps_com004_books01_d1.gtf", "../data/gtf/books.png")]
         [DataRow(@"..\data\hdd4\tutorial\panel\panel_01_par\tutorial_01_1.gtf", "../data/gtf/tutorial.png")]
         public void ReadGtfTest(string fileName, string outPath)
         {
