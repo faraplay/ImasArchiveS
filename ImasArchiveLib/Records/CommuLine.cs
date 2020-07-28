@@ -20,19 +20,19 @@ namespace Imas.Records
             try
             {
                 Binary binary = new Binary(inStream, true);
-                messageID = binary.GetInt32();
-                flag1 = binary.GetByte();
-                flag2 = binary.GetByte();
-                if (binary.GetUShort() != 0 ||
-                    binary.GetUInt() != 0 ||
-                    binary.GetUInt() != 0 ||
-                    binary.GetUInt() != 0 ||
-                    binary.GetUInt() != 0)
+                messageID = binary.ReadInt32();
+                flag1 = binary.ReadByte();
+                flag2 = binary.ReadByte();
+                if (binary.ReadUInt16() != 0 ||
+                    binary.ReadUInt32() != 0 ||
+                    binary.ReadUInt32() != 0 ||
+                    binary.ReadUInt32() != 0 ||
+                    binary.ReadUInt32() != 0)
                 {
                     throw new InvalidDataException();
                 }
-                binary.GetUInt();
-                binary.GetUInt();
+                binary.ReadUInt32();
+                binary.ReadUInt32();
 
                 byte[] namebuf = new byte[32];
                 byte[] msgbuf = new byte[128];
@@ -50,14 +50,14 @@ namespace Imas.Records
         public void Serialise(Stream outStream)
         {
             Binary binary = new Binary(outStream, true);
-            binary.PutInt32(messageID);
-            binary.PutByte(flag1);
-            binary.PutByte(flag2);
-            binary.PutUShort(0);
-            binary.PutUInt(0);
-            binary.PutUInt(0);
-            binary.PutUInt(0);
-            binary.PutUInt(0);
+            binary.WriteInt32(messageID);
+            binary.WriteByte(flag1);
+            binary.WriteByte(flag2);
+            binary.WriteUInt16(0);
+            binary.WriteUInt32(0);
+            binary.WriteUInt32(0);
+            binary.WriteUInt32(0);
+            binary.WriteUInt32(0);
 
             string outName = string.IsNullOrWhiteSpace(name) ? name_raw : name;
             string outMessage = string.IsNullOrWhiteSpace(message) ? message_raw : message;
@@ -74,8 +74,8 @@ namespace Imas.Records
             while (msgLen < 128 / 2 && (msgbytes[2 * msgLen] != 0 || msgbytes[2 * msgLen + 1] != 0))
                 msgLen++;
 
-            binary.PutInt32(nameLen);
-            binary.PutInt32(msgLen);
+            binary.WriteInt32(nameLen);
+            binary.WriteInt32(msgLen);
 
             outStream.Write(namebytes);
             outStream.Write(msgbytes);

@@ -77,13 +77,13 @@ namespace Imas.Records
                     switch (format[i].type)
                     {
                         case FormatType.Byte:
-                            list[i] = binary.GetByte();
+                            list[i] = binary.ReadByte();
                             break;
                         case FormatType.Short:
-                            list[i] = binary.GetInt16();
+                            list[i] = binary.ReadInt16();
                             break;
                         case FormatType.Int:
-                            list[i] = binary.GetInt32();
+                            list[i] = binary.ReadInt32();
                             break;
                         case FormatType.AsciiString:
                         case FormatType.CustomString:
@@ -139,13 +139,13 @@ namespace Imas.Records
                     switch (format[i].type)
                     {
                         case FormatType.Byte:
-                            binary.PutByte((byte)list[i]);
+                            binary.WriteByte((byte)list[i]);
                             break;
                         case FormatType.Short:
-                            binary.PutInt16((short)list[i]);
+                            binary.WriteInt16((short)list[i]);
                             break;
                         case FormatType.Int:
-                            binary.PutInt32((int)list[i]);
+                            binary.WriteInt32((int)list[i]);
                             break;
                         case FormatType.AsciiString:
                         case FormatType.CustomString:

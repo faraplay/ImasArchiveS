@@ -15,37 +15,37 @@ namespace Imas
             long pos = stream.Position;
             Binary binary = new Binary(stream, true);
 
-            binary.GetUInt(); // version (1.1.0.0, 2.2.0.-1 or 2.2.0.0)
-            binary.GetUInt(); // size of file minus header
-            int partCount = binary.GetInt32();
+            binary.ReadUInt32(); // version (1.1.0.0, 2.2.0.-1 or 2.2.0.0)
+            binary.ReadUInt32(); // size of file minus header
+            int partCount = binary.ReadInt32();
 
-            binary.GetUInt(); // 0 : index of first part
-            binary.GetUInt(); // 0x80 : offset of first part
-            binary.GetUInt(); // size of first part
-            int type = binary.GetByte();
-            binary.GetByte(); // mipmap count
-            binary.GetUShort(); // 0x0200
-            binary.GetUInt(); // part type??
-            int width = binary.GetUShort();
-            int height = binary.GetUShort();
-            binary.GetUShort(); // 1
-            binary.GetUShort(); // 0
-            binary.GetUInt(); // stride
-            binary.GetUInt(); // 0
+            binary.ReadUInt32(); // 0 : index of first part
+            binary.ReadUInt32(); // 0x80 : offset of first part
+            binary.ReadUInt32(); // size of first part
+            int type = binary.ReadByte();
+            binary.ReadByte(); // mipmap count
+            binary.ReadUInt16(); // 0x0200
+            binary.ReadUInt32(); // part type??
+            int width = binary.ReadUInt16();
+            int height = binary.ReadUInt16();
+            binary.ReadUInt16(); // 1
+            binary.ReadUInt16(); // 0
+            binary.ReadUInt32(); // stride
+            binary.ReadUInt32(); // 0
 
-            binary.GetUInt(); // 1 : index of second part
-            int paletteData = binary.GetInt32(); // offset of second part
-            binary.GetInt32(); // size of second part
-            binary.GetByte(); // 0x85 : type of second part
-            binary.GetByte(); // 1 : mipmap count
-            binary.GetUShort(); // 0x0200
-            binary.GetUInt(); // 0xAA6C : part type??
-            int paletteWidth = binary.GetUShort();
-            binary.GetUShort(); // 1 : height
-            binary.GetUShort(); // 1
-            binary.GetUShort(); // 0
-            binary.GetUInt(); // 0 : stride
-            binary.GetUInt(); // 0
+            binary.ReadUInt32(); // 1 : index of second part
+            int paletteData = binary.ReadInt32(); // offset of second part
+            binary.ReadInt32(); // size of second part
+            binary.ReadByte(); // 0x85 : type of second part
+            binary.ReadByte(); // 1 : mipmap count
+            binary.ReadUInt16(); // 0x0200
+            binary.ReadUInt32(); // 0xAA6C : part type??
+            int paletteWidth = binary.ReadUInt16();
+            binary.ReadUInt16(); // 1 : height
+            binary.ReadUInt16(); // 1
+            binary.ReadUInt16(); // 0
+            binary.ReadUInt32(); // 0 : stride
+            binary.ReadUInt32(); // 0
 
             stream.Position += 0x2C;
 
@@ -68,7 +68,7 @@ namespace Imas
 
             return (type & 15) switch
             {
-                1 => ReadGTFPalette(stream, width, height, palette),
+                1 => ReadGTFIndexed(stream, width, height, palette),
                 2 => ReadGTF1555(stream, width, height),
                 3 => ReadGTF4444(stream, width, height),
                 5 => ReadGTF8888(stream, width, height),
@@ -95,7 +95,7 @@ namespace Imas
         }
 
         #region Read GTF
-        private static Bitmap ReadGTFPalette(Stream stream, int width, int height, Color[] palette)
+        private static Bitmap ReadGTFIndexed(Stream stream, int width, int height, Color[] palette)
         {
             Bitmap bitmap = new Bitmap(width, height);
             Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
@@ -118,7 +118,7 @@ namespace Imas
 
             for (int n = 0; n < width * height; n++)
             {
-                ushort b = Binary.GetUShort(stream, true);
+                ushort b = Binary.ReadUInt16(stream, true);
                 Color color = ColorHelp.From1555(b);
                 int x, y;
                 (x, y) = order.GetXY(n);
@@ -134,7 +134,7 @@ namespace Imas
 
             for (int n = 0; n < width * height; n++)
             {
-                int b = Binary.GetInt32(stream, true);
+                int b = Binary.ReadInt32(stream, true);
                 Color color = Color.FromArgb(b);
                 int x, y;
                 (x, y) = order.GetXY(n);
@@ -150,7 +150,7 @@ namespace Imas
 
             for (int n = 0; n < width * height; n++)
             {
-                ushort b = Binary.GetUShort(stream, true);
+                ushort b = Binary.ReadUInt16(stream, true);
                 Color color = ColorHelp.From4444(b);
                 int x, y;
                 (x, y) = order.GetXY(n);
@@ -162,15 +162,14 @@ namespace Imas
 
         private static Bitmap ReadGTF565Block4Color(Stream stream, int width, int height)
         {
-            BinaryReader binaryReader = new BinaryReader(stream);
-
+            Binary binary = new Binary(stream, false);
             Bitmap bitmap = new Bitmap(width, height);
 
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
                 {
-                    int c0 = binaryReader.ReadUInt16();
-                    int c1 = binaryReader.ReadUInt16();
+                    ushort c0 = binary.ReadUInt16();
+                    ushort c1 = binary.ReadUInt16();
 
                     Color[] color = new Color[4];
                     color[0] = ColorHelp.From565(c0);
@@ -188,7 +187,7 @@ namespace Imas
 
                     for (int yy = 0; yy < 4; yy++)
                     {
-                        byte k = binaryReader.ReadByte();
+                        byte k = binary.ReadByte();
                         for (int xx = 0; xx < 4; xx++)
                         {
                             int t = k & 3;
@@ -203,14 +202,14 @@ namespace Imas
 
         private static Bitmap ReadGTF565Block8RelAlpha4Color(Stream stream, int width, int height)
         {
-            BinaryReader binaryReader = new BinaryReader(stream);
+            Binary binary = new Binary(stream, false);
 
             Bitmap bitmap = new Bitmap(width, height);
 
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
                 {
-                    ulong n = binaryReader.ReadUInt64();
+                    ulong n = binary.ReadUInt64();
                     int a0 = (byte)(n & 0xFF);
                     n >>= 8;
                     int a1 = (byte)(n & 0xFF);
@@ -249,8 +248,8 @@ namespace Imas
                         }
                     }
 
-                    int c0 = binaryReader.ReadUInt16();
-                    int c1 = binaryReader.ReadUInt16();
+                    ushort c0 = binary.ReadUInt16();
+                    ushort c1 = binary.ReadUInt16();
 
                     Color[] color = new Color[4];
                     color[0] = ColorHelp.From565(c0);
@@ -260,7 +259,7 @@ namespace Imas
 
                     for (int yy = 0; yy < 4; yy++)
                     {
-                        byte k = binaryReader.ReadByte();
+                        byte k = binary.ReadByte();
                         for (int xx = 0; xx < 4; xx++)
                         {
                             int t = k & 3;
@@ -275,14 +274,14 @@ namespace Imas
 
         private static Bitmap ReadGTF565Block8Alpha4Color(Stream stream, int width, int height)
         {
-            BinaryReader binaryReader = new BinaryReader(stream);
+            Binary binary = new Binary(stream, false);
 
             Bitmap bitmap = new Bitmap(width, height);
 
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
                 {
-                    ulong n = binaryReader.ReadUInt64();
+                    ulong n = binary.ReadUInt64();
                     int[,] alphas = new int[4, 4];
                     for (int i = 0; i < 4; i++)
                     {
@@ -293,8 +292,8 @@ namespace Imas
                         }
                     }
 
-                    int c0 = binaryReader.ReadUInt16();
-                    int c1 = binaryReader.ReadUInt16();
+                    ushort c0 = binary.ReadUInt16();
+                    ushort c1 = binary.ReadUInt16();
 
                     Color[] color = new Color[4];
                     color[0] = ColorHelp.From565(c0);
@@ -304,7 +303,7 @@ namespace Imas
 
                     for (int yy = 0; yy < 4; yy++)
                     {
-                        byte k = binaryReader.ReadByte();
+                        byte k = binary.ReadByte();
                         for (int xx = 0; xx < 4; xx++)
                         {
                             int t = k & 3;
@@ -321,32 +320,39 @@ namespace Imas
         private static void WriteHeader(Stream stream, byte type, int width, int height)
         {
             Binary binary = new Binary(stream, true);
+            bool isIndexed = (type & 15) == 1;
             int pixelCount = width * height;
-            int pixelSize = type switch
+            int pixelSize = (type & 15) switch
             {
-                0x83 => 16,
+                1 => 8,
+                2 => 16,
+                3 => 16,
+                5 => 32,
+                6 => 32 / 16,
+                7 => 64 / 16,
+                8 => 64 / 16,
                 _ => throw new NotSupportedException()
             };
             int size = (pixelCount * pixelSize) / 8;
 
-            binary.PutUInt(0x02020000);
-            binary.PutInt32(size);
-            binary.PutUInt(1);
+            binary.WriteUInt32(0x02020000);
+            binary.WriteInt32(size);
+            binary.WriteInt32(isIndexed ? 2 : 1);
 
-            binary.PutUInt(0);
-            binary.PutUInt(0x80);
-            binary.PutInt32(size);
-            binary.PutByte(type);
-            binary.PutByte(1);
-            binary.PutByte(2);
-            binary.PutByte(0);
-            binary.PutUInt(0xAAE4);
-            binary.PutInt16((short)width);
-            binary.PutInt16((short)height);
-            binary.PutUShort(1);
-            binary.PutUShort(0);
-            binary.PutUInt(0);
-            binary.PutUInt(0);
+            binary.WriteUInt32(0);
+            binary.WriteUInt32(0x80);
+            binary.WriteInt32(size);
+            binary.WriteByte(type);
+            binary.WriteByte(1);
+            binary.WriteByte(2);
+            binary.WriteByte(0);
+            binary.WriteInt32(isIndexed ? 0xA9FF : 0xAAE4);
+            binary.WriteInt16((short)width);
+            binary.WriteInt16((short)height);
+            binary.WriteUInt16(1);
+            binary.WriteUInt16(0);
+            binary.WriteUInt32(0);
+            binary.WriteUInt32(0);
 
             stream.Write(new byte[0x50]);
 
@@ -363,7 +369,7 @@ namespace Imas
                 int x, y;
                 (x, y) = order.GetXY(n);
                 Color color = bitmap.GetPixel(x, y);
-                binary.PutUShort(ColorHelp.To4444(color));
+                binary.WriteUInt16(ColorHelp.To4444(color));
             }
 
             memStream.Position = 0;
@@ -430,7 +436,7 @@ namespace Imas
 
         private static class ColorHelp
         {
-            public static Color From565(int x)
+            public static Color From565(ushort x)
             {
                 int r0 = (x >> 11) * 8;
                 int g0 = ((x >> 5) & 0x3F) * 4;

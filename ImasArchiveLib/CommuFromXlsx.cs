@@ -74,10 +74,10 @@ namespace Imas
         private void WriteBin(Stream stream, IEnumerable<CommuLine> lines)
         {
             Binary binary = new Binary(stream, true);
-            binary.PutUInt(0x004D0053);
-            binary.PutUInt(0x00470000);
-            binary.PutInt32(lines.Count());
-            binary.PutUInt(0);
+            binary.WriteUInt32(0x004D0053);
+            binary.WriteUInt32(0x00470000);
+            binary.WriteInt32(lines.Count());
+            binary.WriteUInt32(0);
             foreach (CommuLine line in lines)
             {
                 line.Serialise(stream);

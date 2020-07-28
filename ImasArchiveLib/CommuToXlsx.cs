@@ -38,15 +38,15 @@ namespace Imas
             {
                 List<CommuLine> lines = new List<CommuLine>();
                 Binary binary = new Binary(binStream, true);
-                if (binary.GetUInt() != 0x004D0053 ||
-                    binary.GetUInt() != 0x00470000)
+                if (binary.ReadUInt32() != 0x004D0053 ||
+                    binary.ReadUInt32() != 0x00470000)
                 {
                     throw new InvalidDataException();
                 }
 
-                int msgCount = (int)binary.GetUInt();
+                int msgCount = (int)binary.ReadUInt32();
 
-                if (binary.GetUInt() != 0)
+                if (binary.ReadUInt32() != 0)
                 {
                     throw new InvalidDataException();
                 }

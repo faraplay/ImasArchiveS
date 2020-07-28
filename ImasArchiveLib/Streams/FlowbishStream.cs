@@ -151,11 +151,11 @@ namespace Imas.Streams
             try
             {
                 Binary binary = new Binary(_stream, true);
-                if (binary.GetUInt() != 0x00464253)
+                if (binary.ReadUInt32() != 0x00464253)
                     throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-                if (binary.GetUInt() != 0)
+                if (binary.ReadUInt32() != 0)
                     throw new InvalidDataException(Strings.InvalidData_FbsHeader);
-                _length = binary.GetUInt();
+                _length = binary.ReadUInt32();
                 int keyLength = _stream.ReadByte();
                 if (keyLength != _key.Length + 1)
                     throw new InvalidDataException(Strings.InvalidData_FbsKey);
@@ -191,9 +191,9 @@ namespace Imas.Streams
         {
             Binary binary = new Binary(_stream, true);
             int keyLength = _key.Length + 1;
-            binary.PutUInt(0x00464253);
-            binary.PutUInt(0);
-            binary.PutUInt((uint)_length);
+            binary.WriteUInt32(0x00464253);
+            binary.WriteUInt32(0);
+            binary.WriteUInt32((uint)_length);
             _stream.WriteByte((byte)keyLength);
             _stream.WriteByte(0);
             _stream.WriteByte(0);
@@ -212,7 +212,7 @@ namespace Imas.Streams
         {
             long pos = _stream.Position;
             _stream.Seek(8, SeekOrigin.Begin);
-            Binary.PutUInt(_stream, true, (uint)_length);
+            Binary.WriteUInt32(_stream, true, (uint)_length);
             _stream.Position = pos;
         }
 

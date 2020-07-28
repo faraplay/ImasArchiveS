@@ -44,30 +44,30 @@ namespace Imas.Archive
             try
             {
                 Binary binary = new Binary(_binStream, true);
-                if (binary.GetUInt() != 0x50414100u)
+                if (binary.ReadUInt32() != 0x50414100u)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
 
-                if (binary.GetUInt() != 0x00010000u)
+                if (binary.ReadUInt32() != 0x00010000u)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                uint _entry_count = binary.GetUInt();
-                if (binary.GetUInt() != 32)
+                uint _entry_count = binary.ReadUInt32();
+                if (binary.ReadUInt32() != 32)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                if (binary.GetUInt() != 16 * _entry_count + 32)
+                if (binary.ReadUInt32() != 16 * _entry_count + 32)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                binary.GetUInt();
-                if (binary.GetUInt() != 0)
+                binary.ReadUInt32();
+                if (binary.ReadUInt32() != 0)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
-                if (binary.GetUInt() != 0)
+                if (binary.ReadUInt32() != 0)
                 {
                     throw new InvalidDataException(Strings.InvalidData_BinHeader);
                 }
@@ -79,15 +79,15 @@ namespace Imas.Archive
 
                 for (int i = 0; i < _entry_count; i++)
                 {
-                    filePathOffsets[i] = binary.GetUInt();
-                    lengths[i] = binary.GetUInt();
-                    binary.GetUInt();
-                    binary.GetUInt();
+                    filePathOffsets[i] = binary.ReadUInt32();
+                    lengths[i] = binary.ReadUInt32();
+                    binary.ReadUInt32();
+                    binary.ReadUInt32();
                 }
 
                 for (int i = 0; i < _entry_count; i++)
                 {
-                    offsets[i] = binary.GetUInt();
+                    offsets[i] = binary.ReadUInt32();
                 }
 
                 for (int i = 0; i < _entry_count; i++)
@@ -241,27 +241,27 @@ namespace Imas.Archive
 
             Binary binary = new Binary(newBinStream, true);
 
-            binary.PutUInt(0x50414100u);
-            binary.PutUInt(0x00010000u);
-            binary.PutInt32(Entries.Count);
-            binary.PutUInt(32);
+            binary.WriteUInt32(0x50414100u);
+            binary.WriteUInt32(0x00010000u);
+            binary.WriteInt32(Entries.Count);
+            binary.WriteUInt32(32);
 
-            binary.PutInt32(16 * Entries.Count + 32);
-            binary.PutInt32(root);
-            binary.PutUInt(0);
-            binary.PutUInt(0);
+            binary.WriteInt32(16 * Entries.Count + 32);
+            binary.WriteInt32(root);
+            binary.WriteUInt32(0);
+            binary.WriteUInt32(0);
 
             for (int i = 0; i < arcTrees.Count; i++)
             {
-                binary.PutInt32(stringsStart + arcTrees[i].stringOffset);
-                binary.PutUInt((uint)arcTrees[i].arcEntry.PastLength);
-                binary.PutInt32(arcTrees[i].left);
-                binary.PutInt32(arcTrees[i].right);
+                binary.WriteInt32(stringsStart + arcTrees[i].stringOffset);
+                binary.WriteUInt32((uint)arcTrees[i].arcEntry.PastLength);
+                binary.WriteInt32(arcTrees[i].left);
+                binary.WriteInt32(arcTrees[i].right);
             }
 
             for (int i = 0; i < arcTrees.Count; i++)
             {
-                binary.PutUInt((uint)arcTrees[i].arcEntry.Offset);
+                binary.WriteUInt32((uint)arcTrees[i].arcEntry.Offset);
             }
             newBinStream.Write(new byte[offsetsPad]);
             filepaths.Position = 0;

@@ -46,16 +46,16 @@ namespace Imas.Archive
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             };
             Binary binary = new Binary(_stream, isBigEndian);
-            nameLength = binary.GetInt32() switch
+            nameLength = binary.ReadInt32() switch
             {
                 2 => 0x20,
                 3 => 0x80,
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             };
 
-            fileCount = binary.GetInt32();
+            fileCount = binary.ReadInt32();
 
-            lengthsKnown = binary.GetByte() switch
+            lengthsKnown = binary.ReadByte() switch
             {
                 // v1/2
                 3 => true,
@@ -70,7 +70,7 @@ namespace Imas.Archive
             int[] offsets = new int[fileCount];
             for (int i = 0; i < fileCount; i++)
             {
-                offsets[i] = binary.GetInt32();
+                offsets[i] = binary.ReadInt32();
             }
 
             long pad = (-_stream.Position) & 15;
@@ -88,7 +88,7 @@ namespace Imas.Archive
             int[] props = new int[fileCount];
             for (int i = 0; i < fileCount; i++)
             {
-                props[i] = binary.GetInt32();
+                props[i] = binary.ReadInt32();
             }
             pad = (-_stream.Position) & 15;
             _stream.Position += pad;
@@ -98,7 +98,7 @@ namespace Imas.Archive
             {
                 for (int i = 0; i < fileCount; i++)
                 {
-                    lengths[i] = binary.GetInt32();
+                    lengths[i] = binary.ReadInt32();
                 }
                 pad = (-_stream.Position) & 15;
                 _stream.Position += pad;
@@ -133,24 +133,24 @@ namespace Imas.Archive
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             };
             Binary binary = new Binary(stream, isBigEndian);
-            binary.PutInt32(nameLength switch
+            binary.WriteInt32(nameLength switch
             {
                 0x20 => 2,
                 0x80 => 3,
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             });
-            binary.PutInt32(fileCount);
+            binary.WriteInt32(fileCount);
 
             byte lengthsByte = (byte)(
                 (isBigEndian ? 2 : 0) | (lengthsKnown ? 1 : 0));
-            binary.PutByte(lengthsByte);
-            binary.PutByte(0);
-            binary.PutByte(0);
-            binary.PutByte(0);
+            binary.WriteByte(lengthsByte);
+            binary.WriteByte(0);
+            binary.WriteByte(0);
+            binary.WriteByte(0);
 
             for (int i = 0; i < fileCount; i++)
             {
-                binary.PutUInt((uint)Entries[i].Offset);
+                binary.WriteUInt32((uint)Entries[i].Offset);
             }
             long pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
@@ -165,7 +165,7 @@ namespace Imas.Archive
 
             for (int i = 0; i < fileCount; i++)
             {
-                binary.PutInt32(Entries[i].Property);
+                binary.WriteInt32(Entries[i].Property);
             }
             pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
@@ -174,7 +174,7 @@ namespace Imas.Archive
             {
                 for (int i = 0; i < fileCount; i++)
                 {
-                    binary.PutUInt((uint)Entries[i].Length);
+                    binary.WriteUInt32((uint)Entries[i].Length);
                 }
                 pad = (baseOffset - stream.Position) & 15;
                 stream.Write(new byte[pad]);
