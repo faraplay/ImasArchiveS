@@ -88,7 +88,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        //[DataRow(@"..\data\hdd4\appeal\burst_mik_par\eff_mg_mik_burst03_par\eff_mg_mik_burst03_pta\eff_firework02.gtf", "../data/gtf/firework2.png")]
+        [DataRow(@"..\data\hdd4\appeal\burst_mik_par\eff_mg_mik_burst03_par\eff_mg_mik_burst03_pta\eff_firework02.gtf", "../data/gtf/firework2.png")]
         [DataRow(@"..\data\hdd4\bg3d\fes_006_par\logo_fes_006_C_00_par\logo_fes_006_C.TrueeGtf_pta\kd_fes005_logoc_d3m.gtf", "../data/gtf/logoc.png")]
         [DataRow(@"..\data\hdd4\character\acc\present\acc2_hand_047_pre_par\acc2_hand_047_pre_pta\acc2_hand047_baton_har_argb16.gtf", "../data/gtf/baton.png")]
         [DataRow(@"..\data\hdd4\effect\live\twi_eff_par\pat_par\teff_pfall01s_del_pta\ss_sakura_01.gtf", "../data/gtf/sakura.png")]
@@ -96,6 +96,7 @@ namespace ImasArchiveLibTest
         [DataRow(@"..\data\hdd4\bg3d\commu_006_par\Bg3dModel_par\model.TrueeGtf_pta\ps_com004_books01_d1.gtf", "../data/gtf/books.png")]
         [DataRow(@"..\data\hdd4\tutorial\panel\panel_01_par\tutorial_01_1.gtf", "../data/gtf/tutorial.png")]
         [DataRow(@"..\data\hdd4\character\acc\acc_body\acc2_body_035_par\acc2_body_035_par\acc2_body_035_pta\acc2_body_035_sdw.gtf", "../data/gtf/acc2.png")]
+        [DataRow(@"..\data\hdd4\ui\menu\mail\mailComponent_par\mail_pta\mail_tex.gtf", "../data/gtf/mail_tex.png")]
         public void ReadGtfTest(string fileName, string outPath)
         {
             using FileStream inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);

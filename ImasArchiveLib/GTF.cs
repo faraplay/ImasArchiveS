@@ -108,13 +108,13 @@ namespace Imas
             int stride = bitmapData.Stride;
             byte[] bitmapArray = new byte[stride * height];
 
-            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
+            Order order = new Order(width, height);
 
             for (int n = 0; n < width * height; n++)
             {
                 byte b0 = Binary.ReadByte(stream, true);
                 int x, y;
-                (x, y) = order.GetXY(n);
+                (x, y) = order.GetXY();
                 bitmapArray[y * stride + x] = b0;
             }
             Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
@@ -137,13 +137,13 @@ namespace Imas
             int stride = bitmapData.Stride / 2;
             short[] bitmapArray = new short[stride * height];
 
-            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
+            Order order = new Order(width, height);
 
             for (int n = 0; n < width * height; n++)
             {
                 ushort b = Binary.ReadUInt16(stream, true);
                 int x, y;
-                (x, y) = order.GetXY(n);
+                (x, y) = order.GetXY();
                 bitmapArray[y * stride + x] = (short)b;
             }
 
@@ -162,13 +162,13 @@ namespace Imas
                 PixelFormat.Format32bppArgb);
             int stride = bitmapData.Stride / 4;
             int[] bitmapArray = new int[stride * height];
-            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
+            Order order = new Order(width, height);
 
             for (int n = 0; n < width * height; n++)
             {
                 int b = Binary.ReadInt32(stream, true);
                 int x, y;
-                (x, y) = order.GetXY(n);
+                (x, y) = order.GetXY();
                 bitmapArray[y * stride + x] = b;
             }
 
@@ -187,15 +187,17 @@ namespace Imas
                 PixelFormat.Format32bppArgb);
             int stride = bitmapData.Stride / 4;
             int[] bitmapArray = new int[stride * height];
-            Order order = new Order(width, height, IsPow2(width) && IsPow2(height));
+            Order order = new Order(width, height);
 
             for (int n = 0; n < width * height; n++)
             {
-                ushort b = Binary.ReadUInt16(stream, true);
-                Color color = ColorHelp.From4444(b);
+                uint b = Binary.ReadUInt16(stream, true); // 0x0000abcd
+                b = (b ^ (b << 8)) & 0x00FF00FF;          // 0x00ab00cd
+                b = (b ^ (b << 4)) & 0x0F0F0F0F;          // 0x0a0b0c0d
+                b ^= b << 4;                              // 0xaabbccdd
                 int x, y;
-                (x, y) = order.GetXY(n);
-                bitmapArray[y * stride + x] = color.ToArgb();
+                (x, y) = order.GetXY();
+                bitmapArray[y * stride + x] = (int)b;
             }
 
             IntPtr bitmapPtr = bitmapData.Scan0;
@@ -445,11 +447,11 @@ namespace Imas
             Binary binary = new Binary(memStream, true);
             int pixelCount = bitmap.Width * bitmap.Height;
 
-            Order order = new Order(bitmap.Width, bitmap.Height, zOrder);
+            Order order = new Order(bitmap.Width, bitmap.Height);
             for (int n = 0; n < pixelCount; n++)
             {
                 int x, y;
-                (x, y) = order.GetXY(n);
+                (x, y) = order.GetXY();
                 Color color = bitmap.GetPixel(x, y);
                 binary.WriteUInt16(ColorHelp.To4444(color));
             }
@@ -458,62 +460,49 @@ namespace Imas
             await memStream.CopyToAsync(stream);
         }
 
-        private static bool IsPow2(int n) => (n & (n - 1)) == 0;
-
         private class Order
         {
             readonly int width;
-            readonly int p1;
-            readonly int p2;
+            readonly int height;
+            readonly uint xmax;
+            readonly uint ymax;
+            int x, y;
             readonly bool zOrder;
+            public Order(int width, int height) :
+                this(width, height, IsPow2(width) && IsPow2(height))
+            { }
             public Order(int width, int height, bool isZOrder)
             {
                 this.width = width;
+                this.height = height;
+                xmax = (uint)(width - 1);
+                ymax = (uint)(height - 1);
+                x = 0;
+                y = 0;
                 zOrder = isZOrder;
-                if (zOrder)
-                {
-                    p1 = -1;
-                    while (width > 0)
-                    {
-                        width >>= 1;
-                        p1++;
-                    }
-
-                    p2 = -1;
-                    while (height > 0)
-                    {
-                        height >>= 1;
-                        p2++;
-                    }
-                }
             }
-            public (int, int) GetXY(int n)
+            private static bool IsPow2(int n) => (n & (n - 1)) == 0;
+            public (int, int) GetXY()
             {
+                (int, int) result = (x, y);
                 if (zOrder)
                 {
-                    int x = 0, y = 0;
-                    for (int j = 0; j < p1 || j < p2;)
-                    {
-                        if (j < p1)
-                        {
-                            x += (n % 2) << j;
-                            n >>= 1;
-                        }
-                        if (j < p2)
-                        {
-                            y += (n % 2) << j;
-                            n >>= 1;
-                        }
-                        j++;
-                    }
-                    return (x, y);
+                    uint xTrail1 = (uint)((x - width) ^ (x - width + 1));
+                    uint yTrail1 = (uint)((y - height) ^ (y - height + 1));
+                    x ^= (int)(xTrail1 & yTrail1 & xmax);
+                    y ^= (int)((xTrail1 >> 1) & yTrail1 & ymax);
                 }
                 else
                 {
-                    return (n % width, n / width);
+                    x++;
+                    if (x >= width)
+                    {
+                        x = 0;
+                        y++;
+                    }
                 }
+                return result;
             }
-
         }
 
         private static class ColorHelp
