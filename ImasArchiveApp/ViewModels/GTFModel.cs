@@ -52,6 +52,8 @@ namespace ImasArchiveApp
                 throw new InvalidDataException("Could not read file as GTF. Original exception:\n" + ex.ToString());
             }
         }
+        internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
+            (report, filename, getFilename, stream) => new GTFModel(report, filename, getFilename, stream);
         #endregion
         #region IDisposable
         private bool disposed = false;

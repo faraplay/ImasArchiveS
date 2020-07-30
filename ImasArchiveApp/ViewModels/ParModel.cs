@@ -28,6 +28,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+
         #endregion
         #region Constructors
         public ParModel(IReport parent, Stream stream, string fileName) : base(parent, fileName)
@@ -48,6 +49,8 @@ namespace ImasArchiveApp
                 throw;
             }
         }
+        internal static FileModelFactory.FileModelBuilder Builder { get; set; } = 
+            (report, filename, getFilename, stream) => new ParModel(report, stream, filename);
         #endregion
         #region IDisposable
         bool disposed = false;

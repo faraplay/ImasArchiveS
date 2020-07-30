@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ImasArchiveApp
 {
@@ -22,6 +23,13 @@ namespace ImasArchiveApp
                     return new HexViewModel(report, fileName, stream);
             }
         }
+        public delegate IFileModel FileModelBuilder(IReport report, string filename, IGetFileName getFilename, Stream stream);
+        public static IFileModel CreateFileModel(string fileName, FileModelBuilder fileModelBuilder) =>
+            CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName.Substring(fileName.LastIndexOf('\\')), fileModelBuilder);
+        public static IFileModel CreateFileModel(Stream stream, string fileName, FileModelBuilder fileModelBuilder)
+        {
+            return fileModelBuilder(report, fileName, getFileName, stream);
+        }
 
         public static IFileModel CreateFileModel(string fileName)
         {
@@ -31,7 +39,7 @@ namespace ImasArchiveApp
             }
             else
             {
-                return CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName.Substring(fileName.LastIndexOf('\\')));
+                return CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName.Substring(fileName.LastIndexOf('\\') + 1));
             }
         }
     }

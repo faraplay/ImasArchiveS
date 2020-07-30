@@ -80,16 +80,55 @@ namespace ImasArchiveApp
         private readonly Progress<ProgressData> duoProgress2;
         #endregion
         #region Commands
-        private RelayCommand _openCommand;
-        public ICommand OpenCommand
+        private RelayCommand _openArcCommand;
+        public ICommand OpenArcCommand
         {
             get
             {
-                if (_openCommand == null)
+                if (_openArcCommand == null)
                 {
-                    _openCommand = new RelayCommand(_ => Open());
+                    _openArcCommand = new RelayCommand(_ => OpenWithFilter("Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat"));
                 }
-                return _openCommand;
+                return _openArcCommand;
+            }
+        }
+        private RelayCommand _openParCommand;
+        public ICommand OpenParCommand
+        {
+            get
+            {
+                if (_openParCommand == null)
+                {
+                    _openParCommand = new RelayCommand(_ => 
+                        OpenWithFilter("Par files (*.par)|*.par|All files (*.*)|*.*", ParModel.Builder));
+                }
+                return _openParCommand;
+            }
+        }
+        private RelayCommand _openGtfCommand;
+        public ICommand OpenGtfCommand
+        {
+            get
+            {
+                if (_openGtfCommand == null)
+                {
+                    _openGtfCommand = new RelayCommand(_ => 
+                        OpenWithFilter("GTF files (*.gtf;*.dds;*.tex)|*.gtf;*.dds;*.tex|All files (*.*)|*.*", GTFModel.Builder));
+                }
+                return _openGtfCommand;
+            }
+        }
+        private RelayCommand _openHexCommand;
+        public ICommand OpenHexCommand
+        {
+            get
+            {
+                if (_openHexCommand == null)
+                {
+                    _openHexCommand = new RelayCommand(_ =>
+                        OpenWithFilter("All files (*.*)|*.*", HexViewModel.Builder));
+                }
+                return _openHexCommand;
             }
         }
         private RelayCommand _closeCommand;
@@ -158,10 +197,32 @@ namespace ImasArchiveApp
         public bool CanCreateCommuPatch() => FileModel == null;
         #endregion
         #region Command Methods
-        public void Open()
+        public void OpenWithFilter(string filter, FileModelFactory.FileModelBuilder fileModelBuilder)
         {
-            string fileName = _getFileName.OpenGetFileName("Open archive",
-                "Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat|All files (*.*)|*.*");
+            string fileName = _getFileName.OpenGetFileName("Open", filter);
+            if (fileName != null)
+            {
+                if (FileModel != null)
+                    Close();
+                Open(fileName, fileModelBuilder);
+            }
+        }
+        private void Open(string inPath, FileModelFactory.FileModelBuilder fileModelBuilder)
+        {
+            try
+            {
+                ClearStatus();
+                FileModel = FileModelFactory.CreateFileModel(inPath, fileModelBuilder);
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                FileModel = null;
+            }
+        }
+        public void OpenWithFilter(string filter)
+        {
+            string fileName = _getFileName.OpenGetFileName("Open", filter);
             if (fileName != null)
             {
                 if (FileModel != null)
@@ -173,6 +234,7 @@ namespace ImasArchiveApp
         {
             try
             {
+                ClearStatus();
                 FileModel = FileModelFactory.CreateFileModel(inPath);
             }
             catch (Exception ex)

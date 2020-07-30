@@ -29,7 +29,12 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Command="{Binding Path=OpenCommand}" Header="Open" />
+                <MenuItem Header="Open">
+                    <MenuItem Command="{Binding Path=OpenArcCommand}" Header="Open Arc" />
+                    <MenuItem Command="{Binding Path=OpenParCommand}" Header="Open Par" />
+                    <MenuItem Command="{Binding Path=OpenGtfCommand}" Header="Open GTF" />
+                    <MenuItem Command="{Binding Path=OpenHexCommand}" Header="Open in Hex Viewer" />
+                </MenuItem>
                 <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
                 <Separator />
                 <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />

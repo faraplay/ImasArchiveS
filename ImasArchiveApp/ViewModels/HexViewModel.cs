@@ -97,6 +97,8 @@ namespace ImasArchiveApp
             UpdateHeaderText();
             UpdateDataText();
         }
+        internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
+            (report, filename, getFilename, stream) => new HexViewModel(report, filename, stream);
         #endregion
         #region IDisposable
         private bool disposed = false;
