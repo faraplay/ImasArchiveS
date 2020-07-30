@@ -33,6 +33,8 @@
                 <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
                 <Separator />
                 <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />
+                <Separator />
+                <MenuItem Command="{Binding Path=ConvertToGtfCommand}" Header="Convert Image to GTF" />
             </MenuItem>
             <MenuItem Header="Patch">
                 <MenuItem Header="Patch Arc">
