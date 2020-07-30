@@ -599,9 +599,10 @@ namespace Imas.Archive
                         await memStream.CopyToAsync(outStream).ConfigureAwait(false);
                     }
 
-                    Record record = new Record("XX");
+                    Record record = new Record("XXI");
                     record[0] = filename;
                     record[1] = outName;
+                    record[2] = gtf.Type;
                     records.Add(record);
 
                 }
