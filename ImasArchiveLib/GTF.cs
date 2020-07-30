@@ -83,19 +83,6 @@ namespace Imas
             };
         }
 
-        public static async Task WriteGTF(Stream stream, Bitmap bitmap, byte encodingType)
-        {
-            WriteHeader(stream, encodingType, bitmap.Width, bitmap.Height);
-            switch (encodingType)
-            {
-                case 0x83:
-                    await WriteGTF4444(stream, bitmap, true);
-                    break;
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-
         #region Read GTF
         private static Bitmap ReadGTFIndexed(Stream stream, int width, int height, Color[] palette)
         {
@@ -400,33 +387,67 @@ namespace Imas
             return bitmap;
         }
         #endregion
+        #region Write GTF
+        public static async Task WriteGTF(Stream stream, Bitmap bitmap, int encodingType)
+        {
+            encodingType &= 15;
+            WriteHeader(stream, encodingType, bitmap.Width, bitmap.Height);
+            switch (encodingType)
+            {
+                case 1:
+                    await WriteGTFIndexed(stream, bitmap);
+                    break;
+                case 2:
+                case 3:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    await WriteGTF32Bit(stream, bitmap, encodingType);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
 
-        private static void WriteHeader(Stream stream, byte type, int width, int height)
+        private static void WriteHeader(Stream stream, int type, int width, int height)
         {
             Binary binary = new Binary(stream, true);
-            bool isIndexed = (type & 15) == 1;
+            bool isIndexed = type == 1;
+            bool isPow2 = IsPow2(width) && IsPow2(height);
             int pixelCount = width * height;
-            int pixelSize = (type & 15) switch
+            int pixelSize = type switch
             {
                 1 => 8,
                 2 => 16,
                 3 => 16,
                 5 => 32,
-                6 => 32 / 16,
-                7 => 64 / 16,
-                8 => 64 / 16,
+                6 => 64 / 16,
+                7 => 128 / 16,
+                8 => 128 / 16,
+                _ => throw new NotSupportedException()
+            };
+            int strideSize = type switch
+            {
+                1 => 1,
+                2 => 2,
+                3 => 2,
+                5 => 4,
+                6 => 8,
+                7 => 16,
+                8 => 16,
                 _ => throw new NotSupportedException()
             };
             int size = (pixelCount * pixelSize) / 8;
 
             binary.WriteUInt32(0x02020000);
-            binary.WriteInt32(size);
+            binary.WriteInt32(size + (isIndexed ? 0x400 : 0));
             binary.WriteInt32(isIndexed ? 2 : 1);
 
             binary.WriteUInt32(0);
-            binary.WriteUInt32(0x80);
+            binary.WriteInt32(0x80);
             binary.WriteInt32(size);
-            binary.WriteByte(type);
+            binary.WriteByte((byte)(type ^ (isPow2 ? 0x80 : 0xA0)));
             binary.WriteByte(1);
             binary.WriteByte(2);
             binary.WriteByte(0);
@@ -435,30 +456,426 @@ namespace Imas
             binary.WriteInt16((short)height);
             binary.WriteUInt16(1);
             binary.WriteUInt16(0);
-            binary.WriteUInt32(0);
+            binary.WriteInt32(isPow2 ? 0 : width * strideSize);
             binary.WriteUInt32(0);
 
-            stream.Write(new byte[0x50]);
+            if (isIndexed)
+            {
+                binary.WriteUInt32(1);
+                binary.WriteInt32(0x80 + size);
+                binary.WriteInt32(0x400);
+                binary.WriteByte(0x85);
+                binary.WriteByte(1);
+                binary.WriteByte(2);
+                binary.WriteByte(0);
+                binary.WriteInt32(0xAA6C);
+                binary.WriteInt16(0x100);
+                binary.WriteInt16(1);
+                binary.WriteUInt16(1);
+                binary.WriteUInt16(0);
+                binary.WriteInt32(0);
+                binary.WriteUInt32(0);
+            }
+            else
+            {
+                stream.Write(new byte[0x24]);
+            }
+
+            stream.Write(new byte[0x2C]);
 
         }
-        private static async Task WriteGTF4444(Stream stream, Bitmap bitmap, bool zOrder)
+        private static async Task WriteGTFIndexed(Stream stream, Bitmap bitmap)
         {
+            nQuant.WuQuantizer wuQuantizer = new nQuant.WuQuantizer();
+            using Bitmap qBitmap = (Bitmap)wuQuantizer.QuantizeImage(bitmap);
+
+            if (qBitmap.PixelFormat != PixelFormat.Format8bppIndexed)
+                throw new NotSupportedException("Wrong pixel format - expected 8bppIndexed");
             using MemoryStream memStream = new MemoryStream();
             Binary binary = new Binary(memStream, true);
-            int pixelCount = bitmap.Width * bitmap.Height;
+            int pixelCount = qBitmap.Width * qBitmap.Height;
 
-            Order order = new Order(bitmap.Width, bitmap.Height);
+            BitmapData bitmapData = qBitmap.LockBits(
+                new Rectangle(0, 0, qBitmap.Width, qBitmap.Height),
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format8bppIndexed);
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            int stride = bitmapData.Stride;
+            byte[] bitmapArray = new byte[stride * qBitmap.Height];
+            Marshal.Copy(bitmapPtr, bitmapArray, 0, stride * qBitmap.Height);
+            qBitmap.UnlockBits(bitmapData);
+
+            Order order = new Order(qBitmap.Width, qBitmap.Height);
             for (int n = 0; n < pixelCount; n++)
             {
                 int x, y;
                 (x, y) = order.GetXY();
-                Color color = bitmap.GetPixel(x, y);
-                binary.WriteUInt16(ColorHelp.To4444(color));
+                byte b = bitmapArray[y * stride + x];
+                binary.WriteByte(b);
+            }
+
+            ColorPalette palette = qBitmap.Palette;
+            for (int i = 0; i < 0x100; i++)
+            {
+                binary.WriteByte(palette.Entries[i].A);
+                binary.WriteByte(palette.Entries[i].B);
+                binary.WriteByte(palette.Entries[i].G);
+                binary.WriteByte(palette.Entries[i].R);
             }
 
             memStream.Position = 0;
             await memStream.CopyToAsync(stream);
         }
+        private static async Task WriteGTF32Bit(Stream stream, Bitmap bitmap, int type)
+        {
+            if (bitmap.PixelFormat != PixelFormat.Format32bppArgb)
+                throw new NotSupportedException("Wrong pixel format - expected 32bppArgb");
+            using MemoryStream memStream = new MemoryStream();
+
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format32bppArgb);
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            int stride = bitmapData.Stride / 4;
+            int[] bitmapArray = new int[stride * bitmap.Height];
+            Marshal.Copy(bitmapPtr, bitmapArray, 0, stride * bitmap.Height);
+            bitmap.UnlockBits(bitmapData);
+
+            Binary binary = new Binary(memStream, true);
+            Order order = new Order(bitmap.Width, bitmap.Height);
+            int pixelCount = bitmap.Width * bitmap.Height;
+            switch (type)
+            {
+                case 2:
+                    WriteGTFPixels1555(binary, bitmapArray, order, pixelCount, stride);
+                    break;
+                case 3:
+                    WriteGTFPixels4444(binary, bitmapArray, order, pixelCount, stride);
+                    break;
+                case 5:
+                    WriteGTFPixels8888(binary, bitmapArray, order, pixelCount, stride);
+                    break;
+                case 6:
+                    WriteGTFPixels565Block4Color(stream, bitmapArray, bitmap.Width, bitmap.Height, stride);
+                    break;
+                case 7:
+                    WriteGTFPixels565Block8Alpha4Color(stream, bitmapArray, bitmap.Width, bitmap.Height, stride);
+                    break;
+                case 8:
+                    WriteGTFPixels565Block8RelAlpha4Color(stream, bitmapArray, bitmap.Width, bitmap.Height, stride);
+                    break;
+            }
+
+            memStream.Position = 0;
+            await memStream.CopyToAsync(stream);
+
+        }
+        #region Write Pixels
+        private static void WriteGTFPixels1555(Binary binary, int[] bitmapArray, Order order, int pixelCount, int stride)
+        {
+            for (int n = 0; n < pixelCount; n++)
+            {
+                int x, y;
+                (x, y) = order.GetXY();
+                uint b = (uint)bitmapArray[y * stride + x];
+                binary.WriteUInt16((ushort)(
+                    ((b >> 16) & 0x8000) ^
+                    ((b >> 9) & 0x7C00) ^
+                    ((b >> 6) & 0x03E0) ^
+                    ((b >> 3) & 0x001F)
+                    ));
+            }
+        }
+        private static void WriteGTFPixels4444(Binary binary, int[] bitmapArray, Order order, int pixelCount, int stride)
+        {
+            for (int n = 0; n < pixelCount; n++)
+            {
+                int x, y;
+                (x, y) = order.GetXY();
+                uint b = (uint)bitmapArray[y * stride + x]; // 0xabcdefgh
+                b &= 0xF0F0F0F0;                            // 0xa0c0e0g0
+                b >>= 4;                                    // 0x0a0c0e0g
+                b = (b ^ (b >> 4)) & 0x00FF00FF;            // 0x00ac00eg
+                b = (b ^ (b >> 8)) & 0x0000FFFF;            // 0x0000aceg
+                binary.WriteUInt16((ushort)b);
+            }
+        }
+        private static void WriteGTFPixels8888(Binary binary, int[] bitmapArray, Order order, int pixelCount, int stride)
+        {
+            for (int n = 0; n < pixelCount; n++)
+            {
+                int x, y;
+                (x, y) = order.GetXY();
+                uint b = (uint)bitmapArray[y * stride + x];
+                binary.WriteUInt32(b);
+            }
+        }
+        #endregion
+        private static void WriteGTFPixels565Block4Color(Stream stream, int[] bitmapArray, int width, int height, int stride)
+        {
+            for (int y = 0; y < height / 4; y++)
+            {
+                for (int x = 0; x < width / 4; x++)
+                {
+                    Color[] colors = new Color[16];
+                    for (int yy = 0; yy < 4; yy++)
+                    {
+                        for (int xx = 0; xx < 4; xx++)
+                        {
+                            colors[4 * yy + xx] = Color.FromArgb(bitmapArray[(4 * y + yy) * stride + 4 * x + xx]);
+                        }
+                    }
+                    ushort b0, b1;
+                    int[,] colorIndex;
+                    (b0, b1, colorIndex) = ReduceColors4(colors);
+
+                    Binary.WriteUInt16(stream, false, b0);
+                    Binary.WriteUInt16(stream, false, b1);
+
+                    for (int yy = 0; yy < 4; yy++)
+                    {
+                        int k = 0;
+                        for (int xx = 0; xx < 4; xx++)
+                        {
+                            k ^= colorIndex[xx, yy] << (2 * xx);
+                        }
+                        Binary.WriteByte(stream, false, (byte)k);
+                    }
+                }
+            }
+        }
+        private static void WriteGTFPixels565Block8Alpha4Color(Stream stream, int[] bitmapArray, int width, int height, int stride)
+        {
+            for (int y = 0; y < height / 4; y++)
+            {
+                for (int x = 0; x < width / 4; x++)
+                {
+                    Color[] colors = new Color[16];
+                    for (int yy = 0; yy < 4; yy++)
+                    {
+                        for (int xx = 0; xx < 4; xx++)
+                        {
+                            colors[4 * yy + xx] = Color.FromArgb(bitmapArray[(4 * y + yy) * stride + 4 * x + xx]);
+                        }
+                    }
+
+                    ulong alpha = 0;
+                    for (int i = 0; i < 16; i++)
+                    {
+                        alpha ^= (ulong)(colors[i].A >> 4) << (4 * i);
+                    }
+                    Binary.WriteUInt64(stream, false, alpha);
+
+                    ushort b0, b1;
+                    int[,] colorIndex;
+                    (b0, b1, colorIndex) = ReduceColors4(colors);
+
+                    Binary.WriteUInt16(stream, false, b0);
+                    Binary.WriteUInt16(stream, false, b1);
+
+                    for (int yy = 0; yy < 4; yy++)
+                    {
+                        int k = 0;
+                        for (int xx = 0; xx < 4; xx++)
+                        {
+                            k ^= colorIndex[xx, yy] << (2 * xx);
+                        }
+                        Binary.WriteByte(stream, false, (byte)k);
+                    }
+                }
+            }
+        }
+        private static void WriteGTFPixels565Block8RelAlpha4Color(Stream stream, int[] bitmapArray, int width, int height, int stride)
+        {
+            for (int y = 0; y < height / 4; y++)
+            {
+                for (int x = 0; x < width / 4; x++)
+                {
+                    Color[] colors = new Color[16];
+                    for (int yy = 0; yy < 4; yy++)
+                    {
+                        for (int xx = 0; xx < 4; xx++)
+                        {
+                            colors[4 * yy + xx] = Color.FromArgb(bitmapArray[(4 * y + yy) * stride + 4 * x + xx]);
+                        }
+                    }
+
+                    ulong alpha = 0;
+                    byte a0, a1;
+                    int[] alphaIndex;
+                    (a0, a1, alphaIndex) = ReduceAlphas8(colors);
+                    alpha ^= ((ulong)a1 << 8) ^ a0;
+                    for (int i = 0; i < 16; i++)
+                    {
+                        alpha ^= (ulong)(alphaIndex[i]) << (3 * i + 16);
+                    }
+                    Binary.WriteUInt64(stream, false, alpha);
+
+                    ushort b0, b1;
+                    int[,] colorIndex;
+                    (b0, b1, colorIndex) = ReduceColors4(colors);
+
+                    Binary.WriteUInt16(stream, false, b0);
+                    Binary.WriteUInt16(stream, false, b1);
+
+                    for (int yy = 0; yy < 4; yy++)
+                    {
+                        int k = 0;
+                        for (int xx = 0; xx < 4; xx++)
+                        {
+                            k ^= colorIndex[xx, yy] << (2 * xx);
+                        }
+                        Binary.WriteByte(stream, false, (byte)k);
+                    }
+                }
+            }
+        }
+
+        private static (byte, byte, int[]) ReduceAlphas8(Color[] colors)
+        {
+            byte min = 0xFF;
+            byte max = 0;
+            bool hasExtreme = false;
+            for (int i = 0; i < 16; i++)
+            {
+                byte alpha = colors[i].A;
+                if (alpha == 0 || alpha == 0xFF)
+                {
+                    hasExtreme = true;
+                }
+                else
+                {
+                    if (alpha < min)
+                        min = alpha;
+                    if (alpha > max)
+                        max = alpha;
+                }
+            }
+
+            int[] a = new int[8];
+            if (hasExtreme)
+            {
+                if (min > max) // no non-extreme alpha values
+                {
+                    min = 0;
+                    max = 1;
+                }
+                a[0] = min;
+                a[1] = max;
+                a[2] = (4 * min + 1 * max) / 5;
+                a[3] = (3 * min + 2 * max) / 5;
+                a[4] = (2 * min + 3 * max) / 5;
+                a[5] = (1 * min + 4 * max) / 5;
+                a[6] = 0;
+                a[7] = 255;
+            }
+            else
+            {
+                a[0] = max;
+                a[1] = min;
+                a[2] = (6 * max + 1 * min) / 7;
+                a[3] = (5 * max + 2 * min) / 7;
+                a[4] = (4 * max + 3 * min) / 7;
+                a[5] = (3 * max + 4 * min) / 7;
+                a[6] = (2 * max + 5 * min) / 7;
+                a[7] = (1 * max + 6 * min) / 7;
+            }
+
+            int[] alphaIndex = new int[16];
+            for (int i = 0; i < 16; i++)
+            {
+                int mindist = 256;
+                int minj = 0;
+                for (int j = 0; j < 8; j++)
+                {
+                    int dist = Math.Abs(colors[i].A - a[j]);
+                    if (dist < mindist)
+                    {
+                        mindist = dist;
+                        minj = j;
+                    }
+                }
+                alphaIndex[i] = minj;
+            }
+
+            return ((byte)a[0], (byte)a[1], alphaIndex);
+        }
+
+        private static (ushort, ushort, int[,]) ReduceColors4(Color[] colors)
+        {
+            int maxDist = 0;
+            int maxi0 = 0, maxi1 = 0;
+            for (int i1 = 0; i1 < 16; i1++)
+            {
+                for (int i2 = 0; i2 < i1; i2++)
+                {
+                    int dist =
+                        (colors[i1].R - colors[i2].R) * (colors[i1].R - colors[i2].R) +
+                        (colors[i1].G - colors[i2].G) * (colors[i1].G - colors[i2].G) +
+                        (colors[i1].B - colors[i2].B) * (colors[i1].B - colors[i2].B);
+                    if (dist >= maxDist)
+                    {
+                        maxDist = dist;
+                        maxi0 = i1;
+                        maxi1 = i2;
+                    }
+                }
+            }
+            int c0 = colors[maxi0].ToArgb();
+            int c1 = colors[maxi1].ToArgb();
+            ushort b0 = (ushort)(
+                    ((c0 >> 8) & 0xF800) ^
+                    ((c0 >> 5) & 0x07E0) ^
+                    ((c0 >> 3) & 0x001F)
+                    );
+            ushort b1 = (ushort)(
+                    ((c1 >> 8) & 0xF800) ^
+                    ((c1 >> 5) & 0x07E0) ^
+                    ((c1 >> 3) & 0x001F)
+                    );
+            ushort b0new, b1new;
+            Color[] newColor = new Color[4];
+            if (b0 < b1)
+            {
+                newColor[0] = colors[maxi1];
+                newColor[1] = colors[maxi0];
+                b0new = b1;
+                b1new = b0;
+            }
+            else
+            {
+                newColor[0] = colors[maxi0];
+                newColor[1] = colors[maxi1];
+                b0new = b0;
+                b1new = b1;
+            }
+            newColor[2] = ColorHelp.MixRatio(newColor[0], newColor[1], 2, 1);
+            newColor[3] = ColorHelp.MixRatio(newColor[0], newColor[1], 1, 2);
+
+            int[,] colorIndex = new int[4, 4];
+            for (int i = 0; i < 16; i++)
+            {
+                int minDist = 3 * 256 * 256;
+                int minj = 0;
+                for (int j = 0; j < 4; j++)
+                {
+                    int dist =
+                        (colors[i].R - newColor[j].R) * (colors[i].R - newColor[j].R) +
+                        (colors[i].G - newColor[j].G) * (colors[i].G - newColor[j].G) +
+                        (colors[i].B - newColor[j].B) * (colors[i].B - newColor[j].B);
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        minj = j;
+                    }
+                }
+                colorIndex[i % 4, i / 4] = minj;
+            }
+            return (b0new, b1new, colorIndex);
+        }
+        #endregion
+        private static bool IsPow2(int n) => (n & (n - 1)) == 0;
 
         private class Order
         {
@@ -481,7 +898,6 @@ namespace Imas
                 y = 0;
                 zOrder = isZOrder;
             }
-            private static bool IsPow2(int n) => (n & (n - 1)) == 0;
             public (int, int) GetXY()
             {
                 (int, int) result = (x, y);

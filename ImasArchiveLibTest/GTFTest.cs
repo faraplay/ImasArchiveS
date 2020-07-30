@@ -97,11 +97,30 @@ namespace ImasArchiveLibTest
         [DataRow(@"..\data\hdd4\tutorial\panel\panel_01_par\tutorial_01_1.gtf", "../data/gtf/tutorial.png")]
         [DataRow(@"..\data\hdd4\character\acc\acc_body\acc2_body_035_par\acc2_body_035_par\acc2_body_035_pta\acc2_body_035_sdw.gtf", "../data/gtf/acc2.png")]
         [DataRow(@"..\data\hdd4\ui\menu\mail\mailComponent_par\mail_pta\mail_tex.gtf", "../data/gtf/mail_tex.png")]
+        [DataRow(@"..\data\hdd4\bg3d\live_006_par\Bg3dModel_par\model.TrueeGtf_pta\kd_live006_treekakiwari01_d5.gtf", "../data/gtf/tree.png")]
         public void ReadGtfTest(string fileName, string outPath)
         {
             using FileStream inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             using Bitmap bitmap = GTF.ReadGTF(inStream);
             bitmap.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
+        }
+
+        [DataTestMethod]
+        [DataRow("../data/gtf/firework2.png", "../data/gtf/rebuild/firework2.gtf", 0x85)]
+        [DataRow("../data/gtf/logoc.png", "../data/gtf/rebuild/logoc.gtf", 0xA7)]
+        [DataRow("../data/gtf/baton.png", "../data/gtf/rebuild/baton.gtf", 0x82)]
+        [DataRow("../data/gtf/sakura.png", "../data/gtf/rebuild/sakura.gtf", 0xA3)]
+        [DataRow("../data/gtf/commonRankUp.png", "../data/gtf/rebuild/commonRankUp.gtf", 0x81)]
+        [DataRow("../data/gtf/books.png", "../data/gtf/rebuild/books.gtf", 0x85)]
+        [DataRow("../data/gtf/tutorial.png", "../data/gtf/rebuild/tutorial.gtf", 0x81)]
+        [DataRow("../data/gtf/acc2.png", "../data/gtf/rebuild/acc2.gtf", 0x86)]
+        [DataRow("../data/gtf/mail_tex.png", "../data/gtf/rebuild/mail_tex.gtf", 0x81)]
+        [DataRow("../data/gtf/tree.png", "../data/gtf/rebuild/tree.gtf", 0x88)]
+        public async Task WriteGtfTest(string fileName, string outGtf, int type)
+        {
+            using Bitmap bitmap = new Bitmap(fileName);
+            using FileStream outStream = new FileStream(outGtf, FileMode.Create, FileAccess.Write);
+            await GTF.WriteGTF(outStream, bitmap, type);
         }
 
         [DataTestMethod]
