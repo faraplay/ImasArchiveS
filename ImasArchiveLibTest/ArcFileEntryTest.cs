@@ -309,9 +309,9 @@ namespace ImasArchiveLibTest
             await arcFile.ExtractParameterToXlsx(outputXlsx, progress);
         }
 
-        //[DataTestMethod]
-        //[DataRow("disc", "", "images/disc_images")]
-        //[DataRow("dlc/_dlc03", ".dat", "images/dlc03_images")]
+        [DataTestMethod]
+        [DataRow("disc", "", "images/disc_images")]
+        [DataRow("dlc/_dlc03", ".dat", "images/dlc03_images")]
         //[DataRow("hdd", "", "images/hdd_images")]
         public async Task ExtractAllImagesTest(string arcName, string extension, string outDir)
         {

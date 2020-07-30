@@ -556,11 +556,11 @@ namespace Imas.Archive
                 if (filename.EndsWith(".gtf") || filename.EndsWith(".dds") || filename.EndsWith(".tex"))
                 {
                     using Stream inStream = await entry.GetData();
-                    using Bitmap bitmap = GTF.ReadGTF(inStream);
+                    using GTF gtf = GTF.ReadGTF(inStream);
                     string name = filename.Substring(filename.LastIndexOf('/') + 1);
                     string outNameNoExtend = name[0..^4];
                     using MemoryStream memStream = new MemoryStream();
-                    bitmap.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+                    gtf.Bitmap.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
                     memStream.Position = 0;
 
                     string hashString;

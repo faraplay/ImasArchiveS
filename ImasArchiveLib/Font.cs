@@ -29,7 +29,7 @@ namespace Imas
             int nxpPos = binary.ReadInt32();
 
             memStream.Position = gtfPos;
-            BigBitmap = GTF.ReadGTF(memStream);
+            SetGtf(GTF.ReadGTF(memStream));
 
             memStream.Position = nxpPos + 8;
             int charCount = binary.ReadInt32();
@@ -163,7 +163,30 @@ namespace Imas
         }
         #endregion
         #region Bitmaps
-        public Bitmap BigBitmap { get; private set; }
+        private GTF gtf;
+        private Bitmap nonGtfBitmap;
+        private void SetGtf(GTF value)
+        {
+            nonGtfBitmap?.Dispose();
+            gtf = value;
+        }
+        public Bitmap BigBitmap
+        {
+            get => gtf != null ? gtf.Bitmap : nonGtfBitmap;
+            set
+            {
+                gtf?.Dispose();
+                nonGtfBitmap = value;
+            }
+        }
+        private void ClearBigBitmap()
+        {
+            gtf?.Dispose();
+            gtf = null;
+            nonGtfBitmap?.Dispose();
+            nonGtfBitmap = null;
+        }
+
         private bool charsHaveBitmaps;
 
         private Bitmap GetCharBitmap(CharData c)
@@ -195,8 +218,7 @@ namespace Imas
                     c.bitmap = GetCharBitmap(c);
                 }
             }
-            BigBitmap?.Dispose();
-            BigBitmap = null;
+            ClearBigBitmap();
             charsHaveBitmaps = true;
         }
 
@@ -558,8 +580,7 @@ namespace Imas
         {
             if (disposing)
             {
-                BigBitmap?.Dispose();
-                BigBitmap = null;
+                ClearBigBitmap();
                 foreach (CharData c in chars)
                 {
                     c?.Dispose();

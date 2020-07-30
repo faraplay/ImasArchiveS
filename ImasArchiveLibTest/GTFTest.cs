@@ -36,10 +36,10 @@ namespace ImasArchiveLibTest
                 try
                 {
                     using FileStream inStream = file.OpenRead();
-                    using Bitmap bitmap = GTF.ReadGTF(inStream);
+                    using GTF gtf = GTF.ReadGTF(inStream);
                     string outNameNoExtend = file.Name[0..^4];
                     using MemoryStream memStream = new MemoryStream();
-                    bitmap.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+                    gtf.Bitmap.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
                     memStream.Position = 0;
 
                     byte[] hash = sha.ComputeHash(memStream);
@@ -101,8 +101,8 @@ namespace ImasArchiveLibTest
         public void ReadGtfTest(string fileName, string outPath)
         {
             using FileStream inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-            using Bitmap bitmap = GTF.ReadGTF(inStream);
-            bitmap.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
+            using GTF gtf = GTF.ReadGTF(inStream);
+            gtf.Bitmap.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
         }
 
         [DataTestMethod]
