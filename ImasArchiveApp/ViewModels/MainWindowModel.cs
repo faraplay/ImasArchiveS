@@ -230,7 +230,7 @@ namespace ImasArchiveApp
                 Open(fileName);
             }
         }
-        private void Open(string inPath)
+        public void Open(string inPath)
         {
             try
             {

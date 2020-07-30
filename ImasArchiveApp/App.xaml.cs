@@ -24,6 +24,11 @@ namespace ImasArchiveApp
             };
             FileModelFactory.report = datacontext;
             FileModelFactory.getFileName = dialogs;
+
+            if (e.Args.Length == 1)
+            {
+                datacontext.Open(e.Args[0]);
+            }
             window.Show();
         }
     }
