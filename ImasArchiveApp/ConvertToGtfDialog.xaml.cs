@@ -24,7 +24,7 @@ namespace ImasArchiveApp
 
         private readonly string[] descs =
         {
-            "1: 8-bit indexed color. Used for tutorial panels, icons, backgrounds with transparency.",
+            "1: 8-bit indexed color. Used for tutorial panels, icons, and backgrounds with transparency.",
             "2: 16-bit color (1555). Only used in the baton hand accessory.",
             "3: 16-bit color (4444). Only used in some textures in the 13th live stage, and the sakura petals in The World Is All One.",
             "5: 32-bit color (ARGB). Used in lots of textures in 3D models.",
@@ -35,7 +35,7 @@ namespace ImasArchiveApp
         private readonly int[] types = { 1, 2, 3, 5, 6, 7, 8 };
         private void UpdateDesc()
         {
-            lblTypeDesc.Content = descs[cmbType.SelectedIndex];
+            txtTypeDesc.Text = descs[cmbType.SelectedIndex];
         }
         private void UpdateOKEnabled()
         {

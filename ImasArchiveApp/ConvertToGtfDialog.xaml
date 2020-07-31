@@ -37,13 +37,17 @@
             Padding="5"
             Click="BtnSelectImage_Click"
             Content="Select Image" />
-        <WrapPanel Grid.Row="2" Grid.ColumnSpan="2">
+        <WrapPanel
+            Grid.Row="2"
+            Grid.ColumnSpan="2"
+            MinHeight="80"
+            VerticalAlignment="Center">
             <Label VerticalAlignment="Center">GTF Type</Label>
             <ComboBox
                 Name="cmbType"
+                Width="40"
                 Margin="10"
                 Padding="5"
-                Width="40"
                 VerticalAlignment="Center"
                 SelectionChanged="CmbType_SelectionChanged">
                 <ComboBoxItem Content="1" />
@@ -55,10 +59,12 @@
                 <ComboBoxItem Content="8" />
             </ComboBox>
             <Label
-                Name="lblTypeDesc"
-                MinHeight="40"
+                Width="400"
+                MinHeight="60"
                 Margin="10"
-                VerticalContentAlignment="Center" />
+                VerticalContentAlignment="Center">
+                <TextBlock x:Name="txtTypeDesc" TextWrapping="Wrap" />
+            </Label>
         </WrapPanel>
         <Label Grid.Row="3" Grid.ColumnSpan="2">Output file:</Label>
         <TextBox
