@@ -24,16 +24,16 @@ namespace Imas
             Binary binary = new Binary(memStream, true);
             parHeader = new byte[16];
             memStream.Read(parHeader);
-            int gtfPos = binary.GetInt32();
-            _ = binary.GetInt32();
-            int nxpPos = binary.GetInt32();
+            int gtfPos = binary.ReadInt32();
+            _ = binary.ReadInt32();
+            int nxpPos = binary.ReadInt32();
 
             memStream.Position = gtfPos;
-            BigBitmap = GTF.ReadGTF(memStream);
+            SetGtf(GTF.ReadGTF(memStream));
 
             memStream.Position = nxpPos + 8;
-            int charCount = binary.GetInt32();
-            root = binary.GetInt32();
+            int charCount = binary.ReadInt32();
+            root = binary.ReadInt32();
             chars = new CharData[charCount];
             memStream.Position = nxpPos + 48;
             for (int i = 0; i < charCount; i++)
@@ -41,18 +41,18 @@ namespace Imas
                 chars[i] = new CharData
                 {
                     index = i,
-                    key = binary.GetUShort(),
-                    datawidth = binary.GetByte(),
-                    dataheight = binary.GetByte(),
-                    datax = binary.GetInt16(),
-                    datay = binary.GetInt16(),
-                    offsetx = binary.GetInt16(),
-                    offsety = binary.GetInt16(),
-                    width = binary.GetInt16(),
-                    blank = binary.GetInt16(),
-                    left = binary.GetInt32(),
-                    right = binary.GetInt32(),
-                    isEmoji = binary.GetUShort()
+                    key = binary.ReadUInt16(),
+                    datawidth = binary.ReadByte(),
+                    dataheight = binary.ReadByte(),
+                    datax = binary.ReadInt16(),
+                    datay = binary.ReadInt16(),
+                    offsetx = binary.ReadInt16(),
+                    offsety = binary.ReadInt16(),
+                    width = binary.ReadInt16(),
+                    blank = binary.ReadInt16(),
+                    left = binary.ReadInt32(),
+                    right = binary.ReadInt32(),
+                    isEmoji = binary.ReadUInt16()
                 };
                 memStream.Position += 6;
             }
@@ -80,10 +80,10 @@ namespace Imas
 
                 Binary binary = new Binary(memStream, true);
 
-                binary.PutInt32(gtfPos);
-                binary.PutInt32(nxPos);
-                binary.PutInt32(nxpPos);
-                binary.PutInt32(0);
+                binary.WriteInt32(gtfPos);
+                binary.WriteInt32(nxPos);
+                binary.WriteInt32(nxpPos);
+                binary.WriteInt32(0);
 
                 string gtfName = "im2nx.gtf";
                 string nxName = "im2nx.paf";
@@ -95,15 +95,15 @@ namespace Imas
                 memStream.Write(Encoding.ASCII.GetBytes(nxpName));
                 memStream.Write(zeros, 0, 0x80 - nxpName.Length);
 
-                binary.PutUInt(0);
-                binary.PutUInt(1);
-                binary.PutUInt(2);
-                binary.PutUInt(0);
+                binary.WriteUInt32(0);
+                binary.WriteUInt32(1);
+                binary.WriteUInt32(2);
+                binary.WriteUInt32(0);
 
-                binary.PutInt32(gtfLen);
-                binary.PutInt32(nxLen);
-                binary.PutInt32(nxpLen);
-                binary.PutInt32(0);
+                binary.WriteInt32(gtfLen);
+                binary.WriteInt32(nxLen);
+                binary.WriteInt32(nxpLen);
+                binary.WriteInt32(0);
 
                 int pad = (int)(pos - memStream.Position) & 0x7F;
                 memStream.Write(zeros, 0, pad);
@@ -126,10 +126,10 @@ namespace Imas
         {
             using MemoryStream memStream = new MemoryStream();
             Binary binary = new Binary(memStream, true);
-            binary.PutUInt(0x70616601);
-            binary.PutUInt(0x0201001D);
-            binary.PutInt32(chars.Length);
-            binary.PutInt32(root);
+            binary.WriteUInt32(0x70616601);
+            binary.WriteUInt32(0x0201001D);
+            binary.WriteInt32(chars.Length);
+            binary.WriteInt32(root);
             memStream.Write(Encoding.ASCII.GetBytes("im2nx"));
             if (isNxp)
                 memStream.WriteByte(0x70);
@@ -137,24 +137,24 @@ namespace Imas
                 memStream.WriteByte(0);
             memStream.Write(zeros, 0, 0xA);
 
-            binary.PutInt16(0x30);
-            binary.PutInt16(0x100);
+            binary.WriteInt16(0x30);
+            binary.WriteInt16(0x100);
             memStream.Write(zeros, 0, 0xC);
 
             foreach (CharData c in chars)
             {
-                binary.PutUShort(c.key);
-                binary.PutByte(c.datawidth);
-                binary.PutByte(c.dataheight);
-                binary.PutInt16(c.datax);
-                binary.PutInt16(c.datay);
-                binary.PutInt16(c.offsetx);
-                binary.PutInt16(c.offsety);
-                binary.PutInt16((isNxp || !nxFixedWidth) ? c.width : (short)0x20);
-                binary.PutInt16(c.blank);
-                binary.PutInt32(c.left);
-                binary.PutInt32(c.right);
-                binary.PutUShort(c.isEmoji);
+                binary.WriteUInt16(c.key);
+                binary.WriteByte(c.datawidth);
+                binary.WriteByte(c.dataheight);
+                binary.WriteInt16(c.datax);
+                binary.WriteInt16(c.datay);
+                binary.WriteInt16(c.offsetx);
+                binary.WriteInt16(c.offsety);
+                binary.WriteInt16((isNxp || !nxFixedWidth) ? c.width : (short)0x20);
+                binary.WriteInt16(c.blank);
+                binary.WriteInt32(c.left);
+                binary.WriteInt32(c.right);
+                binary.WriteUInt16(c.isEmoji);
                 memStream.Write(zeros, 0, 6);
             }
 
@@ -163,7 +163,30 @@ namespace Imas
         }
         #endregion
         #region Bitmaps
-        public Bitmap BigBitmap { get; private set; }
+        private GTF gtf;
+        private Bitmap nonGtfBitmap;
+        private void SetGtf(GTF value)
+        {
+            nonGtfBitmap?.Dispose();
+            gtf = value;
+        }
+        public Bitmap BigBitmap
+        {
+            get => gtf != null ? gtf.Bitmap : nonGtfBitmap;
+            set
+            {
+                gtf?.Dispose();
+                nonGtfBitmap = value;
+            }
+        }
+        private void ClearBigBitmap()
+        {
+            gtf?.Dispose();
+            gtf = null;
+            nonGtfBitmap?.Dispose();
+            nonGtfBitmap = null;
+        }
+
         private bool charsHaveBitmaps;
 
         private Bitmap GetCharBitmap(CharData c)
@@ -195,8 +218,7 @@ namespace Imas
                     c.bitmap = GetCharBitmap(c);
                 }
             }
-            BigBitmap?.Dispose();
-            BigBitmap = null;
+            ClearBigBitmap();
             charsHaveBitmaps = true;
         }
 
@@ -455,14 +477,14 @@ namespace Imas
         {
             using FileStream stream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
             Binary binary = new Binary(stream, true);
-            binary.PutInt32(chars.Length);
+            binary.WriteInt32(chars.Length);
             foreach (CharData c in chars)
             {
-                binary.PutUShort(c.key);
-                binary.PutInt16(c.offsetx);
-                binary.PutInt16(c.offsety);
-                binary.PutInt16(c.width);
-                binary.PutUShort(c.isEmoji);
+                binary.WriteUInt16(c.key);
+                binary.WriteInt16(c.offsetx);
+                binary.WriteInt16(c.offsety);
+                binary.WriteInt16(c.width);
+                binary.WriteUInt16(c.isEmoji);
             }
         }
 
@@ -486,17 +508,17 @@ namespace Imas
         {
             using FileStream stream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
             Binary binary = new Binary(stream, true);
-            int charCount = binary.GetInt32();
+            int charCount = binary.ReadInt32();
             chars = new CharData[charCount];
             for (int i = 0; i < charCount; i++)
             {
                 chars[i] = new CharData
                 {
-                    key = binary.GetUShort(),
-                    offsetx = binary.GetInt16(),
-                    offsety = binary.GetInt16(),
-                    width = binary.GetInt16(),
-                    isEmoji = binary.GetUShort()
+                    key = binary.ReadUInt16(),
+                    offsetx = binary.ReadInt16(),
+                    offsety = binary.ReadInt16(),
+                    width = binary.ReadInt16(),
+                    isEmoji = binary.ReadUInt16()
                 };
             }
         }
@@ -558,8 +580,7 @@ namespace Imas
         {
             if (disposing)
             {
-                BigBitmap?.Dispose();
-                BigBitmap = null;
+                ClearBigBitmap();
                 foreach (CharData c in chars)
                 {
                     c?.Dispose();

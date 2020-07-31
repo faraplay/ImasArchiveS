@@ -45,5 +45,18 @@ namespace ImasArchiveApp
             };
             return dialog.ShowDialog() == CommonFileDialogResult.Ok ? dialog.FileName : null;
         }
+
+        public static (string, string, int)? GetConvertToGTFData()
+        {
+            ConvertToGtfDialog dialog = new ConvertToGtfDialog();
+            if (dialog.ShowDialog() == true)
+            {
+                return (dialog.ImagePath, dialog.GtfPath, dialog.Type);
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

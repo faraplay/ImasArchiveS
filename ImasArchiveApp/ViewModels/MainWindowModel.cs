@@ -3,6 +3,7 @@ using Imas.Archive;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -195,6 +196,18 @@ namespace ImasArchiveApp
             }
         }
         public bool CanCreateCommuPatch() => FileModel == null;
+        AsyncCommand _convertToGtfCommand;
+        public ICommand ConvertToGtfCommand
+        {
+            get
+            {
+                if (_convertToGtfCommand == null)
+                {
+                    _convertToGtfCommand = new AsyncCommand(() => ConvertToGtf());
+                }
+                return _convertToGtfCommand;
+            }
+        }
         #endregion
         #region Command Methods
         public void OpenWithFilter(string filter, FileModelFactory.FileModelBuilder fileModelBuilder)
@@ -366,6 +379,32 @@ namespace ImasArchiveApp
                 return;
             }
 
+        }
+
+        public async Task ConvertToGtf()
+        {
+            try
+            {
+                ClearStatus();
+                string imagePath, gtfPath;
+                int type;
+                var names = Dialogs.GetConvertToGTFData();
+                if (names.HasValue)
+                {
+                    Close();
+                    (imagePath, gtfPath, type) = names.Value;
+                    using (FileStream gtfStream = new FileStream(gtfPath, FileMode.Create, FileAccess.Write))
+                    {
+                        using Bitmap bitmap = new Bitmap(imagePath);
+                        await GTF.WriteGTF(gtfStream, bitmap, type);
+                    }
+                    Open(gtfPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
         }
         #endregion
         #region Progress

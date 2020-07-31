@@ -98,13 +98,13 @@ namespace Imas.Streams
             try
             {
                 Binary binary = new Binary(_stream, true);
-                if (binary.GetUInt() != 0x73656773u)
+                if (binary.ReadUInt32() != 0x73656773u)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-                if (binary.GetUShort() != 5)
+                if (binary.ReadUInt16() != 5)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
-                _block_count = binary.GetUShort();
-                _length = binary.GetUInt();
-                if (binary.GetUInt() != _stream.Length)
+                _block_count = binary.ReadUInt16();
+                _length = binary.ReadUInt32();
+                if (binary.ReadUInt32() != _stream.Length)
                     throw new InvalidDataException(Strings.InvalidData_SegsHeader);
 
                 blockOffsets = new long[_block_count];
@@ -113,15 +113,15 @@ namespace Imas.Streams
                 blockIsCompressed = new bool[_block_count];
                 for (int i = 0; i < _block_count; i++)
                 {
-                    blockCompSizes[i] = binary.GetUShort();
+                    blockCompSizes[i] = binary.ReadUInt16();
                     if (blockCompSizes[i] == 0)
                         blockCompSizes[i] = MaxBlockSize;
-                    blockUncompSizes[i] = binary.GetUShort();
+                    blockUncompSizes[i] = binary.ReadUInt16();
                     if (blockUncompSizes[i] != 0 && i != _block_count - 1)
                         throw new InvalidDataException(Strings.InvalidData_SegsHeader);
                     if (blockUncompSizes[i] == 0)
                         blockUncompSizes[i] = MaxBlockSize;
-                    uint blockOffset = binary.GetUInt();
+                    uint blockOffset = binary.ReadUInt32();
                     blockIsCompressed[i] = (blockOffset % 2 == 1);
                     blockOffsets[i] = blockOffset & -2;
                 }
@@ -459,11 +459,11 @@ namespace Imas.Streams
         {
             Binary binary = new Binary(_stream, true);
             _block_count = (fileLength + 0xFFFF) / 0x10000;
-            binary.PutUInt(0x73656773u);
-            binary.PutUShort(5);
-            binary.PutUShort((ushort)_block_count);
-            binary.PutUInt((uint)fileLength);
-            binary.PutUInt(0);
+            binary.WriteUInt32(0x73656773u);
+            binary.WriteUInt16(5);
+            binary.WriteUInt16((ushort)_block_count);
+            binary.WriteUInt32((uint)fileLength);
+            binary.WriteUInt32(0);
 
             _stream.Write(new byte[8 * _block_count]);
 
@@ -526,23 +526,23 @@ namespace Imas.Streams
         {
             _stream.Seek(0, SeekOrigin.Begin);
             Binary binary = new Binary(_stream, true);
-            binary.PutUInt(0x73656773u);
-            binary.PutUShort(5);
-            binary.PutUShort((ushort)_block_count);
-            binary.PutInt32(fileLength);
-            binary.PutUInt((uint)_offset);
+            binary.WriteUInt32(0x73656773u);
+            binary.WriteUInt16(5);
+            binary.WriteUInt16((ushort)_block_count);
+            binary.WriteInt32(fileLength);
+            binary.WriteUInt32((uint)_offset);
 
             for (int i = 0; i < _block_count; i++)
             {
                 if (blockCompSizes[i] == MaxBlockSize)
                     blockCompSizes[i] = 0;
-                binary.PutUShort((ushort)blockCompSizes[i]);
+                binary.WriteUInt16((ushort)blockCompSizes[i]);
                 if (blockUncompSizes[i] == MaxBlockSize)
                     blockUncompSizes[i] = 0;
-                binary.PutUShort((ushort)blockUncompSizes[i]);
+                binary.WriteUInt16((ushort)blockUncompSizes[i]);
                 if (blockIsCompressed[i])
                     blockOffsets[i] += 1;
-                binary.PutUInt((uint)blockOffsets[i]);
+                binary.WriteUInt32((uint)blockOffsets[i]);
             }
         }
     }
