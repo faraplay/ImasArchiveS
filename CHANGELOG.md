@@ -1,3 +1,4 @@
+## Version 0.3.2
 
 ### Added
 Command line arguments are now processed, meaning that you can now double-click on a file in Windows Explorer and use this app to open it.
