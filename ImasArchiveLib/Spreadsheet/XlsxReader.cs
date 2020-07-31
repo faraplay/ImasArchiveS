@@ -102,6 +102,7 @@ namespace Imas.Spreadsheet
                     {
                         CellValues.SharedString => sharedStringTablePart.SharedStringTable.ElementAt(int.Parse(cell.InnerText))
                             .InnerText.Replace("_x000D_", ""),
+                        CellValues.String => cell.CellValue.InnerText,
                         _ => throw new InvalidDataException("Expected a string in cell" + address),
                     };
                 }

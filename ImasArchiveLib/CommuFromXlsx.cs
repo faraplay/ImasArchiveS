@@ -61,9 +61,7 @@ namespace Imas
         }
         private void WriteBin(string commuName, IEnumerable<CommuLine> lines)
         {
-            if (lines.Any(line =>
-                !string.IsNullOrWhiteSpace(line.name) || !string.IsNullOrWhiteSpace(line.message))
-                )
+            if (lines.Any(line => !string.IsNullOrWhiteSpace(line.message)))
             {
                 ZipArchiveEntry entry = zipArchive.CreateEntry(commuName);
                 using Stream stream = entry.Open();
