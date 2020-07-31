@@ -1,3 +1,19 @@
+
+### Added
+Command line arguments are now processed, meaning that you can now double-click on a file in Windows Explorer and use this app to open it.
+
+New command to extract all images from an arc file
+
+New command and dialog for converting an image file into a gtf file
+
+### Changed
+Open command is now split into several commands - one for arc files, one for par files, one for gtf files, and one for opening any file with the hex viewer.
+
+GTF reading has been optimised to read faster.
+
+### Fixed
+Excel reader can now properly extract strings from cells containing non-shared strings.
+
 ## Version 0.3.1
 
 ### Added

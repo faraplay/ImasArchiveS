@@ -3,11 +3,12 @@ App to read, edit, extract and patch files from the game Idolmaster: One For All
 
 ## Instructions for usage
 ### Opening
-Click on "File >> Open" to open a new arc file. 
+Click on "File >> Open >> Open Arc" to open a new arc file. 
 Make sure that the corresponding .bin file of the same name is in the same directory as the .arc file when you do this.
 
-You can also change the drop-down option for file type in the file selection dialog to "All files"
-to select other types of files.
+Click on "File >> Open >> Open Par" to open a par file, and "File >> Open >> Open GTF" to open a gtf (image) file.
+
+To view a file in the hex viewer, click "File >> Open >> Open in Hex Viewer".
 
 Alternatively, you can click on "File >> New Arc" to select a folder from which a new .arc file (and corresponding .bin)
 will be built.
@@ -56,6 +57,15 @@ To patch the font (stored in disc.arc) for the patched commus, choose "Arc >> Pa
 while disc.arc is opened.
 
 ### Other file options
+
+#### Converting images to GTF 
+Click on "File >> Convert Image to GTF" to open the GTF conversion dialog.
+
+Select an image to convert by clicking on the "Select Image" button, and select a file name for the new GTF by 
+clicking "Select Save Location".
+
+You also need to select a GTF type by choosing from the drop-down list. It's best to match the type of the GTF file 
+you are trying to replace. Note that some types do not support transparency.
 
 #### GTF (image) viewer
 Clicking the "Save" menu option allows you to export the GTF file as a PNG file.
