@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Imas.Archive
 {
-    class PatchZipEntry : ContainerEntry
+    public class PatchZipEntry : ContainerEntry
     {
         readonly ZipArchiveEntry _entry;
 

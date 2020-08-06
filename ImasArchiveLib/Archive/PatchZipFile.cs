@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Imas.Records;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Imas.Archive
 {
-    class PatchZipFile : ContainerFile<PatchZipEntry>
+    public class PatchZipFile : ContainerFile<PatchZipEntry>
     {
         private readonly ZipArchive zipArchive;
 
@@ -43,6 +44,16 @@ namespace Imas.Archive
             await stream.CopyToAsync(entryStream);
 
             _entries.Add(new PatchZipEntry(entry));
+        }
+
+        internal void AddCommu(string commuName, IEnumerable<CommuLine> lines)
+        {
+            if (lines.Any(line => !string.IsNullOrWhiteSpace(line.message)))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry(commuName);
+                using Stream stream = entry.Open();
+                CommuFromXlsx.WriteBin(stream, lines);
+            }
         }
 
         #region IDisposable

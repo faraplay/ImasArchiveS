@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Imas.Archive;
 using Imas.Records;
 using Imas.Spreadsheet;
 using System;
@@ -13,7 +14,6 @@ namespace Imas
     public class CommuFromXlsx : IDisposable
     {
         readonly XlsxReader xlsx;
-        readonly ZipArchive zipArchive;
 
         #region IDisposable
         private bool disposed = false;
@@ -27,19 +27,17 @@ namespace Imas
             if (!disposed)
             {
                 xlsx?.Dispose();
-                zipArchive?.Dispose();
             }
             disposed = true;
         }
         #endregion
 
-        public CommuFromXlsx(string xlsxName, string zipName)
+        public CommuFromXlsx(string xlsxName)
         {
             xlsx = new XlsxReader(xlsxName);
-            zipArchive = new ZipArchive(new FileStream(zipName, FileMode.Create, FileAccess.ReadWrite), ZipArchiveMode.Create);
         }
         #region Write Commus
-        public async Task GetAndWriteAllCommus(IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
+        public async Task GetAndWriteAllCommus(PatchZipFile patchZipFile, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
         {
             int total1 = xlsx.Sheets.Descendants<Sheet>().Count();
             int count1 = 0;
@@ -55,21 +53,12 @@ namespace Imas
                 {
                     count2++;
                     progress2?.Report(new ProgressData { count = count2, total = total2, filename = filename });
-                    await Task.Run(() => WriteBin(filename, lines.Where(line => line.file == filename)));
+                    await Task.Run(() => patchZipFile.AddCommu(filename, lines.Where(line => line.file == filename)));
                 }
             }
         }
-        private void WriteBin(string commuName, IEnumerable<CommuLine> lines)
-        {
-            if (lines.Any(line => !string.IsNullOrWhiteSpace(line.message)))
-            {
-                ZipArchiveEntry entry = zipArchive.CreateEntry(commuName);
-                using Stream stream = entry.Open();
-                WriteBin(stream, lines);
-            }
-        }
 
-        private void WriteBin(Stream stream, IEnumerable<CommuLine> lines)
+        internal static void WriteBin(Stream stream, IEnumerable<CommuLine> lines)
         {
             Binary binary = new Binary(stream, true);
             binary.WriteUInt32(0x004D0053);

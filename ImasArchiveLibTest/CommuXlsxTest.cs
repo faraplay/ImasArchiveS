@@ -31,8 +31,9 @@ namespace ImasArchiveLibTest
         [DataRow("../data/hddcommus.xlsx", "../data/nocommus.zip")]
         public async Task WriteCommuTest(string xlsxName, string zipName)
         {
-            using CommuFromXlsx commu = new CommuFromXlsx(xlsxName, zipName);
-            await commu.GetAndWriteAllCommus();
+            using CommuFromXlsx commu = new CommuFromXlsx(xlsxName);
+            using PatchZipFile patchZipFile = new PatchZipFile(zipName, PatchZipMode.Create);
+            await commu.GetAndWriteAllCommus(patchZipFile);
         }
     }
 }
