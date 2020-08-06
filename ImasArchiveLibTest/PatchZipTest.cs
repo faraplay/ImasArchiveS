@@ -34,5 +34,16 @@ namespace ImasArchiveLibTest
             using FileStream fileStream = new FileStream(newFileName, FileMode.Open, FileAccess.Read);
             await patchZipFile.AddFile(fileStream, "text/im2nx_text.ja_jp");
         }
+
+        [DataTestMethod]
+        [DataRow("patch/patch_add.zip", "other/newfont.par", "other/text_ja_jp.xlsx", "patch/translatedcommu.xlsx", "patch/images")]
+        public async Task AddToPatchTest(string filename, string newFileName, string jajpName, string commuName, string gtfDir)
+        {
+            using PatchZipFile patchZipFile = new PatchZipFile(filename, PatchZipMode.Create);
+            patchZipFile.AddFile(newFileName, "im2nx_font.par");
+            patchZipFile.AddJaJp(jajpName, "text/im2nx_text.ja_jp");
+            await patchZipFile.AddCommus(commuName);
+            await patchZipFile.AddGtfs(gtfDir);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Imas.Records;
+using Imas.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,8 +54,57 @@ namespace Imas.Archive
                 ZipArchiveEntry entry = zipArchive.CreateEntry(commuName);
                 using Stream stream = entry.Open();
                 CommuFromXlsx.WriteBin(stream, lines);
+                _entries.Add(new PatchZipEntry(entry));
             }
         }
+
+        #region Add Files
+        public void AddFile(string inputFilename, string entryName)
+        {
+            ZipArchiveEntry entry = zipArchive.CreateEntryFromFile(inputFilename, entryName);
+            _entries.Add(new PatchZipEntry(entry));
+        }
+        public async Task AddCommus(string xlsxName, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
+        {
+            using CommuFromXlsx commuFromXlsx = new CommuFromXlsx(xlsxName);
+            await commuFromXlsx.GetAndWriteAllCommus(this, progress1, progress2);
+        }
+
+        public void AddJaJp(string xlsxName, string entryName)
+        {
+            ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
+            using Stream entryStream = entry.Open();
+            JaJpText.WriteFile(entryStream, xlsxName);
+            _entries.Add(new PatchZipEntry(entry));
+        }
+
+        public async Task AddGtfs(string dirName, IProgress<ProgressData> progress = null)
+        {
+            DirectoryInfo dInfo = new DirectoryInfo(dirName);
+            HashSet<string> filenames = 
+                new HashSet<string>(dInfo.GetFiles("*.png")
+                .Select(fInfo => fInfo.Name));
+
+            string filenameXlsxName = dirName + "/filenames.xlsx";
+            XlsxReader xlsx = new XlsxReader(filenameXlsxName);
+            IEnumerable<Record> records = xlsx.GetRows("XXI", "filenames")
+                .Where(record => filenames.Contains((string)record[1]));
+            int total = records.Count();
+            int count = 0;
+            foreach (Record record in records)
+            {
+                string entryName = (string)record[0];
+                string pngName = dInfo.FullName + '\\' + (string)record[1];
+                count++;
+                progress?.Report(new ProgressData { count = count, total = total, filename = entryName });
+
+                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
+                using Stream entryStream = entry.Open();
+                await GTF.WriteGTF(entryStream, new System.Drawing.Bitmap(pngName), (int)record[2]);
+            }
+
+        }
+        #endregion
 
         #region IDisposable
         private bool disposed;
