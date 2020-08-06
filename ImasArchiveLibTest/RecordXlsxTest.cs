@@ -1,8 +1,11 @@
-﻿using Imas.Records;
+﻿using Imas;
+using Imas.Records;
 using Imas.Spreadsheet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace ImasArchiveLibTest
 {
@@ -40,6 +43,25 @@ namespace ImasArchiveLibTest
                 }
             }
             File.Delete("temp.bin");
+        }
+
+        [DataTestMethod]
+        [DataRow("disc/text/im2nx_text.ja_jp", "other/text_ja_jp.xlsx")]
+        //[DataRow("new.ja_jp", "text_ja_jp_reread.xlsx")]
+        public void JaJpReadTest(string binName, string xlsxName)
+        {
+            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
+            {
+                JaJpText.ReadFile(stream, xlsxName);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("other/text_ja_jp.xlsx", "other/new.ja_jp")]
+        public void JaJpWriteTest(string xlsxName, string binName)
+        {
+            using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
+            JaJpText.WriteFile(stream, xlsxName);
         }
     }
 }

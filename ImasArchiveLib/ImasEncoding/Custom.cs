@@ -88,6 +88,91 @@ namespace Imas.ImasEncoding
             }
         }
 
+        public static int[] GetValues(string s)
+        {
+            List<int> outList = new List<int>();
+            int code = 0;
+            NextByteOptions next = NextByteOptions.None;
+            for (int i = 0; i < s.Length;)
+            {
+                char c;
+                do
+                {
+                    c = s[i++];
+                } while (c == 0xD);
+                switch (next)
+                {
+                    case NextByteOptions.Backslash:
+                        outList.Add(c);
+                        next = NextByteOptions.None;
+                        continue;
+                    case NextByteOptions.AllASCII:
+                        if (c > 0x20 && c < 0x7F && c != '\\')
+                        {
+                            code += c + 0x80;
+                            outList.Add(code);
+                            next = NextByteOptions.None;
+                            continue;
+                        }
+                        else 
+                            outList.Add(code);
+                        break;
+                    case NextByteOptions.Lowercase:
+                        if (c == 0x20 || c > 0x60 && c <= 0x7A)
+                        {
+                            code += c + 0x80;
+                            outList.Add(code);
+                            next = NextByteOptions.None;
+                            continue;
+                        }
+                        else
+                            outList.Add(code);
+                        break;
+                    case NextByteOptions.SpaceOnly:
+                        if (c == 0x20)
+                        {
+                            code += c + 0x80;
+                            outList.Add(code);
+                            next = NextByteOptions.None;
+                            continue;
+                        }
+                        else
+                            outList.Add(code);
+                        break;
+                    case NextByteOptions.None:
+                        break;
+                }
+                if (c == 0x20)
+                {
+                    code = 0x100 * (c + 0x80);
+                    next = NextByteOptions.AllASCII;
+                }
+                else if (c == '\\')
+                {
+                    next = NextByteOptions.Backslash;
+                }
+                else if (c > 0x60 && c <= 0x7A)
+                {
+                    code = 0x100 * (c + 0x80);
+                    next = NextByteOptions.Lowercase;
+                }
+                else if (c >= 0x20 && c < 0x7F)
+                {
+                    code = 0x100 * (c + 0x80);
+                    next = NextByteOptions.SpaceOnly;
+                }
+                else
+                {
+                    code = c;
+                    outList.Add(code);
+                    next = NextByteOptions.None;
+                }
+            }
+            if (next != NextByteOptions.None && next != NextByteOptions.Backslash)
+                outList.Add(code);
+            return outList.ToArray();
+        }
+
         public static string GetString(ReadOnlySpan<byte> inSpan)
         {
             int maxLen = inSpan.Length & -2;
@@ -113,7 +198,8 @@ namespace Imas.ImasEncoding
             None,
             SpaceOnly,
             Lowercase,
-            AllASCII
+            AllASCII,
+            Backslash
         }
     }
 }
