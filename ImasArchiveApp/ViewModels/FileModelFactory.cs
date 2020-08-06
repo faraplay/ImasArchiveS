@@ -37,6 +37,10 @@ namespace ImasArchiveApp
             {
                 return new ArcModel(report, fileName, new Dialogs());
             }
+            else if (fileName.EndsWith(".zip"))
+            {
+                return new PatchZipModel(report, fileName, new Dialogs());
+            }
             else
             {
                 return CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName.Substring(fileName.LastIndexOf('\\') + 1));

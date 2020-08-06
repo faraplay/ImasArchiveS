@@ -93,6 +93,18 @@ namespace ImasArchiveApp
                 return _openArcCommand;
             }
         }
+        private RelayCommand _openPatchZipCommand;
+        public ICommand OpenPatchZipCommand
+        {
+            get
+            {
+                if (_openPatchZipCommand == null)
+                {
+                    _openPatchZipCommand = new RelayCommand(_ => OpenWithFilter("Zip files (*.zip)|*zip"));
+                }
+                return _openPatchZipCommand;
+            }
+        }
         private RelayCommand _openParCommand;
         public ICommand OpenParCommand
         {
@@ -361,16 +373,9 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string inFileName = _getFileName.OpenGetFileName("Choose spreadsheet", "Excel spreadsheet (*.xlsx)|*.xlsx");
-                if (inFileName != null)
+                string outFileName = _getFileName.SaveGetFileName("Save As", "patch", "Zip file (*.zip)|*.zip");
+                if (outFileName != null)
                 {
-                    string outFileName = _getFileName.SaveGetFileName("Save As", inFileName[0..^5], "Zip file (*.zip)|*.zip");
-                    if (outFileName != null)
-                    {
-                        using CommuFromXlsx commuFromXlsx = new CommuFromXlsx(inFileName, outFileName);
-                        await commuFromXlsx.GetAndWriteAllCommus(duoProgress1, duoProgress2);
-                        ReportMessage("Done.");
-                    }
                 }
             }
             catch (Exception ex)
