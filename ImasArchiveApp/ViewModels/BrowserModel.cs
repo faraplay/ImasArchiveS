@@ -72,10 +72,7 @@ namespace ImasArchiveApp
             _history.Add(browserTree);
             _currentDir = browserTree;
             Items = new ObservableCollection<BrowserItemModel>();
-            foreach (BrowserTree tree in _currentDir.Entries)
-            {
-                Items.Add(new BrowserItemModel(this, tree));
-            }
+            UpdateItems();
         }
         #endregion
         #region Commands
@@ -151,7 +148,7 @@ namespace ImasArchiveApp
             {
                 foreach (BrowserTree tree in _currentDir.Entries)
                 {
-                    Items.Add(new BrowserItemModel(this, tree));
+                    Items.Add(BrowserItemModel.CreateBrowserItemModel(this, tree));
                 }
             }
         }
@@ -171,6 +168,9 @@ namespace ImasArchiveApp
         {
             await _parentModel.LoadChildFileModel(selectedFile);
         }
+
+        internal Task Import(string fileName) => _parentModel.Import(fileName);
+        internal Task Export(string fileName) => _parentModel.Export(fileName);
         #endregion
     }
 }

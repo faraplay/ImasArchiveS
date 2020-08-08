@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -7,19 +8,28 @@ namespace ImasArchiveApp
 {
     class BrowserItemModel : INotifyPropertyChanged
     {
-        private readonly BrowserModel _parent;
-        private readonly BrowserTree _tree;
+        protected readonly BrowserModel _parent;
+        protected readonly BrowserTree _tree;
         private string _name;
-        private BrowserEntryType _type;
 
-        internal BrowserItemModel(BrowserModel parent, BrowserTree tree)
+        #region Constructors & Factory Methods
+        protected BrowserItemModel(BrowserModel parent, BrowserTree tree)
         {
             _parent = parent;
             _tree = tree;
             _name = tree.Name;
-            _type = tree.Type;
         }
-
+        internal static BrowserItemModel CreateBrowserItemModel(BrowserModel parent, BrowserTree tree)
+        {
+            return tree.Type switch
+            {
+                BrowserEntryType.Directory => new BrowserFolderItemModel(parent, tree),
+                BrowserEntryType.RegularFile => new BrowserFileItemModel(parent, tree),
+                _ => throw new IndexOutOfRangeException("Type not in enum."),
+            };
+        }
+        #endregion
+        #region Properties
         public string Name
         {
             get => _name;
@@ -29,22 +39,24 @@ namespace ImasArchiveApp
                 OnPropertyChanged(nameof(Name));
             }
         }
-        public BrowserEntryType Type
-        {
-            get => _type;
-            set
-            {
-                _type = value;
-                OnPropertyChanged(nameof(Type));
-            }
-        }
-
+        public string FullName => _tree.ToString().Substring(1);
+        #endregion
+        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
+    }
 
+    class BrowserFileItemModel : BrowserItemModel
+    {
+        internal BrowserFileItemModel(BrowserModel parent, BrowserTree tree) : base(parent, tree)
+        {
+        }
+
+        #region Commands
         AsyncCommand _selectCommand;
         public ICommand SelectCommand
         {
@@ -58,18 +70,70 @@ namespace ImasArchiveApp
                 return _selectCommand;
             }
         }
-        async Task Select()
+        AsyncCommand _importCommand;
+        public ICommand ImportCommand
         {
-            switch (_type)
+            get
             {
-                case BrowserEntryType.Directory:
-                    _parent.MoveToTree(_tree);
-                    break;
-                case BrowserEntryType.RegularFile:
-                    _parent.SelectedFile = _tree.ToString().Substring(1);
-                    await _parent.LoadSelectedFile(_parent.SelectedFile);
-                    break;
+                if (_importCommand == null)
+                {
+                    _importCommand = new AsyncCommand(
+                        () => Import());
+                }
+                return _importCommand;
             }
         }
+        AsyncCommand _exportCommand;
+        public ICommand ExportCommand
+        {
+            get
+            {
+                if (_exportCommand == null)
+                {
+                    _exportCommand = new AsyncCommand(
+                        () => Export());
+                }
+                return _exportCommand;
+            }
+        }
+        #endregion
+        #region Command Methods
+        async Task Select()
+        {
+            _parent.SelectedFile = FullName;
+            await _parent.LoadSelectedFile(FullName);
+        }
+        Task Import() => _parent.Import(FullName);
+        Task Export() => _parent.Export(FullName);
+        #endregion
+    }
+
+    class BrowserFolderItemModel : BrowserItemModel
+    {
+        internal BrowserFolderItemModel(BrowserModel parent, BrowserTree tree) : base(parent, tree)
+        {
+        }
+
+        #region Commands
+        RelayCommand _selectCommand;
+        public ICommand SelectCommand
+        {
+            get
+            {
+                if (_selectCommand == null)
+                {
+                    _selectCommand = new RelayCommand(
+                        _ => Select());
+                }
+                return _selectCommand;
+            }
+        }
+        #endregion
+        #region Command Methods
+        void Select()
+        {
+             _parent.MoveToTree(_tree);
+        }
+        #endregion
     }
 }

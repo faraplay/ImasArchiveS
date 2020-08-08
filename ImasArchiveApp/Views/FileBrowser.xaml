@@ -44,8 +44,27 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
             </ListView.ItemContainerStyle>
-            <ListView.ItemTemplate>
-                <DataTemplate>
+            <ListView.Resources>
+                <DataTemplate DataType="{x:Type local:BrowserFileItemModel}">
+                    <Button HorizontalContentAlignment="Left">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding Path=ImportCommand}" Header="Import" />
+                                <MenuItem Command="{Binding Path=ExportCommand}" Header="Export" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <WrapPanel>
+                            <Image Source="/Icons/TextFile_16x.png" />
+                            <TextBlock Text="{Binding Path=Name}" />
+                        </WrapPanel>
+                    </Button>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type local:BrowserFolderItemModel}">
                     <Button HorizontalContentAlignment="Left">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
@@ -53,11 +72,12 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                         <WrapPanel>
+                            <Image Source="/Icons/FolderClosed_16x.png" />
                             <TextBlock Text="{Binding Path=Name}" />
                         </WrapPanel>
                     </Button>
                 </DataTemplate>
-            </ListView.ItemTemplate>
+            </ListView.Resources>
         </ListView>
     </DockPanel>
 </UserControl>
