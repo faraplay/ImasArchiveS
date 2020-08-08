@@ -13,36 +13,6 @@ namespace ImasArchiveLibTest
     public class ParTest
     {
         [DataTestMethod]
-        [DataRow("hdd")]
-        public void ParReadHeaderTest(string srcDir)
-        {
-            DirectoryInfo dInfo = new DirectoryInfo(srcDir);
-            FileInfo[] files = dInfo.GetFiles("*.par", SearchOption.AllDirectories);
-
-            using StreamWriter streamWriter = new StreamWriter("log_parheader.txt");
-
-            foreach (FileInfo file in files)
-            {
-                using FileStream fileStream = file.OpenRead();
-                ParFile parFile = new ParFile(fileStream);
-                if (parFile.Entries.Count != 0)
-                {
-                    streamWriter.WriteLine(file.FullName);
-                    foreach (var en in parFile.Entries)
-                    {
-                        streamWriter.WriteLine("\t{0}\t{1}\t{2}\t{3}",
-                            en.Offset.ToString("X"),
-                            en.Length.ToString("X"),
-                            en.Property,
-                            en.FileName);
-                    }
-                    streamWriter.WriteLine();
-                    streamWriter.Flush();
-                }
-            }
-        }
-
-        [DataTestMethod]
         [DataRow("hdd/ui/commonCursor/commonCursorComponent.par", "par")]
         [DataRow("hdd/bg3d/fes_001.par", "par")]
         [DataRow("hdd/bg3d/gimmick.par", "par")]

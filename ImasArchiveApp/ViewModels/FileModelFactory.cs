@@ -14,7 +14,7 @@ namespace ImasArchiveApp
             {
                 case "par":
                 case "pta":
-                    return new ParModel(report, stream, fileName);
+                    return new ParModel(report, stream, fileName, getFileName);
                 case "gtf":
                 case "tex":
                 case "dds":

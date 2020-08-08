@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
@@ -44,20 +45,20 @@ namespace ImasArchiveApp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        RelayCommand _selectCommand;
+        AsyncCommand _selectCommand;
         public ICommand SelectCommand
         {
             get
             {
                 if (_selectCommand == null)
                 {
-                    _selectCommand = new RelayCommand(
-                        param => Select());
+                    _selectCommand = new AsyncCommand(
+                        () => Select());
                 }
                 return _selectCommand;
             }
         }
-        void Select()
+        async Task Select()
         {
             switch (_type)
             {
@@ -66,6 +67,7 @@ namespace ImasArchiveApp
                     break;
                 case BrowserEntryType.RegularFile:
                     _parent.SelectedFile = _tree.ToString().Substring(1);
+                    await _parent.LoadSelectedFile(_parent.SelectedFile);
                     break;
             }
         }

@@ -139,7 +139,7 @@ namespace Imas.Archive
                 0x80 => 3,
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             });
-            binary.WriteInt32(fileCount);
+            binary.WriteInt32(Entries.Count);
 
             byte lengthsByte = (byte)(
                 (isBigEndian ? 2 : 0) | (lengthsKnown ? 1 : 0));
@@ -148,33 +148,33 @@ namespace Imas.Archive
             binary.WriteByte(0);
             binary.WriteByte(0);
 
-            for (int i = 0; i < fileCount; i++)
+            foreach (ParEntry entry in Entries)
             {
-                binary.WriteUInt32((uint)Entries[i].Offset);
+                binary.WriteUInt32((uint)entry.Offset);
             }
             long pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
 
             byte[] namebuf = new byte[nameLength];
-            for (int i = 0; i < fileCount; i++)
+            foreach (ParEntry entry in Entries)
             {
                 Array.Clear(namebuf, 0, nameLength);
-                Encoding.ASCII.GetBytes(Entries[i].FileName, namebuf);
+                Encoding.ASCII.GetBytes(entry.FileName, namebuf);
                 stream.Write(namebuf);
             }
 
-            for (int i = 0; i < fileCount; i++)
+            foreach (ParEntry entry in Entries)
             {
-                binary.WriteInt32(Entries[i].Property);
+                binary.WriteInt32(entry.Property);
             }
             pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
 
             if (lengthsKnown)
             {
-                for (int i = 0; i < fileCount; i++)
+                foreach (ParEntry entry in Entries)
                 {
-                    binary.WriteUInt32((uint)Entries[i].Length);
+                    binary.WriteUInt32((uint)entry.Length);
                 }
                 pad = (baseOffset - stream.Position) & 15;
                 stream.Write(new byte[pad]);

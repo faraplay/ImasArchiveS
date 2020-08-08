@@ -182,7 +182,7 @@ namespace Imas.Archive
         {
             if (newArcStream == null)
                 throw new ArgumentNullException(nameof(newArcStream));
-            _entries.Sort((a, b) => String.CompareOrdinal(a.FileName.ToUpper(), b.FileName.ToUpper()));
+            _entries.Sort((a, b) => string.CompareOrdinal(a.FileName.ToUpper(), b.FileName.ToUpper()));
 
             newArcStream.Write(new byte[16]);
             totalProgress = _entries.Count;
@@ -466,17 +466,17 @@ namespace Imas.Archive
         public async Task ExtractCommusToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
         {
             using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName);
-            IEnumerable<ArcEntry> commuEntries = Entries.Where(entry => entry.FileName.StartsWith("commu2/par/"));
+            IEnumerable<ContainerEntry> commuEntries = Entries.Where(entry => entry.FileName.StartsWith("commu2/par/"));
             totalProgress = commuEntries.Count();
             countProgress = 0;
-            foreach (ArcEntry arcEntry in commuEntries)
+            foreach (ContainerEntry arcEntry in commuEntries)
             {
                 countProgress++;
                 progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = arcEntry.FileName });
 
                 using Stream parStream = await arcEntry.GetData();
                 ParFile parFile = new ParFile(parStream);
-                ParEntry binEntry = parFile.Entries.FirstOrDefault(entry => entry.FileName.EndsWith("_m.bin"));
+                ContainerEntry binEntry = parFile.Entries.FirstOrDefault(entry => entry.FileName.EndsWith("_m.bin"));
                 if (binEntry != null)
                 {
                     using Stream stream = await binEntry.GetData();

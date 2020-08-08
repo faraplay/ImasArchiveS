@@ -1,79 +1,42 @@
 ﻿using Imas;
 using Imas.Archive;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Data;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
     class ArcModel : ContainerFileModel
     {
-        #region Fields
-        private IFileModel _fileModel;
-        private readonly IGetFileName _getFileName;
-        #endregion
         #region Properties
         public string ArcPath { get; }
-        public string CurrentFile
-        {
-            get => FileModel.FileName;
-        }
-        public ArcFile ArcFile { get; }
-        public override IFileModel FileModel
-        {
-            get => _fileModel;
-            set
-            {
-                _fileModel?.Dispose();
-                _fileModel = value;
-                OnPropertyChanged();
-            }
-        }
+        private ArcFile ArcFile { get; }
+        protected override IContainerFile ContainerFile => ArcFile;
         #endregion
         #region Constructors
-        public ArcModel(IReport parent, string inPath, IGetFileName getFileName) : base(parent, inPath.Substring(inPath.LastIndexOf('\\') + 1))
+        public ArcModel(IReport parent, string inPath, IGetFileName getFileName) 
+            : base(parent, inPath.Substring(inPath.LastIndexOf('\\') + 1), getFileName)
         {
-            _getFileName = getFileName;
             ArcPath = inPath;
             _fileModel = null;
             try
             {
-                ClearStatus();
-                string truncFilename = ArcPath;
+                string truncFilename;
                 string extension;
-                if (truncFilename.EndsWith(".arc"))
-                {
-                    truncFilename = truncFilename.Remove(truncFilename.Length - 4);
-                    extension = "";
-                }
-                else if (truncFilename.EndsWith(".arc.dat"))
-                {
-                    truncFilename = truncFilename.Remove(truncFilename.Length - 8);
-                    extension = ".dat";
-                }
-                else
-                {
+                (truncFilename, extension) = RemoveArcExtension(inPath);
+                if (extension == null)
+                { 
                     throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
                 }
                 ArcFile = new ArcFile(truncFilename, extension);
+                SetBrowserEntries();
             }
             catch
             {
                 Dispose();
                 throw;
             }
-            List<string> browserEntries = new List<string>();
-            foreach (ArcEntry entry in ArcFile.Entries)
-            {
-                browserEntries.Add(entry.FileName);
-            }
-            BrowserModel = new BrowserModel(this, new BrowserTree("", browserEntries));
         }
         #endregion
         #region IDisposable
@@ -98,7 +61,7 @@ namespace ImasArchiveApp
             {
                 if (_importCommand == null)
                 {
-                    _importCommand = new AsyncCommand(() => Import(), () => CanImport());
+                    _importCommand = new AsyncCommand(() => Import(CurrentFile), () => CanImport());
                 }
                 return _importCommand;
             }
@@ -111,7 +74,7 @@ namespace ImasArchiveApp
             {
                 if (_exportCommand == null)
                 {
-                    _exportCommand = new AsyncCommand(() => Export(), () => CanExport());
+                    _exportCommand = new AsyncCommand(() => Export(CurrentFile), () => CanExport());
                 }
                 return _exportCommand;
             }
@@ -197,73 +160,6 @@ namespace ImasArchiveApp
         public bool CanPatchFont() => ArcFile != null;
         #endregion
         #region Command Methods
-        public async Task Import()
-        {
-            string fileName;
-            ArcEntry arcEntry;
-            try
-            {
-                ClearStatus();
-                fileName = _getFileName.OpenGetFileName("Import", "All files (*.*)|*.*");
-                if (fileName != null)
-                {
-                    if (!File.Exists(fileName))
-                    {
-                        ReportMessage("Selected file not found.");
-                        return;
-                    }
-                    arcEntry = ArcFile.GetEntry(CurrentFile);
-                    if (arcEntry == null)
-                        throw new ArgumentNullException("Could not find current file in archive.");
-                }
-                else
-                    return;
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-                return;
-            }
-            try
-            {
-                using FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                ReportMessage("Importing...");
-                await arcEntry.SetData(fileStream);
-                ReportMessage("Done.");
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-                arcEntry.RevertToOriginal();
-            }
-            await LoadChildFileModel(CurrentFile);
-        }
-        public async Task Export()
-        {
-            try
-            {
-                ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Export",
-                    ArcPath.Substring(0, ArcPath.LastIndexOf('\\')),
-                    CurrentFile.Substring(CurrentFile.LastIndexOf('/') + 1),
-                    "");
-                if (fileName != null)
-                {
-                    ArcEntry arcEntry = ArcFile.GetEntry(CurrentFile);
-                    if (arcEntry == null)
-                        throw new ArgumentNullException("Could not find current file in archive.");
-                    using Stream stream = await arcEntry.GetData();
-                    using FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
-                    ReportMessage("Exporting...");
-                    await stream.CopyToAsync(fileStream);
-                    ReportMessage("Done.");
-                }
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-            }
-        }
         public async Task SaveAs()
         {
             try
@@ -286,7 +182,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Extract to...", RemoveArcExtension(ArcPath), "");
+                string fileName = _getFileName.SaveGetFileName("Extract to...", RemoveArcExtension(ArcPath).Item1, "");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractAllAsync(fileName, false, new Progress<ProgressData>(ReportProgress));
@@ -303,7 +199,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath) + "commus.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
+                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "commus.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractCommusToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
@@ -320,7 +216,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath) + "_parameter.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
+                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "_parameter.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractParameterToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
@@ -337,7 +233,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath) + "_image", "");
+                string fileName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath).Item1 + "_image", "");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractAllImages(fileName, new Progress<ProgressData>(ReportProgress));
@@ -354,7 +250,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                ArcEntry fontEntry = ArcFile.GetEntry("im2nx_font.par");
+                ContainerEntry fontEntry = ArcFile.GetEntry("im2nx_font.par");
                 if (fontEntry == null)
                 {
                     throw new FileNotFoundException("File im2nx_font.par not found. Make sure you are opening disc.arc");
@@ -384,48 +280,19 @@ namespace ImasArchiveApp
         }
         #endregion
         #region Other Methods
-
-        public override async Task LoadChildFileModel(string fileName)
-        {
-            ClearStatus();
-            if (fileName != null)
-            {
-                ArcEntry arcEntry = ArcFile.GetEntry(fileName);
-                if (arcEntry != null)
-                {
-                    try
-                    {
-                        ReportMessage("Loading " + fileName);
-                        FileModel = FileModelFactory.CreateFileModel(await arcEntry.GetData(), fileName);
-                        ReportMessage("Loaded.");
-                    }
-                    catch (Exception ex)
-                    {
-                        ReportException(ex);
-                        FileModel = null;
-                    }
-                }
-            } 
-            else
-            {
-                FileModel = null;
-            }
-
-        }
-
-        public static string RemoveArcExtension(string name)
+        public static (string, string) RemoveArcExtension(string name)
         {
             if (name.EndsWith(".arc"))
             {
-                return name[0..^4];
+                return (name[0..^4], "");
             }
             else if (name.EndsWith(".arc.dat"))
             {
-                return name[0..^8];
+                return (name[0..^8], ".dat");
             }
             else
             {
-                return name;
+                return (name, null);
             }
         }
         #endregion

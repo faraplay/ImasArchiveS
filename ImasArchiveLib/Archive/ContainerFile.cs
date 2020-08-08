@@ -8,22 +8,21 @@ using System.Threading.Tasks;
 
 namespace Imas.Archive
 {
-    public abstract class ContainerFile<T> : IDisposable where T : ContainerEntry 
+    public interface IContainerFile
+    {
+        public IReadOnlyCollection<ContainerEntry> Entries { get; }
+        public ContainerEntry GetEntry(string fileName);
+    }
+    public abstract class ContainerFile<T> : IContainerFile, IDisposable where T : ContainerEntry 
     {
         protected Stream _stream;
         protected List<T> _entries;
 
         #region Properties
-        public ReadOnlyCollection<T> Entries
-        {
-            get => new ReadOnlyCollection<T>(_entries);
-        }
+        public IReadOnlyCollection<ContainerEntry> Entries => new ReadOnlyCollection<T>(_entries);
         #endregion
 
-        public T GetEntry(string fileName)
-        {
-            return _entries.Find(e => e.FileName == fileName);
-        }
+        public ContainerEntry GetEntry(string fileName) => _entries.Find(e => e.FileName == fileName);
 
         /// <summary>
         /// Recursively searches the ContainerFile for the filename string.
@@ -137,101 +136,5 @@ namespace Imas.Archive
             disposed = true;
         }
         #endregion
-    }
-
-    public abstract class ContainerEntry : IDisposable
-    {
-        protected MemoryStream _newData;
-        protected readonly long _originalLength;
-        protected readonly long _originalOffset;
-
-
-        public string FileName { get; }
-        internal bool UsesMemoryStream => _newData != null;
-        internal long Offset { get; set; }
-        public long Length { get => UsesMemoryStream ? _newData.Length : _originalLength; }
-
-        #region Constructors
-        protected ContainerEntry(string fileName, long originalLength, long originalOffset)
-        {
-            FileName = fileName;
-            _originalLength = originalLength;
-            _originalOffset = originalOffset;
-            Offset = originalOffset;
-        }
-        #endregion
-
-        public abstract Task<Stream> GetData();
-        public abstract Task SetData(Stream stream);
-
-        #region IDisposable
-        private bool disposed = false;
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                _newData?.Dispose();
-            }
-            disposed = true;
-        }
-        #endregion
-    }
-
-    /// <summary>
-    /// Stack of parFiles and streams.
-    /// To access the data in an entry in a nested entry, the parFiles in 
-    /// the chain leading up to the entry
-    /// need to all be loaded. This class holds all the parFiles in this
-    /// chain and will automatically dispose them when the stack is disposed.
-    /// </summary>
-    public class EntryStack : IDisposable
-    {
-        private readonly Stack<ParFile> pars = new Stack<ParFile>();
-        private readonly Stack<Stream> streams = new Stack<Stream>();
-
-        public ContainerEntry Entry { get; set; }
-
-        internal void Push(ParFile par) => pars.Push(par);
-        internal void Push(Stream stream) => streams.Push(stream);
-
-        public ParFile Peek() => pars.Peek();
-
-        private void Clear()
-        {
-            foreach (ParFile par in pars)
-            {
-                par?.Dispose();
-            }
-            pars.Clear();
-            foreach (Stream stream in streams)
-            {
-                stream?.Dispose();
-            }
-            streams.Clear();
-        }
-
-        #region IDisposable
-        private bool disposed = false;
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                Entry?.Dispose();
-                Clear();
-            }
-            disposed = true;
-        }
-        #endregion
-
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
@@ -49,7 +50,6 @@ namespace ImasArchiveApp
             set
             {
                 _selectedFile = value;
-                _parentModel.LoadChildFileModel(_selectedFile);
                 OnPropertyChanged();
             }
         }
@@ -165,6 +165,11 @@ namespace ImasArchiveApp
             _history_index++;
             _history.Add(tree);
             CurrentDir = tree;
+        }
+
+        internal async Task LoadSelectedFile(string selectedFile)
+        {
+            await _parentModel.LoadChildFileModel(selectedFile);
         }
         #endregion
     }

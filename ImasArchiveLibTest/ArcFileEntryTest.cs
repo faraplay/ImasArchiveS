@@ -38,31 +38,12 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin.gz.fbs")]
-        public void GetEntryRawAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
-        {
-            using ArcFile arcFile = new ArcFile(filename, extension);
-            ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
-            if (arcEntry == null)
-                Assert.Fail("Entry not found.");
-            using (Stream stream = arcEntry.OpenRaw()) 
-            { 
-                using FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
-                stream.CopyTo(fileStream);
-            }
-            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
-            File.Delete("temp.dat");
-            Assert.IsTrue(eq);
-        }
-
-
-        [DataTestMethod]
         [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin")]
         [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par", "other/ami_bs2_c01.par")]
         public async Task GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
-            ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
+            ContainerEntry arcEntry = arcFile.GetEntry(entryFilepath);
             if (arcEntry == null)
                 Assert.Fail("Entry not found.");
             using (Stream stream = await arcEntry.GetData())
@@ -216,7 +197,7 @@ namespace ImasArchiveLibTest
         {
             using (ArcFile arcFile = new ArcFile(filename, extension))
             {
-                ArcEntry arcEntry = arcFile.GetEntry(entryPath);
+                ContainerEntry arcEntry = arcFile.GetEntry(entryPath);
                 if (arcEntry == null)
                     Assert.Fail("Entry not found.");
                 using (FileStream fileStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
@@ -247,7 +228,7 @@ namespace ImasArchiveLibTest
 
             using (ArcFile arcFile = new ArcFile(filename, extension))
             {
-                ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
+                ContainerEntry arcEntry = arcFile.GetEntry(entryFilepath);
                 if (arcEntry == null)
                     Assert.Fail("Entry not found.");
                 using (FileStream fileStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
