@@ -10,6 +10,7 @@
     Height="800"
     mc:Ignorable="d">
     <Window.Resources>
+        <local:ObjectToTypeConverter x:Key="ObjectToType" />
         <DataTemplate DataType="{x:Type local:BrowserModel}">
             <local:FileBrowser Width="220" />
         </DataTemplate>
@@ -51,6 +52,28 @@
                     <MenuItem Command="{Binding Path=ReplaceSaveZipCommand}" Header="From Zip" />
                 </MenuItem>
                 <MenuItem Command="{Binding Path=CreateCommuPatchCommand}" Header="Create Commu Patch" />
+            </MenuItem>
+            <MenuItem DataContext="{Binding Path=FileModel}" Header="Arc">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="IsEnabled" Value="False" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:ArcModel}">
+                                <Setter Property="IsEnabled" Value="True" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+                <MenuItem Command="{Binding Path=SaveAsCommand}" Header="Save Arc" />
+                <Separator />
+                <MenuItem Command="{Binding Path=ExtractAllCommand}" Header="Extract All" />
+                <MenuItem Header="Extract...">
+                    <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract Commus" />
+                    <MenuItem Command="{Binding Path=ExtractParameterCommand}" Header="Extract Parameter Data" />
+                    <MenuItem Command="{Binding Path=ExtractImagesCommand}" Header="Extract Images" />
+                </MenuItem>
+                <Separator />
+                <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
             </MenuItem>
         </Menu>
         <TextBlock

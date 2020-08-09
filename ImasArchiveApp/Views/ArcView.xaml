@@ -22,27 +22,7 @@
                     </TextBlock.LayoutTransform>
                 </TextBlock>
             </Expander.Header>
-            <DockPanel>
-                <Menu DockPanel.Dock="Top">
-                    <MenuItem Header="Arc">
-                        <MenuItem Command="{Binding Path=SaveAsCommand}" Header="Save Arc" />
-                        <Separator />
-                        <MenuItem Command="{Binding Path=ExtractAllCommand}" Header="Extract All" />
-                        <MenuItem Header="Extract...">
-                            <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract Commus" />
-                            <MenuItem Command="{Binding Path=ExtractParameterCommand}" Header="Extract Parameter Data" />
-                            <MenuItem Command="{Binding Path=ExtractImagesCommand}" Header="Extract Images" />
-                        </MenuItem>
-                        <Separator />
-                        <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
-                    </MenuItem>
-                    <MenuItem Header="File">
-                        <MenuItem Command="{Binding Path=ImportCommand}" Header="Import" />
-                        <MenuItem Command="{Binding Path=ExportCommand}" Header="Export" />
-                    </MenuItem>
-                </Menu>
-                <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
-            </DockPanel>
+            <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
         </Expander>
         <ContentControl Content="{Binding Path=FileModel}" />
     </DockPanel>

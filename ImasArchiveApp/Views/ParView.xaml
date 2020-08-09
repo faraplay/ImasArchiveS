@@ -24,7 +24,6 @@
             </Expander.Header>
             <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
         </Expander>
-        <DockPanel DockPanel.Dock="Left" />
         <ContentControl Content="{Binding Path=FileModel}" />
     </DockPanel>
 </UserControl>
