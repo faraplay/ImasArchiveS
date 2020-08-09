@@ -202,6 +202,13 @@ namespace Imas.Records
             return records;
         }
 
+        public static void WriteRecords(Stream stream, IEnumerable<Record> records)
+        {
+            foreach (Record record in records)
+            {
+                record.Serialise(stream);
+            }
+        }
 
         class FormatElement
         {

@@ -1,4 +1,5 @@
-﻿using Imas.Records;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Imas.Records;
 using Imas.Spreadsheet;
 using System;
 using System.Collections.Generic;
@@ -103,6 +104,21 @@ namespace Imas.Archive
                 await GTF.WriteGTF(entryStream, new System.Drawing.Bitmap(pngName), (int)record[2]);
             }
 
+        }
+
+        public void AddParameterFiles(string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            foreach (RecordFormat format in RecordFormat.formats)
+            {
+                IEnumerable<Record> records = xlsx.GetRows(format.format, format.sheetName);
+                if (records.Any())
+                {
+                    ZipArchiveEntry entry = zipArchive.CreateEntry(format.fileName);
+                    using Stream entryStream = entry.Open();
+                    Record.WriteRecords(entryStream, records);
+                }
+            }
         }
         #endregion
 

@@ -71,6 +71,8 @@ namespace Imas.Spreadsheet
         public IEnumerable<Record> GetRows(string format, string sheetName)
         {
             Sheet sheet = sheets.Descendants<Sheet>().FirstOrDefault(sheet => sheet.Name == sheetName);
+            if (sheet == null)
+                return Enumerable.Empty<Record>();
             WorksheetPart worksheetPart = (WorksheetPart)(workbookPart.GetPartById(sheet.Id));
             var rows = worksheetPart.Worksheet.Descendants<Row>();
             List<Record> list = new List<Record>();
