@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class ArcModel : ContainerFileModel
+    public class ArcModel : ContainerFileModel
     {
         #region Properties
         public string ArcPath { get; }

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace ImasArchiveApp
 {
-    abstract class FileModel : IFileModel, IReport
+    public abstract class FileModel : IFileModel, IReport
     {
         #region Properties
         public string FileName { get; }

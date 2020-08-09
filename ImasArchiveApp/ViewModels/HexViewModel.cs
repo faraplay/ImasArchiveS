@@ -5,7 +5,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class HexViewModel : FileModel, IDisposable
+    public class HexViewModel : FileModel, IDisposable
     {
         #region Fields
         private int _headerLength = 16;

@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class MainWindowModel : IReport, INotifyPropertyChanged
+    public class MainWindowModel : IReport, INotifyPropertyChanged
     {
         #region Fields
         private IFileModel _fileModel;

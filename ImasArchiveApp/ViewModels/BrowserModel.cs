@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class BrowserModel : INotifyPropertyChanged
+    public class BrowserModel : INotifyPropertyChanged
     {
         #region Fields
         private readonly ContainerFileModel _parentModel;

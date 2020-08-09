@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ImasArchiveApp
 {
-    class ParModel : ContainerFileModel
+    public class ParModel : ContainerFileModel
     {
         #region Fields
         private readonly ParFile _parFile;

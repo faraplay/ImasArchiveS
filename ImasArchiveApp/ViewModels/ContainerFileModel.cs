@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ImasArchiveApp
 {
-    abstract class ContainerFileModel : FileModel, IDisposable
+    public abstract class ContainerFileModel : FileModel, IDisposable
     {
         #region Fields
         protected IFileModel _fileModel;

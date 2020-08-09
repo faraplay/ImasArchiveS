@@ -2,7 +2,7 @@
 
 namespace ImasArchiveApp
 {
-    class PatchZipModel : ContainerFileModel
+    public class PatchZipModel : ContainerFileModel
     {
         #region Fields
         private readonly PatchZipFile _patchZipFile;

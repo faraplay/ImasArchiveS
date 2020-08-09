@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class BrowserItemModel : INotifyPropertyChanged
+    public class BrowserItemModel : INotifyPropertyChanged
     {
         protected readonly BrowserModel _parent;
         protected readonly BrowserTree _tree;

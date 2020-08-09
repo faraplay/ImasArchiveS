@@ -8,7 +8,7 @@ using System.Windows.Media.Imaging;
 
 namespace ImasArchiveApp
 {
-    class GTFModel : FileModel
+    public class GTFModel : FileModel
     {
         private ImageSource _imageSource;
         private readonly MemoryStream ms;

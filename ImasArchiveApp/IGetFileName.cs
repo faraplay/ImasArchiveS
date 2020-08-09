@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ImasArchiveApp
 {
-    interface IGetFileName
+    public interface IGetFileName
     {
         public string OpenGetFileName(string title, string filter);
         public string SaveGetFileName(string title, string defaultPath, string filter);
