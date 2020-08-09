@@ -17,14 +17,8 @@
         <DataTemplate DataType="{x:Type local:HexViewModel}">
             <local:HexViewer x:Name="hxViewer" />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type local:ArcModel}">
-            <local:ArcView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type local:ParModel}">
-            <local:ParView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type local:PatchZipModel}">
-            <local:ParView />
+        <DataTemplate DataType="{x:Type local:ContainerFileModel}">
+            <local:ContainerFileView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:GTFModel}">
             <local:GTFView />

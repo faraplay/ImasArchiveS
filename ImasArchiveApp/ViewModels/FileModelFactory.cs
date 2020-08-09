@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ImasArchiveApp
 {
-    static class FileModelFactory
+    public static class FileModelFactory
     {
         public static IReport report;
         public static IGetFileName getFileName;

@@ -1,6 +1,4 @@
-﻿using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -16,11 +14,11 @@ using System.Windows.Shapes;
 namespace ImasArchiveApp
 {
     /// <summary>
-    /// Interaction logic for ArcView.xaml
+    /// Interaction logic for ContainerFileView.xaml
     /// </summary>
-    public partial class ArcView : UserControl
+    public partial class ContainerFileView : UserControl
     {
-        public ArcView()
+        public ContainerFileView()
         {
             InitializeComponent();
         }
