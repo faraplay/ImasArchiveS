@@ -299,6 +299,14 @@ namespace ImasArchiveLibTest
             using ArcFile arcFile = new ArcFile(arcName, extension);
             await arcFile.ExtractAllImages(outDir);
         }
+
+        [DataTestMethod]
+        [DataRow("hdd", "", "other/allPastbl.xlsx")]
+        public async Task ExtractPastblTest(string arcName, string extension, string xlsxName)
+        {
+            using ArcFile arcFile = new ArcFile(arcName, extension);
+            await arcFile.ExtractPastblToXlsx(xlsxName);
+        }
     }
 }
 

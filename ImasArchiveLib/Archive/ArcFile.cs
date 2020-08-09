@@ -485,7 +485,26 @@ namespace Imas.Archive
             }
         }
 
-
+        public async Task ExtractPastblToXlsx(string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            foreach (string fileName in Pastbl.fileNames)
+            {
+                using EntryStack entryStack = await GetEntryRecursive(fileName);
+                if (entryStack != null)
+                {
+                    using Stream stream = await entryStack.Entry.GetData();
+                    IEnumerable<Record> newRecords = Pastbl.ReadFile(stream).Select(
+                        record => {
+                            Record newRec = new Record("XX");
+                            newRec[0] = fileName;
+                            newRec[1] = record[2];
+                            return newRec;
+                        });
+                    xlsx.AppendRows("pastbl", newRecords);
+                }
+            }
+        }
 
         public async Task ExtractParameterToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
         {

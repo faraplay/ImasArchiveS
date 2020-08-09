@@ -63,5 +63,32 @@ namespace ImasArchiveLibTest
             using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
             JaJpText.WriteFile(stream, xlsxName);
         }
+
+        [DataTestMethod]
+        [DataRow("other/auditionDanText.pastbl", "other/audition_pastbl.xlsx")]
+        public void PastblReadTest(string binName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
+            {
+                IEnumerable<Record> records = Pastbl.ReadFile(stream);
+                xlsx.AppendRows("pastbl", records);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("other/auditionDanText_out.pastbl", "other/allPastbl.xlsx", "alf/auditionText_par/auditionDanText.pastbl")]
+        public void PastblWriteTest(string binName, string xlsxName, string alfFileName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            List<string> strings = xlsx.GetRows("XX", "pastbl")
+                .Where(record => (string)record[0] == alfFileName)
+                .Select(record => (string)record[1])
+                .ToList();
+            using (FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write))
+            {
+                Pastbl.WriteFile(stream, strings);
+            }
+        }
     }
 }

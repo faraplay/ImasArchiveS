@@ -120,6 +120,21 @@ namespace Imas.Archive
                 }
             }
         }
+
+        public void AddPastbl(string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            foreach (string fileName in Pastbl.fileNames)
+            {
+                List<string> strings = xlsx.GetRows("XXX", "pastbl")
+                    .Where(record => (string)record[0] == fileName)
+                    .Select(record => (string)record[2])
+                    .ToList();
+                ZipArchiveEntry entry = zipArchive.CreateEntry(fileName);
+                using Stream entryStream = entry.Open();
+                Pastbl.WriteFile(entryStream, strings);
+            }
+        }
         #endregion
 
         #region IDisposable

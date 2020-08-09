@@ -191,7 +191,7 @@ namespace Imas
                 });
             }
         }
-        public void WriteUInt64(uint x) => WriteUInt64(stream, isBigEndian, x);
+        public void WriteUInt64(ulong x) => WriteUInt64(stream, isBigEndian, x);
         /// <summary>
         /// Writes a 64-bit signed integer to the stream.
         /// </summary>
@@ -200,11 +200,11 @@ namespace Imas
         /// <exception cref="IOException"/>
         /// <exception cref="NotSupportedException"/>
         /// <exception cref="ObjectDisposedException"/>
-        public static void WriteInt64(Stream stream, bool isBigEndian, int x)
+        public static void WriteInt64(Stream stream, bool isBigEndian, long x)
         {
-            WriteUInt64(stream, isBigEndian, (uint)x);
+            WriteUInt64(stream, isBigEndian, (ulong)x);
         }
-        public void WriteInt64(int x) => WriteUInt64(stream, isBigEndian, (uint)x);
+        public void WriteInt64(long x) => WriteUInt64(stream, isBigEndian, (ulong)x);
         #endregion
         #region 32
         /// <summary>
