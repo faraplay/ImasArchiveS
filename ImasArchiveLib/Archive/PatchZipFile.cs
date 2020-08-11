@@ -119,21 +119,30 @@ namespace Imas.Archive
                     Record.WriteRecords(entryStream, records);
                 }
             }
-        }
-
-        public void AddPastbl(string xlsxName)
-        {
-            using XlsxReader xlsx = new XlsxReader(xlsxName);
             foreach (string fileName in Pastbl.fileNames)
             {
                 List<string> strings = xlsx.GetRows("XXX", "pastbl")
                     .Where(record => (string)record[0] == fileName)
                     .Select(record => (string)record[2])
                     .ToList();
-                ZipArchiveEntry entry = zipArchive.CreateEntry(fileName);
-                using Stream entryStream = entry.Open();
-                Pastbl.WriteFile(entryStream, strings);
+                if (strings.Any())
+                {
+                    ZipArchiveEntry entry = zipArchive.CreateEntry(fileName);
+                    using Stream entryStream = entry.Open();
+                    Pastbl.WriteFile(entryStream, strings);
+                }
             }
+            if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "songInfo"))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry("songinfo/songResource.bin");
+                using Stream entryStream = entry.Open();
+                SongInfo.WriteFile(entryStream, xlsx);
+            }
+        }
+
+        public void AddPastbl(string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
         }
         #endregion
 

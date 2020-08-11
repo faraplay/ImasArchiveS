@@ -23,6 +23,8 @@ namespace Imas.Records
             new RecordFormat("parameter/profile.bin", "profile", "sbbbbbbbbbbbbbba010c020c020c020c020c020c020c020c040c080c080"),
             new RecordFormat("parameter/reporter.bin", "reporter", "iisssbbc020c040"),
             new RecordFormat("parameter/season/seasonText.bin", "seasonText", "bbsc040c020c020"),
+            new RecordFormat("work/workInfo.bin", "workInfo", "sbbbbbbbbbbiiiisbbssssssssbbsbbssbbssbbbbisbbsssbbbbsc020c020c100"),
+            new RecordFormat("work/rivalInfo.bin", "rivalInfo", "sbbbbbbssssbbbbbbbbiiiiiiiibbbbssc040c080c020")
         };
 
         public string fileName;

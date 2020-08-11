@@ -485,27 +485,6 @@ namespace Imas.Archive
             }
         }
 
-        public async Task ExtractPastblToXlsx(string xlsxName)
-        {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
-            foreach (string fileName in Pastbl.fileNames)
-            {
-                using EntryStack entryStack = await GetEntryRecursive(fileName);
-                if (entryStack != null)
-                {
-                    using Stream stream = await entryStack.Entry.GetData();
-                    IEnumerable<Record> newRecords = Pastbl.ReadFile(stream).Select(
-                        record => {
-                            Record newRec = new Record("XX");
-                            newRec[0] = fileName;
-                            newRec[1] = record[2];
-                            return newRec;
-                        });
-                    xlsx.AppendRows("pastbl", newRecords);
-                }
-            }
-        }
-
         public async Task ExtractParameterToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
         {
             using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
@@ -522,6 +501,32 @@ namespace Imas.Archive
                     xlsxWriter.AppendRows(format.sheetName, records);
                 }
             }
+            foreach (string fileName in Pastbl.fileNames)
+            {
+                using EntryStack entryStack = await GetEntryRecursive(fileName);
+                if (entryStack != null)
+                {
+                    using Stream stream = await entryStack.Entry.GetData();
+                    IEnumerable<Record> newRecords = Pastbl.ReadFile(stream).Select(
+                        record => {
+                            Record newRec = new Record("XX");
+                            newRec[0] = fileName;
+                            newRec[1] = record[2];
+                            return newRec;
+                        });
+                    xlsxWriter.AppendRows("pastbl", newRecords);
+                }
+            }
+            using (EntryStack entryStack = await GetEntryRecursive("songinfo/songResource.bin"))
+            {
+                if (entryStack != null)
+                {
+                    using Stream stream = await entryStack.Entry.GetData();
+                    IEnumerable<Record> records = SongInfo.ReadFile(stream);
+                    xlsxWriter.AppendRows("songInfo", records);
+                }
+            }
+
         }
 
         public async Task ExtractAllImages(string outDir, IProgress<ProgressData> progress = null)

@@ -77,7 +77,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("other/auditionDanText_out.pastbl", "other/allPastbl.xlsx", "alf/auditionText_par/auditionDanText.pastbl")]
+        [DataRow("other/auditionDanText_out.pastbl", "other/parameter_hdd.xlsx", "alf/auditionText_par/auditionDanText.pastbl")]
         public void PastblWriteTest(string binName, string xlsxName, string alfFileName)
         {
             using XlsxReader xlsx = new XlsxReader(xlsxName);
@@ -88,6 +88,18 @@ namespace ImasArchiveLibTest
             using (FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write))
             {
                 Pastbl.WriteFile(stream, strings);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("hdd/songinfo/songResource.bin", "other/songinfo.xlsx")]
+        public void SongInfoReadTest(string binName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
+            {
+                IEnumerable<Record> records = SongInfo.ReadFile(stream);
+                xlsx.AppendRows("songInfo", records);
             }
         }
     }
