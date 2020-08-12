@@ -142,7 +142,7 @@ namespace ImasArchiveApp
                     "");
                 if (destFileName != null)
                 {
-                    ContainerEntry entry = ContainerFile.GetEntry(CurrentFile);
+                    ContainerEntry entry = ContainerFile.GetEntry(srcFileName);
                     if (entry == null)
                         throw new ArgumentNullException("Could not find current file in archive.");
                     using Stream stream = await entry.GetData();
