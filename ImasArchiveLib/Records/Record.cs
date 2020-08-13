@@ -119,7 +119,7 @@ namespace Imas.Records
                         break;
                     case FormatType.CustomString:
                         byte[] array = new byte[format[i].arrayLen];
-                        ImasEncoding.Custom.GetBytes(r.ReadString(), array);
+                        ImasEncoding.Custom.FillBufferWithBytes(r.ReadString(), array);
                         list[i] = array;
                         break;
                     case FormatType.String:

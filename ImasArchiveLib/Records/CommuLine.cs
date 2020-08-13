@@ -64,8 +64,8 @@ namespace Imas.Records
 
             byte[] namebytes = new byte[32];
             byte[] msgbytes = new byte[128];
-            ImasEncoding.Custom.GetBytes(outName, namebytes);
-            ImasEncoding.Custom.GetBytes(outMessage, msgbytes);
+            ImasEncoding.Custom.FillBufferWithBytes(outName, namebytes);
+            ImasEncoding.Custom.FillBufferWithBytes(outMessage, msgbytes);
 
             int nameLen = 0;
             while (nameLen < 32 / 2 && (namebytes[2 * nameLen] != 0 || namebytes[2 * nameLen + 1] != 0))

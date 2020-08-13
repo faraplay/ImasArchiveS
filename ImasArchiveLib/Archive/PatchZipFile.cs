@@ -105,6 +105,37 @@ namespace Imas.Archive
             }
 
         }
+        public async Task AddLyrics(string dirName, IProgress<ProgressData> progress = null)
+        {
+            DirectoryInfo dInfo = new DirectoryInfo(dirName);
+            HashSet<string> filenames =
+                new HashSet<string>(dInfo.GetFiles("*.xml")
+                .Select(fInfo => fInfo.Name));
+
+            string filenameXlsxName = dirName + "/filenames.xlsx";
+            XlsxReader xlsx = new XlsxReader(filenameXlsxName);
+            IEnumerable<Record> records = xlsx.GetRows("XX", "filenames")
+                .Where(record => filenames.Contains((string)record[1]));
+            int total = records.Count();
+            int count = 0;
+            foreach (Record record in records)
+            {
+                string entryName = (string)record[0];
+                string xmlName = dInfo.FullName + '\\' + (string)record[1];
+                count++;
+                progress?.Report(new ProgressData { count = count, total = total, filename = entryName });
+
+                Xmb xmb = new Xmb();
+                using (FileStream xmlStream = new FileStream(xmlName, FileMode.Open, FileAccess.Read))
+                {
+                    xmb.ReadXml(xmlStream);
+                }
+                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
+                using Stream entryStream = entry.Open();
+                await xmb.WriteXmb(entryStream);
+            }
+
+        }
 
         public void AddParameterFiles(string xlsxName)
         {
@@ -138,11 +169,6 @@ namespace Imas.Archive
                 using Stream entryStream = entry.Open();
                 SongInfo.WriteFile(entryStream, xlsx);
             }
-        }
-
-        public void AddPastbl(string xlsxName)
-        {
-            using XlsxReader xlsx = new XlsxReader(xlsxName);
         }
         #endregion
 

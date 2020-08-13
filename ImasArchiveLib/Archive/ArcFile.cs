@@ -529,6 +529,31 @@ namespace Imas.Archive
 
         }
 
+        public async Task ExtractLyrics(string outDir, IProgress<ProgressData> progress = null)
+        {
+            Directory.CreateDirectory(outDir);
+            IEnumerable<ContainerEntry> commuEntries = Entries.Where(entry => entry.FileName.StartsWith("songinfo/") && entry.FileName.EndsWith(".xmb"));
+            totalProgress = commuEntries.Count();
+            countProgress = 0;
+            List<Record> records = new List<Record>();
+            foreach (ContainerEntry arcEntry in commuEntries)
+            {
+                using Stream stream = await arcEntry.GetData();
+                Xmb xmb = new Xmb();
+                xmb.ReadXmb(stream);
+                string filename = arcEntry.FileName;
+                string newName = filename.Substring(filename.LastIndexOf('/') + 1)[0..^4] + ".xml";
+                using FileStream fileStream = new FileStream(outDir + "/" + newName, FileMode.Create, FileAccess.Write);
+                xmb.WriteXml(fileStream);
+                Record record = new Record("XX");
+                record[0] = filename;
+                record[1] = newName;
+                records.Add(record);
+            }
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx");
+            xlsxWriter.AppendRows("filenames", records);
+        }
+
         public async Task ExtractAllImages(string outDir, IProgress<ProgressData> progress = null)
         {
             Dictionary<string, string> hashFileName = new Dictionary<string, string>();

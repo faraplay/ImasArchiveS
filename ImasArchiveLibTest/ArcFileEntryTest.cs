@@ -300,6 +300,14 @@ namespace ImasArchiveLibTest
             using ArcFile arcFile = new ArcFile(arcName, extension);
             await arcFile.ExtractAllImages(outDir);
         }
+
+        [DataTestMethod]
+        [DataRow("hdd", "", "lyrics/hdd_lyrics")]
+        public async Task ExtractLyricsTest(string arcName, string extension, string outDir)
+        {
+            using ArcFile arcFile = new ArcFile(arcName, extension);
+            await arcFile.ExtractLyrics(outDir);
+        }
     }
 }
 

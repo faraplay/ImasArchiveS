@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
@@ -33,14 +34,14 @@ namespace ImasArchiveLibTest
         [DataRow("xml/rsc_etc.xmb", "xml/rsc_etc.xml")]
         [DataRow("xml/rsc_chara.xmb", "xml/rsc_chara.xml")]
         [DataRow("xml/resource_dlc.xmb", "xml/resource_dlc.xml")]
-        public void SongInfoWriteTest(string binName, string xmlName)
+        public async Task SongInfoWriteTest(string binName, string xmlName)
         {
             using FileStream outStream = new FileStream(binName, FileMode.Create, FileAccess.Write);
             Xmb xmb = new Xmb();
             using (FileStream stream = new FileStream(xmlName, FileMode.Open, FileAccess.Read))
             {
                 xmb.ReadXml(stream);
-                xmb.WriteXmb(outStream);
+                await xmb.WriteXmb(outStream);
             }
         }
     }

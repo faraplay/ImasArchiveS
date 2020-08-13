@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Imas.Records
@@ -216,7 +217,7 @@ namespace Imas.Records
         }
         #endregion
 
-        public void WriteXmb(Stream stream)
+        public async Task WriteXmb(Stream stream)
         {
             Binary binary = new Binary(stream, true);
             binary.WriteUInt32(0x584D4220);
@@ -253,10 +254,10 @@ namespace Imas.Records
                 attr.Serialise(stream);
             foreach (IdStringOff idStringOff in idStringOffs)
                 idStringOff.Serialise(stream);
-            typeData.CopyTo(stream);
+            await typeData.CopyToAsync(stream);
             while (stream.Position % 4 != 0)
                 stream.WriteByte(0);
-            valueData.CopyTo(stream);
+            await valueData.CopyToAsync(stream);
             while (stream.Position % 4 != 0)
                 stream.WriteByte(0);
         }
@@ -320,10 +321,10 @@ namespace Imas.Records
 
             public int Length => (int)stringData.Length;
 
-            public void CopyTo(Stream stream)
+            public async Task CopyToAsync(Stream stream)
             {
                 stringData.Position = 0;
-                stringData.CopyTo(stream);
+                await stringData.CopyToAsync(stream);
             }
 
             public List<KeyValuePair<string, int>> GetKeyValuePairs()
@@ -345,7 +346,7 @@ namespace Imas.Records
                     else
                     {
                         int offset = (int)stringData.Position;
-                        stringData.Write(Encoding.BigEndianUnicode.GetBytes(s));
+                        stringData.Write(ImasEncoding.Custom.GetBytes(s));
                         stringData.WriteByte(0);
                         stringData.WriteByte(0);
                         utf16StringOffs.Add(s, offset);

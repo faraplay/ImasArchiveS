@@ -6,7 +6,7 @@ namespace Imas.ImasEncoding
 {
     static class Custom
     {
-        public static void GetBytes(string s, Span<byte> outBuffer)
+        public static void FillBufferWithBytes(string s, Span<byte> outBuffer)
         {
             int maxLen = (outBuffer.Length & -2) - 2;
             int j = 0;
@@ -171,6 +171,18 @@ namespace Imas.ImasEncoding
             if (next != NextByteOptions.None && next != NextByteOptions.Backslash)
                 outList.Add(code);
             return outList.ToArray();
+        }
+
+        public static byte[] GetBytes(string s)
+        {
+            int[] ints = GetValues(s);
+            byte[] bytes = new byte[ints.Length * 2];
+            for (int i = 0; i < ints.Length; i++)
+            {
+                bytes[2 * i] = (byte)((ints[i] >> 8) & 0xFF);
+                bytes[2 * i + 1] = (byte)(ints[i] & 0xFF);
+            }
+            return bytes;
         }
 
         public static string GetString(ReadOnlySpan<byte> inSpan)
