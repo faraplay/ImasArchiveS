@@ -145,6 +145,19 @@ namespace ImasArchiveApp
             }
         }
         public bool CanExtractImages() => ArcFile != null;
+        AsyncCommand _extractLyricsCommand;
+        public ICommand ExtractLyricsCommand
+        {
+            get
+            {
+                if (_extractLyricsCommand == null)
+                {
+                    _extractLyricsCommand = new AsyncCommand(() => ExtractLyrics(), () => CanExtractLyrics());
+                }
+                return _extractLyricsCommand;
+            }
+        }
+        public bool CanExtractLyrics() => ArcFile != null;
         AsyncCommand _patchFontCommand;
         public ICommand PatchFontCommand
         {
@@ -237,6 +250,23 @@ namespace ImasArchiveApp
                 if (fileName != null)
                 {
                     await ArcFile.ExtractAllImages(fileName, new Progress<ProgressData>(ReportProgress));
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+        }
+        public async Task ExtractLyrics()
+        {
+            try
+            {
+                ClearStatus();
+                string dirName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath).Item1 + "_lyrics", "");
+                if (dirName != null)
+                {
+                    await ArcFile.ExtractLyrics(dirName, new Progress<ProgressData>(ReportProgress));
                     ReportMessage("Done.");
                 }
             }

@@ -65,6 +65,7 @@
                     <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract Commus" />
                     <MenuItem Command="{Binding Path=ExtractParameterCommand}" Header="Extract Parameter Data" />
                     <MenuItem Command="{Binding Path=ExtractImagesCommand}" Header="Extract Images" />
+                    <MenuItem Command="{Binding Path=ExtractLyricsCommand}" Header="Extract Lyrics" />
                 </MenuItem>
                 <Separator />
                 <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
