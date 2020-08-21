@@ -167,6 +167,22 @@ namespace Imas
             await memStream.CopyToAsync(stream);
         }
         #endregion
+
+        public void WriteJSON(TextWriter writer)
+        {
+            writer.WriteLine("const fontdata = [");
+
+            foreach (CharData c in chars)
+            {
+                writer.Write("{");
+                writer.Write("\"key\":\"{0}\", \"datawidth\":{1}, \"dataheight\":{2}, \"datax\":{3}, \"datay\":{4}, ",
+                    c.key, c.datawidth, c.dataheight, c.datax, c.datay);
+                writer.Write("\"offsetx\":{0}, \"offsety\":{1}, \"width\":{2}", c.offsetx, c.offsety, c.width);
+                writer.Write("},\n");
+            }
+
+            writer.WriteLine("]");
+        }
         #region Bitmaps
         private GTF gtf;
         private Bitmap nonGtfBitmap;
@@ -225,6 +241,25 @@ namespace Imas
             }
             ClearBigBitmap();
             charsHaveBitmaps = true;
+        }
+
+        public void UseBlackBitmaps()
+        {
+            UseCharBitmaps();
+            foreach (CharData c in chars)
+            {
+                if (c.isEmoji == 0)
+                {
+                    for (int y = 0; y < c.bitmap.Height; y++)
+                    {
+                        for (int x = 0; x < c.bitmap.Width; x++)
+                        {
+                            int a = c.bitmap.GetPixel(x, y).A;
+                            c.bitmap.SetPixel(x, y, Color.FromArgb(a, Color.Black));
+                        }
+                    }
+                }
+            }
         }
 
         // have 2 pixels of space between chars
