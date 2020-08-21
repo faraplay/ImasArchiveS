@@ -104,35 +104,29 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("disc/im2nx_font.par")]
-        public void WriteJSONTest(string inFile)
+        [DataRow("patch/font")]
+        public void WriteJSONTest(string inDir)
         {
-            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
-            {
-                using Font font = new Font();
-                font.ReadFontPar(inStream);
-                font.AddDigraphs();
-                Assert.IsTrue(font.CheckTree());
-                font.BigBitmap.Save("../textbox-display/fontwhite.png");
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            font.AddDigraphs();
+            Assert.IsTrue(font.CheckTree());
+            font.BigBitmap.Save("../textbox-display/fontwhite.png");
 
-                using StreamWriter writer = new StreamWriter("../textbox-display/fontdata.js");
-                font.WriteJSON(writer);
-            }
+            using StreamWriter writer = new StreamWriter("../textbox-display/fontdata.js");
+            font.WriteJSON(writer);
         }
 
         [DataTestMethod]
-        [DataRow("disc/im2nx_font.par")]
-        public void BlackFontTest(string inFile)
+        [DataRow("patch/font")]
+        public void BlackFontTest(string inDir)
         {
-            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
-            {
-                using Font font = new Font();
-                font.ReadFontPar(inStream);
-                font.UseBlackBitmaps();
-                font.AddDigraphs();
-                Assert.IsTrue(font.CheckTree());
-                font.BigBitmap.Save("../textbox-display/fontblack.png");
-            }
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            font.UseBlackBitmaps();
+            font.AddDigraphs();
+            Assert.IsTrue(font.CheckTree());
+            font.BigBitmap.Save("../textbox-display/fontblack.png");
         }
 
         [DataTestMethod]
