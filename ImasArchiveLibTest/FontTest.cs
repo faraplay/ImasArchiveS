@@ -158,5 +158,18 @@ namespace ImasArchiveLibTest
             File.Delete("temp.png");
             Assert.IsTrue(eq);
         }
+
+
+        [DataTestMethod]
+        [DataRow("patch/font", "patch/font_fromFolder.par")]
+        public async Task BuildFontDigraphsFromFolder(string inDir, string outFile)
+        {
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            font.AddDigraphs();
+            using FileStream outStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
+            await font.WriteFontPar(outStream, false);
+
+        }
     }
 }
