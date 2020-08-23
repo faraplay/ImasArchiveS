@@ -90,11 +90,7 @@ namespace Imas.Records
             name_raw = xlsx.GetString(row, "E");
             message_raw = xlsx.GetString(row, "F");
             name = xlsx.GetString(row, "G");
-            string message1 = xlsx.GetString(row, "H");
-            string message2 = xlsx.GetString(row, "J");
-            message = message1;
-            if (!string.IsNullOrWhiteSpace(message2))
-                message += '\n' + message2;
+            message = xlsx.GetString(row, "H");
         }
 
         public void WriteRow(XlsxWriter xlsx, Row row)
@@ -116,10 +112,9 @@ namespace Imas.Records
             xlsx.AppendCell(row, "E",  "Name (raw)");
             xlsx.AppendCell(row, "F",  "Message (raw)");
             xlsx.AppendCell(row, "G",  "Name");
-            xlsx.AppendCell(row, "H",  "Message Line 1");
-            xlsx.AppendCell(row, "I",  "Width");
-            xlsx.AppendCell(row, "J",  "Message Line 2");
-            xlsx.AppendCell(row, "K",  "Width");
+            xlsx.AppendCell(row, "H",  "Message");
+            xlsx.AppendCell(row, "I",  "Line 1 Width");
+            xlsx.AppendCell(row, "J",  "Line 2 Width");
         }
     }
 }
