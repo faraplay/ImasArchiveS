@@ -526,6 +526,14 @@ namespace Imas.Archive
                     xlsxWriter.AppendRows("songInfo", records);
                 }
             }
+            using (EntryStack entryStack = await GetEntryRecursive("ui/menu/skillBoard/skillBoard.info"))
+            {
+                if (entryStack != null)
+                {
+                    using Stream stream = await entryStack.Entry.GetData();
+                    SkillBoard.ReadFile(stream, xlsxWriter);
+                }
+            }
 
         }
 

@@ -169,6 +169,13 @@ namespace Imas.Archive
                 using Stream entryStream = entry.Open();
                 SongInfo.WriteFile(entryStream, xlsx);
             }
+            if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "skillBoard") &&
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "skillBoardStrings"))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry("ui/menu/skillBoard/skillBoard.info");
+                using Stream entryStream = entry.Open();
+                SkillBoard.WriteFile(entryStream, xlsx);
+            }
         }
         #endregion
 

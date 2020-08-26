@@ -102,5 +102,23 @@ namespace ImasArchiveLibTest
                 xlsx.AppendRows("songInfo", records);
             }
         }
+
+        [DataTestMethod]
+        [DataRow("hdd/ui/menu/skillBoard/skillBoard.info", "other/skillBoard.xlsx")]
+        public void SkillBoardReadTest(string binName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            SkillBoard.ReadFile(stream, xlsx);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/newSkillBoard.info", "other/skillBoard.xlsx")]
+        public void SkillBoardWriteTest(string binName, string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
+            SkillBoard.WriteFile(stream, xlsx);
+        }
     }
 }
