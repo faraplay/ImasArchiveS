@@ -71,14 +71,6 @@ namespace Imas.Archive
             await commuFromXlsx.GetAndWriteAllCommus(this, progress1, progress2);
         }
 
-        public void AddJaJp(string xlsxName, string entryName)
-        {
-            ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
-            using Stream entryStream = entry.Open();
-            JaJpText.WriteFile(entryStream, xlsxName);
-            _entries.Add(new PatchZipEntry(entry));
-        }
-
         public async Task AddGtfs(string dirName, IProgress<ProgressData> progress = null)
         {
             DirectoryInfo dInfo = new DirectoryInfo(dirName);
@@ -175,6 +167,13 @@ namespace Imas.Archive
                 ZipArchiveEntry entry = zipArchive.CreateEntry("ui/menu/skillBoard/skillBoard.info");
                 using Stream entryStream = entry.Open();
                 SkillBoard.WriteFile(entryStream, xlsx);
+            }
+            if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJp") &&
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJpStrings"))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry("text/im2nx_text.ja_jp");
+                using Stream entryStream = entry.Open();
+                JaJpText.WriteFile(entryStream, xlsx);
             }
         }
         #endregion

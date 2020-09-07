@@ -40,7 +40,6 @@ namespace ImasArchiveLibTest
         [DataTestMethod]
         [DataRow("patch/patch_add.zip", 
             "other/newfont.par", 
-            "patch/text_ja_jp_tl.xlsx", 
             "patch/parameter_tl.xlsx", 
             "patch/lyrics",
             "patch/translatedcommu.xlsx", 
@@ -48,7 +47,6 @@ namespace ImasArchiveLibTest
         public async Task AddToPatchTest(
             string filename,
             string newFileName,
-            string jajpName,
             string parameterName,
             string lyricDir,
             string commuName,
@@ -56,7 +54,6 @@ namespace ImasArchiveLibTest
         {
             using PatchZipFile patchZipFile = new PatchZipFile(filename, PatchZipMode.Create);
             patchZipFile.AddFile(newFileName, "im2nx_font.par");
-            patchZipFile.AddJaJp(jajpName, "text/im2nx_text.ja_jp");
             patchZipFile.AddParameterFiles(parameterName);
             await patchZipFile.AddLyrics(lyricDir);
             await patchZipFile.AddCommus(commuName, null, new System.Progress<ProgressData>(data => System.Console.WriteLine(data.ToString())));

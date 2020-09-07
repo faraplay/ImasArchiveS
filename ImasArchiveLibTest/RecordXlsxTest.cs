@@ -52,7 +52,8 @@ namespace ImasArchiveLibTest
         {
             using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
             {
-                JaJpText.ReadFile(stream, xlsxName);
+                using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+                JaJpText.ReadFile(stream, xlsxWriter);
             }
         }
 
@@ -61,7 +62,8 @@ namespace ImasArchiveLibTest
         public void JaJpWriteTest(string xlsxName, string binName)
         {
             using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
-            JaJpText.WriteFile(stream, xlsxName);
+            using XlsxReader xlsxReader = new XlsxReader(xlsxName);
+            JaJpText.WriteFile(stream, xlsxReader);
         }
 
         [DataTestMethod]

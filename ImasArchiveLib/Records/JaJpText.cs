@@ -9,7 +9,7 @@ namespace Imas.Records
 {
     static class JaJpText
     {
-        public static void ReadFile(Stream stream, string xlsxName)
+        public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
             List<Record> list = new List<Record>();
             List<Record> stringList = new List<Record>();
@@ -61,16 +61,15 @@ namespace Imas.Records
             {
                 record[4] = stringList.FindIndex(r => (int)r[1] == (int)record[1]);
             }
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
-            xlsx.AppendRows("ints", list);
-            xlsx.AppendRows("strings", stringList);
+
+            xlsx.AppendRows("jaJp", list);
+            xlsx.AppendRows("jaJpStrings", stringList);
         }
 
-        public static void WriteFile(Stream stream, string xlsxName)
+        public static void WriteFile(Stream stream, XlsxReader xlsx)
         {
-            using XlsxReader xlsx = new XlsxReader(xlsxName);
-            List<Record> list = xlsx.GetRows("IIIII", "ints").ToList();
-            List<Record> stringList = xlsx.GetRows("IIXI", "strings").ToList();
+            List<Record> list = xlsx.GetRows("IIIII", "jaJp").ToList();
+            List<Record> stringList = xlsx.GetRows("IIXI", "jaJpStrings").ToList();
             Binary binary = new Binary(stream, false);
             binary.WriteInt32(0);
             int stringOffset = 16 + 16 * list.Count;
