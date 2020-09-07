@@ -50,13 +50,13 @@ namespace Imas.Spreadsheet
             List<T> list = new List<T>();
             foreach (Row row in rows)
             {
-                count++;
-                progress?.Report(new ProgressData { count = count, total = total });
                 if (row.RowIndex == 1)
                     continue;
                 T record = new T();
                 record.ReadRow(this, row);
                 list.Add(record);
+                count++;
+                progress?.Report(new ProgressData { count = count, total = total, filename = record.ToString() });
             }
             return list;
         }

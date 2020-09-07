@@ -39,9 +39,10 @@ namespace Imas
         #region Write Commus
         public async Task GetAndWriteAllCommus(PatchZipFile patchZipFile, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
         {
-            int total1 = xlsx.Sheets.Descendants<Sheet>().Count();
+            var commuSheets = xlsx.Sheets.Descendants<Sheet>().Where(sheet => CommuLine.commuSheetNames.Contains(sheet.Name));
+            int total1 = commuSheets.Count();
             int count1 = 0;
-            foreach (Sheet sheet in xlsx.Sheets.Descendants<Sheet>())
+            foreach (Sheet sheet in commuSheets)
             {
                 count1++;
                 progress1?.Report(new ProgressData { count = count1, total = total1, filename = sheet.Name });

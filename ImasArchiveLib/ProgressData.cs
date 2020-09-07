@@ -9,5 +9,10 @@ namespace Imas
         public int count;
         public int total;
         public string filename;
+
+        public override string ToString()
+        {
+            return string.Format("{0} of {1}: {2}", count, total, filename);
+        }
     }
 }

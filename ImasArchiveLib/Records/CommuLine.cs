@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using Imas.Spreadsheet;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Imas.Records
@@ -14,6 +15,24 @@ namespace Imas.Records
         public string message_raw;
         public string name;
         public string message;
+
+        public static readonly HashSet<string> commuSheetNames = new HashSet<string>{
+            "ami",
+            "azu",
+            "chi",
+            "har",
+            "hib",
+            "ior",
+            "leo",
+            "mak",
+            "mam",
+            "mik",
+            "rit",
+            "tak",
+            "yay",
+            "yuk",
+            "other"
+        };
 
         public void Deserialise(Stream inStream)
         {
@@ -115,6 +134,11 @@ namespace Imas.Records
             xlsx.AppendCell(row, "H",  "Message");
             xlsx.AppendCell(row, "I",  "Line 1 Width");
             xlsx.AppendCell(row, "J",  "Line 2 Width");
+        }
+
+        public override string ToString()
+        {
+            return file;
         }
     }
 }

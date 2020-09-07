@@ -1,4 +1,6 @@
-﻿using Imas.Archive;
+﻿using DocumentFormat.OpenXml.Presentation;
+using Imas;
+using Imas.Archive;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Threading.Tasks;
@@ -57,7 +59,7 @@ namespace ImasArchiveLibTest
             patchZipFile.AddJaJp(jajpName, "text/im2nx_text.ja_jp");
             patchZipFile.AddParameterFiles(parameterName);
             await patchZipFile.AddLyrics(lyricDir);
-            await patchZipFile.AddCommus(commuName);
+            await patchZipFile.AddCommus(commuName, null, new System.Progress<ProgressData>(data => System.Console.WriteLine(data.ToString())));
             await patchZipFile.AddGtfs(gtfDir);
         }
     }
