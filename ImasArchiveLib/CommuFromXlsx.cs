@@ -5,7 +5,6 @@ using Imas.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,15 +12,18 @@ namespace Imas
 {
     public class CommuFromXlsx : IDisposable
     {
-        readonly XlsxReader xlsx;
+        private readonly XlsxReader xlsx;
 
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -30,13 +32,16 @@ namespace Imas
             }
             disposed = true;
         }
-        #endregion
+
+        #endregion IDisposable
 
         public CommuFromXlsx(string xlsxName)
         {
             xlsx = new XlsxReader(xlsxName);
         }
+
         #region Write Commus
+
         public async Task GetAndWriteAllCommus(PatchZipFile patchZipFile, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
         {
             var commuSheets = xlsx.Sheets.Descendants<Sheet>().Where(sheet => CommuLine.commuSheetNames.Contains(sheet.Name));
@@ -71,6 +76,7 @@ namespace Imas
                 line.Serialise(stream);
             }
         }
-        #endregion
+
+        #endregion Write Commus
     }
 }

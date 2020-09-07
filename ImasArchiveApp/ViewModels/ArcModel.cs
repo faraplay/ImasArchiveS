@@ -10,12 +10,16 @@ namespace ImasArchiveApp
     public class ArcModel : ContainerFileModel
     {
         #region Properties
+
         public string ArcPath { get; }
         private ArcFile ArcFile { get; }
         protected override IContainerFile ContainerFile => ArcFile;
-        #endregion
+
+        #endregion Properties
+
         #region Constructors
-        public ArcModel(IReport parent, string inPath, IGetFileName getFileName) 
+
+        public ArcModel(IReport parent, string inPath, IGetFileName getFileName)
             : base(parent, inPath.Substring(inPath.LastIndexOf('\\') + 1), getFileName)
         {
             ArcPath = inPath;
@@ -26,7 +30,7 @@ namespace ImasArchiveApp
                 string extension;
                 (truncFilename, extension) = RemoveArcExtension(inPath);
                 if (extension == null)
-                { 
+                {
                     throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
                 }
                 ArcFile = new ArcFile(truncFilename, extension);
@@ -38,9 +42,13 @@ namespace ImasArchiveApp
                 throw;
             }
         }
-        #endregion
+
+        #endregion Constructors
+
         #region IDisposable
-        bool disposed = false;
+
+        private bool disposed = false;
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -52,9 +60,13 @@ namespace ImasArchiveApp
             disposed = true;
             base.Dispose(disposing);
         }
-        #endregion
+
+        #endregion IDisposable
+
         #region Commands
-        AsyncCommand _importCommand;
+
+        private AsyncCommand _importCommand;
+
         public ICommand ImportCommand
         {
             get
@@ -66,8 +78,11 @@ namespace ImasArchiveApp
                 return _importCommand;
             }
         }
+
         public bool CanImport() => ArcFile != null && FileModel != null;
-        AsyncCommand _exportCommand;
+
+        private AsyncCommand _exportCommand;
+
         public ICommand ExportCommand
         {
             get
@@ -79,8 +94,11 @@ namespace ImasArchiveApp
                 return _exportCommand;
             }
         }
+
         public bool CanExport() => ArcFile != null && FileModel != null;
-        AsyncCommand _saveAsCommand;
+
+        private AsyncCommand _saveAsCommand;
+
         public ICommand SaveAsCommand
         {
             get
@@ -92,8 +110,11 @@ namespace ImasArchiveApp
                 return _saveAsCommand;
             }
         }
+
         public bool CanSaveAs() => ArcFile != null;
-        AsyncCommand _extractAllCommand;
+
+        private AsyncCommand _extractAllCommand;
+
         public ICommand ExtractAllCommand
         {
             get
@@ -105,8 +126,11 @@ namespace ImasArchiveApp
                 return _extractAllCommand;
             }
         }
+
         public bool CanExtractAll() => ArcFile != null;
-        AsyncCommand _extractCommusCommand;
+
+        private AsyncCommand _extractCommusCommand;
+
         public ICommand ExtractCommusCommand
         {
             get
@@ -118,8 +142,11 @@ namespace ImasArchiveApp
                 return _extractCommusCommand;
             }
         }
+
         public bool CanExtractCommus() => ArcFile != null;
-        AsyncCommand _extractParameterCommand;
+
+        private AsyncCommand _extractParameterCommand;
+
         public ICommand ExtractParameterCommand
         {
             get
@@ -131,8 +158,11 @@ namespace ImasArchiveApp
                 return _extractParameterCommand;
             }
         }
+
         public bool CanExtractParameter() => ArcFile != null;
-        AsyncCommand _extractImagesCommand;
+
+        private AsyncCommand _extractImagesCommand;
+
         public ICommand ExtractImagesCommand
         {
             get
@@ -144,8 +174,11 @@ namespace ImasArchiveApp
                 return _extractImagesCommand;
             }
         }
+
         public bool CanExtractImages() => ArcFile != null;
-        AsyncCommand _extractLyricsCommand;
+
+        private AsyncCommand _extractLyricsCommand;
+
         public ICommand ExtractLyricsCommand
         {
             get
@@ -157,8 +190,11 @@ namespace ImasArchiveApp
                 return _extractLyricsCommand;
             }
         }
+
         public bool CanExtractLyrics() => ArcFile != null;
-        AsyncCommand _patchFontCommand;
+
+        private AsyncCommand _patchFontCommand;
+
         public ICommand PatchFontCommand
         {
             get
@@ -170,14 +206,18 @@ namespace ImasArchiveApp
                 return _patchFontCommand;
             }
         }
+
         public bool CanPatchFont() => ArcFile != null;
-        #endregion
+
+        #endregion Commands
+
         #region Command Methods
+
         public async Task SaveAs()
         {
             try
             {
-                ClearStatus(); 
+                ClearStatus();
                 string fileName = _getFileName.SaveGetFileName("Save As", "", "Arc file (*.arc)|*.arc");
                 if (fileName != null)
                 {
@@ -190,6 +230,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
+
         public async Task ExtractAll()
         {
             try
@@ -207,6 +248,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
+
         public async Task ExtractCommus()
         {
             try
@@ -224,6 +266,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
+
         public async Task ExtractParameter()
         {
             try
@@ -241,6 +284,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
+
         public async Task ExtractImages()
         {
             try
@@ -258,6 +302,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
+
         public async Task ExtractLyrics()
         {
             try
@@ -275,6 +320,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
+
         public async Task PatchFont()
         {
             try
@@ -308,8 +354,11 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
-        #endregion
+
+        #endregion Command Methods
+
         #region Other Methods
+
         public static (string, string) RemoveArcExtension(string name)
         {
             if (name.EndsWith(".arc"))
@@ -325,6 +374,7 @@ namespace ImasArchiveApp
                 return (name, null);
             }
         }
-        #endregion
+
+        #endregion Other Methods
     }
 }

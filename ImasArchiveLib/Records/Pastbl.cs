@@ -1,13 +1,11 @@
-﻿using Imas.Spreadsheet;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace Imas.Records
 {
-    static class Pastbl
+    internal static class Pastbl
     {
         public static readonly string[] fileNames =
         {
@@ -17,6 +15,7 @@ namespace Imas.Records
             "alf/auditionText_par/auditionVocText.pastbl",
             "alf/liveText_par/liveText.pastbl"
         };
+
         public static IEnumerable<Record> ReadFile(Stream stream)
         {
             Binary binary = new Binary(stream, true);

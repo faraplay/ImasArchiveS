@@ -9,7 +9,6 @@ namespace ImasArchiveLibTest
     [TestClass]
     public class FontTest
     {
-
         [DataTestMethod]
         [DataRow("disc/im2nx_font.par", "other/font.png")]
         public async Task ReadFontImageTest(string inFile, string expectedFile)
@@ -185,7 +184,6 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
-
         [DataTestMethod]
         [DataRow("patch/font", "patch/font_fromFolder.par")]
         public async Task BuildFontDigraphsFromFolder(string inDir, string outFile)
@@ -195,7 +193,6 @@ namespace ImasArchiveLibTest
             font.AddDigraphs();
             using FileStream outStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
             await font.WriteFontPar(outStream, false);
-
         }
     }
 }

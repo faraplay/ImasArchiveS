@@ -4,28 +4,31 @@ using Imas.Records;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Imas.Spreadsheet
 {
-    class XlsxWriter : IDisposable
+    internal class XlsxWriter : IDisposable
     {
-        readonly SpreadsheetDocument doc;
-        readonly WorkbookPart workbookPart;
-        readonly Sheets sheets;
-        readonly SharedStringTablePart sharedStringTablePart;
+        private readonly SpreadsheetDocument doc;
+        private readonly WorkbookPart workbookPart;
+        private readonly Sheets sheets;
+        private readonly SharedStringTablePart sharedStringTablePart;
 
-        readonly Dictionary<string, WorksheetPart> worksheets = new Dictionary<string, WorksheetPart>();
-        readonly Dictionary<string, int> strings = new Dictionary<string, int>();
+        private readonly Dictionary<string, WorksheetPart> worksheets = new Dictionary<string, WorksheetPart>();
+        private readonly Dictionary<string, int> strings = new Dictionary<string, int>();
 
         public Sheets Sheets => sheets;
+
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -34,7 +37,8 @@ namespace Imas.Spreadsheet
             }
             disposed = true;
         }
-        #endregion
+
+        #endregion IDisposable
 
         public XlsxWriter(string fileName)
         {
@@ -45,7 +49,6 @@ namespace Imas.Spreadsheet
             sharedStringTablePart = workbookPart.AddNewPart<SharedStringTablePart>();
             sharedStringTablePart.SharedStringTable = new SharedStringTable();
         }
-
 
         private WorksheetPart GetWorksheet(string sheetName)
         {
@@ -71,6 +74,7 @@ namespace Imas.Spreadsheet
         }
 
         #region SharedString
+
         private int GetStringID(string s)
         {
             if (strings.ContainsKey(s))
@@ -78,6 +82,7 @@ namespace Imas.Spreadsheet
             else
                 return AddString(s);
         }
+
         private int AddString(string s)
         {
             int index = sharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().Count();
@@ -85,8 +90,11 @@ namespace Imas.Spreadsheet
             strings.Add(s, index);
             return index;
         }
-        #endregion
+
+        #endregion SharedString
+
         #region AppendCell
+
         public void AppendCell(Row row, string colName, string value)
         {
             Cell cell = new Cell { CellReference = colName + row.RowIndex.ToString() };
@@ -95,6 +103,7 @@ namespace Imas.Spreadsheet
             cell.CellValue = new CellValue(stringIndex.ToString());
             cell.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.SharedString);
         }
+
         public void AppendCell(Row row, string colName, int value)
         {
             Cell cell = new Cell { CellReference = colName + row.RowIndex.ToString() };
@@ -102,6 +111,7 @@ namespace Imas.Spreadsheet
             cell.CellValue = new CellValue(value.ToString());
             cell.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.Number);
         }
+
         public void AppendCell(Row row, string colName, bool value)
         {
             Cell cell = new Cell { CellReference = colName + row.RowIndex.ToString() };
@@ -109,13 +119,16 @@ namespace Imas.Spreadsheet
             cell.CellValue = new CellValue(value ? "1" : "0");
             cell.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.Boolean);
         }
-        #endregion
+
+        #endregion AppendCell
+
         public void AppendRow<T>(string sheetName, T record) where T : IRecordable
         {
             WorksheetPart worksheetPart = GetWorksheet(sheetName);
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
             AppendRow<T>(sheetData, record);
         }
+
         private void AppendRow<T>(SheetData sheetData, T record) where T : IRecordable
         {
             uint rowIndex = (uint)(sheetData.Elements<Row>().Count() + 1);
@@ -131,6 +144,7 @@ namespace Imas.Spreadsheet
             sheetData.Append(row);
             record.WriteRow(this, row);
         }
+
         public void AppendRows<T>(string sheetName, IEnumerable<T> records) where T : IRecordable
         {
             WorksheetPart worksheetPart = GetWorksheet(sheetName);

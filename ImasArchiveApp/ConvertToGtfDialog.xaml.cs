@@ -1,15 +1,6 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ImasArchiveApp
 {
@@ -32,11 +23,14 @@ namespace ImasArchiveApp
             "7: 4x4 blocks, 4-bit transparency support. Used in 3D model textures.",
             "8: 4x4 blocks, variable-range transparency support. Used in effect and 3D model textures."
         };
+
         private readonly int[] types = { 1, 2, 3, 5, 6, 7, 8 };
+
         private void UpdateDesc()
         {
             txtTypeDesc.Text = descs[cmbType.SelectedIndex];
         }
+
         private void UpdateOKEnabled()
         {
             btnOK.IsEnabled =
@@ -44,6 +38,7 @@ namespace ImasArchiveApp
                 !string.IsNullOrWhiteSpace(txtGtfName.Text) &&
                 cmbType.SelectedIndex >= 0;
         }
+
         public ConvertToGtfDialog()
         {
             InitializeComponent();
@@ -51,14 +46,15 @@ namespace ImasArchiveApp
 
         private void BtnSelectImage_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog() 
-                { Filter = "Image files(*.png;*.jpg;*.bmp)|*.png;*.jpg;*.png" };
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            { Filter = "Image files(*.png;*.jpg;*.bmp)|*.png;*.jpg;*.png" };
             if (openFileDialog.ShowDialog() == true)
             {
                 txtImageName.Text = openFileDialog.FileName;
             }
             UpdateOKEnabled();
         }
+
         private void BtnSelectGtf_Click(object sender, RoutedEventArgs e)
         {
             string imageNameNoExtend = "";
@@ -75,15 +71,16 @@ namespace ImasArchiveApp
             }
             UpdateOKEnabled();
         }
+
         private void CmbType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateDesc();
             UpdateOKEnabled();
         }
+
         private void BtnOK_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
         }
-
     }
 }

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Imas.Archive
 {
     public class PatchZipEntry : ContainerEntry
     {
-        readonly ZipArchiveEntry _entry;
+        private readonly ZipArchiveEntry _entry;
 
         internal PatchZipEntry(ZipArchiveEntry entry) : base(entry.FullName, 0, 0)
         {

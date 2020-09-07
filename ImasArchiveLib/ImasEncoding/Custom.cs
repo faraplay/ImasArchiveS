@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Imas.ImasEncoding
 {
-    static class Custom
+    internal static class Custom
     {
         public static void FillBufferWithBytes(string s, Span<byte> outBuffer)
         {
             int maxLen = (outBuffer.Length & -2) - 2;
             int j = 0;
             NextByteOptions next = NextByteOptions.None;
-            for (int i = 0; i < s.Length && j < maxLen; )
+            for (int i = 0; i < s.Length && j < maxLen;)
             {
                 char c;
                 do
@@ -30,6 +29,7 @@ namespace Imas.ImasEncoding
                         else
                             outBuffer[j++] = 0;
                         break;
+
                     case NextByteOptions.Lowercase:
                         if (c == 0x20 || c > 0x60 && c <= 0x7A)
                         {
@@ -40,6 +40,7 @@ namespace Imas.ImasEncoding
                         else
                             outBuffer[j++] = 0;
                         break;
+
                     case NextByteOptions.SpaceOnly:
                         if (c == 0x20)
                         {
@@ -50,6 +51,7 @@ namespace Imas.ImasEncoding
                         else
                             outBuffer[j++] = 0;
                         break;
+
                     case NextByteOptions.None:
                         break;
                 }
@@ -74,7 +76,6 @@ namespace Imas.ImasEncoding
                     outBuffer[j++] = (byte)(c & 0xFF);
                     next = NextByteOptions.None;
                 }
-
             }
             switch (next)
             {
@@ -83,6 +84,7 @@ namespace Imas.ImasEncoding
                 case NextByteOptions.SpaceOnly:
                     outBuffer[j++] = 0;
                     break;
+
                 case NextByteOptions.None:
                     break;
             }
@@ -114,9 +116,10 @@ namespace Imas.ImasEncoding
                             next = NextByteOptions.None;
                             continue;
                         }
-                        else 
+                        else
                             outList.Add(code);
                         break;
+
                     case NextByteOptions.Lowercase:
                         if (c == 0x20 || c > 0x60 && c <= 0x7A)
                         {
@@ -128,6 +131,7 @@ namespace Imas.ImasEncoding
                         else
                             outList.Add(code);
                         break;
+
                     case NextByteOptions.SpaceOnly:
                         if (c == 0x20)
                         {
@@ -139,6 +143,7 @@ namespace Imas.ImasEncoding
                         else
                             outList.Add(code);
                         break;
+
                     case NextByteOptions.None:
                         break;
                 }
@@ -205,6 +210,7 @@ namespace Imas.ImasEncoding
             }
             return new string(chars.ToArray());
         }
+
         private enum NextByteOptions
         {
             None,

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO.Compression;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 namespace Imas.Archive
 {
     public class ZipSourceParent : IDisposable
     {
-        readonly ZipArchive zipArchive;
+        private readonly ZipArchive zipArchive;
         internal IReadOnlyCollection<string> Filenames { get; }
 
         public ZipSourceParent(string zipFileName)
@@ -21,16 +20,19 @@ namespace Imas.Archive
         internal Stream GetFile(string filename) => zipArchive.GetEntry(filename[1..]).Open();
 
         public ZipSource GetZipSource() => GetZipSource("");
+
         public ZipSource GetZipSource(string dirName) => new ZipSource(this, dirName);
 
-
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -39,13 +41,14 @@ namespace Imas.Archive
             }
             disposed = true;
         }
-        #endregion
+
+        #endregion IDisposable
     }
 
     public class ZipSource : IFileSource
     {
         private readonly string myDir;
-        IReadOnlyCollection<string> Filenames { get; }
+        private IReadOnlyCollection<string> Filenames { get; }
         private readonly ZipSourceParent parent;
 
         internal ZipSource(ZipSourceParent parent, string dirName)

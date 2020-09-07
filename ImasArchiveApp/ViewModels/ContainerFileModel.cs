@@ -9,12 +9,17 @@ namespace ImasArchiveApp
     public abstract class ContainerFileModel : FileModel, IDisposable
     {
         #region Fields
+
         protected IFileModel _fileModel;
         protected readonly IGetFileName _getFileName;
-        #endregion
+
+        #endregion Fields
+
         #region Properties
+
         protected abstract IContainerFile ContainerFile { get; }
         public BrowserModel BrowserModel { get; set; }
+
         public IFileModel FileModel
         {
             get => _fileModel;
@@ -25,17 +30,22 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+
         public string CurrentFile
         {
             get => FileModel.FileName;
         }
-        #endregion
+
+        #endregion Properties
+
         #region Constructors
+
         protected ContainerFileModel(IReport parent, string fileName, IGetFileName getFileName) : base(parent, fileName)
         {
             _getFileName = getFileName;
         }
-        #endregion
+
+        #endregion Constructors
 
         protected void SetBrowserEntries()
         {
@@ -46,6 +56,7 @@ namespace ImasArchiveApp
             }
             BrowserModel = new BrowserModel(this, new BrowserTree("", browserEntries));
         }
+
         public async Task LoadChildFileModel(string fileName)
         {
             ClearStatus();
@@ -74,7 +85,9 @@ namespace ImasArchiveApp
         }
 
         #region IDisposable
-        bool disposed = false;
+
+        private bool disposed = false;
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -86,7 +99,8 @@ namespace ImasArchiveApp
             disposed = true;
             base.Dispose(disposing);
         }
-        #endregion
+
+        #endregion IDisposable
 
         #region Import/Export
 
@@ -131,6 +145,7 @@ namespace ImasArchiveApp
             if (CurrentFile == destFileName)
                 await LoadChildFileModel(CurrentFile);
         }
+
         public async Task Export(string srcFileName)
         {
             try
@@ -157,7 +172,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
-        #endregion
 
+        #endregion Import/Export
     }
 }

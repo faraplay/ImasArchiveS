@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,12 +6,13 @@ using System.Xml;
 
 namespace Imas.Records
 {
-    class Xmb
+    internal class Xmb
     {
-        Record[] tagStrings;
-        List<Element> elements;
-        List<Attr> attrs;
-        List<IdStringOff> idStringOffs;
+        private Record[] tagStrings;
+        private List<Element> elements;
+        private List<Attr> attrs;
+        private List<IdStringOff> idStringOffs;
+
         public void ReadXmb(Stream stream)
         {
             Binary binary = new Binary(stream, true);
@@ -124,7 +123,7 @@ namespace Imas.Records
             xmlWriter.Flush();
         }
 
-        void WriteXmlNode(XmlWriter xmlWriter, int elementIndex)
+        private void WriteXmlNode(XmlWriter xmlWriter, int elementIndex)
         {
             Element r = elements[elementIndex];
             xmlWriter.WriteStartElement(r.type);
@@ -137,8 +136,10 @@ namespace Imas.Records
         }
 
         #region Read XML
-        StringData typeData;
-        StringData valueData;
+
+        private StringData typeData;
+        private StringData valueData;
+
         public void ReadXml(Stream stream)
         {
             XmlDocument xml = new XmlDocument();
@@ -151,14 +152,14 @@ namespace Imas.Records
             ReadNodeAndDescendants(xml.DocumentElement, -1);
         }
 
-        void ReadNodeAndDescendants(XmlNode xmlNode, int parentIndex)
+        private void ReadNodeAndDescendants(XmlNode xmlNode, int parentIndex)
         {
             int index = elements.Count;
             ReadNode(xmlNode, parentIndex);
             UpdateElementAndReadDescendants(xmlNode, index);
         }
 
-        void ReadNode(XmlNode xmlNode, int parentIndex)
+        private void ReadNode(XmlNode xmlNode, int parentIndex)
         {
             Element element = new Element();
             int elementIndex = elements.Count;
@@ -191,7 +192,7 @@ namespace Imas.Records
             elements.Add(element);
         }
 
-        void UpdateElementAndReadDescendants(XmlNode parentNode, int nodeIndex)
+        private void UpdateElementAndReadDescendants(XmlNode parentNode, int nodeIndex)
         {
             Element element = elements[nodeIndex];
             if (element.type == "text_node")
@@ -203,7 +204,7 @@ namespace Imas.Records
             }
         }
 
-        void ReadDescendantNodes(XmlNode parentNode, int parentIndex)
+        private void ReadDescendantNodes(XmlNode parentNode, int parentIndex)
         {
             int firstChildIndex = elements.Count;
             for (int j = 0; j < parentNode.ChildNodes.Count; j++)
@@ -215,7 +216,8 @@ namespace Imas.Records
                 UpdateElementAndReadDescendants(parentNode.ChildNodes[j], firstChildIndex + j);
             }
         }
-        #endregion
+
+        #endregion Read XML
 
         public async Task WriteXmb(Stream stream)
         {
@@ -262,7 +264,7 @@ namespace Imas.Records
                 stream.WriteByte(0);
         }
 
-        void WriteXmbTypeStringOffset(Stream stream)
+        private void WriteXmbTypeStringOffset(Stream stream)
         {
             var typeStringOffsets = typeData.GetKeyValuePairs();
             typeStringOffsets.Sort((pair1, pair2) => string.Compare(pair1.Key, pair2.Key));
@@ -311,11 +313,11 @@ namespace Imas.Records
         //    writer.Write('"');
         //}
 
-        class StringData
+        private class StringData
         {
-            MemoryStream stringData = new MemoryStream();
-            Dictionary<string, int> asciiStringOffs = new Dictionary<string, int>();
-            Dictionary<string, int> utf16StringOffs = new Dictionary<string, int>();
+            private MemoryStream stringData = new MemoryStream();
+            private Dictionary<string, int> asciiStringOffs = new Dictionary<string, int>();
+            private Dictionary<string, int> utf16StringOffs = new Dictionary<string, int>();
 
             public int Count => asciiStringOffs.Count + utf16StringOffs.Count;
 
@@ -371,7 +373,7 @@ namespace Imas.Records
             }
         }
 
-        class Element
+        private class Element
         {
             public int tagStringOffset;
             public ushort attrCount;
@@ -409,7 +411,7 @@ namespace Imas.Records
             }
         }
 
-        class Attr
+        private class Attr
         {
             public int keyOffset;
             public int valOffset;
@@ -425,6 +427,7 @@ namespace Imas.Records
                     valOffset = binary.ReadInt32()
                 };
             }
+
             public void Serialise(Stream stream)
             {
                 Binary.WriteInt32(stream, true, keyOffset);
@@ -432,10 +435,11 @@ namespace Imas.Records
             }
         }
 
-        class IdStringOff
+        private class IdStringOff
         {
             public int offset;
             public int nodeIndex;
+
             public static IdStringOff GetIdStringOff(Stream stream)
             {
                 Binary binary = new Binary(stream, true);
@@ -445,6 +449,7 @@ namespace Imas.Records
                     nodeIndex = binary.ReadInt32()
                 };
             }
+
             public void Serialise(Stream stream)
             {
                 Binary.WriteInt32(stream, true, offset);

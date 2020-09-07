@@ -3,15 +3,14 @@ using Imas.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Imas.Records
 {
-    class Record : IRecordable
+    internal class Record : IRecordable
     {
-        readonly object[] list;
-        readonly List<FormatElement> format;
-        readonly int length;
+        private readonly object[] list;
+        private readonly List<FormatElement> format;
+        private readonly int length;
 
         public object this[int i]
         {
@@ -20,6 +19,7 @@ namespace Imas.Records
         }
 
         #region IRecordable
+
         public Record(string formatString)
         {
             format = new List<FormatElement>();
@@ -31,34 +31,43 @@ namespace Imas.Records
                     case 'b':
                         format.Add(new FormatElement { type = FormatType.Byte, serialise = true });
                         break;
+
                     case 's':
                         format.Add(new FormatElement { type = FormatType.Short, serialise = true });
                         break;
+
                     case 'i':
                         format.Add(new FormatElement { type = FormatType.Int, serialise = true });
                         break;
+
                     case 'c':
                         int length = int.Parse(formatString.Substring(i, 3), System.Globalization.NumberStyles.HexNumber);
                         i += 3;
                         format.Add(new FormatElement { type = FormatType.CustomString, arrayLen = length, serialise = true });
                         break;
+
                     case 'a':
                         int asciiLength = int.Parse(formatString.Substring(i, 3), System.Globalization.NumberStyles.HexNumber);
                         i += 3;
                         format.Add(new FormatElement { type = FormatType.AsciiString, arrayLen = asciiLength, serialise = true });
                         break;
+
                     case 'B':
                         format.Add(new FormatElement { type = FormatType.Byte, serialise = false });
                         break;
+
                     case 'S':
                         format.Add(new FormatElement { type = FormatType.Short, serialise = false });
                         break;
+
                     case 'I':
                         format.Add(new FormatElement { type = FormatType.Int, serialise = false });
                         break;
+
                     case 'X':
                         format.Add(new FormatElement { type = FormatType.String, serialise = false });
                         break;
+
                     default:
                         throw new FormatException("Record format string is invalid.");
                 }
@@ -79,12 +88,15 @@ namespace Imas.Records
                         case FormatType.Byte:
                             list[i] = binary.ReadByte();
                             break;
+
                         case FormatType.Short:
                             list[i] = binary.ReadInt16();
                             break;
+
                         case FormatType.Int:
                             list[i] = binary.ReadInt32();
                             break;
+
                         case FormatType.AsciiString:
                         case FormatType.CustomString:
                             byte[] array = new byte[format[i].arrayLen];
@@ -106,22 +118,27 @@ namespace Imas.Records
                     case FormatType.Byte:
                         list[i] = r.ReadByte();
                         break;
+
                     case FormatType.Short:
                         list[i] = r.ReadShort();
                         break;
+
                     case FormatType.Int:
                         list[i] = r.ReadInt();
                         break;
+
                     case FormatType.AsciiString:
                         byte[] asciiArray = new byte[format[i].arrayLen];
                         ImasEncoding.Ascii.GetBytes(r.ReadString(), asciiArray);
                         list[i] = asciiArray;
                         break;
+
                     case FormatType.CustomString:
                         byte[] array = new byte[format[i].arrayLen];
                         ImasEncoding.Custom.FillBufferWithBytes(r.ReadString(), array);
                         list[i] = array;
                         break;
+
                     case FormatType.String:
                         list[i] = r.ReadString();
                         break;
@@ -141,12 +158,15 @@ namespace Imas.Records
                         case FormatType.Byte:
                             binary.WriteByte((byte)list[i]);
                             break;
+
                         case FormatType.Short:
                             binary.WriteInt16((short)list[i]);
                             break;
+
                         case FormatType.Int:
                             binary.WriteInt32((int)list[i]);
                             break;
+
                         case FormatType.AsciiString:
                         case FormatType.CustomString:
                             outStream.Write((byte[])list[i]);
@@ -170,25 +190,31 @@ namespace Imas.Records
                     case FormatType.Byte:
                         r.Write((byte)list[i]);
                         break;
+
                     case FormatType.Short:
                         r.Write((short)list[i]);
                         break;
+
                     case FormatType.Int:
                         r.Write((int)list[i]);
                         break;
+
                     case FormatType.AsciiString:
                         r.Write(ImasEncoding.Ascii.GetString((byte[])list[i]));
                         break;
+
                     case FormatType.CustomString:
                         r.Write(ImasEncoding.Custom.GetString((byte[])list[i]));
                         break;
+
                     case FormatType.String:
                         r.Write((string)list[i]);
                         break;
                 }
             }
         }
-        #endregion
+
+        #endregion IRecordable
 
         public static List<Record> GetRecords(Stream stream, string format)
         {
@@ -210,14 +236,14 @@ namespace Imas.Records
             }
         }
 
-        class FormatElement
+        private class FormatElement
         {
             public FormatType type;
             public int arrayLen;
             public bool serialise;
         }
 
-        enum FormatType
+        private enum FormatType
         {
             Byte,
             Short,

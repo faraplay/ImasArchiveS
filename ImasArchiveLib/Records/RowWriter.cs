@@ -1,16 +1,14 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using Imas.Spreadsheet;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Imas.Records
 {
-    class RowWriter
+    internal class RowWriter
     {
-        readonly XlsxWriter xlsx;
-        readonly Row row;
-        int colIndex;
+        private readonly XlsxWriter xlsx;
+        private readonly Row row;
+        private int colIndex;
 
         public RowWriter(XlsxWriter xlsx, Row row)
         {
@@ -20,11 +18,14 @@ namespace Imas.Records
         }
 
         public void Write(bool value) => xlsx.AppendCell(row, ColumnName(colIndex++), value);
+
         public void Write(int value) => xlsx.AppendCell(row, ColumnName(colIndex++), value);
+
         public void Write(string value) => xlsx.AppendCell(row, ColumnName(colIndex++), value);
+
         public void Write(byte[] value) => xlsx.AppendCell(row, ColumnName(colIndex++), ImasEncoding.Custom.GetString(value));
 
-        static string ColumnName(int colIndex)
+        private static string ColumnName(int colIndex)
         {
             if (colIndex == 0)
                 return "";

@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Presentation;
-using Imas;
+﻿using Imas;
 using Imas.Archive;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
@@ -15,7 +14,6 @@ namespace ImasArchiveLibTest
         public void OpenPatchTest(string filename)
         {
             using PatchZipFile patchZipFile = new PatchZipFile(filename, PatchZipMode.Read);
-
         }
 
         [DataTestMethod]
@@ -38,11 +36,11 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("patch/patch_add.zip", 
-            "other/newfont.par", 
-            "patch/parameter_tl.xlsx", 
+        [DataRow("patch/patch_add.zip",
+            "other/newfont.par",
+            "patch/parameter_tl.xlsx",
             "patch/lyrics",
-            "patch/translatedcommu.xlsx", 
+            "patch/translatedcommu.xlsx",
             "patch/images")]
         public async Task AddToPatchTest(
             string filename,

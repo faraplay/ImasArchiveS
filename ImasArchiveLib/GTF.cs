@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Imas
@@ -23,12 +21,15 @@ namespace Imas
         }
 
         #region IDisposable
-        bool disposed = false;
+
+        private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)
@@ -41,11 +42,13 @@ namespace Imas
             Marshal.FreeHGlobal(bitmapPtr);
             disposed = true;
         }
+
         ~GTF()
         {
             Dispose(false);
         }
-        #endregion
+
+        #endregion IDisposable
 
         public static GTF ReadGTF(Stream stream)
         {
@@ -119,6 +122,7 @@ namespace Imas
         }
 
         #region Read GTF
+
         private static GTF ReadGTFIndexed(Stream stream, int width, int height, Color[] palette)
         {
             int stride = (width + 3) & -4;
@@ -145,6 +149,7 @@ namespace Imas
 
             return new GTF(bitmap, bitmapPtr, 1);
         }
+
         private static GTF ReadGTF1555(Stream stream, int width, int height)
         {
             int stride = (width + 1) & -2;
@@ -166,6 +171,7 @@ namespace Imas
 
             return new GTF(bitmap, bitmapPtr, 2);
         }
+
         private static GTF ReadGTF4444(Stream stream, int width, int height)
         {
             int stride = width;
@@ -189,6 +195,7 @@ namespace Imas
 
             return new GTF(bitmap, bitmapPtr, 3);
         }
+
         private static GTF ReadGTF8888(Stream stream, int width, int height)
         {
             int stride = width;
@@ -387,8 +394,11 @@ namespace Imas
 
             return new GTF(bitmap, bitmapPtr, 8);
         }
-        #endregion
+
+        #endregion Read GTF
+
         #region Write GTF
+
         public static async Task WriteGTF(Stream stream, Bitmap bitmap, int encodingType)
         {
             encodingType &= 15;
@@ -398,6 +408,7 @@ namespace Imas
                 case 1:
                     await WriteGTFIndexed(stream, bitmap);
                     break;
+
                 case 2:
                 case 3:
                 case 5:
@@ -406,6 +417,7 @@ namespace Imas
                 case 8:
                     await WriteGTF32Bit(stream, bitmap, encodingType);
                     break;
+
                 default:
                     throw new NotSupportedException();
             }
@@ -483,8 +495,8 @@ namespace Imas
             }
 
             stream.Write(new byte[0x2C]);
-
         }
+
         private static async Task WriteGTFIndexed(Stream stream, Bitmap bitmap)
         {
             nQuant.WuQuantizer wuQuantizer = new nQuant.WuQuantizer();
@@ -527,6 +539,7 @@ namespace Imas
             memStream.Position = 0;
             await memStream.CopyToAsync(stream);
         }
+
         private static async Task WriteGTF32Bit(Stream stream, Bitmap bitmap, int type)
         {
             if (bitmap.PixelFormat != PixelFormat.Format32bppArgb)
@@ -551,18 +564,23 @@ namespace Imas
                 case 2:
                     WriteGTFPixels1555(binary, bitmapArray, order, pixelCount, stride);
                     break;
+
                 case 3:
                     WriteGTFPixels4444(binary, bitmapArray, order, pixelCount, stride);
                     break;
+
                 case 5:
                     WriteGTFPixels8888(binary, bitmapArray, order, pixelCount, stride);
                     break;
+
                 case 6:
                     WriteGTFPixels565Block4Color(stream, bitmapArray, bitmap.Width, bitmap.Height, stride);
                     break;
+
                 case 7:
                     WriteGTFPixels565Block8Alpha4Color(stream, bitmapArray, bitmap.Width, bitmap.Height, stride);
                     break;
+
                 case 8:
                     WriteGTFPixels565Block8RelAlpha4Color(stream, bitmapArray, bitmap.Width, bitmap.Height, stride);
                     break;
@@ -570,9 +588,10 @@ namespace Imas
 
             memStream.Position = 0;
             await memStream.CopyToAsync(stream);
-
         }
+
         #region Write Pixels
+
         private static void WriteGTFPixels1555(Binary binary, int[] bitmapArray, Order order, int pixelCount, int stride)
         {
             for (int n = 0; n < pixelCount; n++)
@@ -588,6 +607,7 @@ namespace Imas
                     ));
             }
         }
+
         private static void WriteGTFPixels4444(Binary binary, int[] bitmapArray, Order order, int pixelCount, int stride)
         {
             for (int n = 0; n < pixelCount; n++)
@@ -602,6 +622,7 @@ namespace Imas
                 binary.WriteUInt16((ushort)b);
             }
         }
+
         private static void WriteGTFPixels8888(Binary binary, int[] bitmapArray, Order order, int pixelCount, int stride)
         {
             for (int n = 0; n < pixelCount; n++)
@@ -612,7 +633,9 @@ namespace Imas
                 binary.WriteUInt32(b);
             }
         }
-        #endregion
+
+        #endregion Write Pixels
+
         private static void WriteGTFPixels565Block4Color(Stream stream, int[] bitmapArray, int width, int height, int stride)
         {
             for (int y = 0; y < height / 4; y++)
@@ -646,6 +669,7 @@ namespace Imas
                 }
             }
         }
+
         private static void WriteGTFPixels565Block8Alpha4Color(Stream stream, int[] bitmapArray, int width, int height, int stride)
         {
             for (int y = 0; y < height / 4; y++)
@@ -687,6 +711,7 @@ namespace Imas
                 }
             }
         }
+
         private static void WriteGTFPixels565Block8RelAlpha4Color(Stream stream, int[] bitmapArray, int width, int height, int stride)
         {
             for (int y = 0; y < height / 4; y++)
@@ -875,20 +900,24 @@ namespace Imas
             }
             return (b0new, b1new, colorIndex);
         }
-        #endregion
+
+        #endregion Write GTF
+
         private static bool IsPow2(int n) => (n & (n - 1)) == 0;
 
         private class Order
         {
-            readonly int width;
-            readonly int height;
-            readonly uint xmax;
-            readonly uint ymax;
-            int x, y;
-            readonly bool zOrder;
+            private readonly int width;
+            private readonly int height;
+            private readonly uint xmax;
+            private readonly uint ymax;
+            private int x, y;
+            private readonly bool zOrder;
+
             public Order(int width, int height) :
                 this(width, height, IsPow2(width) && IsPow2(height))
             { }
+
             public Order(int width, int height, bool isZOrder)
             {
                 this.width = width;
@@ -899,6 +928,7 @@ namespace Imas
                 y = 0;
                 zOrder = isZOrder;
             }
+
             public (int, int) GetXY()
             {
                 (int, int) result = (x, y);
@@ -931,6 +961,7 @@ namespace Imas
                 int b0 = (x & 0x1F) * 8;
                 return Color.FromArgb(r0, g0, b0);
             }
+
             public static Color From1555(ushort x)
             {
                 int a0 = (x >> 15) * 255;

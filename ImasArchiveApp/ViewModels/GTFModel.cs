@@ -1,6 +1,5 @@
 ﻿using Imas;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -15,6 +14,7 @@ namespace ImasArchiveApp
         private readonly IGetFileName getFileName;
 
         #region Properties
+
         public ImageSource ImageSource
         {
             get => _imageSource;
@@ -24,9 +24,11 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        #endregion
+
+        #endregion Properties
 
         #region Constructors
+
         public GTFModel(IReport report, string fileName, IGetFileName getFileName, Stream stream) : base(report, fileName)
         {
             try
@@ -52,11 +54,16 @@ namespace ImasArchiveApp
                 throw new InvalidDataException("Could not read file as GTF. Original exception:\n" + ex.ToString());
             }
         }
+
         internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
             (report, filename, getFilename, stream) => new GTFModel(report, filename, getFilename, stream);
-        #endregion
+
+        #endregion Constructors
+
         #region IDisposable
+
         private bool disposed = false;
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -68,9 +75,13 @@ namespace ImasArchiveApp
             disposed = true;
             base.Dispose(disposing);
         }
-        #endregion
+
+        #endregion IDisposable
+
         #region Commands
+
         private AsyncCommand _savePngCommand;
+
         public IAsyncCommand SavePngCommand
         {
             get
@@ -82,8 +93,11 @@ namespace ImasArchiveApp
                 return _savePngCommand;
             }
         }
-        #endregion
+
+        #endregion Commands
+
         #region Command Methods
+
         public async Task SavePng()
         {
             try
@@ -106,6 +120,7 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
-        #endregion
+
+        #endregion Command Methods
     }
 }

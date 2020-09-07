@@ -1,12 +1,10 @@
 ﻿using Imas;
 using Imas.Archive;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -15,13 +13,17 @@ namespace ImasArchiveApp
     public class MainWindowModel : IReport, INotifyPropertyChanged
     {
         #region Fields
+
         private IFileModel _fileModel;
 
         private string _statusMessage;
         private bool _statusIsException;
         private readonly IGetFileName _getFileName;
-        #endregion
+
+        #endregion Fields
+
         #region Properties
+
         public IFileModel FileModel
         {
             get => _fileModel;
@@ -32,6 +34,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -41,6 +44,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+
         public bool StatusIsException
         {
             get => _statusIsException;
@@ -50,8 +54,11 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        #endregion
+
+        #endregion Properties
+
         #region Constructors
+
         public MainWindowModel(IGetFileName getFileName)
         {
             _getFileName = getFileName;
@@ -63,15 +70,22 @@ namespace ImasArchiveApp
             duoProgress1 = new Progress<ProgressData>(ReportLine1);
             duoProgress2 = new Progress<ProgressData>(ReportLine2);
         }
-        #endregion
+
+        #endregion Constructors
+
         #region INotifyPropertyChanged
+
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
+
+        #endregion INotifyPropertyChanged
+
         #region IReport
+
         public Action ClearStatus { get; }
         public Action<ProgressData> ReportProgress { get; }
         public Action<string> ReportMessage { get; }
@@ -79,9 +93,13 @@ namespace ImasArchiveApp
         private readonly Progress<ProgressData> progress;
         private readonly Progress<ProgressData> duoProgress1;
         private readonly Progress<ProgressData> duoProgress2;
-        #endregion
+
+        #endregion IReport
+
         #region Commands
+
         private RelayCommand _openArcCommand;
+
         public ICommand OpenArcCommand
         {
             get
@@ -93,7 +111,9 @@ namespace ImasArchiveApp
                 return _openArcCommand;
             }
         }
+
         private RelayCommand _openPatchZipCommand;
+
         public ICommand OpenPatchZipCommand
         {
             get
@@ -105,33 +125,39 @@ namespace ImasArchiveApp
                 return _openPatchZipCommand;
             }
         }
+
         private RelayCommand _openParCommand;
+
         public ICommand OpenParCommand
         {
             get
             {
                 if (_openParCommand == null)
                 {
-                    _openParCommand = new RelayCommand(_ => 
+                    _openParCommand = new RelayCommand(_ =>
                         OpenWithFilter("Par files (*.par)|*.par|All files (*.*)|*.*", ParModel.Builder));
                 }
                 return _openParCommand;
             }
         }
+
         private RelayCommand _openGtfCommand;
+
         public ICommand OpenGtfCommand
         {
             get
             {
                 if (_openGtfCommand == null)
                 {
-                    _openGtfCommand = new RelayCommand(_ => 
+                    _openGtfCommand = new RelayCommand(_ =>
                         OpenWithFilter("GTF files (*.gtf;*.dds;*.tex)|*.gtf;*.dds;*.tex|All files (*.*)|*.*", GTFModel.Builder));
                 }
                 return _openGtfCommand;
             }
         }
+
         private RelayCommand _openHexCommand;
+
         public ICommand OpenHexCommand
         {
             get
@@ -144,7 +170,9 @@ namespace ImasArchiveApp
                 return _openHexCommand;
             }
         }
+
         private RelayCommand _closeCommand;
+
         public ICommand CloseCommand
         {
             get
@@ -156,8 +184,11 @@ namespace ImasArchiveApp
                 return _closeCommand;
             }
         }
+
         public bool CanClose() => FileModel != null;
-        AsyncCommand _newFromFolderCommand;
+
+        private AsyncCommand _newFromFolderCommand;
+
         public ICommand NewFromFolderCommand
         {
             get
@@ -169,8 +200,11 @@ namespace ImasArchiveApp
                 return _newFromFolderCommand;
             }
         }
+
         public bool CanNewFromFolder() => FileModel == null;
-        AsyncCommand _replaceSaveFolderCommand;
+
+        private AsyncCommand _replaceSaveFolderCommand;
+
         public ICommand ReplaceSaveFolderCommand
         {
             get
@@ -182,7 +216,9 @@ namespace ImasArchiveApp
                 return _replaceSaveFolderCommand;
             }
         }
-        AsyncCommand _replaceSaveZipCommand;
+
+        private AsyncCommand _replaceSaveZipCommand;
+
         public ICommand ReplaceSaveZipCommand
         {
             get
@@ -194,8 +230,11 @@ namespace ImasArchiveApp
                 return _replaceSaveZipCommand;
             }
         }
+
         public bool CanReplaceSave() => FileModel == null || FileModel is ArcModel;
-        AsyncCommand _createCommuPatchCommand;
+
+        private AsyncCommand _createCommuPatchCommand;
+
         public ICommand CreateCommuPatchCommand
         {
             get
@@ -207,8 +246,11 @@ namespace ImasArchiveApp
                 return _createCommuPatchCommand;
             }
         }
+
         public bool CanCreateCommuPatch() => FileModel == null;
-        AsyncCommand _convertToGtfCommand;
+
+        private AsyncCommand _convertToGtfCommand;
+
         public ICommand ConvertToGtfCommand
         {
             get
@@ -220,8 +262,11 @@ namespace ImasArchiveApp
                 return _convertToGtfCommand;
             }
         }
-        #endregion
+
+        #endregion Commands
+
         #region Command Methods
+
         public void OpenWithFilter(string filter, FileModelFactory.FileModelBuilder fileModelBuilder)
         {
             string fileName = _getFileName.OpenGetFileName("Open", filter);
@@ -232,6 +277,7 @@ namespace ImasArchiveApp
                 Open(fileName, fileModelBuilder);
             }
         }
+
         private void Open(string inPath, FileModelFactory.FileModelBuilder fileModelBuilder)
         {
             try
@@ -245,6 +291,7 @@ namespace ImasArchiveApp
                 FileModel = null;
             }
         }
+
         public void OpenWithFilter(string filter)
         {
             string fileName = _getFileName.OpenGetFileName("Open", filter);
@@ -255,6 +302,7 @@ namespace ImasArchiveApp
                 Open(fileName);
             }
         }
+
         public void Open(string inPath)
         {
             try
@@ -267,11 +315,13 @@ namespace ImasArchiveApp
                 ReportException(ex);
                 FileModel = null;
             }
-        }   
+        }
+
         public void Close()
         {
             FileModel = null;
         }
+
         public async Task CreateNewFromFolder()
         {
             try
@@ -383,7 +433,6 @@ namespace ImasArchiveApp
                 ReportException(ex);
                 return;
             }
-
         }
 
         public async Task ConvertToGtf()
@@ -411,8 +460,11 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
-        #endregion
+
+        #endregion Command Methods
+
         #region Progress
+
         public void MyClearStatus()
         {
             StatusMessage = "";
@@ -425,8 +477,9 @@ namespace ImasArchiveApp
             StatusIsException = false;
         }
 
-        string duoProgressLine1 = "";
-        string duoProgressLine2 = "";
+        private string duoProgressLine1 = "";
+        private string duoProgressLine2 = "";
+
         public void ReportLine1(ProgressData data)
         {
             duoProgressLine1 = string.Format("{0} of {1}: {2}", data.count, data.total, data.filename);
@@ -434,6 +487,7 @@ namespace ImasArchiveApp
             StatusMessage = duoProgressLine1 + "\n" + duoProgressLine2;
             StatusIsException = false;
         }
+
         public void ReportLine2(ProgressData data)
         {
             duoProgressLine2 = string.Format("{0} of {1}: {2}", data.count, data.total, data.filename);
@@ -451,6 +505,7 @@ namespace ImasArchiveApp
             StatusMessage = ex.ToString();
             StatusIsException = true;
         }
-        #endregion
+
+        #endregion Progress
     }
 }

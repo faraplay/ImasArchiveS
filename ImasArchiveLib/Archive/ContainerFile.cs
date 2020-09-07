@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Imas.Archive
@@ -11,16 +10,20 @@ namespace Imas.Archive
     public interface IContainerFile
     {
         public IReadOnlyCollection<ContainerEntry> Entries { get; }
+
         public ContainerEntry GetEntry(string fileName);
     }
-    public abstract class ContainerFile<T> : IContainerFile, IDisposable where T : ContainerEntry 
+
+    public abstract class ContainerFile<T> : IContainerFile, IDisposable where T : ContainerEntry
     {
         protected Stream _stream;
         protected List<T> _entries;
 
         #region Properties
+
         public IReadOnlyCollection<ContainerEntry> Entries => new ReadOnlyCollection<T>(_entries);
-        #endregion
+
+        #endregion Properties
 
         public ContainerEntry GetEntry(string fileName) => _entries.Find(e => e.FileName == fileName);
 
@@ -33,6 +36,7 @@ namespace Imas.Archive
         {
             return await GetEntryRecursive(fileName, new EntryStack());
         }
+
         private async Task<EntryStack> GetEntryRecursive(string fileName, EntryStack stack)
         {
             int parIndex = fileName.IndexOf("_par/");
@@ -93,6 +97,7 @@ namespace Imas.Archive
         }
 
         public Task ForAllTask(Func<ContainerEntry, string, Task> action, IProgress<ProgressData> progress = null) => ForAllTask(action, "", progress);
+
         private async Task ForAllTask(Func<ContainerEntry, string, Task> action, string prefix, IProgress<ProgressData> progress = null)
         {
             int total = Entries.Count;
@@ -121,12 +126,15 @@ namespace Imas.Archive
         }
 
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -135,6 +143,7 @@ namespace Imas.Archive
             }
             disposed = true;
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

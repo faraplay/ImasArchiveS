@@ -10,13 +10,13 @@ namespace Imas.Archive
         protected readonly long _originalLength;
         protected readonly long _originalOffset;
 
-
         public string FileName { get; }
         internal bool UsesMemoryStream => _newData != null;
         internal long Offset { get; set; }
         public long Length { get => UsesMemoryStream ? _newData.Length : _originalLength; }
 
         #region Constructors
+
         protected ContainerEntry(string fileName, long originalLength, long originalOffset)
         {
             FileName = fileName;
@@ -24,18 +24,23 @@ namespace Imas.Archive
             _originalOffset = originalOffset;
             Offset = originalOffset;
         }
-        #endregion
+
+        #endregion Constructors
 
         public abstract Task<Stream> GetData();
+
         public abstract Task SetData(Stream stream);
 
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -44,6 +49,7 @@ namespace Imas.Archive
             }
             disposed = true;
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

@@ -1,17 +1,16 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Imas;
 using Imas.Archive;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
     [TestClass]
     public class ArcFileEntryTest
     {
-        readonly Progress<ProgressData> progress = new Progress<ProgressData>(
+        private readonly Progress<ProgressData> progress = new Progress<ProgressData>(
             pair => Console.WriteLine(" {0} of {1}: {2} ", pair.count, pair.total, pair.filename));
 
         [AssemblyInitialize]
@@ -190,7 +189,6 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
-
         [DataTestMethod]
         [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "other/disc_edited")]
         public async Task EditThenSaveArcAsTwice(string filename, string extension, string entryPath, string replacementFile, string expectedFile)
@@ -225,7 +223,6 @@ namespace ImasArchiveLibTest
         [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "disc")]
         public async Task EditEntryReextractTest(string filename, string extension, string entryFilepath, string replacementFile, string expectedDir)
         {
-
             using (ArcFile arcFile = new ArcFile(filename, extension))
             {
                 ContainerEntry arcEntry = arcFile.GetEntry(entryFilepath);
@@ -282,6 +279,7 @@ namespace ImasArchiveLibTest
             using ArcFile arcFile = new ArcFile(arcName, extension);
             await arcFile.ExtractCommusToXlsx(outputXlsx, progress);
         }
+
         [DataTestMethod]
         [DataRow("disc", "", "other/parameter_disc.xlsx")]
         [DataRow("hdd", "", "other/parameter_hdd.xlsx")]
@@ -310,4 +308,3 @@ namespace ImasArchiveLibTest
         }
     }
 }
-

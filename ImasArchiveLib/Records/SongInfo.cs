@@ -1,15 +1,14 @@
 ﻿using Imas.Spreadsheet;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Imas.Records
 {
-    class SongInfo
+    internal class SongInfo
     {
-        static readonly string format = "iiiia020issiiiiiiiiiiiiiiic040c100c040c040iiiiiiiia020ii";
+        private static readonly string format = "iiiia020issiiiiiiiiiiiiiiic040c100c040c040iiiiiiiia020ii";
+
         public static IEnumerable<Record> ReadFile(Stream stream)
         {
             Binary binary = new Binary(stream, true);

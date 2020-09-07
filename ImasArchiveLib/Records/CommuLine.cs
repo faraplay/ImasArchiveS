@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Imas.Records
 {
-    class CommuLine : IRecordable
+    internal class CommuLine : IRecordable
     {
         public string file;
         public int messageID;
@@ -124,16 +124,16 @@ namespace Imas.Records
 
         public void WriteFirstRow(XlsxWriter xlsx, Row row)
         {
-            xlsx.AppendCell(row, "A",  "File");
-            xlsx.AppendCell(row, "B",  "Message ID");
-            xlsx.AppendCell(row, "C",  "Flag 1");
-            xlsx.AppendCell(row, "D",  "Flag 2");
-            xlsx.AppendCell(row, "E",  "Name (raw)");
-            xlsx.AppendCell(row, "F",  "Message (raw)");
-            xlsx.AppendCell(row, "G",  "Name");
-            xlsx.AppendCell(row, "H",  "Message");
-            xlsx.AppendCell(row, "I",  "Line 1 Width");
-            xlsx.AppendCell(row, "J",  "Line 2 Width");
+            xlsx.AppendCell(row, "A", "File");
+            xlsx.AppendCell(row, "B", "Message ID");
+            xlsx.AppendCell(row, "C", "Flag 1");
+            xlsx.AppendCell(row, "D", "Flag 2");
+            xlsx.AppendCell(row, "E", "Name (raw)");
+            xlsx.AppendCell(row, "F", "Message (raw)");
+            xlsx.AppendCell(row, "G", "Name");
+            xlsx.AppendCell(row, "H", "Message");
+            xlsx.AppendCell(row, "I", "Line 1 Width");
+            xlsx.AppendCell(row, "J", "Line 2 Width");
         }
 
         public override string ToString()

@@ -5,25 +5,28 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Imas.Spreadsheet
 {
-    class XlsxReader : IDisposable
+    internal class XlsxReader : IDisposable
     {
-        readonly SpreadsheetDocument doc;
-        readonly WorkbookPart workbookPart;
-        readonly Sheets sheets;
-        readonly SharedStringTablePart sharedStringTablePart;
+        private readonly SpreadsheetDocument doc;
+        private readonly WorkbookPart workbookPart;
+        private readonly Sheets sheets;
+        private readonly SharedStringTablePart sharedStringTablePart;
 
         public Sheets Sheets => sheets;
+
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -32,7 +35,8 @@ namespace Imas.Spreadsheet
             }
             disposed = true;
         }
-        #endregion
+
+        #endregion IDisposable
 
         public XlsxReader(string xlsxName)
         {
@@ -41,6 +45,7 @@ namespace Imas.Spreadsheet
             sharedStringTablePart = workbookPart.GetPartsOfType<SharedStringTablePart>().First();
             sheets = workbookPart.Workbook.Sheets;
         }
+
         public IEnumerable<T> GetRows<T>(Sheet sheet, IProgress<ProgressData> progress = null) where T : IRecordable, new()
         {
             WorksheetPart worksheetPart = (WorksheetPart)(workbookPart.GetPartById(sheet.Id));
@@ -60,6 +65,7 @@ namespace Imas.Spreadsheet
             }
             return list;
         }
+
         public IEnumerable<T> GetRows<T>(string sheetName) where T : IRecordable, new()
         {
             Sheet sheet = sheets.Descendants<Sheet>().FirstOrDefault(sheet => sheet.Name == sheetName);
@@ -68,6 +74,7 @@ namespace Imas.Spreadsheet
             else
                 return Enumerable.Empty<T>();
         }
+
         public IEnumerable<Record> GetRows(string format, string sheetName)
         {
             Sheet sheet = sheets.Descendants<Sheet>().FirstOrDefault(sheet => sheet.Name == sheetName);
@@ -88,6 +95,7 @@ namespace Imas.Spreadsheet
         }
 
         #region Get Cell Value
+
         public string GetString(Row row, string colName)
         {
             string address = colName + row.RowIndex.ToString();
@@ -114,6 +122,7 @@ namespace Imas.Spreadsheet
                 return "";
             }
         }
+
         public int GetInt(Row row, string colName)
         {
             string address = colName + row.RowIndex.ToString();
@@ -128,6 +137,7 @@ namespace Imas.Spreadsheet
             else
                 throw new InvalidDataException("Expected a number in cell " + address);
         }
+
         public short GetShort(Row row, string colName)
         {
             string address = colName + row.RowIndex.ToString();
@@ -142,6 +152,7 @@ namespace Imas.Spreadsheet
             else
                 throw new InvalidDataException("Expected a number in cell " + address);
         }
+
         public byte GetByte(Row row, string colName)
         {
             string address = colName + row.RowIndex.ToString();
@@ -156,6 +167,7 @@ namespace Imas.Spreadsheet
             else
                 throw new InvalidDataException("Expected a number in cell " + address);
         }
+
         public bool GetBool(Row row, string colName)
         {
             string address = colName + row.RowIndex.ToString();
@@ -167,6 +179,7 @@ namespace Imas.Spreadsheet
             else
                 throw new InvalidDataException("Expected a boolean in cell " + address);
         }
-        #endregion
+
+        #endregion Get Cell Value
     }
 }

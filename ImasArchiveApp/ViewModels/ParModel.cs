@@ -6,12 +6,19 @@ namespace ImasArchiveApp
     public class ParModel : ContainerFileModel
     {
         #region Fields
+
         private readonly ParFile _parFile;
-        #endregion
+
+        #endregion Fields
+
         #region Properties
+
         protected override IContainerFile ContainerFile => _parFile;
-        #endregion
+
+        #endregion Properties
+
         #region Constructors
+
         public ParModel(IReport parent, Stream stream, string fileName, IGetFileName getFileName)
             : base(parent, fileName, getFileName)
         {
@@ -26,11 +33,16 @@ namespace ImasArchiveApp
                 throw;
             }
         }
-        internal static FileModelFactory.FileModelBuilder Builder { get; set; } = 
+
+        internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
             (report, filename, getFilename, stream) => new ParModel(report, stream, filename, getFilename);
-        #endregion
+
+        #endregion Constructors
+
         #region IDisposable
-        bool disposed = false;
+
+        private bool disposed = false;
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -42,6 +54,7 @@ namespace ImasArchiveApp
             disposed = true;
             base.Dispose(disposing);
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Imas.Records
+﻿namespace Imas.Records
 {
-    class RecordFormat
+    internal class RecordFormat
     {
         public static readonly RecordFormat[] formats = {
             new RecordFormat("parameter/accessory.bin", "accessory", "iiiiibbbbiic020c080bbbbbbbbii"),

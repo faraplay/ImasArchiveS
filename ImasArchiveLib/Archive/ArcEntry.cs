@@ -1,7 +1,5 @@
 ﻿using Imas.Streams;
-using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Imas.Archive
@@ -9,15 +7,22 @@ namespace Imas.Archive
     public class ArcEntry : ContainerEntry
     {
         #region Fields
+
         private readonly ArcFile _parent_file;
-        #endregion
+
+        #endregion Fields
+
         #region Properties
+
         private string ShortName { get; }
         private bool rememberPastLength = false;
         private long _pastLength;
         internal long PastLength => rememberPastLength ? _pastLength : Length;
-        #endregion
+
+        #endregion Properties
+
         #region Constructors & Factory Methods
+
         /// <summary>
         /// Create an ArcEntry based on an ArcFile.
         /// </summary>
@@ -54,7 +59,9 @@ namespace Imas.Archive
             await arcEntry.SetData(stream);
             return arcEntry;
         }
-        #endregion
+
+        #endregion Constructors & Factory Methods
+
         #region Stream Methods
 
         /// <summary>
@@ -95,12 +102,12 @@ namespace Imas.Archive
         /// <returns></returns>
         public override async Task<Stream> GetData()
         {
-                using FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, ShortName + ".gz", UsesMemoryStream);
-                using SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
-                MemoryStream memoryStream = new MemoryStream();
-                await segsStream.CopyToAsync(memoryStream).ConfigureAwait(false);
-                memoryStream.Position = 0;
-                return memoryStream;
+            using FlowbishStream flowbishStream = new FlowbishStream(OpenRaw(), FlowbishStreamMode.Decipher, ShortName + ".gz", UsesMemoryStream);
+            using SegsStream segsStream = new SegsStream(flowbishStream, SegsStreamMode.Decompress);
+            MemoryStream memoryStream = new MemoryStream();
+            await segsStream.CopyToAsync(memoryStream).ConfigureAwait(false);
+            memoryStream.Position = 0;
+            return memoryStream;
         }
 
         /// <summary>
@@ -131,6 +138,7 @@ namespace Imas.Archive
             ClearMemoryStream();
             rememberPastLength = false;
         }
+
         internal void ClearMemoryStream()
         {
             if (UsesMemoryStream)
@@ -141,6 +149,7 @@ namespace Imas.Archive
                 _newData = null;
             }
         }
-        #endregion
+
+        #endregion Stream Methods
     }
 }

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 
 namespace Imas.Streams
 {
@@ -19,7 +18,7 @@ namespace Imas.Streams
                 PBox[i] ^= Reverse(key[i]);
             }
             UInt32 datal = 0, datar = 0;
-            for (int i = 0; i < 18; i+= 2)
+            for (int i = 0; i < 18; i += 2)
             {
                 (datal, datar) = Encipher(datal, datar);
                 PBox[i] = datal;
@@ -126,6 +125,7 @@ namespace Imas.Streams
                 buffer[i + 7] = (byte)((xr & 0x000000FFu) >> 0);
             }
         }
+
         /// <summary>
         /// Deciphers the buffer.
         /// </summary>

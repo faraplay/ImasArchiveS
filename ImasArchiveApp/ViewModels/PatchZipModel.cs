@@ -5,12 +5,19 @@ namespace ImasArchiveApp
     public class PatchZipModel : ContainerFileModel
     {
         #region Fields
+
         private readonly PatchZipFile _patchZipFile;
-        #endregion
+
+        #endregion Fields
+
         #region Properties
+
         protected override IContainerFile ContainerFile => _patchZipFile;
-        #endregion
+
+        #endregion Properties
+
         #region Constructors
+
         public PatchZipModel(IReport parent, string inPath, IGetFileName getFileName)
             : base(parent, inPath.Substring(inPath.LastIndexOf('\\') + 1), getFileName)
         {
@@ -25,9 +32,13 @@ namespace ImasArchiveApp
                 throw;
             }
         }
-        #endregion
+
+        #endregion Constructors
+
         #region IDisposable
-        bool disposed = false;
+
+        private bool disposed = false;
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -39,6 +50,7 @@ namespace ImasArchiveApp
             disposed = true;
             base.Dispose(disposing);
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Imas.Spreadsheet;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Text;
 
 namespace Imas.Records
 {
-    static class JaJpText
+    internal static class JaJpText
     {
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
@@ -35,7 +34,6 @@ namespace Imas.Records
                 list[i][2] = binary.ReadInt32();
                 list[i][3] = binary.ReadInt32();
             }
-
 
             stream.Position = stringOffset;
             int id = 0;
@@ -126,7 +124,6 @@ namespace Imas.Records
                 binary.WriteInt32((int)list[i][0]);
                 binary.WriteInt32((int)stringList[(int)list[i][4]][1]);
             }
-
         }
     }
 }

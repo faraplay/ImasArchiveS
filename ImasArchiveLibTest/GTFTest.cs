@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
@@ -15,6 +14,60 @@ namespace ImasArchiveLibTest
     [TestClass]
     public class GTFTest
     {
+        [DataTestMethod]
+        [DataRow("../data/hdd4", "*.dds", "../data/hdd4_dds.xlsx")]
+        [DataRow("../data/hdd4", "*.gtf", "../data/hdd4_gtf.xlsx")]
+        public void GetGtfDataTest(string dirName, string filter, string outDir)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
+            var files = directoryInfo.GetFiles(filter, SearchOption.AllDirectories);
+            int i = 0;
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir);
+            foreach (var file in files)
+            {
+                i++;
+                Record record = new Record("XXIssiiiiibbsissiiiiiibbsissiii");
+                record[0] = file.FullName;
+                record[1] = file.Name;
+                record[2] = (int)file.Length;
+                using (FileStream stream = file.OpenRead())
+                {
+                    record.Deserialise(stream);
+                }
+                xlsxWriter.AppendRow("gtf", record);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("../data/gtf/hdd4_dds", "*.png", "../data/hdd4_dds_png.xlsx")]
+        [DataRow("../data/gtf/hdd4_gtf", "*.png", "../data/hdd4_gtf_png.xlsx")]
+        public void GetPngDataTest(string dirName, string filter, string outDir)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
+            var files = directoryInfo.GetFiles(filter, SearchOption.AllDirectories);
+            int i = 0;
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir);
+            using SHA256 sha = SHA256.Create();
+            foreach (var file in files)
+            {
+                i++;
+                Record record = new Record("XXX");
+                record[0] = file.FullName;
+                record[1] = file.Name;
+                using (FileStream stream = file.OpenRead())
+                {
+                    byte[] hash = sha.ComputeHash(stream);
+                    string s = "";
+                    foreach (byte b in hash)
+                    {
+                        s += b.ToString("X2");
+                    }
+                    record[2] = s;
+                }
+                xlsxWriter.AppendRow("png", record);
+            }
+        }
+
         //[DataTestMethod]
         //[DataRow("../data/hdd4", "*.dds", "../data/gtf/hdd4_dds")]
         //[DataRow("../data/hdd4", "*.gtf", "../data/gtf/hdd4_gtf")]
@@ -78,7 +131,6 @@ namespace ImasArchiveLibTest
                     record[0] = file.FullName.Substring(directoryInfo.FullName.Length);
                     record[1] = outName;
                     xlsxWriter.AppendRow("filenames", record);
-
                 }
                 catch (NotSupportedException)
                 {
@@ -121,60 +173,6 @@ namespace ImasArchiveLibTest
             using Bitmap bitmap = new Bitmap(fileName);
             using FileStream outStream = new FileStream(outGtf, FileMode.Create, FileAccess.Write);
             await GTF.WriteGTF(outStream, bitmap, type);
-        }
-
-        [DataTestMethod]
-        [DataRow("../data/hdd4", "*.dds", "../data/hdd4_dds.xlsx")]
-        [DataRow("../data/hdd4", "*.gtf", "../data/hdd4_gtf.xlsx")]
-        public void GetGtfDataTest(string dirName, string filter, string outDir)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
-            var files = directoryInfo.GetFiles(filter, SearchOption.AllDirectories);
-            int i = 0;
-            using XlsxWriter xlsxWriter = new XlsxWriter(outDir);
-            foreach (var file in files)
-            {
-                i++;
-                Record record = new Record("XXIssiiiiibbsissiiiiiibbsissiii");
-                record[0] = file.FullName;
-                record[1] = file.Name;
-                record[2] = (int)file.Length;
-                using (FileStream stream = file.OpenRead())
-                {
-                    record.Deserialise(stream);
-                }
-                xlsxWriter.AppendRow("gtf", record);
-            }
-        }
-
-        [DataTestMethod]
-        [DataRow("../data/gtf/hdd4_dds", "*.png", "../data/hdd4_dds_png.xlsx")]
-        [DataRow("../data/gtf/hdd4_gtf", "*.png", "../data/hdd4_gtf_png.xlsx")]
-        public void GetPngDataTest(string dirName, string filter, string outDir)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
-            var files = directoryInfo.GetFiles(filter, SearchOption.AllDirectories);
-            int i = 0;
-            using XlsxWriter xlsxWriter = new XlsxWriter(outDir);
-            using SHA256 sha = SHA256.Create();
-            foreach (var file in files)
-            {
-                i++;
-                Record record = new Record("XXX");
-                record[0] = file.FullName;
-                record[1] = file.Name;
-                using (FileStream stream = file.OpenRead())
-                {
-                    byte[] hash = sha.ComputeHash(stream);
-                    string s = "";
-                    foreach (byte b in hash)
-                    {
-                        s += b.ToString("X2");
-                    }
-                    record[2] = s;
-                }
-                xlsxWriter.AppendRow("png", record);
-            }
         }
     }
 }

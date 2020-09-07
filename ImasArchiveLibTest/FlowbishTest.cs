@@ -7,7 +7,6 @@ namespace ImasArchiveLibTest
     [TestClass]
     public class FlowbishTest
     {
-
         [DataTestMethod]
         [DataRow("other/songResource.bin.gz.fbs", "songResource.bin.gz", "other/songResource.bin.gz")]
         public void DecryptWholeFileTest(string inputFile, string name, string expectedFile)
@@ -42,7 +41,6 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
-
         [DataTestMethod]
         [DataRow("other/songResource.bin.gz.fbs", "songResource.bin.gz", "other/songResource.bin.gz", 32)]
         [DataRow("other/songResource.bin.gz.fbs", "songResource.bin.gz", "other/songResource.bin.gz", 0x1040)]
@@ -66,7 +64,6 @@ namespace ImasArchiveLibTest
             File.Delete("temp_exp.dat");
             Assert.IsTrue(eq);
         }
-
 
         [DataTestMethod]
         [DataRow("other/songResource.bin.gz", "songResource.bin.gz", "other/songResource.bin.gz.fbs")]

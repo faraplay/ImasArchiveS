@@ -10,12 +10,14 @@ namespace Imas
 {
     public class Font : IDisposable
     {
-        CharData[] chars;
-        int root;
+        private CharData[] chars;
+        private int root;
 
         #region par
+
         private readonly byte[] zeros = new byte[256];
-        byte[] parHeader;
+        private byte[] parHeader;
+
         public async Task ReadFontPar(Stream stream)
         {
             using MemoryStream memStream = new MemoryStream();
@@ -57,6 +59,7 @@ namespace Imas
                 memStream.Position += 6;
             }
         }
+
         public async Task WriteFontPar(Stream stream, bool nxFixedWidth = true)
         {
             int gtfPad, nxPad, nxpPad;
@@ -166,7 +169,8 @@ namespace Imas
             memStream.Position = 0;
             await memStream.CopyToAsync(stream);
         }
-        #endregion
+
+        #endregion par
 
         public void WriteJSON(TextWriter writer)
         {
@@ -183,14 +187,18 @@ namespace Imas
 
             writer.WriteLine("]");
         }
+
         #region Bitmaps
+
         private GTF gtf;
         private Bitmap nonGtfBitmap;
+
         private void SetGtf(GTF value)
         {
             nonGtfBitmap?.Dispose();
             gtf = value;
         }
+
         public Bitmap BigBitmap
         {
             get => gtf != null ? gtf.Bitmap : nonGtfBitmap;
@@ -200,6 +208,7 @@ namespace Imas
                 nonGtfBitmap = value;
             }
         }
+
         private void ClearBigBitmap()
         {
             gtf?.Dispose();
@@ -269,13 +278,14 @@ namespace Imas
             if (BigBitmap == null && charsHaveBitmaps)
             {
                 BigBitmap = new Bitmap(2048, 2048);
-                Array.Sort(chars, (c1, c2) => {
+                Array.Sort(chars, (c1, c2) =>
+                {
                     int result = c2.dataheight.CompareTo(c1.dataheight);
                     if (result != 0)
                         return result;
                     else
                         return c1.index.CompareTo(c2.index);
-                    }
+                }
                 );
                 short x = 2049;
                 short y = -1;
@@ -321,8 +331,11 @@ namespace Imas
             UseCharBitmaps();
             UseBigBitmap();
         }
-        #endregion
+
+        #endregion Bitmaps
+
         #region Digraph
+
         // Do not rebuild big bitmap after calling this function!
         public void AddDigraphs()
         {
@@ -379,6 +392,7 @@ namespace Imas
             chars = charsNew.ToArray();
             BuildTree();
         }
+
         // Do not rebuild big bitmap after calling this function!
         private void AddAlternateASCIIToFont(char[] charset)
         {
@@ -440,6 +454,7 @@ namespace Imas
             chars = charsNew.ToArray();
             BuildTree();
         }
+
         public void CreateDigraphs(string destDir, char[] charset1, char[] charset2)
         {
             UseCharBitmaps();
@@ -469,6 +484,7 @@ namespace Imas
                 }
             }
         }
+
         private CharData CreateDigraph(CharData c1, CharData c2)
         {
             int offsetxmin = Math.Min(c1.offsetx, c2.offsetx + c1.width);
@@ -499,8 +515,11 @@ namespace Imas
                 width = (short)(c1.width + c2.width)
             };
         }
-        #endregion
+
+        #endregion Digraph
+
         #region Save/Load PNG
+
         public void SaveAllCharBitmaps(string destDir)
         {
             DirectoryInfo dInfo = new DirectoryInfo(destDir);
@@ -562,8 +581,11 @@ namespace Imas
                 };
             }
         }
-        #endregion
+
+        #endregion Save/Load PNG
+
         #region Tree
+
         private void BuildTree()
         {
             Array.Sort(chars);
@@ -596,6 +618,7 @@ namespace Imas
             }
             return CheckSubTree(chars, root);
         }
+
         private bool CheckSubTree(Span<CharData> span, int root)
         {
             if (span.Length == 0)
@@ -608,8 +631,11 @@ namespace Imas
             return CheckSubTree(span.Slice(0, midpoint), span[midpoint].left) &&
                 CheckSubTree(span.Slice(midpoint + 1), span[midpoint].right);
         }
-        #endregion
+
+        #endregion Tree
+
         #region IDisposable
+
         public void Dispose()
         {
             Dispose(true);
@@ -632,10 +658,11 @@ namespace Imas
         {
             Dispose(false);
         }
-        #endregion
+
+        #endregion IDisposable
     }
 
-    class CharData : IComparable<CharData>, IDisposable
+    internal class CharData : IComparable<CharData>, IDisposable
     {
         public ushort key;
         public byte datawidth;
@@ -654,10 +681,11 @@ namespace Imas
         public ushort isEmoji;
 
         public Bitmap bitmap;
+
         public int CompareTo(CharData other) => key.CompareTo(other.key);
 
-
         #region IDisposable
+
         public void Dispose()
         {
             Dispose(true);
@@ -677,6 +705,7 @@ namespace Imas
         {
             Dispose(false);
         }
-        #endregion
+
+        #endregion IDisposable
     }
 }

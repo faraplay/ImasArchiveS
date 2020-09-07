@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Imas
 {
-    class Binary
+    internal class Binary
     {
-        readonly Stream stream;
-        readonly bool isBigEndian;
+        private readonly Stream stream;
+        private readonly bool isBigEndian;
+
         public Binary(Stream stream, bool isBigEndian)
         {
             this.stream = stream;
@@ -16,7 +15,9 @@ namespace Imas
         }
 
         #region Read
+
         #region 64
+
         /// <summary>
         /// Returns a 64-bit unsigned integer from the stream.
         /// </summary>
@@ -49,7 +50,9 @@ namespace Imas
                 ((ulong)data[1] << 8) |
                 ((ulong)data[0]);
         }
+
         public ulong ReadUInt64() => ReadUInt64(stream, isBigEndian);
+
         /// <summary>
         /// Returns a 64-bit signed integer from the stream.
         /// </summary>
@@ -60,9 +63,13 @@ namespace Imas
         {
             return (long)ReadUInt64(stream, isBigEndian);
         }
+
         public long ReadInt64() => (long)ReadUInt64(stream, isBigEndian);
-        #endregion
+
+        #endregion 64
+
         #region 32
+
         /// <summary>
         /// Returns a 32-bit unsigned integer from the stream.
         /// </summary>
@@ -87,7 +94,9 @@ namespace Imas
                 ((uint)data[1] << 8) |
                 ((uint)data[0]);
         }
+
         public uint ReadUInt32() => ReadUInt32(stream, isBigEndian);
+
         /// <summary>
         /// Returns a 32-bit signed integer from the stream.
         /// </summary>
@@ -98,9 +107,13 @@ namespace Imas
         {
             return (int)ReadUInt32(stream, isBigEndian);
         }
+
         public int ReadInt32() => (int)ReadUInt32(stream, isBigEndian);
-        #endregion
+
+        #endregion 32
+
         #region 16
+
         /// <summary>
         /// Returns a 16-bit unsigned integer from the stream.
         /// </summary>
@@ -116,10 +129,12 @@ namespace Imas
                 throw new EndOfStreamException();
             }
             return isBigEndian ?
-                (ushort)((data[0] << 8) | (data[1])):
+                (ushort)((data[0] << 8) | (data[1])) :
                 (ushort)((data[1] << 8) | (data[0]));
         }
+
         public ushort ReadUInt16() => ReadUInt16(stream, isBigEndian);
+
         /// <summary>
         /// Returns a 16-bit signed integer from the stream.
         /// </summary>
@@ -130,9 +145,13 @@ namespace Imas
         {
             return (short)ReadUInt16(stream, isBigEndian);
         }
+
         public short ReadInt16() => (short)ReadUInt16(stream, isBigEndian);
-        #endregion
+
+        #endregion 16
+
         #region 8
+
         /// <summary>
         /// Returns a byte from the stream.
         /// </summary>
@@ -149,11 +168,17 @@ namespace Imas
             }
             return (byte)n;
         }
+
         public byte ReadByte() => ReadByte(stream, isBigEndian);
-        #endregion
-        #endregion
+
+        #endregion 8
+
+        #endregion Read
+
         #region Write
+
         #region 64
+
         /// <summary>
         /// Writes a 64-bit unsigned integer to the stream.
         /// </summary>
@@ -191,7 +216,9 @@ namespace Imas
                 });
             }
         }
+
         public void WriteUInt64(ulong x) => WriteUInt64(stream, isBigEndian, x);
+
         /// <summary>
         /// Writes a 64-bit signed integer to the stream.
         /// </summary>
@@ -204,9 +231,13 @@ namespace Imas
         {
             WriteUInt64(stream, isBigEndian, (ulong)x);
         }
+
         public void WriteInt64(long x) => WriteUInt64(stream, isBigEndian, (ulong)x);
-        #endregion
+
+        #endregion 64
+
         #region 32
+
         /// <summary>
         /// Writes a 32-bit unsigned integer to the stream.
         /// </summary>
@@ -236,7 +267,9 @@ namespace Imas
                 });
             }
         }
+
         public void WriteUInt32(uint x) => WriteUInt32(stream, isBigEndian, x);
+
         /// <summary>
         /// Writes a 32-bit signed integer to the stream.
         /// </summary>
@@ -249,9 +282,13 @@ namespace Imas
         {
             WriteUInt32(stream, isBigEndian, (uint)x);
         }
+
         public void WriteInt32(int x) => WriteUInt32(stream, isBigEndian, (uint)x);
-        #endregion
+
+        #endregion 32
+
         #region 16
+
         /// <summary>
         /// Writes a 16-bit unsigned integer to the stream.
         /// </summary>
@@ -277,7 +314,9 @@ namespace Imas
                 });
             }
         }
+
         public void WriteUInt16(ushort x) => WriteUInt16(stream, isBigEndian, x);
+
         /// <summary>
         /// Writes a 16-bit signed integer to the stream.
         /// </summary>
@@ -290,9 +329,13 @@ namespace Imas
         {
             WriteUInt16(stream, isBigEndian, (ushort)x);
         }
+
         public void WriteInt16(short x) => WriteUInt16(stream, isBigEndian, (ushort)x);
-        #endregion
+
+        #endregion 16
+
         #region 8
+
         /// <summary>
         /// Writes a byte to the stream.
         /// </summary>
@@ -306,8 +349,11 @@ namespace Imas
         {
             stream.WriteByte(x);
         }
+
         public void WriteByte(byte x) => WriteByte(stream, isBigEndian, x);
-        #endregion
-        #endregion
+
+        #endregion 8
+
+        #endregion Write
     }
 }

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Imas.Archive
@@ -23,10 +22,12 @@ namespace Imas.Archive
                     _stream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
                     zipArchive = new ZipArchive(_stream, ZipArchiveMode.Read);
                     break;
+
                 case PatchZipMode.Create:
                     _stream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
                     zipArchive = new ZipArchive(_stream, ZipArchiveMode.Update);
                     break;
+
                 case PatchZipMode.Update:
                     _stream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                     zipArchive = new ZipArchive(_stream, ZipArchiveMode.Update);
@@ -60,11 +61,13 @@ namespace Imas.Archive
         }
 
         #region Add Files
+
         public void AddFile(string inputFilename, string entryName)
         {
             ZipArchiveEntry entry = zipArchive.CreateEntryFromFile(inputFilename, entryName);
             _entries.Add(new PatchZipEntry(entry));
         }
+
         public async Task AddCommus(string xlsxName, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
         {
             using CommuFromXlsx commuFromXlsx = new CommuFromXlsx(xlsxName);
@@ -74,7 +77,7 @@ namespace Imas.Archive
         public async Task AddGtfs(string dirName, IProgress<ProgressData> progress = null)
         {
             DirectoryInfo dInfo = new DirectoryInfo(dirName);
-            HashSet<string> filenames = 
+            HashSet<string> filenames =
                 new HashSet<string>(dInfo.GetFiles("*.png")
                 .Select(fInfo => fInfo.Name));
 
@@ -95,8 +98,8 @@ namespace Imas.Archive
                 using Stream entryStream = entry.Open();
                 await GTF.WriteGTF(entryStream, new System.Drawing.Bitmap(pngName), (int)record[2]);
             }
-
         }
+
         public async Task AddLyrics(string dirName, IProgress<ProgressData> progress = null)
         {
             DirectoryInfo dInfo = new DirectoryInfo(dirName);
@@ -126,7 +129,6 @@ namespace Imas.Archive
                 using Stream entryStream = entry.Open();
                 await xmb.WriteXmb(entryStream);
             }
-
         }
 
         public void AddParameterFiles(string xlsxName)
@@ -176,10 +178,13 @@ namespace Imas.Archive
                 JaJpText.WriteFile(entryStream, xlsx);
             }
         }
-        #endregion
+
+        #endregion Add Files
 
         #region IDisposable
+
         private bool disposed;
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -192,7 +197,8 @@ namespace Imas.Archive
             disposed = true;
             base.Dispose(disposing);
         }
-        #endregion
+
+        #endregion IDisposable
     }
 
     public enum PatchZipMode

@@ -13,12 +13,14 @@ namespace ImasArchiveApp
         private string _name;
 
         #region Constructors & Factory Methods
+
         protected BrowserItemModel(BrowserModel parent, BrowserTree tree)
         {
             _parent = parent;
             _tree = tree;
             _name = tree.Name;
         }
+
         internal static BrowserItemModel CreateBrowserItemModel(BrowserModel parent, BrowserTree tree)
         {
             return tree.Type switch
@@ -28,8 +30,11 @@ namespace ImasArchiveApp
                 _ => throw new IndexOutOfRangeException("Type not in enum."),
             };
         }
-        #endregion
+
+        #endregion Constructors & Factory Methods
+
         #region Properties
+
         public string Name
         {
             get => _name;
@@ -39,25 +44,33 @@ namespace ImasArchiveApp
                 OnPropertyChanged(nameof(Name));
             }
         }
+
         public string FullName => _tree.ToString().Substring(1);
-        #endregion
+
+        #endregion Properties
+
         #region INotifyPropertyChanged
+
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
+
+        #endregion INotifyPropertyChanged
     }
 
-    class BrowserFileItemModel : BrowserItemModel
+    internal class BrowserFileItemModel : BrowserItemModel
     {
         internal BrowserFileItemModel(BrowserModel parent, BrowserTree tree) : base(parent, tree)
         {
         }
 
         #region Commands
-        AsyncCommand _selectCommand;
+
+        private AsyncCommand _selectCommand;
+
         public ICommand SelectCommand
         {
             get
@@ -70,7 +83,9 @@ namespace ImasArchiveApp
                 return _selectCommand;
             }
         }
-        AsyncCommand _importCommand;
+
+        private AsyncCommand _importCommand;
+
         public ICommand ImportCommand
         {
             get
@@ -83,7 +98,9 @@ namespace ImasArchiveApp
                 return _importCommand;
             }
         }
-        AsyncCommand _exportCommand;
+
+        private AsyncCommand _exportCommand;
+
         public ICommand ExportCommand
         {
             get
@@ -96,26 +113,34 @@ namespace ImasArchiveApp
                 return _exportCommand;
             }
         }
-        #endregion
+
+        #endregion Commands
+
         #region Command Methods
-        async Task Select()
+
+        private async Task Select()
         {
             _parent.SelectedFile = FullName;
             await _parent.LoadSelectedFile(FullName);
         }
-        Task Import() => _parent.Import(FullName);
-        Task Export() => _parent.Export(FullName);
-        #endregion
+
+        private Task Import() => _parent.Import(FullName);
+
+        private Task Export() => _parent.Export(FullName);
+
+        #endregion Command Methods
     }
 
-    class BrowserFolderItemModel : BrowserItemModel
+    internal class BrowserFolderItemModel : BrowserItemModel
     {
         internal BrowserFolderItemModel(BrowserModel parent, BrowserTree tree) : base(parent, tree)
         {
         }
 
         #region Commands
-        RelayCommand _selectCommand;
+
+        private RelayCommand _selectCommand;
+
         public ICommand SelectCommand
         {
             get
@@ -128,12 +153,16 @@ namespace ImasArchiveApp
                 return _selectCommand;
             }
         }
-        #endregion
+
+        #endregion Commands
+
         #region Command Methods
-        void Select()
+
+        private void Select()
         {
-             _parent.MoveToTree(_tree);
+            _parent.MoveToTree(_tree);
         }
-        #endregion
+
+        #endregion Command Methods
     }
 }

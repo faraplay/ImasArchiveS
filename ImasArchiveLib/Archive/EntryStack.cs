@@ -6,7 +6,7 @@ namespace Imas.Archive
 {
     /// <summary>
     /// Stack of parFiles and streams.
-    /// To access the data in an entry in a nested entry, the parFiles in 
+    /// To access the data in an entry in a nested entry, the parFiles in
     /// the chain leading up to the entry
     /// need to all be loaded. This class holds all the parFiles in this
     /// chain and will automatically dispose them when the stack is disposed.
@@ -19,6 +19,7 @@ namespace Imas.Archive
         public ContainerEntry Entry { get; set; }
 
         internal void Push(ParFile par) => pars.Push(par);
+
         internal void Push(Stream stream) => streams.Push(stream);
 
         public ParFile Peek() => pars.Peek();
@@ -38,12 +39,15 @@ namespace Imas.Archive
         }
 
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -53,7 +57,7 @@ namespace Imas.Archive
             }
             disposed = true;
         }
-        #endregion
 
+        #endregion IDisposable
     }
 }

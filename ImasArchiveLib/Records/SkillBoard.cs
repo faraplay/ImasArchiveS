@@ -1,5 +1,4 @@
 ﻿using Imas.Spreadsheet;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Text;
 
 namespace Imas.Records
 {
-    static class SkillBoard
+    internal static class SkillBoard
     {
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
@@ -43,7 +42,8 @@ namespace Imas.Records
                 record[1] = stringIndex++;
                 StringBuilder sb = new StringBuilder();
                 char c;
-                while ((c = getChar()) != 0) {
+                while ((c = getChar()) != 0)
+                {
                     sb.Append(c);
                 }
                 record[2] = sb.ToString();
