@@ -203,6 +203,22 @@ namespace ImasArchiveApp
 
         public bool CanNewFromFolder() => FileModel == null;
 
+        private RelayCommand _newPatchCommand;
+
+        public ICommand NewPatchCommand
+        {
+            get
+            {
+                if (_newPatchCommand == null)
+                {
+                    _newPatchCommand = new RelayCommand(_ => CreateNewPatch(), _ => CanNewPatch());
+                }
+                return _newPatchCommand;
+            }
+        }
+
+        public bool CanNewPatch() => FileModel == null;
+
         private AsyncCommand _replaceSaveFolderCommand;
 
         public ICommand ReplaceSaveFolderCommand
@@ -319,6 +335,7 @@ namespace ImasArchiveApp
 
         public void Close()
         {
+            ClearStatus();
             FileModel = null;
         }
 
@@ -337,6 +354,25 @@ namespace ImasArchiveApp
                         ReportMessage("Done.");
                         Open(outFileName);
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                return;
+            }
+        }
+
+        public void CreateNewPatch()
+        {
+            try
+            {
+                ClearStatus();
+                string outFileName = _getFileName.SaveGetFileName("Save As", "patch", "Zip file (*.zip)|*.zip");
+                if (outFileName != null)
+                {
+                    Open(outFileName);
+                    ReportMessage("Done.");
                 }
             }
             catch (Exception ex)

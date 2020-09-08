@@ -1,3 +1,24 @@
+## Version 0.4.0
+
+### Added
+New patch editor - can create new patches and add files to the patch
+
+Lyrics extraction
+
+Parameter extraction now extracts more things
+
+### Changed
+Moved all menu options to main menu bar
+
+Commu spreadsheet reader now only reads one column of translated messages, to be consistent with the updated online spreadsheet
+
+File import/exporting is now accessed thorugh right-clicking the file you want to import/export on
+the file browser.
+
+### Removed
+Old patch creation from commu command has been removed - use new patch editor instead
+
+
 ## Version 0.3.2
 
 ### Added

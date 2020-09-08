@@ -57,5 +57,18 @@ namespace ImasArchiveApp
                 return null;
             }
         }
+
+        public string GetString()
+        {
+            StringInput dialog = new StringInput();
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Filename;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

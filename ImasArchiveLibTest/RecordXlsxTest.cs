@@ -48,11 +48,9 @@ namespace ImasArchiveLibTest
         //[DataRow("new.ja_jp", "text_ja_jp_reread.xlsx")]
         public void JaJpReadTest(string binName, string xlsxName)
         {
-            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
-            {
-                using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
-                JaJpText.ReadFile(stream, xlsxWriter);
-            }
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+            JaJpText.ReadFile(stream, xlsxWriter);
         }
 
         [DataTestMethod]
@@ -69,11 +67,9 @@ namespace ImasArchiveLibTest
         public void PastblReadTest(string binName, string xlsxName)
         {
             using XlsxWriter xlsx = new XlsxWriter(xlsxName);
-            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
-            {
-                IEnumerable<Record> records = Pastbl.ReadFile(stream);
-                xlsx.AppendRows("pastbl", records);
-            }
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            IEnumerable<Record> records = Pastbl.ReadFile(stream);
+            xlsx.AppendRows("pastbl", records);
         }
 
         [DataTestMethod]
@@ -85,10 +81,8 @@ namespace ImasArchiveLibTest
                 .Where(record => (string)record[0] == alfFileName)
                 .Select(record => (string)record[1])
                 .ToList();
-            using (FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write))
-            {
-                Pastbl.WriteFile(stream, strings);
-            }
+            using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
+            Pastbl.WriteFile(stream, strings);
         }
 
         [DataTestMethod]
@@ -96,11 +90,9 @@ namespace ImasArchiveLibTest
         public void SongInfoReadTest(string binName, string xlsxName)
         {
             using XlsxWriter xlsx = new XlsxWriter(xlsxName);
-            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
-            {
-                IEnumerable<Record> records = SongInfo.ReadFile(stream);
-                xlsx.AppendRows("songInfo", records);
-            }
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            IEnumerable<Record> records = SongInfo.ReadFile(stream);
+            xlsx.AppendRows("songInfo", records);
         }
 
         [DataTestMethod]

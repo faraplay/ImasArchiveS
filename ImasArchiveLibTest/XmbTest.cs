@@ -17,11 +17,9 @@ namespace ImasArchiveLibTest
         {
             using FileStream outStream = new FileStream(xmlName, FileMode.Create, FileAccess.Write);
             Xmb xmb = new Xmb();
-            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
-            {
-                xmb.ReadXmb(stream);
-                xmb.WriteXml(outStream);
-            }
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            xmb.ReadXmb(stream);
+            xmb.WriteXml(outStream);
         }
 
         [DataTestMethod]
@@ -33,11 +31,9 @@ namespace ImasArchiveLibTest
         {
             using FileStream outStream = new FileStream(binName, FileMode.Create, FileAccess.Write);
             Xmb xmb = new Xmb();
-            using (FileStream stream = new FileStream(xmlName, FileMode.Open, FileAccess.Read))
-            {
-                xmb.ReadXml(stream);
-                await xmb.WriteXmb(outStream);
-            }
+            using FileStream stream = new FileStream(xmlName, FileMode.Open, FileAccess.Read);
+            xmb.ReadXml(stream);
+            await xmb.WriteXmb(outStream);
         }
     }
 }

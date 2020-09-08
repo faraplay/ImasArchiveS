@@ -75,7 +75,7 @@ namespace Imas.Spreadsheet
                 return Enumerable.Empty<T>();
         }
 
-        public IEnumerable<Record> GetRows(string format, string sheetName)
+        public IEnumerable<Record> GetRows(string format, string sheetName, IProgress<ProgressData> progress = null)
         {
             Sheet sheet = sheets.Descendants<Sheet>().FirstOrDefault(sheet => sheet.Name == sheetName);
             if (sheet == null)
@@ -83,12 +83,16 @@ namespace Imas.Spreadsheet
             WorksheetPart worksheetPart = (WorksheetPart)(workbookPart.GetPartById(sheet.Id));
             var rows = worksheetPart.Worksheet.Descendants<Row>();
             List<Record> list = new List<Record>();
+            int total = rows.Count();
+            int count = 0;
             foreach (Row row in rows)
             {
+                count++;
                 if (row.RowIndex == 1)
                     continue;
                 Record record = new Record(format);
                 record.ReadRow(this, row);
+                progress?.Report(new ProgressData { count = count, total = total, filename = record[0].ToString() });
                 list.Add(record);
             }
             return list;

@@ -83,7 +83,7 @@ namespace Imas.Archive
 
             string filenameXlsxName = dirName + "/filenames.xlsx";
             XlsxReader xlsx = new XlsxReader(filenameXlsxName);
-            IEnumerable<Record> records = xlsx.GetRows("XXI", "filenames")
+            IEnumerable<Record> records = (await Task.Run(() => xlsx.GetRows("XXI", "filenames", progress)))
                 .Where(record => filenames.Contains((string)record[1]));
             int total = records.Count();
             int count = 0;
@@ -97,6 +97,7 @@ namespace Imas.Archive
                 ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
                 using Stream entryStream = entry.Open();
                 await GTF.WriteGTF(entryStream, new System.Drawing.Bitmap(pngName), (int)record[2]);
+                _entries.Add(new PatchZipEntry(entry));
             }
         }
 
@@ -128,6 +129,7 @@ namespace Imas.Archive
                 ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
                 using Stream entryStream = entry.Open();
                 await xmb.WriteXmb(entryStream);
+                _entries.Add(new PatchZipEntry(entry));
             }
         }
 
@@ -142,6 +144,7 @@ namespace Imas.Archive
                     ZipArchiveEntry entry = zipArchive.CreateEntry(format.fileName);
                     using Stream entryStream = entry.Open();
                     Record.WriteRecords(entryStream, records);
+                    _entries.Add(new PatchZipEntry(entry));
                 }
             }
             foreach (string fileName in Pastbl.fileNames)
@@ -155,6 +158,7 @@ namespace Imas.Archive
                     ZipArchiveEntry entry = zipArchive.CreateEntry(fileName);
                     using Stream entryStream = entry.Open();
                     Pastbl.WriteFile(entryStream, strings);
+                    _entries.Add(new PatchZipEntry(entry));
                 }
             }
             if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "songInfo"))
@@ -162,6 +166,7 @@ namespace Imas.Archive
                 ZipArchiveEntry entry = zipArchive.CreateEntry("songinfo/songResource.bin");
                 using Stream entryStream = entry.Open();
                 SongInfo.WriteFile(entryStream, xlsx);
+                _entries.Add(new PatchZipEntry(entry));
             }
             if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "skillBoard") &&
                 xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "skillBoardStrings"))
@@ -169,6 +174,7 @@ namespace Imas.Archive
                 ZipArchiveEntry entry = zipArchive.CreateEntry("ui/menu/skillBoard/skillBoard.info");
                 using Stream entryStream = entry.Open();
                 SkillBoard.WriteFile(entryStream, xlsx);
+                _entries.Add(new PatchZipEntry(entry));
             }
             if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJp") &&
                 xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJpStrings"))
@@ -176,6 +182,7 @@ namespace Imas.Archive
                 ZipArchiveEntry entry = zipArchive.CreateEntry("text/im2nx_text.ja_jp");
                 using Stream entryStream = entry.Open();
                 JaJpText.WriteFile(entryStream, xlsx);
+                _entries.Add(new PatchZipEntry(entry));
             }
         }
 

@@ -19,6 +19,7 @@ namespace ImasArchiveApp
         {
             ClearStatus = parent.ClearStatus;
             ReportProgress = parent.ReportProgress;
+            ProgressReporter = new Progress<ProgressData>(ReportProgress);
             ReportMessage = parent.ReportMessage;
             ReportException = parent.ReportException;
             FileName = fileName;
@@ -60,6 +61,7 @@ namespace ImasArchiveApp
 
         public Action ClearStatus { get; }
         public Action<ProgressData> ReportProgress { get; }
+        protected IProgress<ProgressData> ProgressReporter { get; }
         public Action<string> ReportMessage { get; }
         public Action<Exception> ReportException { get; }
 

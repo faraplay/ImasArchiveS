@@ -518,6 +518,7 @@ namespace Imas.Archive
                 using EntryStack entryStack = await GetEntryRecursive(format.fileName);
                 if (entryStack != null)
                 {
+                    progress.Report(new ProgressData { filename = format.fileName });
                     List<Record> records = new List<Record>();
                     using (Stream stream = await entryStack.Entry.GetData())
                     {
@@ -531,6 +532,7 @@ namespace Imas.Archive
                 using EntryStack entryStack = await GetEntryRecursive(fileName);
                 if (entryStack != null)
                 {
+                    progress.Report(new ProgressData { filename = fileName });
                     using Stream stream = await entryStack.Entry.GetData();
                     IEnumerable<Record> newRecords = Pastbl.ReadFile(stream).Select(
                         record =>
@@ -547,6 +549,7 @@ namespace Imas.Archive
             {
                 if (entryStack != null)
                 {
+                    progress.Report(new ProgressData { filename = "songinfo/songResource.bin" });
                     using Stream stream = await entryStack.Entry.GetData();
                     IEnumerable<Record> records = SongInfo.ReadFile(stream);
                     xlsxWriter.AppendRows("songInfo", records);
@@ -556,8 +559,18 @@ namespace Imas.Archive
             {
                 if (entryStack != null)
                 {
+                    progress.Report(new ProgressData { filename = "ui/menu/skillBoard/skillBoard.info" });
                     using Stream stream = await entryStack.Entry.GetData();
                     SkillBoard.ReadFile(stream, xlsxWriter);
+                }
+            }
+            using (EntryStack entryStack = await GetEntryRecursive("text/im2nx_text.ja_jp"))
+            {
+                if (entryStack != null)
+                {
+                    progress.Report(new ProgressData { filename = "text/im2nx_text.ja_jp" });
+                    using Stream stream = await entryStack.Entry.GetData();
+                    JaJpText.ReadFile(stream, xlsxWriter);
                 }
             }
         }

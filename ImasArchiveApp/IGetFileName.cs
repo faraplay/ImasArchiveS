@@ -9,5 +9,7 @@
         public string SaveGetFileName(string title, string defaultDir, string defaultName, string filter);
 
         public string OpenGetFolderName(string title);
+
+        public string GetString();
     }
 }

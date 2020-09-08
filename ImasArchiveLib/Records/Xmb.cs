@@ -315,9 +315,9 @@ namespace Imas.Records
 
         private class StringData
         {
-            private MemoryStream stringData = new MemoryStream();
-            private Dictionary<string, int> asciiStringOffs = new Dictionary<string, int>();
-            private Dictionary<string, int> utf16StringOffs = new Dictionary<string, int>();
+            private readonly MemoryStream stringData = new MemoryStream();
+            private readonly Dictionary<string, int> asciiStringOffs = new Dictionary<string, int>();
+            private readonly Dictionary<string, int> utf16StringOffs = new Dictionary<string, int>();
 
             public int Count => asciiStringOffs.Count + utf16StringOffs.Count;
 

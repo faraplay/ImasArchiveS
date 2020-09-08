@@ -221,7 +221,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Save As", "", "Arc file (*.arc)|*.arc");
                 if (fileName != null)
                 {
-                    await ArcFile.SaveAs(fileName[0..^4], new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.SaveAs(fileName[0..^4], ProgressReporter);
                     ReportMessage("Done.");
                 }
             }
@@ -239,7 +239,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Extract to...", RemoveArcExtension(ArcPath).Item1, "");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractAllAsync(fileName, false, new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.ExtractAllAsync(fileName, false, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }
@@ -257,7 +257,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "commus.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractCommusToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.ExtractCommusToXlsx(fileName, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }
@@ -275,7 +275,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "_parameter.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractParameterToXlsx(fileName, new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.ExtractParameterToXlsx(fileName, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }
@@ -293,7 +293,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath).Item1 + "_image", "");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractAllImages(fileName, new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.ExtractAllImages(fileName, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }
@@ -311,7 +311,7 @@ namespace ImasArchiveApp
                 string dirName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath).Item1 + "_lyrics", "");
                 if (dirName != null)
                 {
-                    await ArcFile.ExtractLyrics(dirName, new Progress<ProgressData>(ReportProgress));
+                    await ArcFile.ExtractLyrics(dirName, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }

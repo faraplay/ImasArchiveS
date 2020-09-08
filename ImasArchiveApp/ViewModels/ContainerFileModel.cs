@@ -10,6 +10,7 @@ namespace ImasArchiveApp
     {
         #region Fields
 
+        private BrowserModel _browserModel;
         protected IFileModel _fileModel;
         protected readonly IGetFileName _getFileName;
 
@@ -18,7 +19,16 @@ namespace ImasArchiveApp
         #region Properties
 
         protected abstract IContainerFile ContainerFile { get; }
-        public BrowserModel BrowserModel { get; set; }
+
+        public BrowserModel BrowserModel
+        {
+            get => _browserModel;
+            set
+            {
+                _browserModel = value;
+                OnPropertyChanged();
+            }
+        }
 
         public IFileModel FileModel
         {
