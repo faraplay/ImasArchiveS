@@ -52,9 +52,9 @@ namespace Imas.Streams
         /// <param name="key">The key used for encryption (usually the filename).</param>
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="ArgumentException"/>
-        /// 
+        ///
         public FlowbishStream(Stream stream, FlowbishStreamMode mode, string key) : this(stream, mode, key, false)
-        { 
+        {
         }
 
         /// <summary>
@@ -91,6 +91,7 @@ namespace Imas.Streams
                     _buffer_offset = 0;
                     InitialiseBuffer();
                     break;
+
                 case FlowbishStreamMode.Encipher:
                     if (!stream.CanWrite)
                         throw new ArgumentException(Strings.NotSupported_UnwritableStream, nameof(stream));
@@ -110,11 +111,11 @@ namespace Imas.Streams
                         throw new ArgumentException(nameof(key));
                     }
                     break;
+
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
             }
         }
-
 
         protected override void Dispose(bool disposing)
         {
@@ -129,7 +130,6 @@ namespace Imas.Streams
                 }
                 catch (IOException)
                 {
-
                 }
             }
 
@@ -227,6 +227,7 @@ namespace Imas.Streams
             if (_buffer == null)
                 InitialiseBuffer();
         }
+
         public Stream BaseStream => _stream;
 
         public override bool CanRead
@@ -258,7 +259,7 @@ namespace Imas.Streams
                 if (_stream == null)
                     return false;
 
-                return ( _stream.CanSeek);
+                return (_stream.CanSeek);
             }
         }
 
@@ -296,14 +297,14 @@ namespace Imas.Streams
                         _buffer_offset = _position;
                         FillAndDecryptBuffer();
                     }
-                } else if (_mode == FlowbishStreamMode.Encipher)
+                }
+                else if (_mode == FlowbishStreamMode.Encipher)
                 {
                     Flush();
                     _position = value;
                     _buffer_offset = _position;
                     _stream.Position = _position + _offset;
                 }
-
             }
         }
 
@@ -389,7 +390,6 @@ namespace Imas.Streams
             return ReadCore(buffer);
         }
 
-
         /// <exception cref="IOException"/>
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="NotSupportedException"/>
@@ -447,7 +447,6 @@ namespace Imas.Streams
             _buffer_current_size = bytes;
             _avail_in = bytes;
             _box.Decipher(new Span<byte>(_buffer, 0, _buffer_current_size));
-
         }
 
         /// <exception cref="ArgumentNullException"/>

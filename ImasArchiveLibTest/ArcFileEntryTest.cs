@@ -1,17 +1,16 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Imas;
 using Imas.Archive;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
 {
     [TestClass]
     public class ArcFileEntryTest
     {
-        readonly Progress<ProgressData> progress = new Progress<ProgressData>(
+        private readonly Progress<ProgressData> progress = new Progress<ProgressData>(
             pair => Console.WriteLine(" {0} of {1}: {2} ", pair.count, pair.total, pair.filename));
 
         [AssemblyInitialize]
@@ -38,31 +37,12 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin.gz.fbs")]
-        public void GetEntryRawAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
-        {
-            using ArcFile arcFile = new ArcFile(filename, extension);
-            ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
-            if (arcEntry == null)
-                Assert.Fail("Entry not found.");
-            using (Stream stream = arcEntry.OpenRaw()) 
-            { 
-                using FileStream fileStream = new FileStream("temp.dat", FileMode.Create, FileAccess.Write);
-                stream.CopyTo(fileStream);
-            }
-            bool eq = Compare.CompareFiles(expectedFile, "temp.dat");
-            File.Delete("temp.dat");
-            Assert.IsTrue(eq);
-        }
-
-
-        [DataTestMethod]
         [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin")]
         [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par", "other/ami_bs2_c01.par")]
         public async Task GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
         {
             using ArcFile arcFile = new ArcFile(filename, extension);
-            ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
+            ContainerEntry arcEntry = arcFile.GetEntry(entryFilepath);
             if (arcEntry == null)
                 Assert.Fail("Entry not found.");
             using (Stream stream = await arcEntry.GetData())
@@ -209,14 +189,13 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
-
         [DataTestMethod]
         [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "other/disc_edited")]
         public async Task EditThenSaveArcAsTwice(string filename, string extension, string entryPath, string replacementFile, string expectedFile)
         {
             using (ArcFile arcFile = new ArcFile(filename, extension))
             {
-                ArcEntry arcEntry = arcFile.GetEntry(entryPath);
+                ContainerEntry arcEntry = arcFile.GetEntry(entryPath);
                 if (arcEntry == null)
                     Assert.Fail("Entry not found.");
                 using (FileStream fileStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
@@ -244,10 +223,9 @@ namespace ImasArchiveLibTest
         [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "disc")]
         public async Task EditEntryReextractTest(string filename, string extension, string entryFilepath, string replacementFile, string expectedDir)
         {
-
             using (ArcFile arcFile = new ArcFile(filename, extension))
             {
-                ArcEntry arcEntry = arcFile.GetEntry(entryFilepath);
+                ContainerEntry arcEntry = arcFile.GetEntry(entryFilepath);
                 if (arcEntry == null)
                     Assert.Fail("Entry not found.");
                 using (FileStream fileStream = new FileStream(replacementFile, FileMode.Open, FileAccess.Read))
@@ -301,8 +279,10 @@ namespace ImasArchiveLibTest
             using ArcFile arcFile = new ArcFile(arcName, extension);
             await arcFile.ExtractCommusToXlsx(outputXlsx, progress);
         }
+
         [DataTestMethod]
-        [DataRow("disc", "", "other/parameter.xlsx")]
+        [DataRow("disc", "", "other/parameter_disc.xlsx")]
+        [DataRow("hdd", "", "other/parameter_hdd.xlsx")]
         public async Task ArcParameterTest(string arcName, string extension, string outputXlsx)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
@@ -318,6 +298,13 @@ namespace ImasArchiveLibTest
             using ArcFile arcFile = new ArcFile(arcName, extension);
             await arcFile.ExtractAllImages(outDir);
         }
+
+        [DataTestMethod]
+        [DataRow("hdd", "", "lyrics/hdd_lyrics")]
+        public async Task ExtractLyricsTest(string arcName, string extension, string outDir)
+        {
+            using ArcFile arcFile = new ArcFile(arcName, extension);
+            await arcFile.ExtractLyrics(outDir);
+        }
     }
 }
-

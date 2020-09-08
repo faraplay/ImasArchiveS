@@ -1,16 +1,14 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using Imas.Spreadsheet;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Imas.Records
 {
-    class RowReader
+    internal class RowReader
     {
-        readonly XlsxReader xlsx;
-        readonly Row row;
-        int colIndex;
+        private readonly XlsxReader xlsx;
+        private readonly Row row;
+        private int colIndex;
 
         public RowReader(XlsxReader xlsx, Row row)
         {
@@ -20,12 +18,16 @@ namespace Imas.Records
         }
 
         public bool ReadBool() => xlsx.GetBool(row, ColumnName(colIndex++));
+
         public byte ReadByte() => xlsx.GetByte(row, ColumnName(colIndex++));
+
         public short ReadShort() => xlsx.GetShort(row, ColumnName(colIndex++));
+
         public int ReadInt() => xlsx.GetInt(row, ColumnName(colIndex++));
+
         public string ReadString() => xlsx.GetString(row, ColumnName(colIndex++));
 
-        static string ColumnName(int colIndex)
+        private static string ColumnName(int colIndex)
         {
             if (colIndex == 0)
                 return "";

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Imas.Streams
 {
-    internal class Substream: Stream
+    internal class Substream : Stream
     {
         private readonly Stream _stream;
         private readonly long _base_offset;
@@ -14,6 +12,7 @@ namespace Imas.Streams
         private static readonly object _lock = new object();
 
         #region Constructors
+
         /// <summary>
         /// Initialises a new instance of the Substream class with the specified stream, offset and length.
         /// </summary>
@@ -42,8 +41,11 @@ namespace Imas.Streams
             _length = length;
             _position = 0;
         }
-        #endregion
+
+        #endregion Constructors
+
         #region Properties
+
         public override bool CanRead => true;
 
         public override bool CanWrite => false;
@@ -51,6 +53,7 @@ namespace Imas.Streams
         public override bool CanSeek => true;
 
         public override long Length { get => _length; }
+
         /// <summary>
         /// The current position, relative to the substream offset.
         /// </summary>
@@ -71,7 +74,8 @@ namespace Imas.Streams
                 }
             }
         }
-        #endregion
+
+        #endregion Properties
 
         /// <summary>
         /// Sets the position of the stream.

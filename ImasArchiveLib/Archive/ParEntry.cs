@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace Imas.Archive
 {
     public class ParEntry : ContainerEntry
     {
-
         public ParFile Parent { get; set; }
         public int Property { get; set; }
+
         internal MemoryStream NewData
         {
             get
@@ -22,14 +19,18 @@ namespace Imas.Archive
                 return _newData;
             }
         }
+
         #region Constructors
+
         internal ParEntry(ParFile parent, string fileName, int offset, int length, int property) :
             base(fileName, length, offset)
         {
             Parent = parent;
             Property = property;
         }
-        #endregion
+
+        #endregion Constructors
+
         /// <summary>
         /// Creates a new stream containing the raw file data of the entry for read access.
         /// Changes in this new stream will not affect the ParEntry.

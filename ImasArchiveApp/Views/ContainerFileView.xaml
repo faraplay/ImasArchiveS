@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="ImasArchiveApp.ParView"
+    x:Class="ImasArchiveApp.ContainerFileView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -24,7 +24,6 @@
             </Expander.Header>
             <ContentControl Content="{Binding Path=BrowserModel}" DockPanel.Dock="Left" />
         </Expander>
-        <DockPanel DockPanel.Dock="Left" />
         <ContentControl Content="{Binding Path=FileModel}" />
     </DockPanel>
 </UserControl>

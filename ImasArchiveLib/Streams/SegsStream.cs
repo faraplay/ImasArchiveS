@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Imas.Streams
@@ -53,6 +51,7 @@ namespace Imas.Streams
                     _buffer_size = 0;
                     _avail_in = 0;
                     break;
+
                 case SegsStreamMode.Compress:
                     if (!stream.CanWrite)
                         throw new ArgumentException(Strings.NotSupported_UnwritableStream, nameof(stream));
@@ -63,6 +62,7 @@ namespace Imas.Streams
                     _position = 0;
                     _buffer_size = 0;
                     break;
+
                 default:
                     throw new ArgumentException(Strings.ArgumentOutOfRangeException_Enum, nameof(mode));
             }
@@ -195,6 +195,7 @@ namespace Imas.Streams
                 return (_mode == SegsStreamMode.Decompress && _stream.CanRead);
             }
         }
+
         public override bool CanWrite
         {
             get
@@ -204,6 +205,7 @@ namespace Imas.Streams
                 return (_mode == SegsStreamMode.Compress && _stream.CanWrite);
             }
         }
+
         public override bool CanSeek
         {
             get
@@ -379,7 +381,6 @@ namespace Imas.Streams
                     break;
             }
             return totalRead;
-
         }
 
         ///<exception cref="NotSupportedException"/>
@@ -421,7 +422,6 @@ namespace Imas.Streams
 
         private SegsStream()
         {
-
         }
 
         /// <summary>
@@ -517,7 +517,6 @@ namespace Imas.Streams
             await _stream.WriteAsync(new byte[pad]);
             _offset += compSize + pad;
         }
-
 
         /// <exception cref="IOException"/>
         /// <exception cref="NotSupportedException"/>

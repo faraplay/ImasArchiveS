@@ -1,14 +1,10 @@
 ﻿using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ImasArchiveApp
 {
-    class Dialogs : IGetFileName
+    internal class Dialogs : IGetFileName
     {
-
         public string OpenGetFileName(string title, string filter)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -18,6 +14,7 @@ namespace ImasArchiveApp
             };
             return (openFileDialog.ShowDialog() == true) ? openFileDialog.FileName : null;
         }
+
         public string SaveGetFileName(string title, string defaultPath, string filter)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog
@@ -32,10 +29,12 @@ namespace ImasArchiveApp
             }
             return (saveFileDialog.ShowDialog() == true) ? saveFileDialog.FileName : null;
         }
+
         public string SaveGetFileName(string title, string defaultDir, string defaultName, string filter)
         {
             return SaveGetFileName(title, defaultDir + '\\' + defaultName, filter);
         }
+
         public string OpenGetFolderName(string title)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog
@@ -52,6 +51,19 @@ namespace ImasArchiveApp
             if (dialog.ShowDialog() == true)
             {
                 return (dialog.ImagePath, dialog.GtfPath, dialog.Type);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public string GetString()
+        {
+            StringInput dialog = new StringInput();
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.Filename;
             }
             else
             {

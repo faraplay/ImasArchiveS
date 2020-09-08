@@ -8,7 +8,6 @@ namespace ImasArchiveLibTest
     [TestClass]
     public class SegsTest
     {
-
         [DataTestMethod]
         [DataRow("other/songResource.bin.gz", "other/songResource.bin")]
         [DataRow("other/_week_00_002.par.gz", "other/_week_00_002.par")]
@@ -44,7 +43,6 @@ namespace ImasArchiveLibTest
             File.Delete("temp.dat");
             Assert.IsTrue(eq);
         }
-
 
         [DataTestMethod]
         [DataRow("other/songResource.bin.gz", "other/songResource.bin", 32)]

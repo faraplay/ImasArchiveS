@@ -1,11 +1,9 @@
 ﻿using Imas;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ImasArchiveApp
 {
-    interface IReport
+    public interface IReport
     {
         public Action ClearStatus { get; }
         public Action<ProgressData> ReportProgress { get; }

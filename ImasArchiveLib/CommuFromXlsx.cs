@@ -1,10 +1,10 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Imas.Archive;
 using Imas.Records;
 using Imas.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,38 +12,42 @@ namespace Imas
 {
     public class CommuFromXlsx : IDisposable
     {
-        readonly XlsxReader xlsx;
-        readonly ZipArchive zipArchive;
+        private readonly XlsxReader xlsx;
 
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
             {
                 xlsx?.Dispose();
-                zipArchive?.Dispose();
             }
             disposed = true;
         }
-        #endregion
 
-        public CommuFromXlsx(string xlsxName, string zipName)
+        #endregion IDisposable
+
+        public CommuFromXlsx(string xlsxName)
         {
             xlsx = new XlsxReader(xlsxName);
-            zipArchive = new ZipArchive(new FileStream(zipName, FileMode.Create, FileAccess.ReadWrite), ZipArchiveMode.Create);
         }
+
         #region Write Commus
-        public async Task GetAndWriteAllCommus(IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
+
+        public async Task GetAndWriteAllCommus(PatchZipFile patchZipFile, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
         {
-            int total1 = xlsx.Sheets.Descendants<Sheet>().Count();
+            var commuSheets = xlsx.Sheets.Descendants<Sheet>().Where(sheet => CommuLine.commuSheetNames.Contains(sheet.Name));
+            int total1 = commuSheets.Count();
             int count1 = 0;
-            foreach (Sheet sheet in xlsx.Sheets.Descendants<Sheet>())
+            foreach (Sheet sheet in commuSheets)
             {
                 count1++;
                 progress1?.Report(new ProgressData { count = count1, total = total1, filename = sheet.Name });
@@ -55,21 +59,12 @@ namespace Imas
                 {
                     count2++;
                     progress2?.Report(new ProgressData { count = count2, total = total2, filename = filename });
-                    await Task.Run(() => WriteBin(filename, lines.Where(line => line.file == filename)));
+                    await Task.Run(() => patchZipFile.AddCommu(filename, lines.Where(line => line.file == filename)));
                 }
             }
         }
-        private void WriteBin(string commuName, IEnumerable<CommuLine> lines)
-        {
-            if (lines.Any(line => !string.IsNullOrWhiteSpace(line.message)))
-            {
-                ZipArchiveEntry entry = zipArchive.CreateEntry(commuName);
-                using Stream stream = entry.Open();
-                WriteBin(stream, lines);
-            }
-        }
 
-        private void WriteBin(Stream stream, IEnumerable<CommuLine> lines)
+        internal static void WriteBin(Stream stream, IEnumerable<CommuLine> lines)
         {
             Binary binary = new Binary(stream, true);
             binary.WriteUInt32(0x004D0053);
@@ -81,6 +76,7 @@ namespace Imas
                 line.Serialise(stream);
             }
         }
-        #endregion
+
+        #endregion Write Commus
     }
 }

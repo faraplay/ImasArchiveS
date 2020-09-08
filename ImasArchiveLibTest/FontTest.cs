@@ -9,7 +9,6 @@ namespace ImasArchiveLibTest
     [TestClass]
     public class FontTest
     {
-
         [DataTestMethod]
         [DataRow("disc/im2nx_font.par", "other/font.png")]
         public async Task ReadFontImageTest(string inFile, string expectedFile)
@@ -104,6 +103,32 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
+        [DataRow("patch/font")]
+        public void WriteJSONTest(string inDir)
+        {
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            font.AddDigraphs();
+            Assert.IsTrue(font.CheckTree());
+            font.BigBitmap.Save("../textbox-display/fontwhite.png");
+
+            using StreamWriter writer = new StreamWriter("../textbox-display/fontdata.js");
+            font.WriteJSON(writer);
+        }
+
+        [DataTestMethod]
+        [DataRow("patch/font")]
+        public void BlackFontTest(string inDir)
+        {
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            font.UseBlackBitmaps();
+            font.AddDigraphs();
+            Assert.IsTrue(font.CheckTree());
+            font.BigBitmap.Save("../textbox-display/fontblack.png");
+        }
+
+        [DataTestMethod]
         [DataRow("font", "abcdefghijklmnopqrstuvwxyz", "digraphs")]
         public void SaveFontDigraphsTest(string inDir, string charset, string expectedDir)
         {
@@ -157,6 +182,17 @@ namespace ImasArchiveLibTest
             File.Delete("temp.par");
             File.Delete("temp.png");
             Assert.IsTrue(eq);
+        }
+
+        [DataTestMethod]
+        [DataRow("patch/font", "patch/font_fromFolder.par")]
+        public async Task BuildFontDigraphsFromFolder(string inDir, string outFile)
+        {
+            using Font font = new Font();
+            font.LoadCharBitmaps(inDir);
+            font.AddDigraphs();
+            using FileStream outStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
+            await font.WriteFontPar(outStream, false);
         }
     }
 }

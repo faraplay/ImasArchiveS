@@ -5,29 +5,38 @@ using System.Runtime.CompilerServices;
 
 namespace ImasArchiveApp
 {
-    abstract class FileModel : IFileModel, IReport
+    public abstract class FileModel : IFileModel, IReport
     {
         #region Properties
+
         public string FileName { get; }
-        #endregion
+
+        #endregion Properties
 
         #region Constructors
+
         protected FileModel(IReport parent, string fileName)
         {
             ClearStatus = parent.ClearStatus;
             ReportProgress = parent.ReportProgress;
+            ProgressReporter = new Progress<ProgressData>(ReportProgress);
             ReportMessage = parent.ReportMessage;
             ReportException = parent.ReportException;
             FileName = fileName;
         }
-        #endregion
+
+        #endregion Constructors
+
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)
@@ -35,20 +44,27 @@ namespace ImasArchiveApp
             disposed = true;
         }
 
-        #endregion
+        #endregion IDisposable
+
         #region INotifyPropertyChanged
+
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
+
+        #endregion INotifyPropertyChanged
 
         #region IReport
+
         public Action ClearStatus { get; }
         public Action<ProgressData> ReportProgress { get; }
+        protected IProgress<ProgressData> ProgressReporter { get; }
         public Action<string> ReportMessage { get; }
         public Action<Exception> ReportException { get; }
-        #endregion
+
+        #endregion IReport
     }
 }

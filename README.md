@@ -16,17 +16,44 @@ will be built.
 To close the currently open file, click on "File >> Close". Note that no changes will be saved.
 
 ### Patching
-To patch an arc file, click on "Patch >> Patch Arc >> From Zip". Then select the arc file to patch
+To patch an arc file, click on "Patch >> Patch Arc From Zip". Then select the arc file to patch
 and the .zip file containing the new files.
+The program will then prompt you to input a name for the patched .arc file. Make sure to input a new name - do not 
+attempt to overwrite the .arc file that is currently being patched.
 When patching the game, make sure to patch each of the arc files. This includes the DLC (though you'll have to decrypt those first, 
 using another program).
 
 ### Patch creation
-You can create the patch file containing all the translated commus yourself. First, download the spreadsheet 
-containing all the translations, and then open it in Excel and delete all sheets without translations.
-Then, in this app, select "Patch >> Create Commu Patch" and select the spreadsheet you just edited.
-(Make sure that the spreadsheet is saved as an .xlsx file.)
-Then type in a name for the new zip file and the parch file will be created.
+You can create the patch file containing all the translated commus yourself. 
+First, download the spreadsheet 
+containing all the translations, and then open it in Excel and save it again (as a .xlsx file).
+You'll also need to extract all parameter files from all the .arc files of the original game, copy-paste 
+the translated text into the extracted parameter spreadsheets, and save it again.
+
+To add images and lyrics files to the patch, you'll need the filenames.xlsx files you get from extracting all 
+images/lyrics (see below), as those contain the details of where in the .arc files the images/lyrics are stored.
+
+Then, in this app, select "File >> New Patch" and enter a name for the new patch.
+You can now use the "Patch Zip >> Add..." options to add new files.
+* Add File: You can add any file to the patch zip. Select the file to be added and input a file path for the file
+to be saved in the patch.zip file.
+* Add Commus: You can select the spreadsheet containing all translations that you saved in Excel. The program will
+then generate and add all commu files that have translated content to the patch.zip.
+* Add Parameter Files: To use this, select the parameter spreadsheets that you edited by pasting the translated text into.
+Again this will generate and add all the parameter files.
+* Add Images: Select a folder containing the images you want to put in the patch and the filenames.xlsx from image extraction.
+You do not need to include the original extracted images in the folder.
+Make sure that the new images have the same name as the original image it is replacing. The program will then 
+read the filenames.xlsx to figure out what filepath is needed for the images being inserted. If this process is taking too long
+you can delete some rows from the filenames.xlsx file - those images will not be replaced.
+* Add Lyrics: Similar to adding images, you need to select a folder containing the filenames.xlsx from extracting the lyrics
+as well as the translated lyrics you want to insert. Once again, make sure that the new lyrics file has the same name as the original
+file you want to replace.
+
+Do not attempt to add the same file more than once.
+
+Any changes you make will not be saved until you close the patch.zip file through "File >> Close". Your changes will 
+not be saved if you close the whole program without doing this!
 
 ### Arc file options
 #### Extracting & Replacing files
@@ -34,10 +61,11 @@ You can browse through the folders within the .arc in the sidebar on the left. D
 
 Opening a file will display its contents in the hex viewer on the right.
 
-Once a file is opened, you can extract that particular file by selecting "File >> Export" from the smaller menu.
+You can extract a particular file by right-clicking it in the file browser pane and selecting "Export" from the menu that pops up.
 You can also extract all files in the arc by selecting "Arc >> Extract All" and typing in a new folder name.
 
-You can replace the file with the contents of another file by selecting "File >> Import" from the smaller menu.
+You can replace a file with the contents of another file by right-clicking the file to be replaced and selecting "Import"
+from the menu that pops up.
 
 Note that renaming the file is not supported.
 
@@ -45,16 +73,21 @@ To save your changes to the arc, select "Arc >> Save Arc". Then input a new name
 open arc is not allowed.
 
 #### Extracting Specific Data
-To extract all commus from the arc, choose "Arc >> Extract Commus", then input a name for the new spreadsheet.
+To extract all commus from the arc, choose "Arc >> Extract... >> Extract Commus", then input a name for the new spreadsheet.
 All the text and data for the commu messages will be outputted into a new spreadsheet.
 
-Data in the parameter folder can also be extracted. Choose "Arc >> Extract Parameter Data" to extract to a 
-spreadsheet. Note that research into the types of data is still ongoing and not all data in the parameter folder 
-will be extracted.
+Data in the parameter folder can also be extracted. Choose "Arc >> Extract... >> Extract Parameter Data" to extract to a 
+spreadsheet. Note that research into the types of data is still ongoing, so the data that is extracted may vary from version to version
+of this program.
+
+Images and lyrics can also be extracted. Select "Arc >> Extract... >> Extract Images" and input a new folder name to extract all images.
+To extract lyrics, select "Arc >> Extract... >> Extract Lyrics" and input a new folder name.
+This process may take a very long time.
 
 #### Font patching
 To patch the font (stored in disc.arc) for the patched commus, choose "Arc >> Patch Font"
-while disc.arc is opened.
+while disc.arc is opened. Note that the default font included with the game is quite wonky, and
+it's better to use a custom-edited font when patching.
 
 ### Other file options
 

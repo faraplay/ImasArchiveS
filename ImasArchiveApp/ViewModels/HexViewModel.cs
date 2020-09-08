@@ -5,9 +5,10 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class HexViewModel : FileModel, IDisposable
+    public class HexViewModel : FileModel, IDisposable
     {
         #region Fields
+
         private int _headerLength = 16;
         private string _headerText;
         private string _dataText;
@@ -22,8 +23,11 @@ namespace ImasArchiveApp
         private const int DefaultBufferSize = 0x10000;
         private readonly StringBuilder dataStringBuilder = new StringBuilder();
         private int scrollDelta = 0;
-        #endregion
+
+        #endregion Fields
+
         #region Properties
+
         public int HeaderLength
         {
             get => _headerLength;
@@ -38,6 +42,7 @@ namespace ImasArchiveApp
                 }
             }
         }
+
         public string HeaderText
         {
             get => _headerText;
@@ -47,6 +52,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+
         public string DataText
         {
             get => _dataText;
@@ -56,6 +62,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+
         public int Offset
         {
             get => _offset;
@@ -66,6 +73,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+
         public int LineCount
         {
             get => _lineCount;
@@ -79,6 +87,7 @@ namespace ImasArchiveApp
                 }
             }
         }
+
         public HexViewerEncoding Encoding
         {
             get => _encoding;
@@ -89,19 +98,27 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        #endregion
+
+        #endregion Properties
+
         #region Constructors
+
         public HexViewModel(IReport report, string fileName, Stream stream) : base(report, fileName)
         {
             _stream = stream;
             UpdateHeaderText();
             UpdateDataText();
         }
+
         internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
             (report, filename, getFilename, stream) => new HexViewModel(report, filename, stream);
-        #endregion
+
+        #endregion Constructors
+
         #region IDisposable
+
         private bool disposed = false;
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -113,8 +130,11 @@ namespace ImasArchiveApp
             disposed = true;
             base.Dispose(disposing);
         }
-        #endregion
+
+        #endregion IDisposable
+
         #region Commands
+
         public void Scroll(object sender, MouseWheelEventArgs e)
         {
             if (_stream != null)
@@ -132,14 +152,18 @@ namespace ImasArchiveApp
                 }
             }
         }
-        #endregion
+
+        #endregion Commands
+
         #region RelayCommands
+
         private RelayCommand _updateDataTextCommand;
+
         public ICommand UpdateDataTextCommand
         {
             get
             {
-                if (_updateDataTextCommand== null)
+                if (_updateDataTextCommand == null)
                 {
                     _updateDataTextCommand = new RelayCommand(
                         param => UpdateDataText());
@@ -147,9 +171,11 @@ namespace ImasArchiveApp
                 return _updateDataTextCommand;
             }
         }
+
         private RelayCommand _selectAsciiEncodingCommand;
         private RelayCommand _selectLatin1EncodingCommand;
         private RelayCommand _selectUTF16BEEncodingCommand;
+
         public ICommand SelectAsciiEncodingCommand
         {
             get
@@ -162,6 +188,7 @@ namespace ImasArchiveApp
                 return _selectAsciiEncodingCommand;
             }
         }
+
         public ICommand SelectLatin1EncodingCommand
         {
             get
@@ -174,6 +201,7 @@ namespace ImasArchiveApp
                 return _selectLatin1EncodingCommand;
             }
         }
+
         public ICommand SelectUTF16BEEncodingCommand
         {
             get
@@ -187,8 +215,10 @@ namespace ImasArchiveApp
             }
         }
 
-        #endregion
+        #endregion RelayCommands
+
         #region Methods
+
         private void UpdateHeaderText()
         {
             StringBuilder _headerStringBuilder = new StringBuilder(" Offset(h)  ");
@@ -198,15 +228,15 @@ namespace ImasArchiveApp
             }
             HeaderText = _headerStringBuilder.ToString();
         }
+
         private void UpdateDataText()
         {
             if (_stream != null && _stream.CanRead && _stream.CanSeek && _offset >= 0 && _offset < _stream.Length)
             {
-
                 int totalBytes = _headerLength * _lineCount;
-                if (_dataBuffer == null || 
+                if (_dataBuffer == null ||
                     (_bufferSize < 2 * totalBytes && 2 * totalBytes < _stream.Length) ||
-                    _offset < _bufferOffset || 
+                    _offset < _bufferOffset ||
                     (_offset + totalBytes > _bufferOffset + _bufferSize && _bufferOffset + _bufferSize < _stream.Length)
                     )
                 {
@@ -255,6 +285,7 @@ namespace ImasArchiveApp
                                 dataStringBuilder.Append(Char.IsControl(c) ? '.' : c);
                             }
                             break;
+
                         case HexViewerEncoding.Latin1:
                             for (int i = 0; i < _headerLength; i++)
                             {
@@ -265,6 +296,7 @@ namespace ImasArchiveApp
                                 dataStringBuilder.Append(Char.IsControl(c) ? '.' : c);
                             }
                             break;
+
                         case HexViewerEncoding.UTF16BE:
                             for (int i = 0; i < _headerLength; i += 2)
                             {
@@ -288,8 +320,10 @@ namespace ImasArchiveApp
                 DataText = "            Could not read stream.";
             }
         }
-        #endregion
+
+        #endregion Methods
     }
+
     public enum HexViewerEncoding
     {
         ASCII,

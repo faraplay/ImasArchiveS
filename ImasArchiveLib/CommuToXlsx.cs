@@ -6,17 +6,20 @@ using System.IO;
 
 namespace Imas
 {
-    class CommuToXlsx : IDisposable
+    internal class CommuToXlsx : IDisposable
     {
-        readonly XlsxWriter xlsx;
+        private readonly XlsxWriter xlsx;
 
         #region IDisposable
+
         private bool disposed = false;
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -25,7 +28,8 @@ namespace Imas
             }
             disposed = true;
         }
-        #endregion
+
+        #endregion IDisposable
 
         public CommuToXlsx(string fileName)
         {

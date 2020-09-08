@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -11,25 +10,30 @@ namespace Imas.Archive
     public class ParFile : ContainerFile<ParEntry>
     {
         #region Fields
-        int fileCount;
 
-        #endregion
+        private int fileCount;
+
+        #endregion Fields
 
         private int HeaderLength => 16 + nameLength * fileCount +
                 (lengthsKnown ? 12 : 8) * ((fileCount + 3) & -4);
 
         #region Constructors
+
         public ParFile(Stream stream)
         {
             _stream = stream;
             ReadHeader();
         }
-        #endregion
+
+        #endregion Constructors
 
         #region Header
+
         private byte parVersion;
         private int nameLength;
         private bool lengthsKnown;
+
         private void ReadHeader()
         {
             _stream.Position = 0;
@@ -139,7 +143,7 @@ namespace Imas.Archive
                 0x80 => 3,
                 _ => throw new InvalidDataException(Strings.InvalidData_ParHeader)
             });
-            binary.WriteInt32(fileCount);
+            binary.WriteInt32(Entries.Count);
 
             byte lengthsByte = (byte)(
                 (isBigEndian ? 2 : 0) | (lengthsKnown ? 1 : 0));
@@ -148,33 +152,33 @@ namespace Imas.Archive
             binary.WriteByte(0);
             binary.WriteByte(0);
 
-            for (int i = 0; i < fileCount; i++)
+            foreach (ParEntry entry in Entries)
             {
-                binary.WriteUInt32((uint)Entries[i].Offset);
+                binary.WriteUInt32((uint)entry.Offset);
             }
             long pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
 
             byte[] namebuf = new byte[nameLength];
-            for (int i = 0; i < fileCount; i++)
+            foreach (ParEntry entry in Entries)
             {
                 Array.Clear(namebuf, 0, nameLength);
-                Encoding.ASCII.GetBytes(Entries[i].FileName, namebuf);
+                Encoding.ASCII.GetBytes(entry.FileName, namebuf);
                 stream.Write(namebuf);
             }
 
-            for (int i = 0; i < fileCount; i++)
+            foreach (ParEntry entry in Entries)
             {
-                binary.WriteInt32(Entries[i].Property);
+                binary.WriteInt32(entry.Property);
             }
             pad = (baseOffset - stream.Position) & 15;
             stream.Write(new byte[pad]);
 
             if (lengthsKnown)
             {
-                for (int i = 0; i < fileCount; i++)
+                foreach (ParEntry entry in Entries)
                 {
-                    binary.WriteUInt32((uint)Entries[i].Length);
+                    binary.WriteUInt32((uint)entry.Length);
                 }
                 pad = (baseOffset - stream.Position) & 15;
                 stream.Write(new byte[pad]);
@@ -182,8 +186,11 @@ namespace Imas.Archive
 
             Debug.Assert(stream.Position - baseOffset == HeaderLength);
         }
-        #endregion
+
+        #endregion Header
+
         #region Extract
+
         public async Task ExtractAll(string destDir)
         {
             Directory.CreateDirectory(destDir);
@@ -222,8 +229,11 @@ namespace Imas.Archive
                 writer.WriteLine(entry.FileName);
             }
         }
-        #endregion
+
+        #endregion Extract
+
         #region Save to Stream
+
         /// <summary>
         /// Writes par file to a stream.
         /// </summary>
@@ -246,15 +256,16 @@ namespace Imas.Archive
             {
                 parEntry.Offset = (int)(stream.Position - baseOffset);
                 using Stream entryStream = await parEntry.GetData().ConfigureAwait(false);
-                await entryStream.CopyToAsync(stream).ConfigureAwait(false); 
+                await entryStream.CopyToAsync(stream).ConfigureAwait(false);
                 pad = (baseOffset - stream.Position) & 0x7F;
                 stream.Write(new byte[pad]);
             }
         }
-        #endregion
+
+        #endregion Save to Stream
 
         /// <summary>
-        /// Replaces contents of the par file with files in the directory 
+        /// Replaces contents of the par file with files in the directory
         /// with matching name.
         /// </summary>
         /// <param name="outStream"></param>
@@ -264,7 +275,6 @@ namespace Imas.Archive
         {
             foreach (ParEntry entry in Entries)
             {
-
                 if (fileSource.FileExists(entry.FileName))
                 {
                     using Stream fileStream = fileSource.OpenFile(entry.FileName);
@@ -286,7 +296,7 @@ namespace Imas.Archive
         }
 
         /// <summary>
-        /// Replaces contents of the par file with files in the directory 
+        /// Replaces contents of the par file with files in the directory
         /// with matching name, and saves to a stream.
         /// </summary>
         /// <param name="outStream"></param>

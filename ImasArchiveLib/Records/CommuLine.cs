@@ -1,10 +1,11 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using Imas.Spreadsheet;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Imas.Records
 {
-    class CommuLine : IRecordable
+    internal class CommuLine : IRecordable
     {
         public string file;
         public int messageID;
@@ -14,6 +15,24 @@ namespace Imas.Records
         public string message_raw;
         public string name;
         public string message;
+
+        public static readonly HashSet<string> commuSheetNames = new HashSet<string>{
+            "ami",
+            "azu",
+            "chi",
+            "har",
+            "hib",
+            "ior",
+            "leo",
+            "mak",
+            "mam",
+            "mik",
+            "rit",
+            "tak",
+            "yay",
+            "yuk",
+            "other"
+        };
 
         public void Deserialise(Stream inStream)
         {
@@ -64,8 +83,8 @@ namespace Imas.Records
 
             byte[] namebytes = new byte[32];
             byte[] msgbytes = new byte[128];
-            ImasEncoding.Custom.GetBytes(outName, namebytes);
-            ImasEncoding.Custom.GetBytes(outMessage, msgbytes);
+            ImasEncoding.Custom.FillBufferWithBytes(outName, namebytes);
+            ImasEncoding.Custom.FillBufferWithBytes(outMessage, msgbytes);
 
             int nameLen = 0;
             while (nameLen < 32 / 2 && (namebytes[2 * nameLen] != 0 || namebytes[2 * nameLen + 1] != 0))
@@ -90,11 +109,7 @@ namespace Imas.Records
             name_raw = xlsx.GetString(row, "E");
             message_raw = xlsx.GetString(row, "F");
             name = xlsx.GetString(row, "G");
-            string message1 = xlsx.GetString(row, "H");
-            string message2 = xlsx.GetString(row, "J");
-            message = message1;
-            if (!string.IsNullOrWhiteSpace(message2))
-                message += '\n' + message2;
+            message = xlsx.GetString(row, "H");
         }
 
         public void WriteRow(XlsxWriter xlsx, Row row)
@@ -109,17 +124,21 @@ namespace Imas.Records
 
         public void WriteFirstRow(XlsxWriter xlsx, Row row)
         {
-            xlsx.AppendCell(row, "A",  "File");
-            xlsx.AppendCell(row, "B",  "Message ID");
-            xlsx.AppendCell(row, "C",  "Flag 1");
-            xlsx.AppendCell(row, "D",  "Flag 2");
-            xlsx.AppendCell(row, "E",  "Name (raw)");
-            xlsx.AppendCell(row, "F",  "Message (raw)");
-            xlsx.AppendCell(row, "G",  "Name");
-            xlsx.AppendCell(row, "H",  "Message Line 1");
-            xlsx.AppendCell(row, "I",  "Width");
-            xlsx.AppendCell(row, "J",  "Message Line 2");
-            xlsx.AppendCell(row, "K",  "Width");
+            xlsx.AppendCell(row, "A", "File");
+            xlsx.AppendCell(row, "B", "Message ID");
+            xlsx.AppendCell(row, "C", "Flag 1");
+            xlsx.AppendCell(row, "D", "Flag 2");
+            xlsx.AppendCell(row, "E", "Name (raw)");
+            xlsx.AppendCell(row, "F", "Message (raw)");
+            xlsx.AppendCell(row, "G", "Name");
+            xlsx.AppendCell(row, "H", "Message");
+            xlsx.AppendCell(row, "I", "Line 1 Width");
+            xlsx.AppendCell(row, "J", "Line 2 Width");
+        }
+
+        public override string ToString()
+        {
+            return file;
         }
     }
 }

@@ -10,17 +10,15 @@
     Height="800"
     mc:Ignorable="d">
     <Window.Resources>
+        <local:ObjectToTypeConverter x:Key="ObjectToType" />
         <DataTemplate DataType="{x:Type local:BrowserModel}">
             <local:FileBrowser Width="220" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:HexViewModel}">
             <local:HexViewer x:Name="hxViewer" />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type local:ArcModel}">
-            <local:ArcView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type local:ParModel}">
-            <local:ParView />
+        <DataTemplate DataType="{x:Type local:ContainerFileModel}">
+            <local:ContainerFileView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:GTFModel}">
             <local:GTFView />
@@ -31,6 +29,7 @@
             <MenuItem Header="File">
                 <MenuItem Header="Open">
                     <MenuItem Command="{Binding Path=OpenArcCommand}" Header="Open Arc" />
+                    <MenuItem Command="{Binding Path=OpenPatchZipCommand}" Header="Open Patch Zip" />
                     <MenuItem Command="{Binding Path=OpenParCommand}" Header="Open Par" />
                     <MenuItem Command="{Binding Path=OpenGtfCommand}" Header="Open GTF" />
                     <MenuItem Command="{Binding Path=OpenHexCommand}" Header="Open in Hex Viewer" />
@@ -38,15 +37,59 @@
                 <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
                 <Separator />
                 <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />
+                <MenuItem Command="{Binding Path=NewPatchCommand}" Header="New Patch" />
                 <Separator />
                 <MenuItem Command="{Binding Path=ConvertToGtfCommand}" Header="Convert Image to GTF" />
             </MenuItem>
             <MenuItem Header="Patch">
-                <MenuItem Header="Patch Arc">
-                    <MenuItem Command="{Binding Path=ReplaceSaveFolderCommand}" Header="From Folder" />
-                    <MenuItem Command="{Binding Path=ReplaceSaveZipCommand}" Header="From Zip" />
+                <MenuItem Command="{Binding Path=ReplaceSaveFolderCommand}" Header="Patch Arc From Folder" />
+                <MenuItem Command="{Binding Path=ReplaceSaveZipCommand}" Header="Patch Arc From Zip" />
+            </MenuItem>
+            <MenuItem DataContext="{Binding Path=FileModel}" Header="Arc">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="IsEnabled" Value="False" />
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:ArcModel}">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+                <MenuItem Command="{Binding Path=SaveAsCommand}" Header="Save Arc" />
+                <Separator />
+                <MenuItem Command="{Binding Path=ExtractAllCommand}" Header="Extract All" />
+                <MenuItem Header="Extract...">
+                    <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract Commus" />
+                    <MenuItem Command="{Binding Path=ExtractParameterCommand}" Header="Extract Parameter Data" />
+                    <MenuItem Command="{Binding Path=ExtractImagesCommand}" Header="Extract Images" />
+                    <MenuItem Command="{Binding Path=ExtractLyricsCommand}" Header="Extract Lyrics" />
                 </MenuItem>
-                <MenuItem Command="{Binding Path=CreateCommuPatchCommand}" Header="Create Commu Patch" />
+                <Separator />
+                <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
+            </MenuItem>
+            <MenuItem DataContext="{Binding Path=FileModel}" Header="Patch Zip">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="IsEnabled" Value="False" />
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:PatchZipModel}">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+                <MenuItem Header="Add...">
+                    <MenuItem Command="{Binding Path=AddFileCommand}" Header="Add File" />
+                    <MenuItem Command="{Binding Path=AddCommusCommand}" Header="Add Commus" />
+                    <MenuItem Command="{Binding Path=AddParameterCommand}" Header="Add Parameter Files" />
+                    <MenuItem Command="{Binding Path=AddImagesCommand}" Header="Add Images" />
+                    <MenuItem Command="{Binding Path=AddLyricsCommand}" Header="Add Lyrics" />
+                </MenuItem>
             </MenuItem>
         </Menu>
         <TextBlock

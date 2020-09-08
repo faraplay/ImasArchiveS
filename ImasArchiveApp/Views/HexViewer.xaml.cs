@@ -23,6 +23,7 @@ namespace ImasArchiveApp
             if (e.NewValue is HexViewModel)
                 SetLineCount();
         }
+
         private void SetLineCount()
         {
             double lineHeight = tbData.LineHeight;

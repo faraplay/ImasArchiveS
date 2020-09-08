@@ -1,11 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace ImasArchiveLibTest
 {
@@ -13,7 +7,7 @@ namespace ImasArchiveLibTest
     {
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<DLL signature>")]
-        static extern int memcmp(byte[] b1, byte[] b2, long count);
+        private static extern int memcmp(byte[] b1, byte[] b2, long count);
 
         public static bool CompareFiles(string file1, string file2)
         {
@@ -56,4 +50,3 @@ namespace ImasArchiveLibTest
         }
     }
 }
-

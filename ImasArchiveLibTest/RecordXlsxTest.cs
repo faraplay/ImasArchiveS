@@ -3,6 +3,7 @@ using Imas.Spreadsheet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace ImasArchiveLibTest
 {
@@ -40,6 +41,76 @@ namespace ImasArchiveLibTest
                 }
             }
             File.Delete("temp.bin");
+        }
+
+        [DataTestMethod]
+        [DataRow("disc/text/im2nx_text.ja_jp", "other/text_ja_jp.xlsx")]
+        //[DataRow("new.ja_jp", "text_ja_jp_reread.xlsx")]
+        public void JaJpReadTest(string binName, string xlsxName)
+        {
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+            JaJpText.ReadFile(stream, xlsxWriter);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/text_ja_jp.xlsx", "other/new.ja_jp")]
+        public void JaJpWriteTest(string xlsxName, string binName)
+        {
+            using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
+            using XlsxReader xlsxReader = new XlsxReader(xlsxName);
+            JaJpText.WriteFile(stream, xlsxReader);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/auditionDanText.pastbl", "other/audition_pastbl.xlsx")]
+        public void PastblReadTest(string binName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            IEnumerable<Record> records = Pastbl.ReadFile(stream);
+            xlsx.AppendRows("pastbl", records);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/auditionDanText_out.pastbl", "other/parameter_hdd.xlsx", "alf/auditionText_par/auditionDanText.pastbl")]
+        public void PastblWriteTest(string binName, string xlsxName, string alfFileName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            List<string> strings = xlsx.GetRows("XX", "pastbl")
+                .Where(record => (string)record[0] == alfFileName)
+                .Select(record => (string)record[1])
+                .ToList();
+            using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
+            Pastbl.WriteFile(stream, strings);
+        }
+
+        [DataTestMethod]
+        [DataRow("hdd/songinfo/songResource.bin", "other/songinfo.xlsx")]
+        public void SongInfoReadTest(string binName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            IEnumerable<Record> records = SongInfo.ReadFile(stream);
+            xlsx.AppendRows("songInfo", records);
+        }
+
+        [DataTestMethod]
+        [DataRow("hdd/ui/menu/skillBoard/skillBoard.info", "other/skillBoard.xlsx")]
+        public void SkillBoardReadTest(string binName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            SkillBoard.ReadFile(stream, xlsx);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/newSkillBoard.info", "other/skillBoard.xlsx")]
+        public void SkillBoardWriteTest(string binName, string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
+            SkillBoard.WriteFile(stream, xlsx);
         }
     }
 }

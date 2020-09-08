@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Imas.ImasEncoding
 {
-    static class Ascii
+    internal static class Ascii
     {
         public static void GetBytes(string s, Span<byte> outBuffer)
         {
