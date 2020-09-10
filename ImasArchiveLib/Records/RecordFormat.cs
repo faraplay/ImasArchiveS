@@ -12,7 +12,7 @@
             new RecordFormat("parameter/lesson_par/menu.bin", "lesson_menu", "bbssssc020c040ssssssssssi"),
             //new RecordFormat("parameter/mail_idol_par/_ps3_mail_idol.bin", "mail_idol", "ssic020c800"),
             //new RecordFormat("parameter/mail_idol_par/_dlc01_mail_idol.bin", "mail_idol", "ssic020c800"),
-            //new RecordFormat("parameter/mail_system_par/mail_system.bin", "mail_system", "ssic020c800"),
+            new RecordFormat("parameter/mail_system_par/mail_system.bin", "mail_system", "ssic020c800"),
             new RecordFormat("parameter/money.bin", "money", "ssbbsic020"),
             new RecordFormat("parameter/nonUnit/nonUnitFanUp.bin", "nonUnitFanUp", "bbsic080"),
             new RecordFormat("parameter/producerRank/producerRank.bin", "producerRank", "bbbbbbsbbsc040"),
