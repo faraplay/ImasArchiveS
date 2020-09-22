@@ -69,17 +69,25 @@ namespace Imas.Records
             int currentOffset = 0x20 + ((4 * recCount + 15) & -16) + ((2 * recCount + 15) & -16);
             for (int i = 0; i < recCount; i++)
             {
-                int[] tempArray = ImasEncoding.Custom.GetValues(strings[i]);
                 offsets[i] = currentOffset;
-                lengths[i] = tempArray.Length;
+                List<byte> bytes = ImasEncoding.Custom.GetBytesEnumerable(strings[i]).ToList();
+                lengths[i] = bytes.Count / 2;
                 int arrayLen = (2 * lengths[i] + 16) & -16;
                 arrays[i] = new byte[arrayLen];
-                for (int j = 0; j < tempArray.Length; j++)
-                {
-                    arrays[i][2 * j] = (byte)((tempArray[j] >> 8) & 0xFF);
-                    arrays[i][2 * j + 1] = (byte)(tempArray[j] & 0xFF);
-                }
+                bytes.CopyTo(arrays[i]);
                 currentOffset += arrayLen;
+
+                //int[] tempArray = ImasEncoding.Custom.GetValues(strings[i]);
+                //offsets[i] = currentOffset;
+                //lengths[i] = tempArray.Length;
+                //int arrayLen = (2 * lengths[i] + 16) & -16;
+                //arrays[i] = new byte[arrayLen];
+                //for (int j = 0; j < tempArray.Length; j++)
+                //{
+                //    arrays[i][2 * j] = (byte)((tempArray[j] >> 8) & 0xFF);
+                //    arrays[i][2 * j + 1] = (byte)(tempArray[j] & 0xFF);
+                //}
+                //currentOffset += arrayLen;
             }
 
             binary.WriteInt64(0x706173747274626C);
