@@ -147,6 +147,14 @@ namespace Imas.Archive
                     _entries.Add(new PatchZipEntry(entry));
                 }
             }
+            if (FanLetterInfo.sheetNames.All(sheetName =>
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == sheetName)))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry("parameter/fanLetterInfo.bin");
+                using Stream entryStream = entry.Open();
+                FanLetterInfo.WriteFile(entryStream, xlsx);
+                _entries.Add(new PatchZipEntry(entry));
+            }
             foreach (string fileName in Pastbl.fileNames)
             {
                 List<string> strings = xlsx.GetRows("XXX", "pastbl")

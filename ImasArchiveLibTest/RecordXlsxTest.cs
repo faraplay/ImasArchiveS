@@ -112,5 +112,23 @@ namespace ImasArchiveLibTest
             using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
             SkillBoard.WriteFile(stream, xlsx);
         }
+
+        [DataTestMethod]
+        [DataRow("disc/parameter/fanLetterInfo.bin", "other/fanLetterInfo.xlsx")]
+        public void FanLetterInfoReadTest(string binName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
+            FanLetterInfo.ReadFile(stream, xlsx);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/newFanLetterInfo.bin", "other/fanLetterInfo.xlsx")]
+        public void FanLetterInfoWriteTest(string binName, string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
+            FanLetterInfo.WriteFile(stream, xlsx);
+        }
     }
 }

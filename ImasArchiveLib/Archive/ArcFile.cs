@@ -527,6 +527,15 @@ namespace Imas.Archive
                     xlsxWriter.AppendRows(format.sheetName, records);
                 }
             }
+            using (EntryStack entryStack = await GetEntryRecursive("parameter/fanLetterInfo.bin"))
+            {
+                if (entryStack != null)
+                {
+                    progress.Report(new ProgressData { filename = "parameter/fanLetterInfo.bin" });
+                    using Stream stream = await entryStack.Entry.GetData();
+                    FanLetterInfo.ReadFile(stream, xlsxWriter);
+                }
+            }
             foreach (string fileName in Pastbl.fileNames)
             {
                 using EntryStack entryStack = await GetEntryRecursive(fileName);
