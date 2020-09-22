@@ -24,7 +24,6 @@ namespace ImasArchiveLibTest
         [DataTestMethod]
         [DataRow("hdd", "", 0x13DF)]
         [DataRow("disc", "", 0x1B8)]
-        [DataRow("dlc\\_dlc03", ".dat", 0x1D7)]
         public void EntryCount(string filename, string extension, int expectedCount)
         {
             int actualCount;
@@ -176,7 +175,6 @@ namespace ImasArchiveLibTest
         [DataTestMethod]
         [DataRow("hdd", "")]
         [DataRow("disc", "")]
-        [DataRow("dlc\\_dlc03", ".dat")]
         public async Task SaveArcAs(string filename, string extension)
         {
             using (ArcFile arcFile = new ArcFile(filename, extension))
@@ -291,7 +289,6 @@ namespace ImasArchiveLibTest
 
         [DataTestMethod]
         [DataRow("disc", "", "images/disc_images")]
-        [DataRow("dlc/_dlc03", ".dat", "images/dlc03_images")]
         //[DataRow("hdd", "", "images/hdd_images")]
         public async Task ExtractAllImagesTest(string arcName, string extension, string outDir)
         {
