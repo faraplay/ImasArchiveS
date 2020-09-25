@@ -1,5 +1,6 @@
 ﻿using Imas;
 using Imas.Archive;
+using Imas.Spreadsheet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Threading.Tasks;
@@ -35,5 +36,15 @@ namespace ImasArchiveLibTest
         //    using PatchZipFile patchZipFile = new PatchZipFile(zipName, PatchZipMode.Create);
         //    await commu.GetAndWriteAllCommus(patchZipFile);
         //}
+
+        [DataTestMethod]
+        [DataRow("other/ref_disc.xlsx", "other/parameter_disc.xlsx", "other/edited_disc.xlsx")]
+        public void CopyColumnsTest(string refXlsxName, string editXlsxName, string destXlsxName)
+        {
+            File.Copy(editXlsxName, destXlsxName, true);
+            using XlsxColumnCopy xlsxColumnCopy = new XlsxColumnCopy(destXlsxName, refXlsxName);
+            xlsxColumnCopy.CopyColumns("accessory", "accessory");
+            xlsxColumnCopy.CopyColumns("costume", "costume_ps3");
+        }
     }
 }
