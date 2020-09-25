@@ -3,12 +3,14 @@ using Imas.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Imas.Records
 {
     internal class Record : IRecordable
     {
         private readonly object[] list;
+        private readonly string[] headers;
         private readonly List<FormatElement> format;
         private readonly int length;
 
@@ -20,7 +22,8 @@ namespace Imas.Records
 
         #region IRecordable
 
-        public Record(string formatString)
+        public Record(string formatString) : this(formatString, null) { }
+        public Record(string formatString, string[] headers)
         {
             format = new List<FormatElement>();
             int i = 0;
@@ -74,6 +77,18 @@ namespace Imas.Records
             }
             length = format.Count;
             list = new object[length];
+            if (headers == null)
+            {
+                this.headers = Enumerable.Repeat(string.Empty, length).ToArray();
+            }
+            else
+            {
+                if (headers.Length != length)
+                {
+                    throw new ArgumentException("Header array and format have differing lengths");
+                }
+                this.headers = headers;
+            }
         }
 
         public void Deserialise(Stream inStream)
@@ -178,6 +193,11 @@ namespace Imas.Records
 
         public void WriteFirstRow(XlsxWriter xlsx, Row row)
         {
+            RowWriter r = new RowWriter(xlsx, row);
+            foreach (string header in headers)
+            {
+                r.Write(header);
+            }
         }
 
         public void WriteRow(XlsxWriter xlsx, Row row)
@@ -216,12 +236,12 @@ namespace Imas.Records
 
         #endregion IRecordable
 
-        public static List<Record> GetRecords(Stream stream, string format)
+        public static List<Record> GetRecords(Stream stream, string format, string[] headers)
         {
             List<Record> records = new List<Record>();
             while (stream.Position < stream.Length)
             {
-                Record record = new Record(format);
+                Record record = new Record(format, headers);
                 record.Deserialise(stream);
                 records.Add(record);
             }

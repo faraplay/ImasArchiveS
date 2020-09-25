@@ -37,9 +37,10 @@ namespace Imas.Records
 
             stream.Position = stringOffset;
             int id = 0;
+            string[] stringSheetHeaders = { "ID", "Position", "Text", "Use UTF16 Encoding" };
             do
             {
-                Record record = new Record("IIXI");
+                Record record = new Record("IIXI", stringSheetHeaders);
                 record[0] = id;
                 record[1] = (int)(stream.Position - stringOffset);
                 ushort c;

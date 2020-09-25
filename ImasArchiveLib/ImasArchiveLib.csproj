@@ -6,6 +6,7 @@
     <Version>0.4.0.9</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>faraplay</Authors>
+    <PackageTags>cord</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

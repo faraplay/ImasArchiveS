@@ -35,9 +35,10 @@ namespace Imas.Records
                 i++;
                 return cc;
             }
+            string[] stringSheetHeaders = { "Position", "ID", "Text" };
             while (i < strBufLen)
             {
-                Record record = new Record("IIX");
+                Record record = new Record("IIX", stringSheetHeaders);
                 record[0] = i;
                 record[1] = stringIndex++;
                 StringBuilder sb = new StringBuilder();

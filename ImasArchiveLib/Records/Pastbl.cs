@@ -15,6 +15,7 @@ namespace Imas.Records
             "alf/auditionText_par/auditionVocText.pastbl",
             "alf/liveText_par/liveText.pastbl"
         };
+        public static readonly string[] headers = { "Filename", "Text" };
 
         public static IEnumerable<Record> ReadFile(Stream stream)
         {

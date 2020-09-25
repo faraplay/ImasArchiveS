@@ -522,7 +522,7 @@ namespace Imas.Archive
                     List<Record> records = new List<Record>();
                     using (Stream stream = await entryStack.Entry.GetData())
                     {
-                        records = Record.GetRecords(stream, format.format);
+                        records = Record.GetRecords(stream, format.format, format.headers);
                     }
                     xlsxWriter.AppendRows(format.sheetName, records);
                 }
@@ -546,7 +546,7 @@ namespace Imas.Archive
                     IEnumerable<Record> newRecords = Pastbl.ReadFile(stream).Select(
                         record =>
                         {
-                            Record newRec = new Record("XX");
+                            Record newRec = new Record("XX", Pastbl.headers);
                             newRec[0] = fileName;
                             newRec[1] = record[2];
                             return newRec;
@@ -600,7 +600,7 @@ namespace Imas.Archive
                 string newName = filename.Substring(filename.LastIndexOf('/') + 1)[0..^4] + ".xml";
                 using FileStream fileStream = new FileStream(outDir + "/" + newName, FileMode.Create, FileAccess.Write);
                 xmb.WriteXml(fileStream);
-                Record record = new Record("XX");
+                Record record = new Record("XX", Xmb.filenameXlsxHeaders);
                 record[0] = filename;
                 record[1] = newName;
                 records.Add(record);
@@ -621,6 +621,7 @@ namespace Imas.Archive
             xlsxWriter.AppendRows("filenames", records);
         }
 
+        private static readonly string[] ImageFilenameXlsxHeaders = { "Original Filename", "New Filename", "GTF Type" };
         private async Task ExtractImage(ContainerEntry entry, string filename,
             Dictionary<string, string> hashFileName, Dictionary<string, int> fileNameCount, string outDir, List<Record> records)
         {
@@ -672,7 +673,7 @@ namespace Imas.Archive
                         await memStream.CopyToAsync(outStream).ConfigureAwait(false);
                     }
 
-                    Record record = new Record("XXI");
+                    Record record = new Record("XXI", ImageFilenameXlsxHeaders);
                     record[0] = filename;
                     record[1] = outName;
                     record[2] = gtf.Type;

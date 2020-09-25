@@ -85,15 +85,27 @@ namespace Imas.Spreadsheet
             List<Record> list = new List<Record>();
             int total = rows.Count();
             int count = 0;
+            string[] headers = null;
             foreach (Row row in rows)
             {
                 count++;
                 if (row.RowIndex == 1)
-                    continue;
-                Record record = new Record(format);
-                record.ReadRow(this, row);
-                progress?.Report(new ProgressData { count = count, total = total, filename = record[0].ToString() });
-                list.Add(record);
+                {
+                    RowReader rowReader = new RowReader(this, row);
+                    int length = format.Count(c => "bsicaBSIX".Contains(c));
+                    headers = new string[length];
+                    for (int i = 0; i < length; ++i)
+                    {
+                        headers[i] = rowReader.ReadString();
+                    }
+                }
+                else
+                {
+                    Record record = new Record(format, headers);
+                    record.ReadRow(this, row);
+                    progress?.Report(new ProgressData { count = count, total = total, filename = record[0].ToString() });
+                    list.Add(record);
+                }
             }
             return list;
         }
