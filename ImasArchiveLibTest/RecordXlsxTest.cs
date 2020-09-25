@@ -49,7 +49,7 @@ namespace ImasArchiveLibTest
         public void JaJpReadTest(string binName, string xlsxName)
         {
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
-            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName, true);
             JaJpText.ReadFile(stream, xlsxWriter);
         }
 
@@ -66,7 +66,7 @@ namespace ImasArchiveLibTest
         [DataRow("other/auditionDanText.pastbl", "other/audition_pastbl.xlsx")]
         public void PastblReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             IEnumerable<Record> records = Pastbl.ReadFile(stream);
             xlsx.AppendRows("pastbl", records);
@@ -89,7 +89,7 @@ namespace ImasArchiveLibTest
         [DataRow("hdd/songinfo/songResource.bin", "other/songinfo.xlsx")]
         public void SongInfoReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             IEnumerable<Record> records = SongInfo.ReadFile(stream);
             xlsx.AppendRows("songInfo", records);
@@ -99,7 +99,7 @@ namespace ImasArchiveLibTest
         [DataRow("hdd/ui/menu/skillBoard/skillBoard.info", "other/skillBoard.xlsx")]
         public void SkillBoardReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             SkillBoard.ReadFile(stream, xlsx);
         }
@@ -117,7 +117,7 @@ namespace ImasArchiveLibTest
         [DataRow("disc/parameter/fanLetterInfo.bin", "other/fanLetterInfo.xlsx")]
         public void FanLetterInfoReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             FanLetterInfo.ReadFile(stream, xlsx);
         }

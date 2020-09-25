@@ -14,7 +14,7 @@ namespace ImasArchiveLibTest
         [DataRow("other/commus.xlsx", "hdd", "other/commulist.txt")]
         public async Task WriteXlsxTest(string xlsxName, string arcName, string commuList)
         {
-            using CommuToXlsx commu = new CommuToXlsx(xlsxName);
+            using CommuToXlsx commu = new CommuToXlsx(xlsxName, true);
             using StreamReader streamReader = new StreamReader(commuList);
             using ArcFile arcFile = new ArcFile(arcName);
             while (!streamReader.EndOfStream)

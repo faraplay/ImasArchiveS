@@ -22,6 +22,10 @@ namespace Imas.Records
 
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
+            if (sheetNames.Any(sheetName => xlsx.HasWorksheet(sheetName)))
+            {
+                return;
+            }
             int count1 = Binary.ReadInt32(stream, true);
             const string format1 = "iiiss";
             Record[] records1 = new Record[count1];

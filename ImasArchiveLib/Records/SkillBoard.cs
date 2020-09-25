@@ -10,6 +10,10 @@ namespace Imas.Records
     {
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
+            if (xlsx.HasWorksheet("skillBoard") || xlsx.HasWorksheet("skillBoardStrings"))
+            {
+                return;
+            }
             List<Record> list = new List<Record>();
             List<Record> stringList = new List<Record>();
             Binary binary = new Binary(stream, true);

@@ -31,9 +31,9 @@ namespace Imas
 
         #endregion IDisposable
 
-        public CommuToXlsx(string fileName)
+        public CommuToXlsx(string fileName, bool overwrite)
         {
-            xlsx = new XlsxWriter(fileName);
+            xlsx = new XlsxWriter(fileName, overwrite);
         }
 
         private IEnumerable<CommuLine> GetCommuFromStream(Stream binStream, string fileName)

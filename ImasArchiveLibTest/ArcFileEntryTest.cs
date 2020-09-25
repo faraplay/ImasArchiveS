@@ -275,16 +275,30 @@ namespace ImasArchiveLibTest
         public async Task ArcFileCommuTest(string arcName, string extension, string outputXlsx)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
-            await arcFile.ExtractCommusToXlsx(outputXlsx, progress);
+            await arcFile.ExtractCommusToXlsx(outputXlsx, true, progress);
         }
 
         [DataTestMethod]
         [DataRow("disc", "", "other/parameter_disc.xlsx")]
         [DataRow("hdd", "", "other/parameter_hdd.xlsx")]
-        public async Task ArcParameterTest(string arcName, string extension, string outputXlsx)
+        public async Task ArcParameterIndividualTest(string arcName, string extension, string outputXlsx)
         {
             using ArcFile arcFile = new ArcFile(arcName, extension);
-            await arcFile.ExtractParameterToXlsx(outputXlsx, progress);
+            await arcFile.ExtractParameterToXlsx(outputXlsx, true, progress);
+        }
+
+        [DataTestMethod]
+        [DataRow("other/parameter.xlsx")]
+        public async Task ArcParameterCombinedTest(string outputXlsx)
+        {
+            using (ArcFile arcFile = new ArcFile("disc"))
+            {
+                await arcFile.ExtractParameterToXlsx(outputXlsx, true, progress);
+            }
+            using (ArcFile arcFile = new ArcFile("hdd"))
+            {
+                await arcFile.ExtractParameterToXlsx(outputXlsx, false, progress);
+            }
         }
 
         [DataTestMethod]

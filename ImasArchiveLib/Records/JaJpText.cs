@@ -10,6 +10,10 @@ namespace Imas.Records
     {
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
+            if (xlsx.HasWorksheet("jaJp") || xlsx.HasWorksheet("jaJpStrings"))
+            {
+                return;
+            }
             List<Record> list = new List<Record>();
             List<Record> stringList = new List<Record>();
             Binary binary = new Binary(stream, false);

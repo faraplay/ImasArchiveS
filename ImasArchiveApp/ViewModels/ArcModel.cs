@@ -257,7 +257,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "commus.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractCommusToXlsx(fileName, ProgressReporter);
+                    await ArcFile.ExtractCommusToXlsx(fileName, true, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }
@@ -275,7 +275,7 @@ namespace ImasArchiveApp
                 string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "_parameter.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
-                    await ArcFile.ExtractParameterToXlsx(fileName, ProgressReporter);
+                    await ArcFile.ExtractParameterToXlsx(fileName, true, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }

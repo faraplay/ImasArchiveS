@@ -488,9 +488,9 @@ namespace Imas.Archive
 
         #region Extracting
 
-        public async Task ExtractCommusToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
+        public async Task ExtractCommusToXlsx(string xlsxName, bool overwrite, IProgress<ProgressData> progress = null)
         {
-            using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName);
+            using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName, overwrite);
             IEnumerable<ContainerEntry> commuEntries = Entries.Where(entry => entry.FileName.StartsWith("commu2/par/"));
             totalProgress = commuEntries.Count();
             countProgress = 0;
@@ -510,13 +510,13 @@ namespace Imas.Archive
             }
         }
 
-        public async Task ExtractParameterToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
+        public async Task ExtractParameterToXlsx(string xlsxName, bool overwrite, IProgress<ProgressData> progress = null)
         {
-            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName, overwrite);
             foreach (RecordFormat format in RecordFormat.formats)
             {
                 using EntryStack entryStack = await GetEntryRecursive(format.fileName);
-                if (entryStack != null)
+                if (!xlsxWriter.HasWorksheet(format.sheetName) && entryStack != null)
                 {
                     progress.Report(new ProgressData { filename = format.fileName });
                     List<Record> records = new List<Record>();
@@ -539,7 +539,7 @@ namespace Imas.Archive
             foreach (string fileName in Pastbl.fileNames)
             {
                 using EntryStack entryStack = await GetEntryRecursive(fileName);
-                if (entryStack != null)
+                if (!xlsxWriter.HasWorksheet("pastbl") && entryStack != null)
                 {
                     progress.Report(new ProgressData { filename = fileName });
                     using Stream stream = await entryStack.Entry.GetData();
@@ -556,7 +556,7 @@ namespace Imas.Archive
             }
             using (EntryStack entryStack = await GetEntryRecursive("songinfo/songResource.bin"))
             {
-                if (entryStack != null)
+                if (!xlsxWriter.HasWorksheet("songInfo") && entryStack != null)
                 {
                     progress.Report(new ProgressData { filename = "songinfo/songResource.bin" });
                     using Stream stream = await entryStack.Entry.GetData();
@@ -605,7 +605,7 @@ namespace Imas.Archive
                 record[1] = newName;
                 records.Add(record);
             }
-            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx");
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx", true);
             xlsxWriter.AppendRows("filenames", records);
         }
 
@@ -617,7 +617,7 @@ namespace Imas.Archive
 
             Directory.CreateDirectory(outDir);
             await ForAllTask((entry, filename) => ExtractImage(entry, filename, hashFileName, fileNameCount, outDir, records), progress);
-            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx");
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx", true);
             xlsxWriter.AppendRows("filenames", records);
         }
 
