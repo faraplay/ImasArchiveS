@@ -18,7 +18,7 @@
                 {
                     "ID", "Idol", "Movie", "Order", "", "", "", "", "", "", "String ID", "Name", "Idol Name", "Location",
                 }),
-            new RecordFormat("parameter/costume_par/ps3.out", "costume_ps3", "iiiia010c020c080bbsbbsssiibbbb", new string[] 
+            new RecordFormat("parameter/costume_par/ps3.out", "costume", "iiiia010c020c080bbsbbsssiibbbb", new string[] 
                 { 
                     "", "", "", "", "String ID", "Name", "Description", "", "", "", "", "", 
                     "Dance", "Visual", "Vocal", "Price", "", "", "", "", "",

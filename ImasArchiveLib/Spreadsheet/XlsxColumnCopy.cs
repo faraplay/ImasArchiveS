@@ -22,6 +22,31 @@ namespace Imas.Spreadsheet
         private readonly SharedStringTablePart editSharedStringTablePart;
         private readonly Dictionary<string, int> strings;
 
+        private static readonly string[] sheetsToCopy =
+        {
+            "accessory",
+            "album",
+            "albumCommu",
+            "costume",
+            "dlcName",
+            "item",
+            "lesson_menu",
+            "mail_system",
+            "money",
+            "nonUnitFanUp",
+            "producerRank",
+            "profile",
+            "reporter",
+            "seasonText",
+            "fanLetterStrings",
+            "jaJpStrings",
+            "workInfo",
+            "rivalInfo",
+            "pastbl",
+            "songInfo",
+            "skillBoardStrings",
+        };
+
         public XlsxColumnCopy(string editXlsxName, string refXlsxName)
         {
             refDoc = SpreadsheetDocument.Open(refXlsxName, false);
@@ -63,7 +88,15 @@ namespace Imas.Spreadsheet
 
         #endregion IDisposable
 
-        public void CopyColumns(string refSheetName, string editSheetName)
+        public void CopyColumns()
+        {
+            foreach (string sheetName in sheetsToCopy)
+            {
+                CopySheetColumns(sheetName, sheetName);
+            }
+        }
+
+        private void CopySheetColumns(string refSheetName, string editSheetName)
         {
             Worksheet refWorksheet = GetWorksheet(refSheetName, refSheets, refWorkbookPart);
             Worksheet editWorksheet = GetWorksheet(editSheetName, editSheets, editWorkbookPart);

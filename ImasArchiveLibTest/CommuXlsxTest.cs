@@ -43,8 +43,7 @@ namespace ImasArchiveLibTest
         {
             File.Copy(editXlsxName, destXlsxName, true);
             using XlsxColumnCopy xlsxColumnCopy = new XlsxColumnCopy(destXlsxName, refXlsxName);
-            xlsxColumnCopy.CopyColumns("accessory", "accessory");
-            xlsxColumnCopy.CopyColumns("costume", "costume_ps3");
+            xlsxColumnCopy.CopyColumns();
         }
     }
 }
