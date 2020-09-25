@@ -132,8 +132,12 @@ namespace Imas.Spreadsheet
             int top = Math.Min(refColumn.Length, editColumn.Length);
             for (int i = 1; i < top; i++) // start from 1 to skip header cell
             {
-                editColumn[i].DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.SharedString);
-                editColumn[i].CellValue = new CellValue(GetEditSharedStringID(GetRefString(refColumn[i])).ToString());
+                string refValue = GetRefString(refColumn[i]);
+                if (!string.IsNullOrEmpty(refValue))
+                {
+                    editColumn[i].DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.SharedString);
+                    editColumn[i].CellValue = new CellValue(GetEditSharedStringID(refValue).ToString());
+                }
             }
         }
 
@@ -153,7 +157,7 @@ namespace Imas.Spreadsheet
 
         private string GetRefString(Cell cell)
         {
-            if (cell != null)
+            if (cell.DataType != null)
             {
                 return cell.DataType.Value switch
                 {
@@ -170,7 +174,7 @@ namespace Imas.Spreadsheet
 
         private string GetEditString(Cell cell)
         {
-            if (cell != null)
+            if (cell.DataType != null)
             {
                 return cell.DataType.Value switch
                 {
