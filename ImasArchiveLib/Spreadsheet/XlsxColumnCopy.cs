@@ -8,7 +8,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Imas.Spreadsheet
 {
-    class XlsxColumnCopy : IDisposable
+    public class XlsxColumnCopy : IDisposable
     {
         private readonly SpreadsheetDocument refDoc;
         private readonly WorkbookPart refWorkbookPart;
@@ -88,10 +88,14 @@ namespace Imas.Spreadsheet
 
         #endregion IDisposable
 
-        public void CopyColumns()
+        public void CopyColumns(IProgress<ProgressData> progress = null)
         {
+            int total = sheetsToCopy.Length;
+            int count = 0;
             foreach (string sheetName in sheetsToCopy)
             {
+                count++;
+                progress?.Report(new ProgressData { count = count, total = total, filename = sheetName });
                 CopySheetColumns(sheetName, sheetName);
             }
         }
