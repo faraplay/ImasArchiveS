@@ -53,6 +53,10 @@ namespace Imas.Spreadsheet
                 {
                     strings.Add(item.InnerText, strings.Count);
                 }
+                foreach (var sheet in sheets.Elements<Sheet>())
+                {
+                    worksheets.Add(sheet.Name, (WorksheetPart)workbookPart.GetPartById(sheet.Id));
+                }
             }
             else
             {
