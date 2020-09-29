@@ -130,5 +130,24 @@ namespace ImasArchiveLibTest
             using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
             FanLetterInfo.WriteFile(stream, xlsx);
         }
+
+        [DataTestMethod]
+        [DataRow("parameter/_dlc01_mail_idol.bin", "parameter/_ps3_info_idol.bin", "parameter/mailIdol.xlsx")]
+        public void IdolMailReadTest(string mailName, string infoName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
+            using FileStream mailStream = new FileStream(mailName, FileMode.Open, FileAccess.Read);
+            using FileStream infoStream = new FileStream(infoName, FileMode.Open, FileAccess.Read);
+            IdolMail.ReadFile(mailStream, infoStream, xlsx);
+        }
+
+        [DataTestMethod]
+        [DataRow("parameter/new_dlc01_mail_idol.bin", "parameter/mailIdol.xlsx")]
+        public void IdolMailWriteTest(string mailName, string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            using FileStream stream = new FileStream(mailName, FileMode.Create, FileAccess.Write);
+            IdolMail.WriteFile(stream, xlsx);
+        }
     }
 }

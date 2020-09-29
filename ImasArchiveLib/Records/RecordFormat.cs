@@ -39,11 +39,9 @@
                     "Bad Duration", "Normal Duration", "Good Duration", "Perfect Duration", "Bonus Duration",
                     ""
                 }),
-            //new RecordFormat("parameter/mail_idol_par/_ps3_mail_idol.bin", "mail_idol", "ssic020c800"),
-            //new RecordFormat("parameter/mail_idol_par/_dlc01_mail_idol.bin", "mail_idol", "ssic020c800"),
             new RecordFormat("parameter/mail_system_par/mail_system.bin", "mail_system", "ssic020c800", new string[]
                 {
-                    "ID", "", "", "Subject", "Message",
+                    "ID", "Image", "", "Subject", "Message",
                 }),
             new RecordFormat("parameter/money.bin", "money", "ssbbsic020", null),
             new RecordFormat("parameter/nonUnit/nonUnitFanUp.bin", "nonUnitFanUp", "bbsic080", new string[]

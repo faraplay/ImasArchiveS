@@ -192,6 +192,14 @@ namespace Imas.Archive
                 JaJpText.WriteFile(entryStream, xlsx);
                 _entries.Add(new PatchZipEntry(entry));
             }
+            if (IdolMail.allMailSheetNames.Any(sheetName => 
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == sheetName)))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry("parameter/mail_idol_par/_dlc01_mail_idol.bin");
+                using Stream entryStream = entry.Open();
+                IdolMail.WriteFile(entryStream, xlsx);
+                _entries.Add(new PatchZipEntry(entry));
+            }
         }
 
         #endregion Add Files

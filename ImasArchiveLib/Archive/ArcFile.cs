@@ -621,6 +621,17 @@ namespace Imas.Archive
                     JaJpText.ReadFile(stream, xlsxWriter);
                 }
             }
+            using (EntryStack mailEntryStack = await GetEntryRecursive("parameter/mail_idol_par/_dlc01_mail_idol.bin"))
+            {
+                using EntryStack infoEntryStack = await GetEntryRecursive("parameter/mail_idol_par/_ps3_info_idol.bin");
+                if (mailEntryStack != null && infoEntryStack != null)
+                {
+                    progress.Report(new ProgressData { filename = "parameter/mail_idol_par/_dlc01_mail_idol.bin" });
+                    using Stream mailStream = await mailEntryStack.Entry.GetData();
+                    using Stream infoStream = await infoEntryStack.Entry.GetData();
+                    IdolMail.ReadFile(mailStream, infoStream, xlsxWriter);
+                }
+            }
         }
 
         public async Task ExtractLyrics(string outDir, IProgress<ProgressData> progress = null)
