@@ -39,6 +39,22 @@ namespace Imas.Archive
         {
         }
 
+        public static (string, string) RemoveArcExtension(string name)
+        {
+            if (name.EndsWith(".arc"))
+            {
+                return (name[0..^4], "");
+            }
+            else if (name.EndsWith(".arc.dat"))
+            {
+                return (name[0..^8], ".dat");
+            }
+            else
+            {
+                return (name, null);
+            }
+        }
+
         #endregion Constructors
 
         #region Initialisation

@@ -28,7 +28,7 @@ namespace ImasArchiveApp
             {
                 string truncFilename;
                 string extension;
-                (truncFilename, extension) = RemoveArcExtension(inPath);
+                (truncFilename, extension) = ArcFile.RemoveArcExtension(inPath);
                 if (extension == null)
                 {
                     throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
@@ -236,7 +236,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Extract to...", RemoveArcExtension(ArcPath).Item1, "");
+                string fileName = _getFileName.SaveGetFileName("Extract to...", ArcFile.RemoveArcExtension(ArcPath).Item1, "");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractAllAsync(fileName, false, ProgressReporter);
@@ -254,7 +254,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "commus.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
+                string fileName = _getFileName.SaveGetFileName("Save As", ArcFile.RemoveArcExtension(ArcPath).Item1 + "commus.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractCommusToXlsx(fileName, true, ProgressReporter);
@@ -272,7 +272,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Save As", RemoveArcExtension(ArcPath).Item1 + "_parameter.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
+                string fileName = _getFileName.SaveGetFileName("Save As", ArcFile.RemoveArcExtension(ArcPath).Item1 + "_parameter.xlsx", "Excel spreadsheet (*.xlsx)|*.xlsx");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractParameterToXlsx(fileName, true, ProgressReporter);
@@ -290,7 +290,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath).Item1 + "_image", "");
+                string fileName = _getFileName.SaveGetFileName("Select New Folder", ArcFile.RemoveArcExtension(ArcPath).Item1 + "_image", "");
                 if (fileName != null)
                 {
                     await ArcFile.ExtractAllImages(fileName, ProgressReporter);
@@ -308,7 +308,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string dirName = _getFileName.SaveGetFileName("Select New Folder", RemoveArcExtension(ArcPath).Item1 + "_lyrics", "");
+                string dirName = _getFileName.SaveGetFileName("Select New Folder", ArcFile.RemoveArcExtension(ArcPath).Item1 + "_lyrics", "");
                 if (dirName != null)
                 {
                     await ArcFile.ExtractLyrics(dirName, ProgressReporter);
@@ -356,25 +356,5 @@ namespace ImasArchiveApp
         }
 
         #endregion Command Methods
-
-        #region Other Methods
-
-        public static (string, string) RemoveArcExtension(string name)
-        {
-            if (name.EndsWith(".arc"))
-            {
-                return (name[0..^4], "");
-            }
-            else if (name.EndsWith(".arc.dat"))
-            {
-                return (name[0..^8], ".dat");
-            }
-            else
-            {
-                return (name, null);
-            }
-        }
-
-        #endregion Other Methods
     }
 }
