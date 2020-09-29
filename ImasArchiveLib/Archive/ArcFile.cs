@@ -22,10 +22,11 @@ namespace Imas.Archive
 
         #region Constructors
 
-        public ArcFile(string filename, string extraExtension = "")
+        public ArcFile(string arcName)
         {
-            string _arc_filename = filename + ".arc" + extraExtension;
-            string _bin_filename = filename + ".bin" + extraExtension;
+            (string body, string extension) = RemoveArcExtension(arcName);
+            string _arc_filename = body + ".arc" + extension;
+            string _bin_filename = body + ".bin" + extension;
             if (!File.Exists(_arc_filename))
                 throw new FileNotFoundException("Arc file not found.");
             if (!File.Exists(_bin_filename))
@@ -39,23 +40,31 @@ namespace Imas.Archive
         {
         }
 
-        public static (string, string) RemoveArcExtension(string name)
+        #endregion Constructors
+
+        #region Arc name parsing
+        public static (string, string) RemoveArcExtension(string arcName)
         {
-            if (name.EndsWith(".arc"))
+            if (arcName.EndsWith(".arc"))
             {
-                return (name[0..^4], "");
+                return (arcName[0..^4], "");
             }
-            else if (name.EndsWith(".arc.dat"))
+            else if (arcName.EndsWith(".arc.dat"))
             {
-                return (name[0..^8], ".dat");
+                return (arcName[0..^8], ".dat");
             }
             else
             {
-                return (name, null);
+                throw new ArgumentException("Filename does not have .arc or .arc.dat extension.");
             }
         }
 
-        #endregion Constructors
+        public static string GetBinName(string arcName)
+        {
+            (string body, string extension) = RemoveArcExtension(arcName);
+            return body + ".bin" + extension;
+        }
+        #endregion Arc name parsing
 
         #region Initialisation
 
@@ -146,11 +155,12 @@ namespace Imas.Archive
         /// Asynchronously creates a new archive from the specified directory.
         /// </summary>
         /// <param name="dir">The directory to read from.</param>
-        /// <param name="outputName">The name of the new archive.</param>
+        /// <param name="outputArcName">The name of the new arc file.</param>
         /// <param name="progress"></param>
         /// <returns></returns>
-        public static async Task BuildFromDirectory(string dir, string outputName, IProgress<ProgressData> progress = null)
+        public static async Task BuildFromDirectory(string dir, string outputArcName, IProgress<ProgressData> progress = null)
         {
+            _ = RemoveArcExtension(outputArcName);
             using ArcFile arcFile = new ArcFile
             {
                 _entries = new List<ArcEntry>()
@@ -159,7 +169,7 @@ namespace Imas.Archive
             FileInfo[] files = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
             Array.Sort(files, (a, b) => string.CompareOrdinal(a.FullName.ToUpper(), b.FullName.ToUpper()));
 
-            using (FileStream newArcStream = new FileStream(outputName + ".arc", FileMode.Create, FileAccess.Write))
+            using (FileStream newArcStream = new FileStream(outputArcName, FileMode.Create, FileAccess.Write))
             {
                 await newArcStream.WriteAsync(new byte[16]);
                 arcFile.totalProgress = files.Length;
@@ -179,24 +189,25 @@ namespace Imas.Archive
                     });
                 }
             }
-            using FileStream newBinStream = new FileStream(outputName + ".bin", FileMode.Create, FileAccess.Write);
+            using FileStream newBinStream = new FileStream(GetBinName(outputArcName), FileMode.Create, FileAccess.Write);
             arcFile.BuildBin(newBinStream);
         }
 
         /// <summary>
         /// Asynchronously save a copy of the edited archive.
         /// </summary>
-        /// <param name="filename">The name of the new file.</param>
+        /// <param name="arcName">The name of the new arc file.</param>
         /// <param name="progress"></param>
         /// <returns>A Task representing the asynchronous operation.</returns>
         /// <exception cref="IOException"/>
-        public async Task SaveAs(string filename, IProgress<ProgressData> progress = null)
+        public async Task SaveAs(string arcName, IProgress<ProgressData> progress = null)
         {
-            using (FileStream newArcStream = new FileStream(filename + ".arc", FileMode.Create, FileAccess.Write))
+            _ = RemoveArcExtension(arcName);
+            using (FileStream newArcStream = new FileStream(arcName, FileMode.Create, FileAccess.Write))
             {
                 await BuildArc(newArcStream, progress);
             }
-            using FileStream newBinStream = new FileStream(filename + ".bin", FileMode.Create, FileAccess.Write);
+            using FileStream newBinStream = new FileStream(GetBinName(arcName), FileMode.Create, FileAccess.Write);
             BuildBin(newBinStream);
         }
 
@@ -451,15 +462,27 @@ namespace Imas.Archive
             }
         }
 
-        public static async Task OpenReplaceAndSave(string inName, string inExt, IFileSource fileSource, string outName, string outExt, IProgress<ProgressData> progress = null)
+        public static async Task PatchArcFromZip(string inArcName, string patchName, string outArcName, IProgress<ProgressData> progress = null)
         {
-            using ArcFile arcFile = new ArcFile(inName, inExt);
-            await arcFile.ReplaceAndSaveTo(fileSource, outName, outExt, progress);
+            using ZipSourceParent zipSourceParent = new ZipSourceParent(patchName);
+            await PatchArc(inArcName, zipSourceParent.GetZipSource(), outArcName, progress);
         }
 
-        private async Task ReplaceAndSaveTo(IFileSource fileSource, string outName, string outExt, IProgress<ProgressData> progress = null)
+        public static async Task PatchArcFromFolder(string inArcName, string folderName, string outArcName, IProgress<ProgressData> progress = null)
         {
-            using (FileStream newArcStream = new FileStream(outName + ".arc" + outExt, FileMode.Create, FileAccess.Write))
+            await PatchArc(inArcName, new FileSource(folderName), outArcName, progress);
+        }
+
+        private static async Task PatchArc(string inArcName, IFileSource fileSource, string outArcName, IProgress<ProgressData> progress)
+        {
+            using ArcFile arcFile = new ArcFile(inArcName);
+            await arcFile.ReplaceAndSaveTo(fileSource, outArcName, progress);
+        }
+
+        private async Task ReplaceAndSaveTo(IFileSource fileSource, string outArcName, IProgress<ProgressData> progress)
+        {
+            (string outName, string outExt) = RemoveArcExtension(outArcName);
+            using (FileStream newArcStream = new FileStream(outArcName, FileMode.Create, FileAccess.Write))
             {
                 totalProgress = Entries.Count;
                 countProgress = 0;

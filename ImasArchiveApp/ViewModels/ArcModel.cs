@@ -26,14 +26,7 @@ namespace ImasArchiveApp
             _fileModel = null;
             try
             {
-                string truncFilename;
-                string extension;
-                (truncFilename, extension) = ArcFile.RemoveArcExtension(inPath);
-                if (extension == null)
-                {
-                    throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
-                }
-                ArcFile = new ArcFile(truncFilename, extension);
+                ArcFile = new ArcFile(inPath);
                 SetBrowserEntries();
             }
             catch
@@ -218,10 +211,10 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string fileName = _getFileName.SaveGetFileName("Save As", "", "Arc file (*.arc)|*.arc");
+                string fileName = _getFileName.SaveGetFileName("Save As", "", "Arc file (*.arc)|*.arc|Arc dat file (*.arc.dat)|*.arc.dat");
                 if (fileName != null)
                 {
-                    await ArcFile.SaveAs(fileName[0..^4], ProgressReporter);
+                    await ArcFile.SaveAs(fileName, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }

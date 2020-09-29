@@ -11,7 +11,7 @@ namespace ImasArchiveLibTest
     public class CommuXlsxTest
     {
         [DataTestMethod]
-        [DataRow("other/commus.xlsx", "hdd", "other/commulist.txt")]
+        [DataRow("other/commus.xlsx", "hdd.arc", "other/commulist.txt")]
         public async Task WriteXlsxTest(string xlsxName, string arcName, string commuList)
         {
             using CommuToXlsx commu = new CommuToXlsx(xlsxName, true);
