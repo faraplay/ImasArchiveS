@@ -10,6 +10,7 @@
     <RepositoryUrl>https://github.com/faraplay/ImasArchiveS</RepositoryUrl>
     <PackageIcon>haruka_ofa.png</PackageIcon>
     <SignAssembly>false</SignAssembly>
+    <AssemblyName>Imas-Archive</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

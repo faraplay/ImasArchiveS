@@ -3,6 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>faraplay</Authors>
+    <Product>ImasArchiveConsole</Product>
+    <PackageId>ImasArchiveConsole</PackageId>
+    <AssemblyName>imas</AssemblyName>
+    <Version>0.5.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
