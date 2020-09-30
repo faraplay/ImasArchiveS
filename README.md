@@ -1,4 +1,6 @@
 # ImasArchiveS
+
+# Imas-Archive.exe
 App to read, edit, extract and patch files from the game Idolmaster: One For All (PS3).
 
 ## Instructions for usage
@@ -116,3 +118,37 @@ This is probably the charset used in most hex editors.
 
 * UTF16-BE: This groups bytes into 16-bit big-endian words and displays the Unicode character with that 
 number. This is the encoding used in-game for most text, so use this to read any text in the files.
+
+# imas.exe
+Command-line app to patch and extract game files as well as create patches.
+
+It has the following operations:
+
+#### help
+Type "imas help" to get this.
+
+This explains how to use the app and what each option does.
+
+#### patch
+Patches an arc file with the specified patch and outputs to the new filename.
+Make sure the input and output filenames are different as the program will not allow you to
+overwrite the input file.
+
+#### make-patch
+Creates or adds to a patch file. You can add commus, parameter files, images, lyrics files, or any other type of file with this.
+The default behaviour is to add to the existing patch file, or create a new patch file if none exists. You can override this
+and force it to overwrite the old patch by using the overwrite option.
+
+#### extract
+Extracts files or data from an arc file. You can extract commu or parameter data in the form of a spreadsheet,
+extract all images or lyrics to a new directory, or extract all files to a new directory.
+Note that you can only extract one thing at a time.
+
+#### copy
+This will copy columns from a source spreadsheet to a destination spreadsheet. This will only copy 
+from one column to another if the sheets they are in share the same name, the columns have the 
+same heading, and the sheet name is one of a few specified names.
+This is useful for copying translated text from the Google sheet to a parameter data spreadsheet.
+
+Note that with all of these options you can use the -v or --verbose option to make the program output reports 
+of its progress to the console.

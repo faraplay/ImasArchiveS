@@ -1,3 +1,16 @@
+## Version 0.5.0
+
+### Added
+Command-line app with various features such as patching, extracting, patch creation and spreadsheet data copying.
+
+Parameter extraction now also extracts mail (both system and idol mail)
+
+Spreadsheet data copy function (on command-line app only) that can copy columns of data from one spreadsheet to another. It will only copy from one column to
+another if the two columns are in sheets with the same name and have the same heading.
+
+### Fixed
+App will now no longer add multiple files of the same name to a zip file - instead, any such files will be skipped.
+
 ## Version 0.4.0
 
 ### Added
