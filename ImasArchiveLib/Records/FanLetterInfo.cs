@@ -22,8 +22,12 @@ namespace Imas.Records
 
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
+            if (sheetNames.Any(sheetName => xlsx.HasWorksheet(sheetName)))
+            {
+                return;
+            }
             int count1 = Binary.ReadInt32(stream, true);
-            string format1 = "iiiss";
+            const string format1 = "iiiss";
             Record[] records1 = new Record[count1];
             for (int i = 0; i < count1; i++)
             {
@@ -33,7 +37,7 @@ namespace Imas.Records
             xlsx.AppendRows("fanLetterInfo1", records1);
 
             int count2 = Binary.ReadInt32(stream, true);
-            string format2 = "iii";
+            const string format2 = "iii";
             Record[] records2 = new Record[count2];
             for (int i = 0; i < count2; i++)
             {
@@ -43,7 +47,7 @@ namespace Imas.Records
             xlsx.AppendRows("fanLetterInfo2", records2);
 
             int count3 = Binary.ReadInt32(stream, true);
-            string format3 = "iii";
+            const string format3 = "iii";
             Record[] records3 = new Record[count3];
             for (int i = 0; i < count3; i++)
             {
@@ -53,7 +57,7 @@ namespace Imas.Records
             xlsx.AppendRows("fanLetterInfo3", records3);
 
             int count4 = Binary.ReadInt32(stream, true);
-            string format4 = "ss";
+            const string format4 = "ss";
             Record[] records4 = new Record[count4];
             for (int i = 0; i < count4; i++)
             {
@@ -63,7 +67,7 @@ namespace Imas.Records
             xlsx.AppendRows("fanLetterInfo4", records4);
 
             int lettCount = Binary.ReadInt32(stream, true);
-            string lettFormat = "iiiiiiII";
+            const string lettFormat = "iiiiiiII";
             Record[] letts = new Record[lettCount];
             for (int i = 0; i < lettCount; i++)
             {
@@ -71,7 +75,7 @@ namespace Imas.Records
                 letts[i].Deserialise(stream);
             }
 
-            string format6 = "i";
+            const string format6 = "i";
             Record[] records6 = new Record[6];
             for (int i = 0; i < 6; i++)
             {
@@ -84,9 +88,10 @@ namespace Imas.Records
 
             int id = 0;
             List<Record> lettStrings = new List<Record>();
+            string[] stringSheetHeaders = { "ID", "Position", "Text" };
             do
             {
-                Record record = new Record("IIX");
+                Record record = new Record("IIX", stringSheetHeaders);
                 record[0] = id;
                 record[1] = (int)(stream.Position - stringPos) / 2;
                 ushort c;

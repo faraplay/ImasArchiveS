@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Imas.Records;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Imas.Spreadsheet
@@ -40,19 +41,39 @@ namespace Imas.Spreadsheet
 
         #endregion IDisposable
 
-        public XlsxWriter(string fileName)
+        public XlsxWriter(string fileName, bool overwrite)
         {
-            doc = SpreadsheetDocument.Create(fileName, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook);
-            workbookPart = doc.AddWorkbookPart();
-            workbookPart.Workbook = new Workbook();
-            sheets = doc.WorkbookPart.Workbook.AppendChild(new Sheets());
-            sharedStringTablePart = workbookPart.AddNewPart<SharedStringTablePart>();
-            sharedStringTablePart.SharedStringTable = new SharedStringTable();
+            if (File.Exists(fileName) && !overwrite)
+            {
+                doc = SpreadsheetDocument.Open(fileName, true);
+                workbookPart = doc.WorkbookPart;
+                sheets = doc.WorkbookPart.Workbook.Sheets;
+                sharedStringTablePart = workbookPart.GetPartsOfType<SharedStringTablePart>().First();
+                foreach (var item in sharedStringTablePart.SharedStringTable.Elements<SharedStringItem>())
+                {
+                    strings.Add(item.InnerText, strings.Count);
+                }
+                foreach (var sheet in sheets.Elements<Sheet>())
+                {
+                    worksheets.Add(sheet.Name, (WorksheetPart)workbookPart.GetPartById(sheet.Id));
+                }
+            }
+            else
+            {
+                doc = SpreadsheetDocument.Create(fileName, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook);
+                workbookPart = doc.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
+                sheets = doc.WorkbookPart.Workbook.AppendChild(new Sheets());
+                sharedStringTablePart = workbookPart.AddNewPart<SharedStringTablePart>();
+                sharedStringTablePart.SharedStringTable = new SharedStringTable();
+            }
         }
+
+        public bool HasWorksheet(string sheetName) => worksheets.ContainsKey(sheetName);
 
         private WorksheetPart GetWorksheet(string sheetName)
         {
-            if (worksheets.ContainsKey(sheetName))
+            if (HasWorksheet(sheetName))
                 return worksheets[sheetName];
             else
                 return AddWorksheet(sheetName);

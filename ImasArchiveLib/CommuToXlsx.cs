@@ -31,9 +31,9 @@ namespace Imas
 
         #endregion IDisposable
 
-        public CommuToXlsx(string fileName)
+        public CommuToXlsx(string fileName, bool overwrite)
         {
-            xlsx = new XlsxWriter(fileName);
+            xlsx = new XlsxWriter(fileName, overwrite);
         }
 
         private IEnumerable<CommuLine> GetCommuFromStream(Stream binStream, string fileName)
@@ -71,19 +71,19 @@ namespace Imas
             }
         }
 
-        private void WriteCommuToXlsx(IEnumerable<CommuLine> lines)
+        private void WriteCommuToXlsx(IEnumerable<CommuLine> lines, string fileName)
         {
+            string sheetName;
+            if (fileName[11] == '_')
+                sheetName = "other";
+            else
+                sheetName = fileName[11..14];
             foreach (CommuLine line in lines)
             {
-                string sheetName;
-                if (line.file[11] == '_')
-                    sheetName = "other";
-                else
-                    sheetName = line.file[11..14];
                 xlsx.AppendRow(sheetName, line);
             }
         }
 
-        public void GetAndWriteCommu(Stream binStream, string fileName) => WriteCommuToXlsx(GetCommuFromStream(binStream, fileName));
+        public void GetAndWriteCommu(Stream binStream, string fileName) => WriteCommuToXlsx(GetCommuFromStream(binStream, fileName), fileName);
     }
 }

@@ -10,6 +10,10 @@ namespace Imas.Records
     {
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
+            if (xlsx.HasWorksheet("jaJp") || xlsx.HasWorksheet("jaJpStrings"))
+            {
+                return;
+            }
             List<Record> list = new List<Record>();
             List<Record> stringList = new List<Record>();
             Binary binary = new Binary(stream, false);
@@ -37,9 +41,10 @@ namespace Imas.Records
 
             stream.Position = stringOffset;
             int id = 0;
+            string[] stringSheetHeaders = { "ID", "Position", "Text", "Use UTF16 Encoding" };
             do
             {
-                Record record = new Record("IIXI");
+                Record record = new Record("IIXI", stringSheetHeaders);
                 record[0] = id;
                 record[1] = (int)(stream.Position - stringOffset);
                 ushort c;

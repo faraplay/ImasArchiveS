@@ -40,18 +40,23 @@ namespace Imas.Archive
             }
         }
 
+        public bool HasFile(string entryName) => _entries.Any(entry => entry.FileName == entryName);
+
         public async Task AddFile(Stream stream, string entryName)
         {
-            ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
-            using Stream entryStream = entry.Open();
-            await stream.CopyToAsync(entryStream);
+            if (!HasFile(entryName))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
+                using Stream entryStream = entry.Open();
+                await stream.CopyToAsync(entryStream);
 
-            _entries.Add(new PatchZipEntry(entry));
+                _entries.Add(new PatchZipEntry(entry));
+            }
         }
 
         internal void AddCommu(string commuName, IEnumerable<CommuLine> lines)
         {
-            if (lines.Any(line => !string.IsNullOrWhiteSpace(line.message)))
+            if (!HasFile(commuName) && lines.Any(line => !string.IsNullOrWhiteSpace(line.message)))
             {
                 ZipArchiveEntry entry = zipArchive.CreateEntry(commuName);
                 using Stream stream = entry.Open();
@@ -64,8 +69,11 @@ namespace Imas.Archive
 
         public void AddFile(string inputFilename, string entryName)
         {
-            ZipArchiveEntry entry = zipArchive.CreateEntryFromFile(inputFilename, entryName);
-            _entries.Add(new PatchZipEntry(entry));
+            if (!HasFile(entryName))
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntryFromFile(inputFilename, entryName);
+                _entries.Add(new PatchZipEntry(entry));
+            }
         }
 
         public async Task AddCommus(string xlsxName, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
@@ -93,11 +101,13 @@ namespace Imas.Archive
                 string pngName = dInfo.FullName + '\\' + (string)record[1];
                 count++;
                 progress?.Report(new ProgressData { count = count, total = total, filename = entryName });
-
-                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
-                using Stream entryStream = entry.Open();
-                await GTF.WriteGTF(entryStream, new System.Drawing.Bitmap(pngName), (int)record[2]);
-                _entries.Add(new PatchZipEntry(entry));
+                if (!HasFile(entryName))
+                {
+                    ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
+                    using Stream entryStream = entry.Open();
+                    await GTF.WriteGTF(entryStream, new System.Drawing.Bitmap(pngName), (int)record[2]);
+                    _entries.Add(new PatchZipEntry(entry));
+                }
             }
         }
 
@@ -120,77 +130,143 @@ namespace Imas.Archive
                 string xmlName = dInfo.FullName + '\\' + (string)record[1];
                 count++;
                 progress?.Report(new ProgressData { count = count, total = total, filename = entryName });
-
-                Xmb xmb = new Xmb();
-                using (FileStream xmlStream = new FileStream(xmlName, FileMode.Open, FileAccess.Read))
+                if (!HasFile(entryName))
                 {
-                    xmb.ReadXml(xmlStream);
+                    Xmb xmb = new Xmb();
+                    using (FileStream xmlStream = new FileStream(xmlName, FileMode.Open, FileAccess.Read))
+                    {
+                        xmb.ReadXml(xmlStream);
+                    }
+                    ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
+                    using Stream entryStream = entry.Open();
+                    await xmb.WriteXmb(entryStream);
+                    _entries.Add(new PatchZipEntry(entry));
                 }
-                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName);
+            }
+        }
+
+        public void AddParameterFiles(string xlsxName, IProgress<string> progress = null)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            AddRecordFormatFiles(xlsx, progress);
+            AddFanLetter(xlsx, progress);
+            AddPastblFiles(xlsx, progress);
+            AddSongInfo(xlsx, progress);
+            AddSkillBoard(xlsx, progress);
+            AddJaJp(xlsx, progress);
+            AddIdolMail(xlsx, progress);
+        }
+
+        private void AddIdolMail(XlsxReader xlsx, IProgress<string> progress)
+        {
+            const string idolMailName = "parameter/mail_idol_par/_dlc01_mail_idol.bin";
+            if (!HasFile(idolMailName) &&
+                IdolMail.allMailSheetNames.Any(sheetName =>
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == sheetName)))
+            {
+                progress?.Report(string.Format("Adding {0}", idolMailName));
+                ZipArchiveEntry entry = zipArchive.CreateEntry(idolMailName);
                 using Stream entryStream = entry.Open();
-                await xmb.WriteXmb(entryStream);
+                IdolMail.WriteFile(entryStream, xlsx);
                 _entries.Add(new PatchZipEntry(entry));
             }
         }
 
-        public void AddParameterFiles(string xlsxName)
+        private void AddJaJp(XlsxReader xlsx, IProgress<string> progress)
         {
-            using XlsxReader xlsx = new XlsxReader(xlsxName);
-            foreach (RecordFormat format in RecordFormat.formats)
+            const string jaJpName = "text/im2nx_text.ja_jp";
+            if (!HasFile(jaJpName) &&
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJp") &&
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJpStrings"))
             {
-                IEnumerable<Record> records = xlsx.GetRows(format.format, format.sheetName);
-                if (records.Any())
-                {
-                    ZipArchiveEntry entry = zipArchive.CreateEntry(format.fileName);
-                    using Stream entryStream = entry.Open();
-                    Record.WriteRecords(entryStream, records);
-                    _entries.Add(new PatchZipEntry(entry));
-                }
-            }
-            if (FanLetterInfo.sheetNames.All(sheetName =>
-                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == sheetName)))
-            {
-                ZipArchiveEntry entry = zipArchive.CreateEntry("parameter/fanLetterInfo.bin");
+                progress?.Report(string.Format("Adding {0}", jaJpName));
+                ZipArchiveEntry entry = zipArchive.CreateEntry(jaJpName);
                 using Stream entryStream = entry.Open();
-                FanLetterInfo.WriteFile(entryStream, xlsx);
+                JaJpText.WriteFile(entryStream, xlsx);
                 _entries.Add(new PatchZipEntry(entry));
             }
-            foreach (string fileName in Pastbl.fileNames)
-            {
-                List<string> strings = xlsx.GetRows("XXX", "pastbl")
-                    .Where(record => (string)record[0] == fileName)
-                    .Select(record => (string)record[2])
-                    .ToList();
-                if (strings.Any())
-                {
-                    ZipArchiveEntry entry = zipArchive.CreateEntry(fileName);
-                    using Stream entryStream = entry.Open();
-                    Pastbl.WriteFile(entryStream, strings);
-                    _entries.Add(new PatchZipEntry(entry));
-                }
-            }
-            if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "songInfo"))
-            {
-                ZipArchiveEntry entry = zipArchive.CreateEntry("songinfo/songResource.bin");
-                using Stream entryStream = entry.Open();
-                SongInfo.WriteFile(entryStream, xlsx);
-                _entries.Add(new PatchZipEntry(entry));
-            }
-            if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "skillBoard") &&
+        }
+
+        private void AddSkillBoard(XlsxReader xlsx, IProgress<string> progress)
+        {
+            const string skillBoardName = "ui/menu/skillBoard/skillBoard.info";
+            if (!HasFile(skillBoardName) &&
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "skillBoard") &&
                 xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "skillBoardStrings"))
             {
-                ZipArchiveEntry entry = zipArchive.CreateEntry("ui/menu/skillBoard/skillBoard.info");
+                progress?.Report(string.Format("Adding {0}", skillBoardName));
+                ZipArchiveEntry entry = zipArchive.CreateEntry(skillBoardName);
                 using Stream entryStream = entry.Open();
                 SkillBoard.WriteFile(entryStream, xlsx);
                 _entries.Add(new PatchZipEntry(entry));
             }
-            if (xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJp") &&
-                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "jaJpStrings"))
+        }
+
+        private void AddSongInfo(XlsxReader xlsx, IProgress<string> progress)
+        {
+            const string songInfoName = "songinfo/songResource.bin";
+            if (!HasFile(songInfoName) && xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == "songInfo"))
             {
-                ZipArchiveEntry entry = zipArchive.CreateEntry("text/im2nx_text.ja_jp");
+                progress?.Report(string.Format("Adding {0}", songInfoName));
+                ZipArchiveEntry entry = zipArchive.CreateEntry(songInfoName);
                 using Stream entryStream = entry.Open();
-                JaJpText.WriteFile(entryStream, xlsx);
+                SongInfo.WriteFile(entryStream, xlsx);
                 _entries.Add(new PatchZipEntry(entry));
+            }
+        }
+
+        private void AddPastblFiles(XlsxReader xlsx, IProgress<string> progress)
+        {
+            foreach (string fileName in Pastbl.fileNames)
+            {
+                if (!HasFile(fileName))
+                {
+                    progress?.Report(string.Format("Adding {0}", fileName));
+                    List<string> strings = xlsx.GetRows("XXX", "pastbl")
+                        .Where(record => (string)record[0] == fileName)
+                        .Select(record => (string)record[2])
+                        .ToList();
+                    if (strings.Any())
+                    {
+                        ZipArchiveEntry entry = zipArchive.CreateEntry(fileName);
+                        using Stream entryStream = entry.Open();
+                        Pastbl.WriteFile(entryStream, strings);
+                        _entries.Add(new PatchZipEntry(entry));
+                    }
+                }
+            }
+        }
+
+        private void AddFanLetter(XlsxReader xlsx, IProgress<string> progress)
+        {
+            const string fanLetterFilename = "parameter/fanLetterInfo.bin";
+            if (!HasFile(fanLetterFilename) && FanLetterInfo.sheetNames.All(sheetName =>
+                xlsx.Sheets.Descendants<Sheet>().Any(sheet => sheet.Name == sheetName)))
+            {
+                progress?.Report(string.Format("Adding {0}", fanLetterFilename));
+                ZipArchiveEntry entry = zipArchive.CreateEntry(fanLetterFilename);
+                using Stream entryStream = entry.Open();
+                FanLetterInfo.WriteFile(entryStream, xlsx);
+                _entries.Add(new PatchZipEntry(entry));
+            }
+        }
+
+        private void AddRecordFormatFiles(XlsxReader xlsx, IProgress<string> progress)
+        {
+            foreach (RecordFormat format in RecordFormat.formats)
+            {
+                if (!HasFile(format.fileName))
+                {
+                    progress?.Report(string.Format("Adding {0}", format.fileName));
+                    IEnumerable<Record> records = xlsx.GetRows(format.format, format.sheetName);
+                    if (records.Any())
+                    {
+                        ZipArchiveEntry entry = zipArchive.CreateEntry(format.fileName);
+                        using Stream entryStream = entry.Open();
+                        Record.WriteRecords(entryStream, records);
+                        _entries.Add(new PatchZipEntry(entry));
+                    }
+                }
             }
         }
 

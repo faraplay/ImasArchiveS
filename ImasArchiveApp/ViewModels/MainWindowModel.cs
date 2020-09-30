@@ -347,10 +347,10 @@ namespace ImasArchiveApp
                 string inFileName = _getFileName.OpenGetFolderName("Choose folder");
                 if (inFileName != null)
                 {
-                    string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc");
+                    string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc|Arc dat file (*.arc.dat)|*.arc.dat");
                     if (outFileName != null)
                     {
-                        await Imas.Archive.ArcFile.BuildFromDirectory(inFileName, outFileName[0..^4], progress);
+                        await ArcFile.BuildFromDirectory(inFileName, outFileName, progress);
                         ReportMessage("Done.");
                         Open(outFileName);
                     }
@@ -405,43 +405,24 @@ namespace ImasArchiveApp
                 }
                 string replacementName = fromZip ? _getFileName.OpenGetFileName("Choose patch zip", "Zip file (*.zip)|*.zip") : _getFileName.OpenGetFolderName("Choose patch folder");
                 if (replacementName == null) return;
-                string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc");
+                string outFileName = _getFileName.SaveGetFileName("Save As", inFileName, "Arc file (*.arc)|*.arc|Arc dat file (*.arc.dat)|*.arc.dat");
                 if (outFileName == null) return;
-
-                string extension;
-                if (inFileName.EndsWith(".arc"))
-                {
-                    inFileName = inFileName[0..^4];
-                    extension = "";
-                }
-                else if (inFileName.EndsWith(".arc.dat"))
-                {
-                    inFileName = inFileName[0..^8];
-                    extension = ".dat";
-                }
-                else
-                    throw new ArgumentException("Selected file does not have .arc or .arc.dat extension.");
                 if (fileOpened)
                     Close();
                 if (fromZip)
                 {
-                    using ZipSourceParent zipSourceParent = new ZipSourceParent(replacementName);
-                    await ArcFile.OpenReplaceAndSave(
+                    await ArcFile.PatchArcFromZip(
                         inFileName,
-                        extension,
-                        zipSourceParent.GetZipSource(),
-                        outFileName[0..^4],
-                        "",
+                        replacementName,
+                        outFileName,
                         progress);
                 }
                 else
                 {
-                    await ArcFile.OpenReplaceAndSave(
+                    await ArcFile.PatchArcFromFolder(
                         inFileName,
-                        extension,
-                        new FileSource(replacementName),
-                        outFileName[0..^4],
-                        "",
+                        replacementName,
+                        outFileName,
                         progress);
                 }
                 ReportMessage("Done.");
@@ -456,19 +437,6 @@ namespace ImasArchiveApp
 
         public async Task CreateCommuPatch()
         {
-            try
-            {
-                ClearStatus();
-                string outFileName = _getFileName.SaveGetFileName("Save As", "patch", "Zip file (*.zip)|*.zip");
-                if (outFileName != null)
-                {
-                }
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-                return;
-            }
         }
 
         public async Task ConvertToGtf()

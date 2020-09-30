@@ -22,10 +22,11 @@ namespace Imas.Archive
 
         #region Constructors
 
-        public ArcFile(string filename, string extraExtension = "")
+        public ArcFile(string arcName)
         {
-            string _arc_filename = filename + ".arc" + extraExtension;
-            string _bin_filename = filename + ".bin" + extraExtension;
+            (string body, string extension) = RemoveArcExtension(arcName);
+            string _arc_filename = body + ".arc" + extension;
+            string _bin_filename = body + ".bin" + extension;
             if (!File.Exists(_arc_filename))
                 throw new FileNotFoundException("Arc file not found.");
             if (!File.Exists(_bin_filename))
@@ -40,6 +41,30 @@ namespace Imas.Archive
         }
 
         #endregion Constructors
+
+        #region Arc name parsing
+        public static (string, string) RemoveArcExtension(string arcName)
+        {
+            if (arcName.EndsWith(".arc"))
+            {
+                return (arcName[0..^4], "");
+            }
+            else if (arcName.EndsWith(".arc.dat"))
+            {
+                return (arcName[0..^8], ".dat");
+            }
+            else
+            {
+                throw new ArgumentException("Filename does not have .arc or .arc.dat extension.");
+            }
+        }
+
+        public static string GetBinName(string arcName)
+        {
+            (string body, string extension) = RemoveArcExtension(arcName);
+            return body + ".bin" + extension;
+        }
+        #endregion Arc name parsing
 
         #region Initialisation
 
@@ -130,11 +155,12 @@ namespace Imas.Archive
         /// Asynchronously creates a new archive from the specified directory.
         /// </summary>
         /// <param name="dir">The directory to read from.</param>
-        /// <param name="outputName">The name of the new archive.</param>
+        /// <param name="outputArcName">The name of the new arc file.</param>
         /// <param name="progress"></param>
         /// <returns></returns>
-        public static async Task BuildFromDirectory(string dir, string outputName, IProgress<ProgressData> progress = null)
+        public static async Task BuildFromDirectory(string dir, string outputArcName, IProgress<ProgressData> progress = null)
         {
+            _ = RemoveArcExtension(outputArcName);
             using ArcFile arcFile = new ArcFile
             {
                 _entries = new List<ArcEntry>()
@@ -143,7 +169,7 @@ namespace Imas.Archive
             FileInfo[] files = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
             Array.Sort(files, (a, b) => string.CompareOrdinal(a.FullName.ToUpper(), b.FullName.ToUpper()));
 
-            using (FileStream newArcStream = new FileStream(outputName + ".arc", FileMode.Create, FileAccess.Write))
+            using (FileStream newArcStream = new FileStream(outputArcName, FileMode.Create, FileAccess.Write))
             {
                 await newArcStream.WriteAsync(new byte[16]);
                 arcFile.totalProgress = files.Length;
@@ -163,24 +189,25 @@ namespace Imas.Archive
                     });
                 }
             }
-            using FileStream newBinStream = new FileStream(outputName + ".bin", FileMode.Create, FileAccess.Write);
+            using FileStream newBinStream = new FileStream(GetBinName(outputArcName), FileMode.Create, FileAccess.Write);
             arcFile.BuildBin(newBinStream);
         }
 
         /// <summary>
         /// Asynchronously save a copy of the edited archive.
         /// </summary>
-        /// <param name="filename">The name of the new file.</param>
+        /// <param name="arcName">The name of the new arc file.</param>
         /// <param name="progress"></param>
         /// <returns>A Task representing the asynchronous operation.</returns>
         /// <exception cref="IOException"/>
-        public async Task SaveAs(string filename, IProgress<ProgressData> progress = null)
+        public async Task SaveAs(string arcName, IProgress<ProgressData> progress = null)
         {
-            using (FileStream newArcStream = new FileStream(filename + ".arc", FileMode.Create, FileAccess.Write))
+            _ = RemoveArcExtension(arcName);
+            using (FileStream newArcStream = new FileStream(arcName, FileMode.Create, FileAccess.Write))
             {
                 await BuildArc(newArcStream, progress);
             }
-            using FileStream newBinStream = new FileStream(filename + ".bin", FileMode.Create, FileAccess.Write);
+            using FileStream newBinStream = new FileStream(GetBinName(arcName), FileMode.Create, FileAccess.Write);
             BuildBin(newBinStream);
         }
 
@@ -435,15 +462,27 @@ namespace Imas.Archive
             }
         }
 
-        public static async Task OpenReplaceAndSave(string inName, string inExt, IFileSource fileSource, string outName, string outExt, IProgress<ProgressData> progress = null)
+        public static async Task PatchArcFromZip(string inArcName, string patchName, string outArcName, IProgress<ProgressData> progress = null)
         {
-            using ArcFile arcFile = new ArcFile(inName, inExt);
-            await arcFile.ReplaceAndSaveTo(fileSource, outName, outExt, progress);
+            using ZipSourceParent zipSourceParent = new ZipSourceParent(patchName);
+            await PatchArc(inArcName, zipSourceParent.GetZipSource(), outArcName, progress);
         }
 
-        private async Task ReplaceAndSaveTo(IFileSource fileSource, string outName, string outExt, IProgress<ProgressData> progress = null)
+        public static async Task PatchArcFromFolder(string inArcName, string folderName, string outArcName, IProgress<ProgressData> progress = null)
         {
-            using (FileStream newArcStream = new FileStream(outName + ".arc" + outExt, FileMode.Create, FileAccess.Write))
+            await PatchArc(inArcName, new FileSource(folderName), outArcName, progress);
+        }
+
+        private static async Task PatchArc(string inArcName, IFileSource fileSource, string outArcName, IProgress<ProgressData> progress)
+        {
+            using ArcFile arcFile = new ArcFile(inArcName);
+            await arcFile.ReplaceAndSaveTo(fileSource, outArcName, progress);
+        }
+
+        private async Task ReplaceAndSaveTo(IFileSource fileSource, string outArcName, IProgress<ProgressData> progress)
+        {
+            (string outName, string outExt) = RemoveArcExtension(outArcName);
+            using (FileStream newArcStream = new FileStream(outArcName, FileMode.Create, FileAccess.Write))
             {
                 totalProgress = Entries.Count;
                 countProgress = 0;
@@ -488,9 +527,9 @@ namespace Imas.Archive
 
         #region Extracting
 
-        public async Task ExtractCommusToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
+        public async Task ExtractCommusToXlsx(string xlsxName, bool overwrite, IProgress<ProgressData> progress = null)
         {
-            using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName);
+            using CommuToXlsx commuToXlsx = new CommuToXlsx(xlsxName, overwrite);
             IEnumerable<ContainerEntry> commuEntries = Entries.Where(entry => entry.FileName.StartsWith("commu2/par/"));
             totalProgress = commuEntries.Count();
             countProgress = 0;
@@ -510,19 +549,19 @@ namespace Imas.Archive
             }
         }
 
-        public async Task ExtractParameterToXlsx(string xlsxName, IProgress<ProgressData> progress = null)
+        public async Task ExtractParameterToXlsx(string xlsxName, bool overwrite, IProgress<ProgressData> progress = null)
         {
-            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName, overwrite);
             foreach (RecordFormat format in RecordFormat.formats)
             {
                 using EntryStack entryStack = await GetEntryRecursive(format.fileName);
-                if (entryStack != null)
+                if (!xlsxWriter.HasWorksheet(format.sheetName) && entryStack != null)
                 {
-                    progress.Report(new ProgressData { filename = format.fileName });
+                    progress?.Report(new ProgressData { filename = format.fileName });
                     List<Record> records = new List<Record>();
                     using (Stream stream = await entryStack.Entry.GetData())
                     {
-                        records = Record.GetRecords(stream, format.format);
+                        records = Record.GetRecords(stream, format.format, format.headers);
                     }
                     xlsxWriter.AppendRows(format.sheetName, records);
                 }
@@ -531,7 +570,7 @@ namespace Imas.Archive
             {
                 if (entryStack != null)
                 {
-                    progress.Report(new ProgressData { filename = "parameter/fanLetterInfo.bin" });
+                    progress?.Report(new ProgressData { filename = "parameter/fanLetterInfo.bin" });
                     using Stream stream = await entryStack.Entry.GetData();
                     FanLetterInfo.ReadFile(stream, xlsxWriter);
                 }
@@ -539,14 +578,14 @@ namespace Imas.Archive
             foreach (string fileName in Pastbl.fileNames)
             {
                 using EntryStack entryStack = await GetEntryRecursive(fileName);
-                if (entryStack != null)
+                if (!xlsxWriter.HasWorksheet("pastbl") && entryStack != null)
                 {
-                    progress.Report(new ProgressData { filename = fileName });
+                    progress?.Report(new ProgressData { filename = fileName });
                     using Stream stream = await entryStack.Entry.GetData();
                     IEnumerable<Record> newRecords = Pastbl.ReadFile(stream).Select(
                         record =>
                         {
-                            Record newRec = new Record("XX");
+                            Record newRec = new Record("XX", Pastbl.headers);
                             newRec[0] = fileName;
                             newRec[1] = record[2];
                             return newRec;
@@ -556,9 +595,9 @@ namespace Imas.Archive
             }
             using (EntryStack entryStack = await GetEntryRecursive("songinfo/songResource.bin"))
             {
-                if (entryStack != null)
+                if (!xlsxWriter.HasWorksheet("songInfo") && entryStack != null)
                 {
-                    progress.Report(new ProgressData { filename = "songinfo/songResource.bin" });
+                    progress?.Report(new ProgressData { filename = "songinfo/songResource.bin" });
                     using Stream stream = await entryStack.Entry.GetData();
                     IEnumerable<Record> records = SongInfo.ReadFile(stream);
                     xlsxWriter.AppendRows("songInfo", records);
@@ -568,7 +607,7 @@ namespace Imas.Archive
             {
                 if (entryStack != null)
                 {
-                    progress.Report(new ProgressData { filename = "ui/menu/skillBoard/skillBoard.info" });
+                    progress?.Report(new ProgressData { filename = "ui/menu/skillBoard/skillBoard.info" });
                     using Stream stream = await entryStack.Entry.GetData();
                     SkillBoard.ReadFile(stream, xlsxWriter);
                 }
@@ -577,9 +616,20 @@ namespace Imas.Archive
             {
                 if (entryStack != null)
                 {
-                    progress.Report(new ProgressData { filename = "text/im2nx_text.ja_jp" });
+                    progress?.Report(new ProgressData { filename = "text/im2nx_text.ja_jp" });
                     using Stream stream = await entryStack.Entry.GetData();
                     JaJpText.ReadFile(stream, xlsxWriter);
+                }
+            }
+            using (EntryStack mailEntryStack = await GetEntryRecursive("parameter/mail_idol_par/_dlc01_mail_idol.bin"))
+            {
+                using EntryStack infoEntryStack = await GetEntryRecursive("parameter/mail_idol_par/_ps3_info_idol.bin");
+                if (mailEntryStack != null && infoEntryStack != null)
+                {
+                    progress?.Report(new ProgressData { filename = "parameter/mail_idol_par/_dlc01_mail_idol.bin" });
+                    using Stream mailStream = await mailEntryStack.Entry.GetData();
+                    using Stream infoStream = await infoEntryStack.Entry.GetData();
+                    IdolMail.ReadFile(mailStream, infoStream, xlsxWriter);
                 }
             }
         }
@@ -600,12 +650,12 @@ namespace Imas.Archive
                 string newName = filename.Substring(filename.LastIndexOf('/') + 1)[0..^4] + ".xml";
                 using FileStream fileStream = new FileStream(outDir + "/" + newName, FileMode.Create, FileAccess.Write);
                 xmb.WriteXml(fileStream);
-                Record record = new Record("XX");
+                Record record = new Record("XX", Xmb.filenameXlsxHeaders);
                 record[0] = filename;
                 record[1] = newName;
                 records.Add(record);
             }
-            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx");
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx", true);
             xlsxWriter.AppendRows("filenames", records);
         }
 
@@ -617,10 +667,11 @@ namespace Imas.Archive
 
             Directory.CreateDirectory(outDir);
             await ForAllTask((entry, filename) => ExtractImage(entry, filename, hashFileName, fileNameCount, outDir, records), progress);
-            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx");
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx", true);
             xlsxWriter.AppendRows("filenames", records);
         }
 
+        private static readonly string[] ImageFilenameXlsxHeaders = { "Original Filename", "New Filename", "GTF Type" };
         private async Task ExtractImage(ContainerEntry entry, string filename,
             Dictionary<string, string> hashFileName, Dictionary<string, int> fileNameCount, string outDir, List<Record> records)
         {
@@ -672,7 +723,7 @@ namespace Imas.Archive
                         await memStream.CopyToAsync(outStream).ConfigureAwait(false);
                     }
 
-                    Record record = new Record("XXI");
+                    Record record = new Record("XXI", ImageFilenameXlsxHeaders);
                     record[0] = filename;
                     record[1] = outName;
                     record[2] = gtf.Type;

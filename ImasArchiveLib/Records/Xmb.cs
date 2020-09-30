@@ -8,6 +8,7 @@ namespace Imas.Records
 {
     internal class Xmb
     {
+        public static readonly string[] filenameXlsxHeaders = { "Original Filename", "New Filename" };
         private Record[] tagStrings;
         private List<Element> elements;
         private List<Attr> attrs;

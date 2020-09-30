@@ -10,6 +10,10 @@ namespace Imas.Records
     {
         public static void ReadFile(Stream stream, XlsxWriter xlsx)
         {
+            if (xlsx.HasWorksheet("skillBoard") || xlsx.HasWorksheet("skillBoardStrings"))
+            {
+                return;
+            }
             List<Record> list = new List<Record>();
             List<Record> stringList = new List<Record>();
             Binary binary = new Binary(stream, true);
@@ -35,9 +39,10 @@ namespace Imas.Records
                 i++;
                 return cc;
             }
+            string[] stringSheetHeaders = { "Position", "ID", "Text" };
             while (i < strBufLen)
             {
-                Record record = new Record("IIX");
+                Record record = new Record("IIX", stringSheetHeaders);
                 record[0] = i;
                 record[1] = stringIndex++;
                 StringBuilder sb = new StringBuilder();

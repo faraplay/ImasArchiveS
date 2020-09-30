@@ -3,9 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>Imas</RootNamespace>
-    <Version>0.4.0.8</Version>
+    <Version>0.4.0.15</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>faraplay</Authors>
+    <PackageTags>cord</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

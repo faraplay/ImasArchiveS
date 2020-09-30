@@ -8,6 +8,38 @@ namespace Imas.Records
     internal class SongInfo
     {
         private static readonly string format = "iiiia020issiiiiiiiiiiiiiiic040c100c040c040iiiiiiiia020ii";
+        private static readonly string[] headers =
+        {
+            "",
+            "",
+            "Order On Song Screen",
+            "",
+            "String ID",
+            "BPM",
+            "",
+            "",
+            "",
+            "",
+            "Dance",
+            "Visual",
+            "Vocal",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Name",
+            "Description",
+            "Lyricist",
+            "Composer",
+            "", "", "", "", "", "",
+            "", "", "", "", "",
+        };
 
         public static IEnumerable<Record> ReadFile(Stream stream)
         {
@@ -21,7 +53,7 @@ namespace Imas.Records
             Record[] records = new Record[recCount];
             for (int i = 0; i < recCount; i++)
             {
-                records[i] = new Record(format);
+                records[i] = new Record(format, headers);
                 records[i].Deserialise(stream);
             }
 

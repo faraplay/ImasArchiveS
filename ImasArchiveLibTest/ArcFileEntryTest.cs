@@ -22,12 +22,12 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", 0x13DF)]
-        [DataRow("disc", "", 0x1B8)]
-        public void EntryCount(string filename, string extension, int expectedCount)
+        [DataRow("hdd.arc", 0x13DF)]
+        [DataRow("disc.arc", 0x1B8)]
+        public void EntryCount(string filename, int expectedCount)
         {
             int actualCount;
-            using (ArcFile arcFile = new ArcFile(filename, extension))
+            using (ArcFile arcFile = new ArcFile(filename))
             {
                 actualCount = arcFile.Entries.Count;
             }
@@ -36,11 +36,11 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "songinfo/songResource.bin", "other/songResource.bin")]
-        [DataRow("hdd", "", "commu2/par/ami_bs2_c01.par", "other/ami_bs2_c01.par")]
-        public async Task GetEntryAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
+        [DataRow("hdd.arc", "songinfo/songResource.bin", "other/songResource.bin")]
+        [DataRow("hdd.arc", "commu2/par/ami_bs2_c01.par", "other/ami_bs2_c01.par")]
+        public async Task GetEntryAndWriteToFile(string filename, string entryFilepath, string expectedFile)
         {
-            using ArcFile arcFile = new ArcFile(filename, extension);
+            using ArcFile arcFile = new ArcFile(filename);
             ContainerEntry arcEntry = arcFile.GetEntry(entryFilepath);
             if (arcEntry == null)
                 Assert.Fail("Entry not found.");
@@ -55,10 +55,10 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "commu2/par/ami_bs2_c01_par/ami_bs2_c01_m.bin", "other/ami_bs2_c01_m.bin")]
-        public async Task GetEntryRecursiveAndWriteToFile(string filename, string extension, string entryFilepath, string expectedFile)
+        [DataRow("hdd.arc", "commu2/par/ami_bs2_c01_par/ami_bs2_c01_m.bin", "other/ami_bs2_c01_m.bin")]
+        public async Task GetEntryRecursiveAndWriteToFile(string filename, string entryFilepath, string expectedFile)
         {
-            using ArcFile arcFile = new ArcFile(filename, extension);
+            using ArcFile arcFile = new ArcFile(filename);
             using EntryStack stack = await arcFile.GetEntryRecursive(entryFilepath);
             if (stack == null)
                 Assert.Fail("Entry not found.");
@@ -73,11 +73,11 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("disc", "", false, "disc")]
-        [DataRow("little", "", true, "little_pars")]
-        public async Task ExtractAllAsync(string filename, string extension, bool extractPar, string expectedFolder)
+        [DataRow("disc.arc", false, "disc")]
+        [DataRow("little.arc", true, "little_pars")]
+        public async Task ExtractAllAsync(string filename, bool extractPar, string expectedFolder)
         {
-            using ArcFile arcFile = new ArcFile(filename, extension);
+            using ArcFile arcFile = new ArcFile(filename);
             await Task.Run(() => arcFile.ExtractAllAsync("temp", extractPar, progress));
             bool eq = Compare.CompareDirectories(expectedFolder, "temp");
             DirectoryInfo directoryInfo = new DirectoryInfo("temp");
@@ -86,24 +86,24 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("disc", "")]
-        public async Task ListFileNamesTest(string filename, string extension)
+        [DataRow("disc.arc")]
+        public async Task ListFileNamesTest(string filename)
         {
-            using ArcFile arcFile = new ArcFile(filename, extension);
+            using ArcFile arcFile = new ArcFile(filename);
             using TextWriter textWriter = new StreamWriter("log_arcnames.txt");
             await arcFile.ForAll((entry, name) => textWriter.WriteLine(name));
         }
 
         [DataTestMethod]
-        [DataRow("little", "", "little_replace", "little_exp")]
-        public async Task ReplaceTest(string filename, string extension, string replacementFolder, string expectedFolder)
+        [DataRow("little.arc", "little_replace", "little_exp")]
+        public async Task ReplaceTest(string filename, string replacementFolder, string expectedFolder)
         {
-            using (ArcFile arcFile = new ArcFile(filename, extension))
+            using (ArcFile arcFile = new ArcFile(filename))
             {
                 await arcFile.ReplaceEntries(new FileSource(replacementFolder), progress);
-                await arcFile.SaveAs("temp");
+                await arcFile.SaveAs("temp.arc");
             }
-            using (ArcFile arcFile = new ArcFile("temp"))
+            using (ArcFile arcFile = new ArcFile("temp.arc"))
             {
                 await arcFile.ExtractAllAsync("tempdir", true, progress);
             }
@@ -116,16 +116,16 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("little", "", "little_replace.zip", "little_exp")]
-        public async Task ReplaceZipTest(string filename, string extension, string replacementZip, string expectedFolder)
+        [DataRow("little.arc", "little_replace.zip", "little_exp")]
+        public async Task ReplaceZipTest(string filename, string replacementZip, string expectedFolder)
         {
-            using (ArcFile arcFile = new ArcFile(filename, extension))
+            using (ArcFile arcFile = new ArcFile(filename))
             {
                 using ZipSourceParent zipSourceParent = new ZipSourceParent(replacementZip);
                 await arcFile.ReplaceEntries(zipSourceParent.GetZipSource(), progress);
-                await arcFile.SaveAs("temp");
+                await arcFile.SaveAs("temp.arc");
             }
-            using (ArcFile arcFile = new ArcFile("temp"))
+            using (ArcFile arcFile = new ArcFile("temp.arc"))
             {
                 await arcFile.ExtractAllAsync("tempdir", true, progress);
             }
@@ -138,11 +138,11 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("little", "", "little_replace", "little_exp")]
-        public async Task ReplaceSaveTest(string filename, string extension, string replacementFolder, string expectedFolder)
+        [DataRow("little.arc", "little_replace", "little_exp")]
+        public async Task ReplaceSaveTest(string filename, string replacementFolder, string expectedFolder)
         {
-            await ArcFile.OpenReplaceAndSave(filename, extension, new FileSource(replacementFolder), "temp", "", progress);
-            using (ArcFile arcFile = new ArcFile("temp"))
+            await ArcFile.PatchArcFromFolder(filename, replacementFolder, "temp.arc", progress);
+            using (ArcFile arcFile = new ArcFile("temp.arc"))
             {
                 await arcFile.ExtractAllAsync("tempdir", true, progress);
             }
@@ -155,12 +155,11 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("little", "", "little_replace.zip", "little_exp")]
-        public async Task ReplaceSaveZipTest(string filename, string extension, string replacementZip, string expectedFolder)
+        [DataRow("little.arc", "little_replace.zip", "little_exp")]
+        public async Task ReplaceSaveZipTest(string filename, string replacementZip, string expectedFolder)
         {
-            using ZipSourceParent zipSourceParent = new ZipSourceParent(replacementZip);
-            await ArcFile.OpenReplaceAndSave(filename, extension, zipSourceParent.GetZipSource(), "temp", "", progress);
-            using (ArcFile arcFile = new ArcFile("temp"))
+            await ArcFile.PatchArcFromZip(filename, replacementZip, "temp.arc", progress);
+            using (ArcFile arcFile = new ArcFile("temp.arc"))
             {
                 await arcFile.ExtractAllAsync("tempdir", true, progress);
             }
@@ -173,25 +172,25 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "")]
-        [DataRow("disc", "")]
-        public async Task SaveArcAs(string filename, string extension)
+        [DataRow("hdd.arc")]
+        [DataRow("disc.arc")]
+        public async Task SaveArcAs(string filename)
         {
-            using (ArcFile arcFile = new ArcFile(filename, extension))
+            using (ArcFile arcFile = new ArcFile(filename))
             {
-                await arcFile.SaveAs("temp", progress);
+                await arcFile.SaveAs("temp.arc", progress);
             }
-            bool eq = Compare.CompareFiles(filename + ".arc" + extension, "temp.arc") && Compare.CompareFiles(filename + ".bin" + extension, "temp.bin");
+            bool eq = Compare.CompareFiles(filename, "temp.arc") && Compare.CompareFiles(ArcFile.GetBinName(filename), "temp.bin");
             File.Delete("temp.arc");
             File.Delete("temp.bin");
             Assert.IsTrue(eq);
         }
 
         [DataTestMethod]
-        [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "other/disc_edited")]
-        public async Task EditThenSaveArcAsTwice(string filename, string extension, string entryPath, string replacementFile, string expectedFile)
+        [DataRow("disc.arc", "system/chara_viewer_def.bin", "other/songResource.bin", "other/disc_edited.arc")]
+        public async Task EditThenSaveArcAsTwice(string filename, string entryPath, string replacementFile, string expectedFile)
         {
-            using (ArcFile arcFile = new ArcFile(filename, extension))
+            using (ArcFile arcFile = new ArcFile(filename))
             {
                 ContainerEntry arcEntry = arcFile.GetEntry(entryPath);
                 if (arcEntry == null)
@@ -200,13 +199,13 @@ namespace ImasArchiveLibTest
                 {
                     await arcEntry.SetData(fileStream);
                 }
-                await arcFile.SaveAs("temp1", progress);
-                await arcFile.SaveAs("temp2", progress);
+                await arcFile.SaveAs("temp1.arc", progress);
+                await arcFile.SaveAs("temp2.arc", progress);
             }
-            bool eq1 = Compare.CompareFiles(expectedFile + ".arc" + extension, "temp1.arc");
-            bool eq2 = Compare.CompareFiles(expectedFile + ".bin" + extension, "temp1.bin");
-            bool eq3 = Compare.CompareFiles(expectedFile + ".arc" + extension, "temp2.arc");
-            bool eq4 = Compare.CompareFiles(expectedFile + ".bin" + extension, "temp2.bin");
+            bool eq1 = Compare.CompareFiles(expectedFile, "temp1.arc");
+            bool eq2 = Compare.CompareFiles(ArcFile.GetBinName(expectedFile), "temp1.bin");
+            bool eq3 = Compare.CompareFiles(expectedFile, "temp2.arc");
+            bool eq4 = Compare.CompareFiles(ArcFile.GetBinName(expectedFile), "temp2.bin");
             File.Delete("temp1.arc");
             File.Delete("temp1.bin");
             File.Delete("temp2.arc");
@@ -218,10 +217,10 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("disc", "", "system/chara_viewer_def.bin", "other/songResource.bin", "disc")]
-        public async Task EditEntryReextractTest(string filename, string extension, string entryFilepath, string replacementFile, string expectedDir)
+        [DataRow("disc.arc", "system/chara_viewer_def.bin", "other/songResource.bin", "disc")]
+        public async Task EditEntryReextractTest(string filename, string entryFilepath, string replacementFile, string expectedDir)
         {
-            using (ArcFile arcFile = new ArcFile(filename, extension))
+            using (ArcFile arcFile = new ArcFile(filename))
             {
                 ContainerEntry arcEntry = arcFile.GetEntry(entryFilepath);
                 if (arcEntry == null)
@@ -230,9 +229,9 @@ namespace ImasArchiveLibTest
                 {
                     await arcEntry.SetData(fileStream);
                 }
-                await arcFile.SaveAs("temp", progress);
+                await arcFile.SaveAs("temp.arc", progress);
             }
-            using (ArcFile arcFile = new ArcFile("temp", ""))
+            using (ArcFile arcFile = new ArcFile("temp.arc"))
             {
                 await arcFile.ExtractAllAsync("tempdir", false, progress);
             }
@@ -254,8 +253,8 @@ namespace ImasArchiveLibTest
         [DataRow("disc")]
         public async Task BuildNewArcTest(string dir)
         {
-            await ArcFile.BuildFromDirectory(dir, "temp", progress);
-            using (ArcFile arcFile = new ArcFile("temp"))
+            await ArcFile.BuildFromDirectory(dir, "temp.arc", progress);
+            using (ArcFile arcFile = new ArcFile("temp.arc"))
             {
                 await arcFile.ExtractAllAsync("tempdir", false, progress);
             }
@@ -271,36 +270,50 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "other/commus.xlsx")]
-        public async Task ArcFileCommuTest(string arcName, string extension, string outputXlsx)
+        [DataRow("hdd.arc", "other/commus.xlsx")]
+        public async Task ArcFileCommuTest(string arcName, string outputXlsx)
         {
-            using ArcFile arcFile = new ArcFile(arcName, extension);
-            await arcFile.ExtractCommusToXlsx(outputXlsx, progress);
+            using ArcFile arcFile = new ArcFile(arcName);
+            await arcFile.ExtractCommusToXlsx(outputXlsx, true, progress);
         }
 
         [DataTestMethod]
-        [DataRow("disc", "", "other/parameter_disc.xlsx")]
-        [DataRow("hdd", "", "other/parameter_hdd.xlsx")]
-        public async Task ArcParameterTest(string arcName, string extension, string outputXlsx)
+        [DataRow("disc.arc", "other/parameter_disc.xlsx")]
+        [DataRow("hdd.arc", "other/parameter_hdd.xlsx")]
+        public async Task ArcParameterIndividualTest(string arcName, string outputXlsx)
         {
-            using ArcFile arcFile = new ArcFile(arcName, extension);
-            await arcFile.ExtractParameterToXlsx(outputXlsx, progress);
+            using ArcFile arcFile = new ArcFile(arcName);
+            await arcFile.ExtractParameterToXlsx(outputXlsx, true, progress);
         }
 
         [DataTestMethod]
-        [DataRow("disc", "", "images/disc_images")]
-        //[DataRow("hdd", "", "images/hdd_images")]
-        public async Task ExtractAllImagesTest(string arcName, string extension, string outDir)
+        [DataRow("other/parameter.xlsx")]
+        public async Task ArcParameterCombinedTest(string outputXlsx)
         {
-            using ArcFile arcFile = new ArcFile(arcName, extension);
+            using (ArcFile arcFile = new ArcFile("disc.arc"))
+            {
+                await arcFile.ExtractParameterToXlsx(outputXlsx, true, progress);
+            }
+            using (ArcFile arcFile = new ArcFile("hdd.arc"))
+            {
+                await arcFile.ExtractParameterToXlsx(outputXlsx, false, progress);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("disc.arc", "images/disc_images")]
+        //[DataRow("hdd.arc", "images/hdd_images")]
+        public async Task ExtractAllImagesTest(string arcName, string outDir)
+        {
+            using ArcFile arcFile = new ArcFile(arcName);
             await arcFile.ExtractAllImages(outDir);
         }
 
         [DataTestMethod]
-        [DataRow("hdd", "", "lyrics/hdd_lyrics")]
-        public async Task ExtractLyricsTest(string arcName, string extension, string outDir)
+        [DataRow("hdd.arc", "lyrics/hdd_lyrics")]
+        public async Task ExtractLyricsTest(string arcName, string outDir)
         {
-            using ArcFile arcFile = new ArcFile(arcName, extension);
+            using ArcFile arcFile = new ArcFile(arcName);
             await arcFile.ExtractLyrics(outDir);
         }
     }

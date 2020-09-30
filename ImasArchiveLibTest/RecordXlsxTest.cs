@@ -10,22 +10,22 @@ namespace ImasArchiveLibTest
     [TestClass]
     public class RecordXlsxTest
     {
-        [DataTestMethod]
-        [DataRow("disc/parameter/accessory.bin", "parameter/accessory.xlsx", "accessory", "iiiiibbbbiic020c080bbbbbbbbii")]
-        [DataRow("disc/parameter/item.bin", "parameter/item.xlsx", "item", "isbbiic020c080c080ssssssiiiibbbb")]
-        [DataRow("disc/parameter/profile.bin", "parameter/profile.xlsx", "profile", "sbbbbbbbbbbbbbba010c020c020c020c020c020c020c020c040c080c080")]
-        [DataRow("disc/parameter/album.bin", "parameter/album.xlsx", "album", "ssbbsbbsssa010c020c020c020")]
-        [DataRow("disc/parameter/season/seasonText.bin", "parameter/seasonText.xlsx", "seasonText", "bbsc040c020c020")]
-        public void ReadRecordTest(string binName, string xlsxName, string sheetName, string format)
-        {
-            List<Record> list = new List<Record>();
-            using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
-            {
-                list = Record.GetRecords(stream, format);
-            }
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
-            xlsx.AppendRows(sheetName, list);
-        }
+        //[DataTestMethod]
+        //[DataRow("disc/parameter/accessory.bin", "parameter/accessory.xlsx", "accessory", "iiiiibbbbiic020c080bbbbbbbbii")]
+        //[DataRow("disc/parameter/item.bin", "parameter/item.xlsx", "item", "isbbiic020c080c080ssssssiiiibbbb")]
+        //[DataRow("disc/parameter/profile.bin", "parameter/profile.xlsx", "profile", "sbbbbbbbbbbbbbba010c020c020c020c020c020c020c020c040c080c080")]
+        //[DataRow("disc/parameter/album.bin", "parameter/album.xlsx", "album", "ssbbsbbsssa010c020c020c020")]
+        //[DataRow("disc/parameter/season/seasonText.bin", "parameter/seasonText.xlsx", "seasonText", "bbsc040c020c020")]
+        //public void ReadRecordTest(string binName, string xlsxName, string sheetName, string format)
+        //{
+        //    List<Record> list = new List<Record>();
+        //    using (FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read))
+        //    {
+        //        list = Record.GetRecords(stream, format);
+        //    }
+        //    using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+        //    xlsx.AppendRows(sheetName, list);
+        //}
 
         [DataTestMethod]
         [DataRow("parameter/accessory.xlsx", "accessory", "iiiiibbbbiic020c080bbbbbbbbii")]
@@ -49,7 +49,7 @@ namespace ImasArchiveLibTest
         public void JaJpReadTest(string binName, string xlsxName)
         {
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
-            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsxWriter = new XlsxWriter(xlsxName, true);
             JaJpText.ReadFile(stream, xlsxWriter);
         }
 
@@ -66,7 +66,7 @@ namespace ImasArchiveLibTest
         [DataRow("other/auditionDanText.pastbl", "other/audition_pastbl.xlsx")]
         public void PastblReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             IEnumerable<Record> records = Pastbl.ReadFile(stream);
             xlsx.AppendRows("pastbl", records);
@@ -89,7 +89,7 @@ namespace ImasArchiveLibTest
         [DataRow("hdd/songinfo/songResource.bin", "other/songinfo.xlsx")]
         public void SongInfoReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             IEnumerable<Record> records = SongInfo.ReadFile(stream);
             xlsx.AppendRows("songInfo", records);
@@ -99,7 +99,7 @@ namespace ImasArchiveLibTest
         [DataRow("hdd/ui/menu/skillBoard/skillBoard.info", "other/skillBoard.xlsx")]
         public void SkillBoardReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             SkillBoard.ReadFile(stream, xlsx);
         }
@@ -117,7 +117,7 @@ namespace ImasArchiveLibTest
         [DataRow("disc/parameter/fanLetterInfo.bin", "other/fanLetterInfo.xlsx")]
         public void FanLetterInfoReadTest(string binName, string xlsxName)
         {
-            using XlsxWriter xlsx = new XlsxWriter(xlsxName);
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
             using FileStream stream = new FileStream(binName, FileMode.Open, FileAccess.Read);
             FanLetterInfo.ReadFile(stream, xlsx);
         }
@@ -129,6 +129,25 @@ namespace ImasArchiveLibTest
             using XlsxReader xlsx = new XlsxReader(xlsxName);
             using FileStream stream = new FileStream(binName, FileMode.Create, FileAccess.Write);
             FanLetterInfo.WriteFile(stream, xlsx);
+        }
+
+        [DataTestMethod]
+        [DataRow("parameter/_dlc01_mail_idol.bin", "parameter/_ps3_info_idol.bin", "parameter/mailIdol.xlsx")]
+        public void IdolMailReadTest(string mailName, string infoName, string xlsxName)
+        {
+            using XlsxWriter xlsx = new XlsxWriter(xlsxName, true);
+            using FileStream mailStream = new FileStream(mailName, FileMode.Open, FileAccess.Read);
+            using FileStream infoStream = new FileStream(infoName, FileMode.Open, FileAccess.Read);
+            IdolMail.ReadFile(mailStream, infoStream, xlsx);
+        }
+
+        [DataTestMethod]
+        [DataRow("parameter/new_dlc01_mail_idol.bin", "parameter/mailIdol.xlsx")]
+        public void IdolMailWriteTest(string mailName, string xlsxName)
+        {
+            using XlsxReader xlsx = new XlsxReader(xlsxName);
+            using FileStream stream = new FileStream(mailName, FileMode.Create, FileAccess.Write);
+            IdolMail.WriteFile(stream, xlsx);
         }
     }
 }
