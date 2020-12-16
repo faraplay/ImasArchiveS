@@ -222,9 +222,9 @@ namespace Imas.Archive
                 if (!HasFile(fileName))
                 {
                     progress?.Report(string.Format("Adding {0}", fileName));
-                    List<string> strings = xlsx.GetRows("XXX", "pastbl")
+                    List<string> strings = xlsx.GetRows("XX", "pastbl")
                         .Where(record => (string)record[0] == fileName)
-                        .Select(record => (string)record[2])
+                        .Select(record => (string)record[1])
                         .ToList();
                     if (strings.Any())
                     {

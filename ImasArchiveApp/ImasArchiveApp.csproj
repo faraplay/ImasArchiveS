@@ -11,6 +11,7 @@
     <PackageIcon>haruka_ofa.png</PackageIcon>
     <SignAssembly>false</SignAssembly>
     <AssemblyName>Imas-Archive</AssemblyName>
+    <Version>0.5.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,3 +1,10 @@
+## Version 0.5.1
+
+### Fixed
+Fixed parameter pastbl extraction and adding to patch
+
+Extracting parameter process no longer reports extracting skill board if the spreadsheet already contains skill board data
+
 ## Version 0.5.0
 
 ### Added

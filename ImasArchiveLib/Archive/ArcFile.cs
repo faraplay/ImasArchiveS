@@ -578,7 +578,7 @@ namespace Imas.Archive
             foreach (string fileName in Pastbl.fileNames)
             {
                 using EntryStack entryStack = await GetEntryRecursive(fileName);
-                if (!xlsxWriter.HasWorksheet("pastbl") && entryStack != null)
+                if (entryStack != null)
                 {
                     progress?.Report(new ProgressData { filename = fileName });
                     using Stream stream = await entryStack.Entry.GetData();
@@ -605,7 +605,7 @@ namespace Imas.Archive
             }
             using (EntryStack entryStack = await GetEntryRecursive("ui/menu/skillBoard/skillBoard.info"))
             {
-                if (entryStack != null)
+                if (!xlsxWriter.HasWorksheet("skillBoard") && !xlsxWriter.HasWorksheet("skillBoardStrings") && entryStack != null)
                 {
                     progress?.Report(new ProgressData { filename = "ui/menu/skillBoard/skillBoard.info" });
                     using Stream stream = await entryStack.Entry.GetData();
