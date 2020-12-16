@@ -1,5 +1,9 @@
 ## Version 0.5.1
 
+### Changed
+
+Program no longer spams as many progress messages when extracting commus or patching an arc file
+
 ### Fixed
 Fixed parameter pastbl extraction and adding to patch
 

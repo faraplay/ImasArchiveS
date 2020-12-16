@@ -53,6 +53,7 @@ namespace Imas.Spreadsheet
             int total = rows.Count();
             int count = 0;
             List<T> list = new List<T>();
+            string lastFile = "";
             foreach (Row row in rows)
             {
                 if (row.RowIndex == 1)
@@ -61,7 +62,12 @@ namespace Imas.Spreadsheet
                 record.ReadRow(this, row);
                 list.Add(record);
                 count++;
-                progress?.Report(new ProgressData { count = count, total = total, filename = record.ToString() });
+                string filename = record.ToString();
+                if (lastFile != filename)
+                {
+                    progress?.Report(new ProgressData { count = count, total = total, filename = filename });
+                }
+                lastFile = filename;
             }
             return list;
         }

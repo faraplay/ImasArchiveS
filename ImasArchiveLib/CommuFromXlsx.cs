@@ -58,8 +58,12 @@ namespace Imas
                 foreach (string filename in commuFilenames)
                 {
                     count2++;
-                    progress2?.Report(new ProgressData { count = count2, total = total2, filename = filename });
-                    await Task.Run(() => patchZipFile.AddCommu(filename, lines.Where(line => line.file == filename)));
+                    var fileLines = lines.Where(line => line.file == filename);
+                    if (!patchZipFile.HasFile(filename) && fileLines.Any(line => !string.IsNullOrWhiteSpace(line.message)))
+                    {
+                        progress2?.Report(new ProgressData { count = count2, total = total2, filename = filename });
+                        await Task.Run(() => patchZipFile.AddCommu(filename, fileLines));
+                    }
                 }
             }
         }

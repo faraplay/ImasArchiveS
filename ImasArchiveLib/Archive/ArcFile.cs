@@ -438,10 +438,10 @@ namespace Imas.Archive
             foreach (ArcEntry entry in Entries)
             {
                 countProgress++;
-                progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
 
                 if (fileSource.FileExists(entry.FileName))
                 {
+                    progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
                     using Stream fileStream = fileSource.OpenFile(entry.FileName);
                     await entry.SetData(fileStream);
                 }
@@ -450,6 +450,7 @@ namespace Imas.Archive
                     string childDir = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
                     if (fileSource.DirectoryExists(childDir))
                     {
+                        progress?.Report(new ProgressData { count = countProgress, total = totalProgress, filename = entry.FileName });
                         using Stream entryStream1 = await entry.GetData();
                         using ParFile childPar = new ParFile(entryStream1);
                         await childPar.ReplaceEntries(fileSource.OpenDirectory(childDir));
@@ -489,14 +490,14 @@ namespace Imas.Archive
                 foreach (ArcEntry entry in Entries)
                 {
                     countProgress++;
-                    progress?.Report(new ProgressData
-                    {
-                        count = countProgress,
-                        total = totalProgress,
-                        filename = entry.FileName
-                    });
                     if (fileSource.FileExists(entry.FileName))
                     {
+                        progress?.Report(new ProgressData
+                        {
+                            count = countProgress,
+                            total = totalProgress,
+                            filename = entry.FileName
+                        });
                         using Stream fileStream = fileSource.OpenFile(entry.FileName);
                         await entry.SetData(fileStream);
                     }
@@ -505,6 +506,12 @@ namespace Imas.Archive
                         string childDir = entry.FileName[0..^4] + '_' + entry.FileName[^3..];
                         if (fileSource.DirectoryExists(childDir))
                         {
+                            progress?.Report(new ProgressData
+                            {
+                                count = countProgress,
+                                total = totalProgress,
+                                filename = entry.FileName
+                            });
                             using Stream entryStream1 = await entry.GetData();
                             using ParFile childPar = new ParFile(entryStream1);
                             await childPar.ReplaceEntries(fileSource.OpenDirectory(childDir));
