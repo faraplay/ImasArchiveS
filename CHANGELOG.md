@@ -1,7 +1,11 @@
 ## Version 0.5.1
 
-### Changed
+### Added
+Program now adds "all"-commus to a patch
 
+DLC costume data is now extracted and added to patches
+
+### Changed
 Program no longer spams as many progress messages when extracting commus or patching an arc file
 
 ### Fixed

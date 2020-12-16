@@ -31,7 +31,8 @@ namespace Imas.Records
             "tak",
             "yay",
             "yuk",
-            "other"
+            "other",
+            "all"
         };
 
         public void Deserialise(Stream inStream)
