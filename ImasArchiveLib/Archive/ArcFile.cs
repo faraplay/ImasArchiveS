@@ -573,6 +573,21 @@ namespace Imas.Archive
                     xlsxWriter.AppendRows(format.sheetName, records);
                 }
             }
+            using (EntryStack entryStack = await GetEntryRecursive("parameter/stage_info.par"))
+            {
+                if (!xlsxWriter.HasWorksheet(StageInfo.sheetName) && entryStack != null)
+                {
+                    progress?.Report(new ProgressData { filename = "parameter/stage_info.par" });
+                    using Stream parStream = await entryStack.Entry.GetData();
+                    using ParFile parFile = new ParFile(parStream);
+                    foreach (ContainerEntry entry in parFile.Entries)
+                    {
+                        using Stream stream = await entry.GetData();
+                        var records = StageInfo.ReadFile(stream, entry.FileName);
+                        xlsxWriter.AppendRows(StageInfo.sheetName, records);
+                    }
+                }
+            }
             using (EntryStack entryStack = await GetEntryRecursive("parameter/fanLetterInfo.bin"))
             {
                 if (entryStack != null)

@@ -149,6 +149,7 @@ namespace Imas.Archive
         {
             using XlsxReader xlsx = new XlsxReader(xlsxName);
             AddRecordFormatFiles(xlsx, progress);
+            AddStageInfoFiles(xlsx, progress);
             AddFanLetter(xlsx, progress);
             AddPastblFiles(xlsx, progress);
             AddSongInfo(xlsx, progress);
@@ -267,6 +268,19 @@ namespace Imas.Archive
                         _entries.Add(new PatchZipEntry(entry));
                     }
                 }
+            }
+        }
+
+        private void AddStageInfoFiles(XlsxReader xlsx, IProgress<string> progress)
+        {
+            progress?.Report(string.Format("Adding stageInfo"));
+            IEnumerable<Record> records = xlsx.GetRows(StageInfo.format, StageInfo.sheetName);
+            foreach (Record record in records)
+            {
+                ZipArchiveEntry entry = zipArchive.CreateEntry(StageInfo.parFilePath + (string)record[0]);
+                using Stream entryStream = entry.Open();
+                record.Serialise(entryStream);
+                _entries.Add(new PatchZipEntry(entry));
             }
         }
 

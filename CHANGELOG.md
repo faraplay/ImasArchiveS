@@ -1,3 +1,8 @@
+## Version 0.5.2
+
+### Added
+Program now extracts stage info
+
 ## Version 0.5.1
 
 ### Added

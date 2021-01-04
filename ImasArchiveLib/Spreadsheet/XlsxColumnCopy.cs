@@ -51,6 +51,7 @@ namespace Imas.Spreadsheet
             "profile",
             "reporter",
             "seasonText",
+            "stageInfo",
             "fanLetterStrings",
             "jaJpStrings",
             "workInfo",

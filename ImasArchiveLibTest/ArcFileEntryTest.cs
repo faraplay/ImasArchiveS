@@ -278,6 +278,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
+        [DataRow("D:/OFA_arc/original/_dlc07.arc.dat", "other/parameter_dlc07.xlsx")]
         [DataRow("disc.arc", "other/parameter_disc.xlsx")]
         [DataRow("hdd.arc", "other/parameter_hdd.xlsx")]
         public async Task ArcParameterIndividualTest(string arcName, string outputXlsx)
