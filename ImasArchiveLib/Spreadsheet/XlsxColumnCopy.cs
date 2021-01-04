@@ -143,18 +143,21 @@ namespace Imas.Spreadsheet
                 .Where(cell => GetColumnName(cell.CellReference) == refColumnAddress)
                 .OrderBy(cell => GetRowIndex(cell.CellReference))
                 .ToArray();
-            Cell[] editColumn = editWorksheet.Descendants<Cell>()
+            var editColumn = editWorksheet.Descendants<Cell>()
                 .Where(cell => GetColumnName(cell.CellReference) == editColumnAddress)
-                .OrderBy(cell => GetRowIndex(cell.CellReference))
-                .ToArray();
-            int top = Math.Min(refColumn.Length, editColumn.Length);
+                .ToDictionary(cell => GetRowIndex(cell.CellReference));
+            int top = refColumn.Length;
             for (int i = 1; i < top; i++) // start from 1 to skip header cell
             {
                 string refValue = GetRefString(refColumn[i]);
+                uint rowIndex = GetRowIndex(refColumn[i].CellReference);
                 if (!string.IsNullOrEmpty(refValue))
                 {
-                    editColumn[i].DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.SharedString);
-                    editColumn[i].CellValue = new CellValue(GetEditSharedStringID(refValue).ToString());
+                    if (editColumn.TryGetValue(rowIndex, out Cell cellToEdit))
+                    {
+                        cellToEdit.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.SharedString);
+                        cellToEdit.CellValue = new CellValue(GetEditSharedStringID(refValue).ToString());
+                    }
                 }
             }
         }
