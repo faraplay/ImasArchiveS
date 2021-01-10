@@ -3,6 +3,9 @@
 ### Added
 Program now extracts stage info
 
+### Changed
+Less progress message spam when adding images to a patch.zip
+
 ### Fixed
 Fixed bug where GTF creation would produce black pixels on a very slight gradient
 

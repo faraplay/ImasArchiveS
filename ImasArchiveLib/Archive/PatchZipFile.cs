@@ -91,7 +91,7 @@ namespace Imas.Archive
 
             string filenameXlsxName = dirName + "/filenames.xlsx";
             XlsxReader xlsx = new XlsxReader(filenameXlsxName);
-            IEnumerable<Record> records = (await Task.Run(() => xlsx.GetRows("XXI", "filenames", progress)))
+            IEnumerable<Record> records = (await Task.Run(() => xlsx.GetRows("XXI", "filenames")))
                 .Where(record => filenames.Contains((string)record[1]));
             int total = records.Count();
             int count = 0;
