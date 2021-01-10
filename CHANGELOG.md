@@ -6,6 +6,8 @@ Program now extracts stage info
 ### Fixed
 Fixed bug where GTF creation would produce black pixels on a very slight gradient
 
+Console app will now actually add lyrics files from the lyrics folder
+
 ## Version 0.5.1
 
 ### Added

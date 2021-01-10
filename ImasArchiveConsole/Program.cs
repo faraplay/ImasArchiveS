@@ -150,7 +150,7 @@ namespace ImasArchiveConsole
             if (o.Lyrics != null)
             {
                 progress?.Report("Adding lyrics.");
-                await patchZipFile.AddLyrics(o.Image, progress);
+                await patchZipFile.AddLyrics(o.Lyrics, progress);
             }
             progress?.Report("Done.");
         }
