@@ -848,34 +848,22 @@ namespace Imas
                     }
                 }
             }
-            int c0 = colors[maxi0].ToArgb();
-            int c1 = colors[maxi1].ToArgb();
-            ushort b0 = (ushort)(
-                    ((c0 >> 8) & 0xF800) ^
-                    ((c0 >> 5) & 0x07E0) ^
-                    ((c0 >> 3) & 0x001F)
-                    );
-            ushort b1 = (ushort)(
-                    ((c1 >> 8) & 0xF800) ^
-                    ((c1 >> 5) & 0x07E0) ^
-                    ((c1 >> 3) & 0x001F)
-                    );
+            ushort b0 = ColorHelp.To565(colors[maxi0]);
+            ushort b1 = ColorHelp.To565(colors[maxi1]);
             ushort b0new, b1new;
             Color[] newColor = new Color[4];
             if (b0 < b1)
             {
-                newColor[0] = colors[maxi1];
-                newColor[1] = colors[maxi0];
                 b0new = b1;
                 b1new = b0;
             }
             else
             {
-                newColor[0] = colors[maxi0];
-                newColor[1] = colors[maxi1];
                 b0new = b0;
                 b1new = b1;
             }
+            newColor[0] = ColorHelp.From565(b0new);
+            newColor[1] = ColorHelp.From565(b1new);
             newColor[2] = ColorHelp.MixRatio(newColor[0], newColor[1], 2, 1);
             newColor[3] = ColorHelp.MixRatio(newColor[0], newColor[1], 1, 2);
 
@@ -990,6 +978,14 @@ namespace Imas
                     + ((color.R >> 4) << 8)
                     + ((color.G >> 4) << 4)
                     + (color.B >> 4));
+            }
+
+            public static ushort To565(Color color)
+            {
+                return (ushort)(
+                    ((color.R >> 3) << 11)
+                    + ((color.G >> 2) << 5)
+                    + (color.B >> 3));
             }
 
             public static Color MixRatio(Color c0, Color c1, int m0, int m1)

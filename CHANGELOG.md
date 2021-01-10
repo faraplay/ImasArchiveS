@@ -3,6 +3,9 @@
 ### Added
 Program now extracts stage info
 
+### Fixed
+Fixed bug where GTF creation would produce black pixels on a very slight gradient
+
 ## Version 0.5.1
 
 ### Added
