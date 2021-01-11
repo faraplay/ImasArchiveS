@@ -446,9 +446,9 @@ namespace Imas
                 2 => 2,
                 3 => 2,
                 5 => 4,
-                6 => 8,
-                7 => 16,
-                8 => 16,
+                6 => 8 / 4,
+                7 => 16 / 4,
+                8 => 16 / 4,
                 _ => throw new NotSupportedException()
             };
             int size = (pixelCount * pixelSize) / 8;

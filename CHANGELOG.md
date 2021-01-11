@@ -7,6 +7,8 @@ Program now extracts stage info
 Less progress message spam when adding images to a patch.zip
 
 ### Fixed
+Fix stride value in 4x4 block GTF creation
+
 Fixed bug where GTF creation would produce black pixels on a very slight gradient
 
 Console app will now actually add lyrics files from the lyrics folder
