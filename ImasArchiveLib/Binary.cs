@@ -173,6 +173,38 @@ namespace Imas
 
         #endregion 8
 
+        #region Float
+
+        /// <summary>
+        /// Returns a float from the stream.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        /// <exception cref="EndOfStreamException"/>
+        public static float ReadFloat(Stream stream, bool isBigEndian)
+        {
+            byte[] data = new byte[4];
+            int n = stream.Read(data);
+            if (n != 4)
+            {
+                throw new EndOfStreamException();
+            }
+            if (isBigEndian)
+            {
+                byte t = data[0];
+                data[0] = data[3];
+                data[3] = t;
+                t = data[1];
+                data[1] = data[2];
+                data[2] = t;
+            }
+            return BitConverter.ToSingle(data);
+        }
+
+        public float ReadFloat() => ReadFloat(stream, isBigEndian);
+
+        #endregion
+
         #endregion Read
 
         #region Write
@@ -353,6 +385,35 @@ namespace Imas
         public void WriteByte(byte x) => WriteByte(stream, isBigEndian, x);
 
         #endregion 8
+
+        #region Float
+
+        /// <summary>
+        /// Writes a 32-bit unsigned integer to the stream.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="x"></param>
+        /// <exception cref="IOException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="ObjectDisposedException"/>
+        public static void WriteFloat(Stream stream, bool isBigEndian, float x)
+        {
+            byte[] data = BitConverter.GetBytes(x);
+            if (isBigEndian)
+            {
+                byte t = data[0];
+                data[0] = data[3];
+                data[3] = t;
+                t = data[1];
+                data[1] = data[2];
+                data[2] = t;
+            }
+            stream.Write(data);
+        }
+
+        public void WriteFloat(float x) => WriteFloat(stream, isBigEndian, x);
+
+        #endregion
 
         #endregion Write
     }
