@@ -7,8 +7,10 @@ using System.Text;
 
 namespace Imas.UI
 {
-    class Control
+    public class Control
     {
+        protected UIComponent parent;
+
         public int type;
         public string name;
         public float xpos, ypos;
@@ -20,6 +22,11 @@ namespace Imas.UI
         public float sourceLeft, sourceTop, sourceRight, sourceBottom;
         public int d1; // 7 usually
         public SpriteGroup specialSprite;
+
+        protected Control(UIComponent parent)
+        {
+            this.parent = parent;
+        }
 
         public override string ToString() => name;
 
@@ -51,29 +58,31 @@ namespace Imas.UI
             sourceRight = binary.ReadFloat();
             sourceBottom = binary.ReadFloat();
             d1 = binary.ReadInt32();
-            specialSprite = SpriteGroup.CreateFromStream(stream);
+            specialSprite = SpriteGroup.CreateFromStream(parent, stream);
         }
 
-        public static Control Create(Stream stream)
+        public static Control Create(UIComponent parent, Stream stream)
         {
             int type = Binary.ReadInt32(stream, true);
-            return type switch
+            Control control = type switch
             {
-                2 => TextBox.CreateFromStream(stream),
-                4 => GroupControl.CreateFromStream(stream),
-                5 => Icon.CreateFromStream(stream),
-                9 => Control9.CreateFromStream(stream),
-                10 => SpriteCollection.CreateFromStream(stream),
+                2 => TextBox.CreateFromStream(parent, stream),
+                4 => GroupControl.CreateFromStream(parent, stream),
+                5 => Icon.CreateFromStream(parent, stream),
+                9 => Control9.CreateFromStream(parent, stream),
+                10 => SpriteCollection.CreateFromStream(parent, stream),
                 _ => throw new InvalidDataException("Unrecognised control type"),
             };
+            control.parent = parent;
+            return control;
         }
 
-        public virtual void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        public virtual void Draw(Graphics g, Matrix transform)
         {
             transform.Translate(xpos, ypos);
             g.Transform = transform;
             g.DrawRectangle(Pens.Red, 0, 0, width, height);
-            specialSprite.Draw(g, imageSource, transform);
+            specialSprite.Draw(g, transform);
         }
     }
 }

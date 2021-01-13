@@ -11,9 +11,11 @@ namespace Imas.UI
         public int e1, e2;
         public List<SpriteGroup> childControls;
 
-        internal static SpriteCollection CreateFromStream(Stream stream)
+        protected SpriteCollection(UIComponent parent) : base(parent) { }
+
+        internal static SpriteCollection CreateFromStream(UIComponent parent, Stream stream)
         {
-            SpriteCollection spriteCollection = new SpriteCollection();
+            SpriteCollection spriteCollection = new SpriteCollection(parent);
             spriteCollection.Deserialise(stream);
             return spriteCollection;
         }
@@ -30,7 +32,7 @@ namespace Imas.UI
             childControls = new List<SpriteGroup>(childCount);
             for (int i = 0; i < childCount; i++)
             {
-                childControls.Add(SpriteGroup.CreateFromStream(stream));
+                childControls.Add(SpriteGroup.CreateFromStream(parent, stream));
             }
         }
     }

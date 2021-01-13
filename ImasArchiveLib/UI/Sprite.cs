@@ -9,8 +9,10 @@ using System.Text;
 
 namespace Imas.UI
 {
-    class Sprite
+    public class Sprite
     {
+        public UIComponent parent;
+
         // (9*4 bytes of 0s)
         public int[] start = new int[9];
 
@@ -22,9 +24,10 @@ namespace Imas.UI
         public uint ARGBMultiplier;
         public float sourceLeft, sourceTop, sourceRight, sourceBottom;
 
-        internal static Sprite CreateFromStream(Stream stream)
+        internal static Sprite CreateFromStream(UIComponent parent, Stream stream)
         {
             Sprite sprite = new Sprite();
+            sprite.parent = parent;
             sprite.Deserialise(stream);
             return sprite;
         }
@@ -52,13 +55,13 @@ namespace Imas.UI
             sourceBottom = binary.ReadFloat();
         }
 
-        public void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        public void Draw(Graphics g, Matrix transform)
         {
             transform.Translate(xpos, ypos);
             g.Transform = transform;
             if (srcImageID >= 0)
             {
-                Bitmap srcImg = imageSource[srcImageID];
+                Bitmap srcImg = parent.imageSource[srcImageID];
                 int x1 = (int)(sourceLeft * srcImg.Width);
                 int y1 = (int)(sourceTop * srcImg.Height);
                 int x2 = (int)(sourceRight * srcImg.Width);

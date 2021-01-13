@@ -19,9 +19,10 @@ namespace Imas.UI
         public byte[] textBuffer;
         public string text;
 
-        internal static TextBox CreateFromStream(Stream stream)
+        protected TextBox(UIComponent parent) : base(parent) { }
+        internal static TextBox CreateFromStream(UIComponent parent, Stream stream)
         {
-            TextBox textBox = new TextBox();
+            TextBox textBox = new TextBox(parent);
             textBox.Deserialise(stream);
             return textBox;
         }
@@ -45,9 +46,9 @@ namespace Imas.UI
             text = ImasEncoding.Custom.GetString(textBuffer);
         }
 
-        public override void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        public override void Draw(Graphics g, Matrix transform)
         {
-            base.Draw(g, imageSource, transform); // this changes the matrix transform
+            base.Draw(g, transform); // this changes the matrix transform
 
             using ImageAttributes imageAttributes = new ImageAttributes();
             float[][] colorMatrixElements = {

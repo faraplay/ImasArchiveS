@@ -11,9 +11,11 @@ namespace Imas.UI
     {
         public float angle, e2, e3;
 
-        internal static Icon CreateFromStream(Stream stream)
+        protected Icon(UIComponent parent) : base(parent) { }
+
+        internal static Icon CreateFromStream(UIComponent parent, Stream stream)
         {
-            Icon icon = new Icon();
+            Icon icon = new Icon(parent);
             icon.Deserialise(stream);
             return icon;
         }
@@ -31,10 +33,10 @@ namespace Imas.UI
                 angle = angle;
             }
         }
-        public override void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        public override void Draw(Graphics g, Matrix transform)
         {
             transform.RotateAt(-angle * (180 / (float)Math.PI), new PointF(xpos, ypos));
-            base.Draw(g, imageSource, transform);
+            base.Draw(g, transform);
         }
 
     }

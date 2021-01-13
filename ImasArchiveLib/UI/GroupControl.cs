@@ -12,9 +12,11 @@ namespace Imas.UI
         public int childCount;
         public List<Control> childControls;
 
-        internal static GroupControl CreateFromStream(Stream stream)
+        protected GroupControl(UIComponent parent) : base(parent) { }
+
+        internal static GroupControl CreateFromStream(UIComponent parent, Stream stream)
         {
-            GroupControl groupControl = new GroupControl();
+            GroupControl groupControl = new GroupControl(parent);
             groupControl.Deserialise(stream);
             return groupControl;
         }
@@ -28,17 +30,17 @@ namespace Imas.UI
             childControls = new List<Control>(childCount);
             for (int i = 0; i < childCount; i++)
             {
-                childControls.Add(Control.Create(stream));
+                childControls.Add(Control.Create(parent, stream));
             }
         }
 
-        public override void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        public override void Draw(Graphics g, Matrix transform)
         {
-            base.Draw(g, imageSource, transform); // this changes the matrix transform
+            base.Draw(g, transform); // this changes the matrix transform
             foreach (Control childControl in childControls)
             {
                 using Matrix childTransform = transform.Clone();
-                childControl.Draw(g, imageSource, childTransform);
+                childControl.Draw(g, childTransform);
             }
         }
     }
