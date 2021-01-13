@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text;
 
@@ -27,6 +29,16 @@ namespace Imas.UI
             for (int i = 0; i < childCount; i++)
             {
                 childControls.Add(Control.Create(stream));
+            }
+        }
+
+        public override void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        {
+            base.Draw(g, imageSource, transform); // this changes the matrix transform
+            foreach (Control childControl in childControls)
+            {
+                using Matrix childTransform = transform.Clone();
+                childControl.Draw(g, imageSource, childTransform);
             }
         }
     }

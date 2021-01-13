@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
@@ -48,6 +50,31 @@ namespace Imas.UI
             sourceTop = binary.ReadFloat();
             sourceRight = binary.ReadFloat();
             sourceBottom = binary.ReadFloat();
+        }
+
+        public void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        {
+            transform.Translate(xpos, ypos);
+            g.Transform = transform;
+            if (srcImageID >= 0)
+            {
+                Bitmap srcImg = imageSource[srcImageID];
+                int x1 = (int)(sourceLeft * srcImg.Width);
+                int y1 = (int)(sourceTop * srcImg.Height);
+                int x2 = (int)(sourceRight * srcImg.Width);
+                int y2 = (int)(sourceBottom * srcImg.Height);
+
+                g.DrawImage(
+                    srcImg,
+                    new Rectangle(new Point(0, 0), new Size((int)width, (int)height)),
+                    x1, y1,
+                    x2 - x1, y2 - y1,
+                    GraphicsUnit.Pixel);
+            }
+            else
+            {
+                g.FillRectangle(Brushes.White, 0, 0, width, height);
+            }
         }
     }
 }

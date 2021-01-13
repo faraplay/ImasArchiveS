@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text;
 
 namespace Imas.UI
 {
-    class Icon : Control
+    class Icon : GroupControl
     {
-        public int childCount;
-        public List<Control> childControls;
-        public int e1, e2, e3;
+        public float angle, e2, e3;
 
         internal static Icon CreateFromStream(Stream stream)
         {
@@ -20,19 +20,21 @@ namespace Imas.UI
 
         protected override void Deserialise(Stream stream)
         {
-            type = 5;
             base.Deserialise(stream);
+            type = 5;
 
-            childCount = Binary.ReadInt32(stream, true);
-            childControls = new List<Control>(childCount);
-            for (int i = 0; i < childCount; i++)
+            angle = Binary.ReadFloat(stream, true);
+            e2 = Binary.ReadFloat(stream, true);
+            e3 = Binary.ReadFloat(stream, true);
+            if (e2 != 0 || e3 != 0)
             {
-                childControls.Add(Control.Create(stream));
+                angle = angle;
             }
-
-            e1 = Binary.ReadInt32(stream, true);
-            e2 = Binary.ReadInt32(stream, true);
-            e3 = Binary.ReadInt32(stream, true);
+        }
+        public override void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        {
+            transform.RotateAt(-angle * (180 / (float)Math.PI), new PointF(xpos, ypos));
+            base.Draw(g, imageSource, transform);
         }
 
     }

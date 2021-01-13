@@ -334,6 +334,41 @@ namespace Imas
 
         #endregion Bitmaps
 
+        #region Graphics Draw
+
+        private void DrawChar(Graphics g, CharData charData, ImageAttributes imageAttributes, int offsetx, int offsety)
+        {
+            if (charData == null)
+                return;
+            if (!charsHaveBitmaps)
+            {
+                g.DrawImage(
+                    BigBitmap,
+                    new Rectangle(new Point(offsetx + charData.offsetx, offsety + charData.offsety), new Size(charData.datawidth, charData.dataheight)),
+                    charData.datax, charData.datay, charData.datawidth, charData.dataheight,
+                    GraphicsUnit.Pixel,
+                    imageAttributes
+                    );
+            }
+        }
+
+        public void DrawByteArray(Graphics g, Span<byte> chars, ImageAttributes imageAttributes)
+        {
+            int offsetx = 0;
+            int offsety = 0;
+            for (int i = 0; i < chars.Length; i += 2)
+            {
+                ushort cID = (ushort)(chars[i] * 0x100 + chars[i + 1]);
+                if (cID == 0)
+                    return;
+                CharData charData = Find(cID);
+                DrawChar(g, charData, imageAttributes, offsetx, offsety);
+                offsetx += charData.width;
+            }
+        }
+
+        #endregion Graphics Draw
+
         #region Digraph
 
         // Do not rebuild big bitmap after calling this function!
@@ -630,6 +665,23 @@ namespace Imas
 
             return CheckSubTree(span.Slice(0, midpoint), span[midpoint].left) &&
                 CheckSubTree(span.Slice(midpoint + 1), span[midpoint].right);
+        }
+
+        private CharData Find(ushort charID)
+        {
+            int index = root;
+            while (true)
+            {
+                if (index == -1)
+                    return null;
+                ushort ikey = chars[index].key;
+                if (charID < ikey)
+                    index = chars[index].left;
+                else if (charID > ikey)
+                    index = chars[index].right;
+                else
+                    return chars[index];
+            }
         }
 
         #endregion Tree

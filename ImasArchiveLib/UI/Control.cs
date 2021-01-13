@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text;
 
@@ -60,9 +62,18 @@ namespace Imas.UI
                 2 => TextBox.CreateFromStream(stream),
                 4 => GroupControl.CreateFromStream(stream),
                 5 => Icon.CreateFromStream(stream),
+                9 => Control9.CreateFromStream(stream),
                 10 => SpriteCollection.CreateFromStream(stream),
                 _ => throw new InvalidDataException("Unrecognised control type"),
             };
+        }
+
+        public virtual void Draw(Graphics g, ImageSource imageSource, Matrix transform)
+        {
+            transform.Translate(xpos, ypos);
+            g.Transform = transform;
+            g.DrawRectangle(Pens.Red, 0, 0, width, height);
+            specialSprite.Draw(g, imageSource, transform);
         }
     }
 }
