@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Imas.UI
 {
-    class GroupControl : Control
+    public class GroupControl : Control
     {
         public int childCount;
         public List<Control> childControls;

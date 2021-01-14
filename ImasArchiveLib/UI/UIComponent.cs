@@ -36,6 +36,11 @@ namespace Imas.UI
             return component;
         }
 
+        public static async Task<UIComponent> CreateComponent(Stream parStream, string name)
+        {
+            return await CreateComponent(new ParFile(parStream), name);
+        }
+
         #region IDisposable
 
         private bool disposed = false;

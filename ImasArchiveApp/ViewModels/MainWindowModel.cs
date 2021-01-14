@@ -171,6 +171,21 @@ namespace ImasArchiveApp
             }
         }
 
+        private AsyncCommand _openComponentCommand;
+
+        public ICommand OpenComponentCommand
+        {
+            get
+            {
+                if (_openComponentCommand == null)
+                {
+                    _openComponentCommand = new AsyncCommand(() =>
+                        OpenUIComponent("Par files (*.par)|*.par|All files (*.*)|*.*"));
+                }
+                return _openComponentCommand;
+            }
+        }
+
         private RelayCommand _closeCommand;
 
         public ICommand CloseCommand
@@ -325,6 +340,26 @@ namespace ImasArchiveApp
             {
                 ClearStatus();
                 FileModel = FileModelFactory.CreateFileModel(inPath);
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                FileModel = null;
+            }
+        }
+
+        public async Task OpenUIComponent(string filter)
+        {
+            try
+            {
+                ClearStatus();
+                string fileName = _getFileName.OpenGetFileName("Open", filter);
+                if (fileName != null)
+                {
+                    if (FileModel != null)
+                        Close();
+                    FileModel = await UIComponentModel.CreateUIComponentModel(FileModelFactory.report, new FileStream(fileName, FileMode.Open), fileName);
+                }
             }
             catch (Exception ex)
             {
