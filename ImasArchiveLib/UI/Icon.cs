@@ -11,15 +11,6 @@ namespace Imas.UI
     {
         public float angle, e2, e3;
 
-        protected Icon(UIComponent parent) : base(parent) { }
-
-        internal static Icon CreateFromStream(UIComponent parent, Stream stream)
-        {
-            Icon icon = new Icon(parent);
-            icon.Deserialise(stream);
-            return icon;
-        }
-
         protected override void Deserialise(Stream stream)
         {
             base.Deserialise(stream);

@@ -19,14 +19,6 @@ namespace Imas.UI
         public byte[] textBuffer;
         public string text;
 
-        protected TextBox(UIComponent parent) : base(parent) { }
-        internal static TextBox CreateFromStream(UIComponent parent, Stream stream)
-        {
-            TextBox textBox = new TextBox(parent);
-            textBox.Deserialise(stream);
-            return textBox;
-        }
-
         protected override void Deserialise(Stream stream)
         {
             type = 2;

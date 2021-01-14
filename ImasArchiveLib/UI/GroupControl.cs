@@ -12,15 +12,6 @@ namespace Imas.UI
         public int childCount;
         public List<Control> childControls;
 
-        protected GroupControl(UIComponent parent) : base(parent) { }
-
-        internal static GroupControl CreateFromStream(UIComponent parent, Stream stream)
-        {
-            GroupControl groupControl = new GroupControl(parent);
-            groupControl.Deserialise(stream);
-            return groupControl;
-        }
-
         protected override void Deserialise(Stream stream)
         {
             type = 4;

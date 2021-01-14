@@ -11,15 +11,6 @@ namespace Imas.UI
         public int e1, e2;
         public List<SpriteGroup> childControls;
 
-        protected SpriteCollection(UIComponent parent) : base(parent) { }
-
-        internal static SpriteCollection CreateFromStream(UIComponent parent, Stream stream)
-        {
-            SpriteCollection spriteCollection = new SpriteCollection(parent);
-            spriteCollection.Deserialise(stream);
-            return spriteCollection;
-        }
-
         protected override void Deserialise(Stream stream)
         {
             type = 10;

@@ -9,14 +9,6 @@ namespace Imas.UI
     class Control9 : GroupControl
     {
         public int e1;
-        protected Control9(UIComponent parent) : base(parent) { }
-
-        internal static Control9 CreateFromStream(UIComponent parent, Stream stream)
-        {
-            Control9 control9 = new Control9(parent);
-            control9.Deserialise(stream);
-            return control9;
-        }
 
         protected override void Deserialise(Stream stream)
         {

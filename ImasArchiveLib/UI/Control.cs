@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Imas.UI
 {
-    public class Control
+    public abstract class Control
     {
         protected UIComponent parent;
 
@@ -22,11 +22,6 @@ namespace Imas.UI
         public float sourceLeft, sourceTop, sourceRight, sourceBottom;
         public int d1; // 7 usually
         public SpriteGroup specialSprite;
-
-        protected Control(UIComponent parent)
-        {
-            this.parent = parent;
-        }
 
         public override string ToString() => name;
 
@@ -66,16 +61,26 @@ namespace Imas.UI
             int type = Binary.ReadInt32(stream, true);
             Control control = type switch
             {
-                2 => TextBox.CreateFromStream(parent, stream),
-                4 => GroupControl.CreateFromStream(parent, stream),
-                5 => Icon.CreateFromStream(parent, stream),
-                9 => Control9.CreateFromStream(parent, stream),
-                10 => SpriteCollection.CreateFromStream(parent, stream),
+                2 => CreateFromStream<TextBox>(parent, stream),
+                4 => CreateFromStream<GroupControl>(parent, stream),
+                5 => CreateFromStream<Icon>(parent, stream),
+                9 => CreateFromStream<Control9>(parent, stream),
+                10 => CreateFromStream<SpriteCollection>(parent, stream),
                 _ => throw new InvalidDataException("Unrecognised control type"),
             };
-            control.parent = parent;
             return control;
         }
+
+        private static T CreateFromStream<T>(UIComponent parent, Stream stream) where T : Control, new()
+        {
+            T newControl = new T
+            {
+                parent = parent
+            };
+            newControl.Deserialise(stream);
+            return newControl;
+        }
+
 
         public virtual void Draw(Graphics g, Matrix transform)
         {
