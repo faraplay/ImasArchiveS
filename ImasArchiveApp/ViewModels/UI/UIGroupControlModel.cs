@@ -7,11 +7,11 @@ namespace ImasArchiveApp
 {
     class UIGroupControlModel : UITypedControlModel<GroupControl>
     {
-        public UIGroupControlModel(GroupControl control) : base(control)
+        public UIGroupControlModel(UISubcomponentModel parent, GroupControl control) : base(parent, control)
         {
             foreach (Control child in control.childControls)
             {
-                Children.Add(UIControlModel.CreateModel(child));
+                Children.Add(UIControlModel.CreateModel(parent, child));
             }
         }
     }

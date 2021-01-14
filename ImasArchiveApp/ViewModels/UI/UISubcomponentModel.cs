@@ -10,18 +10,27 @@ using Imas.UI;
 
 namespace ImasArchiveApp
 {
-    class UISubcomponentModel : FileModel
+    public class UISubcomponentModel : FileModel
     {
         private UISubcomponent uiComponent;
-        private ObservableCollection<UIControlModel> _controlModel;
-        public ObservableCollection<UIControlModel> ControlModel { get => _controlModel; }
+        private UIElementModel _selectedModel;
+        public ObservableCollection<UIControlModel> ControlModel { get; }
+        public UIElementModel SelectedModel
+        {
+            get => _selectedModel;
+            set
+            {
+                _selectedModel = value;
+                OnPropertyChanged();
+            }
+        }
 
         public UISubcomponentModel(IReport report, UISubcomponent subcomponent, string filename) : base(report, filename)
         {
             uiComponent = subcomponent;
-            _controlModel = new ObservableCollection<UIControlModel>
+            ControlModel = new ObservableCollection<UIControlModel>
             {
-                UIControlModel.CreateModel(uiComponent.control)
+                UIControlModel.CreateModel(this, uiComponent.control)
             };
         }
     }
