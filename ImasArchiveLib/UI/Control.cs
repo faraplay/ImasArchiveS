@@ -9,7 +9,7 @@ namespace Imas.UI
 {
     public abstract class Control
     {
-        protected UIComponent parent;
+        protected UISubcomponent parent;
 
         public int type;
         public string name;
@@ -56,7 +56,7 @@ namespace Imas.UI
             specialSprite = SpriteGroup.CreateFromStream(parent, stream);
         }
 
-        public static Control Create(UIComponent parent, Stream stream)
+        public static Control Create(UISubcomponent parent, Stream stream)
         {
             int type = Binary.ReadInt32(stream, true);
             Control control = type switch
@@ -71,7 +71,7 @@ namespace Imas.UI
             return control;
         }
 
-        private static T CreateFromStream<T>(UIComponent parent, Stream stream) where T : Control, new()
+        private static T CreateFromStream<T>(UISubcomponent parent, Stream stream) where T : Control, new()
         {
             T newControl = new T
             {

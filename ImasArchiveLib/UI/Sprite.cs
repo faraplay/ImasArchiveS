@@ -11,7 +11,7 @@ namespace Imas.UI
 {
     public class Sprite
     {
-        public UIComponent parent;
+        public UISubcomponent parent;
 
         // (9*4 bytes of 0s)
         public int[] start = new int[9];
@@ -24,7 +24,7 @@ namespace Imas.UI
         public uint ARGBMultiplier;
         public float sourceLeft, sourceTop, sourceRight, sourceBottom;
 
-        internal static Sprite CreateFromStream(UIComponent parent, Stream stream)
+        internal static Sprite CreateFromStream(UISubcomponent parent, Stream stream)
         {
             Sprite sprite = new Sprite();
             sprite.parent = parent;

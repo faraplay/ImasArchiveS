@@ -171,7 +171,7 @@ namespace ImasArchiveApp
             }
         }
 
-        private AsyncCommand _openComponentCommand;
+        private RelayCommand _openComponentCommand;
 
         public ICommand OpenComponentCommand
         {
@@ -179,8 +179,8 @@ namespace ImasArchiveApp
             {
                 if (_openComponentCommand == null)
                 {
-                    _openComponentCommand = new AsyncCommand(() =>
-                        OpenUIComponent("Par files (*.par)|*.par|All files (*.*)|*.*"));
+                    _openComponentCommand = new RelayCommand(_ =>
+                        OpenWithFilter("Par files (*.par)|*.par|All files (*.*)|*.*", UIComponentModel.Builder));
                 }
                 return _openComponentCommand;
             }
@@ -348,25 +348,25 @@ namespace ImasArchiveApp
             }
         }
 
-        public async Task OpenUIComponent(string filter)
-        {
-            try
-            {
-                ClearStatus();
-                string fileName = _getFileName.OpenGetFileName("Open", filter);
-                if (fileName != null)
-                {
-                    if (FileModel != null)
-                        Close();
-                    FileModel = await UIComponentModel.CreateUIComponentModel(FileModelFactory.report, new FileStream(fileName, FileMode.Open), fileName);
-                }
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-                FileModel = null;
-            }
-        }
+        //public async Task OpenUIComponent(string filter)
+        //{
+        //    try
+        //    {
+        //        ClearStatus();
+        //        string fileName = _getFileName.OpenGetFileName("Open", filter);
+        //        if (fileName != null)
+        //        {
+        //            if (FileModel != null)
+        //                Close();
+        //            FileModel = await UISubcomponentModel.CreateUIComponentModel(FileModelFactory.report, new FileStream(fileName, FileMode.Open), fileName);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ReportException(ex);
+        //        FileModel = null;
+        //    }
+        //}
 
         public void Close()
         {

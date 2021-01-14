@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,36 +10,29 @@ namespace Imas.UI
 {
     public class UIComponent : IDisposable
     {
-        private Stream pauStream;
-        private ParFile ptaFile;
-        public Control control;
-        internal ImageSource imageSource;
+        private ParFile parFile;
+        private List<string> _subNames;
 
-        private void ReadPauStream()
+        public IReadOnlyList<string> SubcomponentNames => _subNames;
+
+        public UIComponent(Stream parStream)
         {
-            if (Binary.ReadUInt32(pauStream, true) != 0x50415505) // "PAU\05"
-                throw new InvalidDataException("Unrecognised PAU header");
-            control = Control.Create(this, pauStream);
+            parFile = new ParFile(parStream);
+            _subNames = new List<string>();
+            foreach (string entryName in parFile.Entries.Select(entry => entry.FileName).Where(name => name.EndsWith(".pau")))
+            {
+                _subNames.Add(entryName[..^4]);
+            }
         }
 
-        private async Task LoadImageSource()
+        public async Task<UISubcomponent> CreateComponent(string name)
         {
-            imageSource = await ImageSource.CreateImageSource(ptaFile);
+            return await UISubcomponent.CreateComponent(parFile, name);
         }
 
-        public static async Task<UIComponent> CreateComponent(ParFile componentPar, string name)
+        public async Task<UISubcomponent> CreateComponent(int index)
         {
-            UIComponent component = new UIComponent();
-            component.pauStream = await componentPar.GetEntry(name + ".pau").GetData();
-            component.ReadPauStream();
-            component.ptaFile = new ParFile(await componentPar.GetEntry(name + ".pta").GetData());
-            await component.LoadImageSource();
-            return component;
-        }
-
-        public static async Task<UIComponent> CreateComponent(Stream parStream, string name)
-        {
-            return await CreateComponent(new ParFile(parStream), name);
+            return await CreateComponent(SubcomponentNames[index]);
         }
 
         #region IDisposable
@@ -55,8 +49,7 @@ namespace Imas.UI
         {
             if (!disposed)
             {
-                pauStream?.Dispose();
-                ptaFile?.Dispose();
+                parFile?.Dispose();
             }
             disposed = true;
         }

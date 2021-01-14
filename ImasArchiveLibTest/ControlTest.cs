@@ -24,8 +24,8 @@ namespace ImasArchiveLibTest
             {
                 using (EntryStack entryStack = await arcFile.GetEntryRecursive(parName))
                 {
-                    using ParFile parFile = new ParFile(await entryStack.Entry.GetData());
-                    using UIComponent uIComponent = await UIComponent.CreateComponent(parFile, componentName);
+                    using UIComponent component = new UIComponent(await entryStack.Entry.GetData());
+                    using UISubcomponent uIComponent = await component.CreateComponent(0);
                 }
             }
         }
@@ -43,8 +43,8 @@ namespace ImasArchiveLibTest
             {
                 using (EntryStack entryStack = await arcFile.GetEntryRecursive(parName))
                 {
-                    using ParFile parFile = new ParFile(await entryStack.Entry.GetData());
-                    using UIComponent uIComponent = await UIComponent.CreateComponent(parFile, componentName);
+                    using UIComponent component = new UIComponent(await entryStack.Entry.GetData());
+                    using UISubcomponent uIComponent = await component.CreateComponent(componentName);
 
                     using Stream fontStream = new FileStream("patch/font_fromFolder.par", FileMode.Open, FileAccess.Read);
                     TextBox.font = new Imas.Font();

@@ -1,42 +1,100 @@
-﻿using System;
+﻿using Imas.UI;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using Imas.UI;
+using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
     class UIComponentModel : FileModel
     {
-        private UIComponent uiComponent;
-        private ObservableCollection<UIControlModel> _controlModel;
-        public ObservableCollection<UIControlModel> ControlModel { get => _controlModel; }
+        private UIComponent _component;
+        private IFileModel _fileModel;
+        private string _selectedName;
+
+        public ObservableCollection<string> SubcomponentNames { get; }
+
+        public IFileModel FileModel
+        {
+            get => _fileModel;
+            set
+            {
+                _fileModel?.Dispose();
+                _fileModel = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string SelectedName
+        {
+            get => _selectedName;
+            set
+            {
+                _selectedName = value;
+                OnPropertyChanged();
+            }
+        }
 
         protected UIComponentModel(IReport report, string filename) : base(report, filename) { }
-
-        public static async Task<UIComponentModel> CreateUIComponentModel(IReport report, Stream parStream, string parName)
+        public UIComponentModel(IReport parent, Stream stream, string fileName, IGetFileName getFileName)
+            : base(parent, fileName)
         {
-            UIComponentModel model = new UIComponentModel(report, parName);
-            string fileNameShort = parName[(parName.LastIndexOf('\\') + 1)..^13];
-            model.uiComponent = await UIComponent.CreateComponent(parStream, fileNameShort);
-            model._controlModel = new ObservableCollection<UIControlModel>();
-            model._controlModel.Add(UIControlModel.CreateModel(model.uiComponent.control));
-            return model;
+            try
+            {
+                _component = new UIComponent(stream);
+                SubcomponentNames = new ObservableCollection<string>();
+                foreach (string name in _component.SubcomponentNames)
+                    SubcomponentNames.Add(name);
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
 
-        #region INotifyPropertyChanged
+        internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
+            (report, filename, getFilename, stream) => new UIComponentModel(report, stream, filename, getFilename);
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        private AsyncCommand _loadSubComponentCommand;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        public ICommand LoadSubcomponentCommand
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            get
+            {
+                if (_loadSubComponentCommand == null)
+                {
+                    _loadSubComponentCommand = new AsyncCommand(
+                        () => LoadChildFileModel(SelectedName));
+                }
+                return _loadSubComponentCommand;
+            }
         }
 
-        #endregion INotifyPropertyChanged
+        public async Task LoadChildFileModel(string fileName)
+        {
+            ClearStatus();
+            if (fileName != null)
+            {
+                try
+                {
+                    ReportMessage("Loading " + fileName);
+                    FileModel = new UISubcomponentModel(FileModelFactory.report, await _component.CreateComponent(fileName), fileName);
+                    ReportMessage("Loaded.");
+                }
+                catch (Exception ex)
+                {
+                    ReportException(ex);
+                    FileModel = null;
+                }
+            }
+            else
+            {
+                FileModel = null;
+            }
+        }
     }
 }

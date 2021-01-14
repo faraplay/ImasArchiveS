@@ -9,11 +9,11 @@ namespace Imas.UI
 {
     public class SpriteGroup
     {
-        public UIComponent parent;
+        public UISubcomponent parent;
         public int spriteCount;
         public List<Sprite> sprites = new List<Sprite>();
 
-        internal static SpriteGroup CreateFromStream(UIComponent parent, Stream stream)
+        internal static SpriteGroup CreateFromStream(UISubcomponent parent, Stream stream)
         {
             SpriteGroup spriteGroup = new SpriteGroup();
             spriteGroup.parent = parent;
