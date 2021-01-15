@@ -21,6 +21,11 @@
     <None Remove="Icons\FolderClosed_16x.png" />
     <None Remove="Icons\Forwards_16x.png" />
     <None Remove="Icons\Forwards_disabled_16x.png" />
+    <None Remove="Icons\ImageChisel_16x.png" />
+    <None Remove="Icons\ImageGroup_16x.png" />
+    <None Remove="Icons\Image_16x.png" />
+    <None Remove="Icons\Item_16x.png" />
+    <None Remove="Icons\TextElement_16x.png" />
     <None Remove="Icons\TextFile_16x.png" />
     <None Remove="Icons\Upload_16x.png" />
     <None Remove="Icons\Upload_gray_16x.png" />
@@ -52,6 +57,21 @@
     </Resource>
     <Resource Include="Icons\Forwards_16x.png" />
     <Resource Include="Icons\Forwards_disabled_16x.png" />
+    <Resource Include="Icons\ImageChisel_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\ImageGroup_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\Image_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\Item_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Icons\TextElement_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Icons\TextFile_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

@@ -6,11 +6,11 @@ namespace ImasArchiveApp
 {
     public abstract class UIControlModel : UIElementModel
     {
-        protected readonly UISubcomponentModel parent;
         public abstract Control Control { get; }
         public abstract ImageSource ImageSource { get; set; }
 
         #region Properties
+        public override string ModelName => string.IsNullOrWhiteSpace(Control.name) ? "(no name)" : Control.name;
         public int Type
         {
             get => Control.type;
@@ -22,7 +22,7 @@ namespace ImasArchiveApp
         }
         public string Name
         {
-            get => string.IsNullOrWhiteSpace(Control.name) ? "(no name)" : Control.name;
+            get => Control.name;
             set
             {
                 Control.name = value;
@@ -259,7 +259,6 @@ namespace ImasArchiveApp
 
         protected UIControlModel(UISubcomponentModel parent, string name) : base(parent, name)
         {
-            this.parent = parent;
         }
 
         public static UIControlModel CreateModel(UISubcomponentModel parent, Control control)
@@ -267,6 +266,8 @@ namespace ImasArchiveApp
             return control switch
             {
                 GroupControl gc => new UIGroupControlModel(parent, gc),
+                SpriteCollection sc => new UISpriteCollectionModel(parent, sc),
+                TextBox tb => new UITextBoxModel(parent, tb),
                 _ => new UITypedControlModel<Control>(parent, control),
             };
         }

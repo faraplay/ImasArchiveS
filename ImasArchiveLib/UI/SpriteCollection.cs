@@ -5,11 +5,11 @@ using System.Text;
 
 namespace Imas.UI
 {
-    class SpriteCollection : Control
+    public class SpriteCollection : Control
     {
         public int childCount;
         public int e1, e2;
-        public List<SpriteGroup> childControls;
+        public List<SpriteGroup> childSpriteGroups;
 
         protected override void Deserialise(Stream stream)
         {
@@ -20,10 +20,10 @@ namespace Imas.UI
             e1 = Binary.ReadInt32(stream, true);
             e2 = Binary.ReadInt32(stream, true);
 
-            childControls = new List<SpriteGroup>(childCount);
+            childSpriteGroups = new List<SpriteGroup>(childCount);
             for (int i = 0; i < childCount; i++)
             {
-                childControls.Add(SpriteGroup.CreateFromStream(parent, stream));
+                childSpriteGroups.Add(SpriteGroup.CreateFromStream(parent, stream));
             }
         }
     }

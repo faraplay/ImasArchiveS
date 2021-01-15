@@ -28,6 +28,7 @@ namespace ImasArchiveApp
         public UITypedControlModel(UISubcomponentModel parent, T control) : base(parent, control.ToString())
         {
             _control = control;
+            Children.Add(new UISpriteGroupModel(parent, control.specialSprite));
             ms = new MemoryStream();
         }
 

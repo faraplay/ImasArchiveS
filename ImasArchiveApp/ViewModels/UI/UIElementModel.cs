@@ -7,12 +7,15 @@ using System.Text;
 
 namespace ImasArchiveApp
 {
-    public class UIElementModel : FileModel
+    public abstract class UIElementModel : FileModel
     {
+        protected readonly UISubcomponentModel parent;
         public ObservableCollection<UIElementModel> Children { get; set; }
+        public abstract string ModelName { get; }
 
-        public UIElementModel(IReport parent, string name) : base(parent, name)
+        protected UIElementModel(UISubcomponentModel parent, string name) : base(parent, name)
         {
+            this.parent = parent;
             Children = new ObservableCollection<UIElementModel>();
         }
     }

@@ -182,13 +182,13 @@
                     Grid.Row="22"
                     Grid.Column="1"
                     Padding="4"
-                    Text="{Binding Path=SourceLeft}" />
+                    Text="{Binding Path=ScaleX}" />
                 <Label Grid.Row="23" Grid.Column="0">ScaleY</Label>
                 <TextBox
                     Grid.Row="23"
                     Grid.Column="1"
                     Padding="4"
-                    Text="{Binding Path=SourceTop}" />
+                    Text="{Binding Path=ScaleY}" />
                 <Label Grid.Row="24" Grid.Column="0">SourceRight</Label>
                 <TextBox
                     Grid.Row="24"
