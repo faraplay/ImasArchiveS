@@ -46,13 +46,10 @@ namespace ImasArchiveApp
         {
             try
             {
-                parent.ClearStatus();
-                parent.ReportMessage("Loading component " + fileName);
                 _component = new UIComponent(stream);
                 SubcomponentNames = new ObservableCollection<string>();
                 foreach (string name in _component.SubcomponentNames)
                     SubcomponentNames.Add(name);
-                parent.ReportMessage("Loaded component " + fileName);
             }
             catch
             {
@@ -82,7 +79,11 @@ namespace ImasArchiveApp
         public async Task LoadSubcomponent(string subName)
         {
             ClearStatus();
-            if (subName != null)
+            if (subName == null)
+            {
+                FileModel = null;
+            }
+            else if (subName != FileModel?.FileName)
             {
                 try
                 {
@@ -108,10 +109,25 @@ namespace ImasArchiveApp
                     FileModel = null;
                 }
             }
-            else
-            {
-                FileModel = null;
-            }
         }
+
+        #region IDisposable
+
+        private bool disposed = false;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+            if (disposing)
+            {
+                _fileModel?.Dispose();
+                _component?.Dispose();
+            }
+            disposed = true;
+            base.Dispose(disposing);
+        }
+
+        #endregion IDisposable
     }
 }

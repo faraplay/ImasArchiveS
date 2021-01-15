@@ -15,16 +15,5 @@ namespace ImasArchiveApp
         {
             Children = new ObservableCollection<UIElementModel>();
         }
-
-        #region INotifyPropertyChanged
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        #endregion INotifyPropertyChanged
     }
 }
