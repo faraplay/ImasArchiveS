@@ -209,21 +209,21 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public float SourceLeft
+        public float ScaleX
         {
-            get => Control.sourceLeft;
+            get => Control.scaleX;
             set
             {
-                Control.sourceLeft = value;
+                Control.scaleX = value;
                 OnPropertyChanged();
             }
         }
-        public float SourceTop
+        public float ScaleY
         {
-            get => Control.sourceTop;
+            get => Control.scaleY;
             set
             {
-                Control.sourceTop = value;
+                Control.scaleY = value;
                 OnPropertyChanged();
             }
         }

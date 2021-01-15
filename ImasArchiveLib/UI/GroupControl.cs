@@ -28,11 +28,12 @@ namespace Imas.UI
 
         public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
-            base.Draw(g, transform, color); // this changes the matrix transform
+            base.Draw(g, transform, color); // this changes the matrix transform but not the color
+            ColorMatrix newColor = ScaleMatrix(color, alpha, red, green, blue);
             foreach (Control childControl in childControls)
             {
                 using Matrix childTransform = transform.Clone();
-                childControl.Draw(g, childTransform, color);
+                childControl.Draw(g, childTransform, newColor);
             }
         }
     }

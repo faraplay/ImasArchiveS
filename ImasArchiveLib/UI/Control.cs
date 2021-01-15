@@ -20,7 +20,8 @@ namespace Imas.UI
         public float b1, b2, b3, b4;
         public int c1, c2, c3, c4;
         public byte alpha, red, green, blue;
-        public float sourceLeft, sourceTop, sourceRight, sourceBottom;
+        public float scaleX, scaleY;
+        public float sourceRight, sourceBottom;
         public int d1; // 7 usually
         public SpriteGroup specialSprite;
 
@@ -52,8 +53,8 @@ namespace Imas.UI
             red = binary.ReadByte();
             green = binary.ReadByte();
             blue = binary.ReadByte();
-            sourceLeft = binary.ReadFloat();
-            sourceTop = binary.ReadFloat();
+            scaleX = binary.ReadFloat();
+            scaleY = binary.ReadFloat();
             sourceRight = binary.ReadFloat();
             sourceBottom = binary.ReadFloat();
             d1 = binary.ReadInt32();
@@ -94,10 +95,10 @@ namespace Imas.UI
         public virtual void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             transform.Translate(xpos, ypos);
+            transform.Scale(scaleX, scaleY);
             g.Transform = transform;
             g.DrawRectangle(Pens.Red, 0, 0, width, height);
-            color = ScaleMatrix(color, alpha, red, green, blue);
-            specialSprite.Draw(g, transform, color);
+            specialSprite.Draw(g, transform, ScaleMatrix(color, alpha, red, green, blue));
         }
 
         public Bitmap GetBitmap()

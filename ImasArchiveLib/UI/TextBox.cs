@@ -43,14 +43,12 @@ namespace Imas.UI
 
         public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
-            base.Draw(g, transform, color); // this changes the matrix transform
+            base.Draw(g, transform, color); // this changes the matrix transform but not the color
 
             using ImageAttributes imageAttributes = new ImageAttributes();
-            ColorMatrix colorMatrix = Control.ScaleMatrix(color, textAlpha, textRed, textGreen, textBlue);
-            imageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-
-            g.TranslateTransform(0f, 18f);
-            g.ScaleTransform(0.65f, 0.65f);
+            ColorMatrix newColor = ScaleMatrix(color, alpha, red, green, blue);
+            newColor = ScaleMatrix(newColor, textAlpha, textRed, textGreen, textBlue);
+            imageAttributes.SetColorMatrix(newColor, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
             if (string.IsNullOrWhiteSpace(text))
                 font.DrawByteArray(g, 

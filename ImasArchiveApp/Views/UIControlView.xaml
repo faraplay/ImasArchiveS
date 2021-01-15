@@ -177,13 +177,13 @@
                     Grid.Column="1"
                     Padding="4"
                     Text="{Binding Path=Blue}" />
-                <Label Grid.Row="22" Grid.Column="0">SourceLeft</Label>
+                <Label Grid.Row="22" Grid.Column="0">ScaleX</Label>
                 <TextBox
                     Grid.Row="22"
                     Grid.Column="1"
                     Padding="4"
                     Text="{Binding Path=SourceLeft}" />
-                <Label Grid.Row="23" Grid.Column="0">SourceTop</Label>
+                <Label Grid.Row="23" Grid.Column="0">ScaleY</Label>
                 <TextBox
                     Grid.Row="23"
                     Grid.Column="1"
