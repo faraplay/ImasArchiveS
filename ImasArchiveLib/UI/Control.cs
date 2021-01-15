@@ -90,7 +90,6 @@ namespace Imas.UI
             transform.Translate(xpos, ypos);
             transform.Scale(scaleX, scaleY);
             g.Transform = transform;
-            g.DrawRectangle(Pens.Red, 0, 0, width, height);
             specialSprite.Draw(g, transform, ScaleMatrix(color, alpha, red, green, blue));
         }
     }

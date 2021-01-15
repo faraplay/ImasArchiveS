@@ -353,7 +353,7 @@ namespace Imas
         public void DrawByteArray(Graphics g, Span<byte> chars, ImageAttributes imageAttributes)
         {
             int offsetx = 0;
-            int offsety = 0;
+            int offsety = 32;
             for (int i = 0; i < chars.Length; i += 2)
             {
                 ushort cID = (ushort)(chars[i] * 0x100 + chars[i + 1]);
