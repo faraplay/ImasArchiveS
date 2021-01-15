@@ -16,7 +16,8 @@ namespace Imas.UI
 
         private void ReadPauStream()
         {
-            if (Binary.ReadUInt32(pauStream, true) != 0x50415505) // "PAU\05"
+            uint header = Binary.ReadUInt32(pauStream, true);
+            if (header != 0x50415505 && header != 0x50415504) // "PAU\x05", "PAU\x04"
                 throw new InvalidDataException("Unrecognised PAU header");
             control = Control.Create(this, pauStream);
         }

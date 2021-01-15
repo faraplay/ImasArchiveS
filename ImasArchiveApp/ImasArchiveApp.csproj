@@ -59,4 +59,23 @@
     <Resource Include="Icons\Upload_gray_16x.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="FontResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FontResource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Font.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Font.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="FontResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>FontResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

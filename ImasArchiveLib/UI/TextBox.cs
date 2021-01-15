@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Imas.UI
 {
-    class TextBox : Control
+    public class TextBox : Control
     {
         public static Font font;
         public uint textColor;

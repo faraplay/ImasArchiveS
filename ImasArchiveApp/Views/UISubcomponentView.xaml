@@ -19,7 +19,7 @@
                 <HierarchicalDataTemplate DataType="{x:Type local:UIElementModel}" ItemsSource="{Binding Children}">
                     <ContentControl>
                         <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:EventTrigger EventName="MouseDown">
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>

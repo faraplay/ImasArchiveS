@@ -338,8 +338,6 @@ namespace Imas
 
         private void DrawChar(Graphics g, CharData charData, ImageAttributes imageAttributes, int offsetx, int offsety)
         {
-            if (charData == null)
-                return;
             if (!charsHaveBitmaps)
             {
                 g.DrawImage(
@@ -362,8 +360,11 @@ namespace Imas
                 if (cID == 0)
                     return;
                 CharData charData = Find(cID);
-                DrawChar(g, charData, imageAttributes, offsetx, offsety);
-                offsetx += charData.width;
+                if (charData != null)
+                {
+                    DrawChar(g, charData, imageAttributes, offsetx, offsety);
+                    offsetx += charData.width;
+                }
             }
         }
 

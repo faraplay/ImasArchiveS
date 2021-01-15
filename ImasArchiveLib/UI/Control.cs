@@ -89,5 +89,14 @@ namespace Imas.UI
             g.DrawRectangle(Pens.Red, 0, 0, width, height);
             specialSprite.Draw(g, transform);
         }
+
+        public Bitmap GetBitmap()
+        {
+            Bitmap bitmap = new Bitmap(1280, 720);
+            using Graphics g = Graphics.FromImage(bitmap);
+            using Matrix matrix = new Matrix();
+            Draw(g, matrix);
+            return bitmap;
+        }
     }
 }

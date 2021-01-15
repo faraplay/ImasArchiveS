@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ImasArchiveApp
 {
@@ -7,6 +8,7 @@ namespace ImasArchiveApp
     {
         protected readonly UISubcomponentModel parent;
         public abstract Control Control { get; }
+        public abstract ImageSource ImageSource { get; set; }
 
         #region Properties
         public int Type
@@ -228,7 +230,7 @@ namespace ImasArchiveApp
 
         #endregion Properties
 
-        protected UIControlModel(UISubcomponentModel parent)
+        protected UIControlModel(UISubcomponentModel parent, string name) : base(parent, name)
         {
             this.parent = parent;
         }

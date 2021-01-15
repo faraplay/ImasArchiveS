@@ -7,11 +7,11 @@ using System.Text;
 
 namespace ImasArchiveApp
 {
-    public class UIElementModel : INotifyPropertyChanged
+    public class UIElementModel : FileModel
     {
         public ObservableCollection<UIElementModel> Children { get; set; }
 
-        public UIElementModel()
+        public UIElementModel(IReport parent, string name) : base(parent, name)
         {
             Children = new ObservableCollection<UIElementModel>();
         }

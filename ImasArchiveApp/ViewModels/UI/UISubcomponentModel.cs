@@ -25,13 +25,16 @@ namespace ImasArchiveApp
             }
         }
 
-        public UISubcomponentModel(IReport report, UISubcomponent subcomponent, string filename) : base(report, filename)
+        public UISubcomponentModel(IReport parent, UISubcomponent subcomponent, string filename) : base(parent, filename)
         {
+            parent.ClearStatus();
+            parent.ReportMessage("Loading subcomponent " + filename);
             uiComponent = subcomponent;
             ControlModel = new ObservableCollection<UIControlModel>
             {
                 UIControlModel.CreateModel(this, uiComponent.control)
             };
+            parent.ReportMessage("Loaded.");
         }
     }
 }

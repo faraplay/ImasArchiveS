@@ -5,7 +5,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Resources;
 
 namespace ImasArchiveApp
 {
@@ -38,16 +40,19 @@ namespace ImasArchiveApp
             }
         }
 
-        protected UIComponentModel(IReport report, string filename) : base(report, filename) { }
+        protected UIComponentModel(IReport parent, string filename) : base(parent, filename) { }
         public UIComponentModel(IReport parent, Stream stream, string fileName, IGetFileName getFileName)
             : base(parent, fileName)
         {
             try
             {
+                parent.ClearStatus();
+                parent.ReportMessage("Loading component " + fileName);
                 _component = new UIComponent(stream);
                 SubcomponentNames = new ObservableCollection<string>();
                 foreach (string name in _component.SubcomponentNames)
                     SubcomponentNames.Add(name);
+                parent.ReportMessage("Loaded component " + fileName);
             }
             catch
             {
@@ -68,22 +73,34 @@ namespace ImasArchiveApp
                 if (_loadSubComponentCommand == null)
                 {
                     _loadSubComponentCommand = new AsyncCommand(
-                        () => LoadChildFileModel(SelectedName));
+                        () => LoadSubcomponent(SelectedName));
                 }
                 return _loadSubComponentCommand;
             }
         }
 
-        public async Task LoadChildFileModel(string fileName)
+        public async Task LoadSubcomponent(string subName)
         {
             ClearStatus();
-            if (fileName != null)
+            if (subName != null)
             {
                 try
                 {
-                    ReportMessage("Loading " + fileName);
-                    FileModel = new UISubcomponentModel(FileModelFactory.report, await _component.CreateComponent(fileName), fileName);
-                    ReportMessage("Loaded.");
+                    ClearStatus();
+                    if (TextBox.font == null)
+                    {
+                        ReportMessage("Loading font");
+                        TextBox.font = new Imas.Font();
+                        using (MemoryStream stream = new MemoryStream(FontResource.im2nx_font))
+                        {
+                            await TextBox.font.ReadFontPar(stream);
+                        }
+                        ReportMessage("Loaded font.");
+
+                    }
+                    ReportMessage("Loading subcomponent " + subName);
+                    FileModel = new UISubcomponentModel(FileModelFactory.report, await _component.CreateComponent(subName), subName);
+                    ReportMessage("Loaded subcomponent " + subName);
                 }
                 catch (Exception ex)
                 {
