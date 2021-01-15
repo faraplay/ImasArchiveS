@@ -6,8 +6,8 @@ namespace ImasArchiveApp
 {
     public abstract class UIControlModel : UIElementModel
     {
-        public abstract Control Control { get; }
-        public abstract ImageSource ImageSource { get; set; }
+        protected abstract Control Control { get; }
+        protected override UIElement UIElement => Control;
 
         #region Properties
         public override string ModelName => string.IsNullOrWhiteSpace(Control.name) ? "(no name)" : Control.name;
@@ -257,9 +257,7 @@ namespace ImasArchiveApp
 
         #endregion Properties
 
-        protected UIControlModel(UISubcomponentModel parent, string name) : base(parent, name)
-        {
-        }
+        protected UIControlModel(UISubcomponentModel parent, string name) : base(parent, name) { }
 
         public static UIControlModel CreateModel(UISubcomponentModel parent, Control control)
         {
@@ -271,25 +269,5 @@ namespace ImasArchiveApp
                 _ => new UITypedControlModel<Control>(parent, control),
             };
         }
-
-        private RelayCommand _selectCommand;
-
-        public ICommand SelectCommand
-        {
-            get
-            {
-                if (_selectCommand == null)
-                {
-                    _selectCommand = new RelayCommand(
-                        _ => {
-                            LoadImage();
-                            parent.SelectedModel = this;
-                        });
-                }
-                return _selectCommand;
-            }
-        }
-
-        protected abstract void LoadImage();
     }
 }

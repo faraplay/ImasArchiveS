@@ -8,9 +8,8 @@ using System.Text;
 
 namespace Imas.UI
 {
-    public abstract class Control
+    public abstract class Control : UIElement
     {
-        protected UISubcomponent parent;
 
         public int type;
         public string name;
@@ -86,13 +85,7 @@ namespace Imas.UI
             return newControl;
         }
 
-        public void Draw(Graphics g)
-        {
-            using Matrix matrix = new Matrix();
-            Draw(g, matrix, Identity);
-        }
-
-        public virtual void Draw(Graphics g, Matrix transform, ColorMatrix color)
+        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             transform.Translate(xpos, ypos);
             transform.Scale(scaleX, scaleY);
@@ -100,42 +93,5 @@ namespace Imas.UI
             g.DrawRectangle(Pens.Red, 0, 0, width, height);
             specialSprite.Draw(g, transform, ScaleMatrix(color, alpha, red, green, blue));
         }
-
-        public Bitmap GetBitmap()
-        {
-            Bitmap bitmap = new Bitmap(1280, 720);
-            using Graphics g = Graphics.FromImage(bitmap);
-            Draw(g);
-            return bitmap;
-        }
-
-        #region ColorMatrix
-
-        public static ColorMatrix Identity 
-        {
-            get
-            {
-                float[][] colorMatrixElements = {
-               new float[] {1, 0, 0, 0, 0},        // red scaling factor
-               new float[] {0, 1, 0, 0, 0},        // green scaling factor
-               new float[] {0, 0, 1, 0, 0},        // blue scaling factor
-               new float[] {0, 0, 0, 1, 0},        // alpha scaling factor
-               new float[] {0, 0, 0, 0, 1}};
-                return new ColorMatrix(colorMatrixElements);
-            }
-        }
-
-        public static ColorMatrix ScaleMatrix(ColorMatrix colorMatrix, byte a, byte r, byte g, byte b)
-        {
-            float[][] colorMatrixElements = {
-               new float[] {colorMatrix.Matrix00 * r / 255f,  0,  0,  0, 0},        // red scaling factor
-               new float[] {0, colorMatrix.Matrix11 * g / 255f,  0,  0, 0},        // green scaling factor
-               new float[] {0,  0, colorMatrix.Matrix22 * b / 255f,  0, 0},        // blue scaling factor
-               new float[] {0,  0,  0, colorMatrix.Matrix33 * a / 255f, 0},        // alpha scaling factor
-               new float[] {0, 0, 0, 0, 1}};
-            return new ColorMatrix(colorMatrixElements);
-        }
-
-        #endregion ColorMatrix
     }
 }

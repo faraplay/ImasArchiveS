@@ -60,6 +60,9 @@
                 <DataTemplate DataType="{x:Type local:UIControlModel}">
                     <local:UIControlView />
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type local:UIElementModel}">
+                    <local:UIElementImageView />
+                </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
     </DockPanel>

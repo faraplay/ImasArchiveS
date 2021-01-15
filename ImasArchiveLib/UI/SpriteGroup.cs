@@ -8,9 +8,8 @@ using System.Text;
 
 namespace Imas.UI
 {
-    public class SpriteGroup
+    public class SpriteGroup : UIElement
     {
-        public UISubcomponent parent;
         public int spriteCount;
         public List<Sprite> sprites = new List<Sprite>();
 
@@ -30,7 +29,7 @@ namespace Imas.UI
             }
         }
 
-        public void Draw(Graphics g, Matrix transform, ColorMatrix color)
+        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             foreach (Sprite sprite in sprites)
             {

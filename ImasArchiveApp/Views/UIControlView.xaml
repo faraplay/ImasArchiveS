@@ -209,9 +209,6 @@
                     Text="{Binding Path=D1}" />
             </Grid>
         </ScrollViewer>
-        <Grid Width="1280" Height="720">
-            <Image Source="/Icons/checkerboard.png" Stretch="UniformToFill" />
-            <Image Source="{Binding Path=ImageSource}" />
-        </Grid>
+        <local:UIElementImageView />
     </DockPanel>
 </UserControl>

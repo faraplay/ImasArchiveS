@@ -9,10 +9,8 @@ using System.Text;
 
 namespace Imas.UI
 {
-    public class Sprite
+    public class Sprite : UIElement
     {
-        public UISubcomponent parent;
-
         // (9*4 bytes of 0s)
         public int[] start = new int[9];
 
@@ -58,7 +56,7 @@ namespace Imas.UI
             sourceBottom = binary.ReadFloat();
         }
 
-        public void Draw(Graphics g, Matrix transform, ColorMatrix color)
+        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             transform.Translate(xpos, ypos);
             g.Transform = transform;
