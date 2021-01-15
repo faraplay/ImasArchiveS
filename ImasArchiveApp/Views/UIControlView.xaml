@@ -40,6 +40,10 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Grid.Column="0">Type</Label>
                 <TextBox
@@ -149,36 +153,60 @@
                     Grid.Column="1"
                     Padding="4"
                     Text="{Binding Path=C4}" />
-                <Label Grid.Row="18" Grid.Column="0">ARGB Multiplier</Label>
+                <Label Grid.Row="18" Grid.Column="0">Alpha</Label>
                 <TextBox
                     Grid.Row="18"
                     Grid.Column="1"
                     Padding="4"
-                    Text="{Binding Path=ARGBMultiplier}" />
-                <Label Grid.Row="19" Grid.Column="0">SourceLeft</Label>
+                    Text="{Binding Path=Alpha}" />
+                <Label Grid.Row="19" Grid.Column="0">Red</Label>
                 <TextBox
                     Grid.Row="19"
                     Grid.Column="1"
                     Padding="4"
-                    Text="{Binding Path=SourceLeft}" />
-                <Label Grid.Row="20" Grid.Column="0">SourceTop</Label>
+                    Text="{Binding Path=Red}" />
+                <Label Grid.Row="20" Grid.Column="0">Green</Label>
                 <TextBox
                     Grid.Row="20"
                     Grid.Column="1"
                     Padding="4"
-                    Text="{Binding Path=SourceTop}" />
-                <Label Grid.Row="21" Grid.Column="0">SourceRight</Label>
+                    Text="{Binding Path=Green}" />
+                <Label Grid.Row="21" Grid.Column="0">Blue</Label>
                 <TextBox
                     Grid.Row="21"
                     Grid.Column="1"
                     Padding="4"
-                    Text="{Binding Path=SourceRight}" />
-                <Label Grid.Row="22" Grid.Column="0">SourceBottom</Label>
+                    Text="{Binding Path=Blue}" />
+                <Label Grid.Row="22" Grid.Column="0">SourceLeft</Label>
                 <TextBox
                     Grid.Row="22"
                     Grid.Column="1"
                     Padding="4"
+                    Text="{Binding Path=SourceLeft}" />
+                <Label Grid.Row="23" Grid.Column="0">SourceTop</Label>
+                <TextBox
+                    Grid.Row="23"
+                    Grid.Column="1"
+                    Padding="4"
+                    Text="{Binding Path=SourceTop}" />
+                <Label Grid.Row="24" Grid.Column="0">SourceRight</Label>
+                <TextBox
+                    Grid.Row="24"
+                    Grid.Column="1"
+                    Padding="4"
+                    Text="{Binding Path=SourceRight}" />
+                <Label Grid.Row="25" Grid.Column="0">SourceBottom</Label>
+                <TextBox
+                    Grid.Row="25"
+                    Grid.Column="1"
+                    Padding="4"
                     Text="{Binding Path=SourceBottom}" />
+                <Label Grid.Row="26" Grid.Column="0">D1</Label>
+                <TextBox
+                    Grid.Row="26"
+                    Grid.Column="1"
+                    Padding="4"
+                    Text="{Binding Path=D1}" />
             </Grid>
         </ScrollViewer>
         <Grid Width="1280" Height="720">

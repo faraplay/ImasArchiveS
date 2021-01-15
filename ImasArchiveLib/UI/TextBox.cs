@@ -11,7 +11,7 @@ namespace Imas.UI
     public class TextBox : Control
     {
         public static Font font;
-        public uint textColor;
+        public byte textAlpha, textRed, textGreen, textBlue;
         public int lineSpacing;
         public string fontName;
         public int charLimit;
@@ -24,7 +24,10 @@ namespace Imas.UI
             type = 2;
             base.Deserialise(stream);
 
-            textColor = Binary.ReadUInt32(stream, true);
+            textAlpha = Binary.ReadByte(stream, true);
+            textRed = Binary.ReadByte(stream, true);
+            textGreen = Binary.ReadByte(stream, true);
+            textBlue = Binary.ReadByte(stream, true);
             lineSpacing = Binary.ReadInt32(stream, true);
             byte[] buffer = new byte[16];
             stream.Read(buffer);
@@ -38,18 +41,12 @@ namespace Imas.UI
             text = ImasEncoding.Custom.GetString(textBuffer);
         }
 
-        public override void Draw(Graphics g, Matrix transform)
+        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
-            base.Draw(g, transform); // this changes the matrix transform
+            base.Draw(g, transform, color); // this changes the matrix transform
 
             using ImageAttributes imageAttributes = new ImageAttributes();
-            float[][] colorMatrixElements = {
-               new float[] {((textColor >> 16) & 0xFF) / 255f,  0,  0,  0, 0},        // red scaling factor
-               new float[] {0, ((textColor >> 8) & 0xFF) / 255f,  0,  0, 0},        // green scaling factor
-               new float[] {0,  0, ((textColor >> 0) & 0xFF) / 255f,  0, 0},        // blue scaling factor
-               new float[] {0,  0,  0, ((textColor >> 24) & 0xFF) / 255f, 0},        // alpha scaling factor
-               new float[] {0, 0, 0, 0, 1}};    
-            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+            ColorMatrix colorMatrix = Control.ScaleMatrix(color, textAlpha, textRed, textGreen, textBlue);
             imageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
             g.TranslateTransform(0f, 18f);

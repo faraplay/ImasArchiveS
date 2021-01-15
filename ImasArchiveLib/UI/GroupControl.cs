@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
@@ -25,13 +26,13 @@ namespace Imas.UI
             }
         }
 
-        public override void Draw(Graphics g, Matrix transform)
+        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
-            base.Draw(g, transform); // this changes the matrix transform
+            base.Draw(g, transform, color); // this changes the matrix transform
             foreach (Control childControl in childControls)
             {
                 using Matrix childTransform = transform.Clone();
-                childControl.Draw(g, childTransform);
+                childControl.Draw(g, childTransform, color);
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
@@ -29,12 +30,12 @@ namespace Imas.UI
             }
         }
 
-        public void Draw(Graphics g, Matrix transform)
+        public void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             foreach (Sprite sprite in sprites)
             {
                 using Matrix childTransform = transform.Clone();
-                sprite.Draw(g, childTransform);
+                sprite.Draw(g, childTransform, color);
             }
         }
     }

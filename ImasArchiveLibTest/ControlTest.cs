@@ -52,8 +52,7 @@ namespace ImasArchiveLibTest
 
                     var bitmap = new Bitmap(1280, 720);
                     Graphics graphics = Graphics.FromImage(bitmap);
-                    using Matrix matrix = new Matrix();
-                    uIComponent.control.Draw(graphics, matrix);
+                    uIComponent.control.Draw(graphics);
                     bitmap.Save(outPng, ImageFormat.Png);
                 }
             }

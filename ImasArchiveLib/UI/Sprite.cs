@@ -21,7 +21,7 @@ namespace Imas.UI
         public int a1, a2;
         public float b1, b2, b3, b4;
         public int srcImageID;
-        public uint ARGBMultiplier;
+        public byte alpha, red, green, blue;
         public float sourceLeft, sourceTop, sourceRight, sourceBottom;
 
         internal static Sprite CreateFromStream(UISubcomponent parent, Stream stream)
@@ -48,17 +48,24 @@ namespace Imas.UI
             b3 = binary.ReadFloat();
             b4 = binary.ReadFloat();
             srcImageID = binary.ReadInt32();
-            ARGBMultiplier = binary.ReadUInt32();
+            alpha = binary.ReadByte();
+            red = binary.ReadByte();
+            green = binary.ReadByte();
+            blue = binary.ReadByte();
             sourceLeft = binary.ReadFloat();
             sourceTop = binary.ReadFloat();
             sourceRight = binary.ReadFloat();
             sourceBottom = binary.ReadFloat();
         }
 
-        public void Draw(Graphics g, Matrix transform)
+        public void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             transform.Translate(xpos, ypos);
             g.Transform = transform;
+
+            using ImageAttributes imageAttributes = new ImageAttributes();
+            ColorMatrix newColor = Control.ScaleMatrix(color, alpha, red, green, blue);
+            imageAttributes.SetColorMatrix(newColor, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
             if (srcImageID >= 0)
             {
                 Bitmap srcImg = parent.imageSource[srcImageID];
@@ -72,11 +79,17 @@ namespace Imas.UI
                     new Rectangle(new Point(0, 0), new Size((int)width, (int)height)),
                     x1, y1,
                     x2 - x1, y2 - y1,
-                    GraphicsUnit.Pixel);
+                    GraphicsUnit.Pixel,
+                    imageAttributes);
             }
             else
             {
-                g.FillRectangle(Brushes.White, 0, 0, width, height);
+                Brush brush = new SolidBrush(Color.FromArgb(
+                    (int)(newColor.Matrix33 * 255), 
+                    (int)(newColor.Matrix00 * 255), 
+                    (int)(newColor.Matrix11 * 255), 
+                    (int)(newColor.Matrix22 * 255)));
+                g.FillRectangle(brush, 0, 0, width, height);
             }
         }
     }

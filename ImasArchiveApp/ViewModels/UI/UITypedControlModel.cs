@@ -28,8 +28,12 @@ namespace ImasArchiveApp
         public UITypedControlModel(UISubcomponentModel parent, T control) : base(parent, control.ToString())
         {
             _control = control;
-
             ms = new MemoryStream();
+        }
+
+        protected override void LoadImage()
+        {
+            ms.SetLength(0);
             using (Bitmap bitmap = _control.GetBitmap())
             {
                 bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);

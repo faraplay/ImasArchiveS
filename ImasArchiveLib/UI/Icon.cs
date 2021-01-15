@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
@@ -24,10 +25,10 @@ namespace Imas.UI
                 angle = angle;
             }
         }
-        public override void Draw(Graphics g, Matrix transform)
+        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             transform.RotateAt(-angle * (180 / (float)Math.PI), new PointF(xpos, ypos));
-            base.Draw(g, transform);
+            base.Draw(g, transform, color);
         }
 
     }

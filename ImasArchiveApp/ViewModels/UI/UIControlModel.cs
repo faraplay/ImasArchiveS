@@ -173,12 +173,39 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public uint ARGBMultiplier
+        public byte Alpha
         {
-            get => Control.ARGBMultiplier;
+            get => Control.alpha;
             set
             {
-                Control.ARGBMultiplier = value;
+                Control.alpha = value;
+                OnPropertyChanged();
+            }
+        }
+        public byte Red
+        {
+            get => Control.red;
+            set
+            {
+                Control.red = value;
+                OnPropertyChanged();
+            }
+        }
+        public byte Green
+        {
+            get => Control.green;
+            set
+            {
+                Control.green = value;
+                OnPropertyChanged();
+            }
+        }
+        public byte Blue
+        {
+            get => Control.blue;
+            set
+            {
+                Control.blue = value;
                 OnPropertyChanged();
             }
         }
@@ -253,10 +280,15 @@ namespace ImasArchiveApp
                 if (_selectCommand == null)
                 {
                     _selectCommand = new RelayCommand(
-                        _ => { parent.SelectedModel = this; });
+                        _ => {
+                            LoadImage();
+                            parent.SelectedModel = this;
+                        });
                 }
                 return _selectCommand;
             }
         }
+
+        protected abstract void LoadImage();
     }
 }
