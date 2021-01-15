@@ -41,7 +41,7 @@ namespace ImasArchiveApp
 
         private RelayCommand _selectCommand;
 
-        public ICommand SelectCommand
+        public virtual ICommand SelectCommand
         {
             get
             {

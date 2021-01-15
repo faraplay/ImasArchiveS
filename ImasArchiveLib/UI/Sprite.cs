@@ -20,7 +20,47 @@ namespace Imas.UI
         public float b1, b2, b3, b4;
         public int srcImageID;
         public byte alpha, red, green, blue;
-        public float sourceLeft, sourceTop, sourceRight, sourceBottom;
+        public float srcFracLeft, srcFracTop, srcFracRight, srcFracBottom;
+
+        private Bitmap SourceImage => parent.imageSource[srcImageID];
+        private int SrcImgWidth => (srcImageID == -1) ? 1 : SourceImage.Width;
+        private int SrcImgHeight => (srcImageID == -1) ? 1 : SourceImage.Height;
+        public float SourceX
+        {
+            get => srcFracLeft * SrcImgWidth;
+            set
+            {
+                float srcFracWidth = srcFracRight - srcFracLeft;
+                srcFracLeft = value / SrcImgWidth;
+                srcFracRight = srcFracLeft + srcFracWidth;
+            }
+        }
+        public float SourceY
+        {
+            get => srcFracTop * SrcImgHeight;
+            set
+            {
+                float srcFracHeight = srcFracBottom - srcFracTop;
+                srcFracTop = value / SrcImgHeight;
+                srcFracBottom = srcFracTop + srcFracHeight;
+            }
+        }
+        public float SourceWidth
+        {
+            get => (srcFracRight - srcFracLeft) * SrcImgWidth;
+            set
+            {
+                srcFracRight = srcFracLeft + (value / SrcImgWidth);
+            }
+        }
+        public float SourceHeight
+        {
+            get => (srcFracBottom - srcFracTop) * SrcImgHeight;
+            set
+            {
+                srcFracBottom = srcFracTop + (value / SrcImgHeight);
+            }
+        }
 
         internal static Sprite CreateFromStream(UISubcomponent parent, Stream stream)
         {
@@ -50,10 +90,10 @@ namespace Imas.UI
             red = binary.ReadByte();
             green = binary.ReadByte();
             blue = binary.ReadByte();
-            sourceLeft = binary.ReadFloat();
-            sourceTop = binary.ReadFloat();
-            sourceRight = binary.ReadFloat();
-            sourceBottom = binary.ReadFloat();
+            srcFracLeft = binary.ReadFloat();
+            srcFracTop = binary.ReadFloat();
+            srcFracRight = binary.ReadFloat();
+            srcFracBottom = binary.ReadFloat();
         }
 
         public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
@@ -62,32 +102,46 @@ namespace Imas.UI
             g.Transform = transform;
 
             using ImageAttributes imageAttributes = new ImageAttributes();
-            ColorMatrix newColor = Control.ScaleMatrix(color, alpha, red, green, blue);
+            ColorMatrix newColor = ScaleMatrix(color, alpha, red, green, blue);
             imageAttributes.SetColorMatrix(newColor, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-            if (srcImageID >= 0)
+            if (srcImageID == -1)
             {
-                Bitmap srcImg = parent.imageSource[srcImageID];
-                int x1 = (int)(sourceLeft * srcImg.Width);
-                int y1 = (int)(sourceTop * srcImg.Height);
-                int x2 = (int)(sourceRight * srcImg.Width);
-                int y2 = (int)(sourceBottom * srcImg.Height);
-
-                g.DrawImage(
-                    srcImg,
-                    new Rectangle(new Point(0, 0), new Size((int)width, (int)height)),
-                    x1, y1,
-                    x2 - x1, y2 - y1,
-                    GraphicsUnit.Pixel,
-                    imageAttributes);
+                Brush brush = new SolidBrush(Color.FromArgb(
+                    (int)(newColor.Matrix33 * 255),
+                    (int)(newColor.Matrix00 * 255),
+                    (int)(newColor.Matrix11 * 255),
+                    (int)(newColor.Matrix22 * 255)));
+                g.FillRectangle(brush, 0, 0, width, height);
             }
             else
             {
-                Brush brush = new SolidBrush(Color.FromArgb(
-                    (int)(newColor.Matrix33 * 255), 
-                    (int)(newColor.Matrix00 * 255), 
-                    (int)(newColor.Matrix11 * 255), 
-                    (int)(newColor.Matrix22 * 255)));
-                g.FillRectangle(brush, 0, 0, width, height);
+                g.DrawImage(
+                    SourceImage,
+                    new Rectangle(new Point(0, 0), new Size((int)width, (int)height)),
+                    SourceX, SourceY,
+                    SourceWidth, SourceHeight,
+                    GraphicsUnit.Pixel,
+                    imageAttributes);
+            }
+        }
+
+        public Bitmap ShowInSpriteSheet()
+        {
+            if (srcImageID == -1)
+            {
+                Bitmap bitmap = new Bitmap(1, 1);
+                bitmap.SetPixel(0, 0, Color.White);
+                return bitmap;
+            }
+            else
+            {
+                Bitmap bitmap = new Bitmap(SrcImgWidth, SrcImgHeight);
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    g.DrawImage(SourceImage, new Point());
+                    g.DrawRectangle(Pens.Red, SourceX, SourceY, SourceWidth, SourceHeight);
+                }
+                return bitmap;
             }
         }
     }
