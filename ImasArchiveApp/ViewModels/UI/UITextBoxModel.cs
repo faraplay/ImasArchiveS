@@ -1,4 +1,5 @@
-﻿using Imas.UI;
+﻿using Imas;
+using Imas.UI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -49,14 +50,62 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public int LineSpacing
+        public uint TextAttributes
         {
-            get => _control.lineSpacing;
+            get => _control.textAttributes;
             set
             {
-                _control.lineSpacing = value;
+                _control.textAttributes = value;
 				LoadImage();
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(XAlignment));
+                OnPropertyChanged(nameof(YAlignment));
+                OnPropertyChanged(nameof(Multiline));
+                OnPropertyChanged(nameof(WordWrap));
+            }
+        }
+        public int XAlignment
+        {
+            get => (int)_control.XAlignment;
+            set
+            {
+                _control.XAlignment = (HorizontalAlignment)value;
+                LoadImage();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TextAttributes));
+            }
+        }
+        public int YAlignment
+        {
+            get => (int)_control.YAlignment / 4;
+            set
+            {
+                _control.YAlignment = (VerticalAlignment)(value * 4);
+                LoadImage();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TextAttributes));
+            }
+        }
+        public bool Multiline
+        {
+            get => _control.Multiline;
+            set
+            {
+                _control.Multiline = value;
+                LoadImage();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TextAttributes));
+            }
+        }
+        public bool WordWrap
+        {
+            get => _control.WordWrap;
+            set
+            {
+                _control.WordWrap = value;
+                LoadImage();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TextAttributes));
             }
         }
         public string FontName
@@ -87,6 +136,7 @@ namespace ImasArchiveApp
                 _control.Text = value;
 				LoadImage();
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CharLimit));
             }
         }
 

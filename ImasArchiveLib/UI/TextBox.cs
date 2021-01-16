@@ -12,12 +12,50 @@ namespace Imas.UI
     {
         public static Font font;
         public byte textAlpha, textRed, textGreen, textBlue;
-        public int lineSpacing;
+        public uint textAttributes;
         public byte[] fontNameBuffer;
         public int charLimit;
         public int textLength;
         public byte[] textBuffer;
 
+        public HorizontalAlignment XAlignment
+        {
+            get => (HorizontalAlignment)(textAttributes & 0x03u);
+            set
+            {
+                textAttributes = (textAttributes & ~0x3u) ^ ((uint)value & 0x3u);
+            }
+        }
+        public VerticalAlignment YAlignment
+        {
+            get => (VerticalAlignment)(textAttributes & 0xCu);
+            set
+            {
+                textAttributes = (textAttributes & ~0xCu) ^ ((uint)value & 0xCu);
+            }
+        }
+        public bool Multiline
+        {
+            get => (textAttributes & 0x10u) != 0;
+            set
+            {
+                if (value)
+                    textAttributes |= 0x10u;
+                else
+                    textAttributes &= ~0x10u;
+            }
+        }
+        public bool WordWrap
+        {
+            get => (textAttributes & 0x20u) != 0;
+            set
+            {
+                if (value)
+                    textAttributes |= 0x20u;
+                else
+                    textAttributes &= ~0x20u;
+            }
+        }
         public string FontName
         {
             get => ImasEncoding.Ascii.GetString(fontNameBuffer);
@@ -49,7 +87,7 @@ namespace Imas.UI
             textRed = Binary.ReadByte(stream, true);
             textGreen = Binary.ReadByte(stream, true);
             textBlue = Binary.ReadByte(stream, true);
-            lineSpacing = Binary.ReadInt32(stream, true);
+            textAttributes = Binary.ReadUInt32(stream, true);
             fontNameBuffer = new byte[16];
             stream.Read(fontNameBuffer);
             charLimit = Binary.ReadInt32(stream, true);
@@ -68,7 +106,7 @@ namespace Imas.UI
             Binary.WriteByte(stream, true, textRed);
             Binary.WriteByte(stream, true, textGreen);
             Binary.WriteByte(stream, true, textBlue);
-            Binary.WriteInt32(stream, true, lineSpacing);
+            Binary.WriteUInt32(stream, true, textAttributes);
             stream.Write(fontNameBuffer);
             Binary.WriteInt32(stream, true, charLimit);
             Binary.WriteInt32(stream, true, textLength);
@@ -84,12 +122,20 @@ namespace Imas.UI
             newColor = ScaleMatrix(newColor, textAlpha, textRed, textGreen, textBlue);
             imageAttributes.SetColorMatrix(newColor, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
+            TextBoxAttributes textBoxAttributes = new TextBoxAttributes { xAlign = XAlignment, yAlign = YAlignment, multiline = Multiline, wordWrap = WordWrap };
+
             if (string.IsNullOrWhiteSpace(Text))
-                font.DrawByteArray(g, 
-                    ImasEncoding.Custom.GetBytes("placeholder text"),
-                    imageAttributes);
+            {
+                byte[] placeholderText = new byte[2 * charLimit];
+                Array.Fill(placeholderText, (byte)0xE1);
+                font.DrawByteArray(g,
+                    placeholderText,
+                    imageAttributes,
+                    width, height, textBoxAttributes);
+            }
             else
-                font.DrawByteArray(g, textBuffer, imageAttributes);
+                font.DrawByteArray(g, textBuffer, imageAttributes,
+                    width, height, textBoxAttributes);
         }
     }
 }
