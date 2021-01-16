@@ -19,6 +19,21 @@ namespace ImasArchiveApp
 
         #region Constructors
 
+        public ParModel(IReport parent, ParFile parFile, string fileName, IGetFileName getFileName)
+            : base(parent, fileName, getFileName)
+        {
+            try
+            {
+                _parFile = parFile;
+                SetBrowserEntries();
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
+        }
+
         public ParModel(IReport parent, Stream stream, string fileName, IGetFileName getFileName)
             : base(parent, fileName, getFileName)
         {

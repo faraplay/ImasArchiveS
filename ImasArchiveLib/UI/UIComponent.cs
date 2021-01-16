@@ -39,9 +39,9 @@ namespace Imas.UI
             }
         }
 
-        private UIComponent(Stream parStream)
+        private UIComponent(ParFile parFile)
         {
-            parFile = new ParFile(parStream);
+            this.parFile = parFile;
             var entryNames = parFile.Entries.Select(entry => entry.FileName).Where(name => name.EndsWith(".pau"));
             Count = entryNames.Count();
             _subNames = new List<string>(Count);
@@ -60,11 +60,16 @@ namespace Imas.UI
             }
         }
 
-        public static async Task<UIComponent> CreateUIComponent(Stream parStream)
+        public static async Task<UIComponent> CreateUIComponent(ParFile parFile)
         {
-            UIComponent uiComponent = new UIComponent(parStream);
+            UIComponent uiComponent = new UIComponent(parFile);
             await uiComponent.CreateAllSubcomponents();
             return uiComponent;
+        }
+
+        public static async Task<UIComponent> CreateUIComponent(Stream parStream)
+        {
+            return await CreateUIComponent(new ParFile(parStream));
         }
 
         public async Task SaveTo(Stream stream)

@@ -9,11 +9,33 @@
     d:DesignWidth="240"
     mc:Ignorable="d">
     <Grid>
+        <Grid.Resources>
+            <Style x:Key="ExtDataLabelStyle" TargetType="Label">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=HasExtData}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="ExtDataTextBoxStyle" TargetType="TextBox">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=HasExtData}" Value="True">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="90" />
             <ColumnDefinition MinWidth="120" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -205,5 +227,53 @@
             Grid.Column="1"
             Padding="4"
             Text="{Binding Path=D1}" />
+        <Label
+            Grid.Row="27"
+            Grid.Column="0"
+            Style="{StaticResource ExtDataLabelStyle}">
+            ExtInt0
+        </Label>
+        <TextBox
+            Grid.Row="27"
+            Grid.Column="1"
+            Padding="4"
+            Style="{StaticResource ExtDataTextBoxStyle}"
+            Text="{Binding Path=ExtInt0}" />
+        <Label
+            Grid.Row="28"
+            Grid.Column="0"
+            Style="{StaticResource ExtDataLabelStyle}">
+            ExtInt1
+        </Label>
+        <TextBox
+            Grid.Row="28"
+            Grid.Column="1"
+            Padding="4"
+            Style="{StaticResource ExtDataTextBoxStyle}"
+            Text="{Binding Path=ExtInt1}" />
+        <Label
+            Grid.Row="29"
+            Grid.Column="0"
+            Style="{StaticResource ExtDataLabelStyle}">
+            ExtInt2
+        </Label>
+        <TextBox
+            Grid.Row="29"
+            Grid.Column="1"
+            Padding="4"
+            Style="{StaticResource ExtDataTextBoxStyle}"
+            Text="{Binding Path=ExtInt2}" />
+        <Label
+            Grid.Row="30"
+            Grid.Column="0"
+            Style="{StaticResource ExtDataLabelStyle}">
+            ExtInt3
+        </Label>
+        <TextBox
+            Grid.Row="30"
+            Grid.Column="1"
+            Padding="4"
+            Style="{StaticResource ExtDataTextBoxStyle}"
+            Text="{Binding Path=ExtInt3}" />
     </Grid>
 </UserControl>

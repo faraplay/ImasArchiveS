@@ -281,6 +281,47 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+        public bool HasExtData => Control.HasExtData;
+        public int ExtInt0
+        {
+            get => Control.extData[0];
+            set
+            {
+                Control.extData[0] = value;
+                LoadImage();
+                OnPropertyChanged();
+            }
+        }
+        public int ExtInt1
+        {
+            get => Control.extData[1];
+            set
+            {
+                Control.extData[1] = value;
+                LoadImage();
+                OnPropertyChanged();
+            }
+        }
+        public int ExtInt2
+        {
+            get => Control.extData[2];
+            set
+            {
+                Control.extData[2] = value;
+                LoadImage();
+                OnPropertyChanged();
+            }
+        }
+        public int ExtInt3
+        {
+            get => Control.extData[3];
+            set
+            {
+                Control.extData[3] = value;
+                LoadImage();
+                OnPropertyChanged();
+            }
+        }
 
         #endregion Properties
 

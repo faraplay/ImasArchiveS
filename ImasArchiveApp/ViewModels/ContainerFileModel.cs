@@ -78,7 +78,7 @@ namespace ImasArchiveApp
                     try
                     {
                         ReportMessage("Loading " + fileName);
-                        FileModel = FileModelFactory.CreateFileModel(await entry.GetData(), fileName);
+                        FileModel = await FileModelFactory.CreateFileModel(await entry.GetData(), fileName);
                         ReportMessage("Loaded.");
                     }
                     catch (Exception ex)

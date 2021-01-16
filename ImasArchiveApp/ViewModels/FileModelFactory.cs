@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using Imas.Archive;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImasArchiveApp
 {
@@ -7,12 +10,17 @@ namespace ImasArchiveApp
         public static IReport report;
         public static IGetFileName getFileName;
 
-        public static IFileModel CreateFileModel(Stream stream, string fileName)
+        public static async Task<IFileModel> CreateFileModel(Stream stream, string fileName)
         {
-            string extension = fileName.Substring(fileName.LastIndexOf('.') + 1);
+            string extension = fileName[(fileName.LastIndexOf('.') + 1)..];
             switch (extension)
             {
                 case "par":
+                    ParFile parFile = new ParFile(stream);
+                    if (parFile.Entries.Any(entry => entry.FileName.EndsWith(".pau")))
+                        return await UIComponentModel.CreateComponentModel(report, stream, fileName, getFileName);
+                    else
+                        return new ParModel(report, parFile, fileName, getFileName);
                 case "pta":
                     return new ParModel(report, stream, fileName, getFileName);
 
@@ -36,7 +44,7 @@ namespace ImasArchiveApp
             return fileModelBuilder(report, fileName, getFileName, stream);
         }
 
-        public static IFileModel CreateFileModel(string fileName)
+        public static async Task<IFileModel> CreateFileModel(string fileName)
         {
             if (fileName.EndsWith(".arc") || fileName.EndsWith(".arc.dat"))
             {
@@ -48,7 +56,7 @@ namespace ImasArchiveApp
             }
             else
             {
-                return CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName.Substring(fileName.LastIndexOf('\\') + 1));
+                return await CreateFileModel(new FileStream(fileName, FileMode.Open, FileAccess.Read), fileName.Substring(fileName.LastIndexOf('\\') + 1));
             }
         }
     }

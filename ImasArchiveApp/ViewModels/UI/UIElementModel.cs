@@ -59,18 +59,25 @@ namespace ImasArchiveApp
 
         protected virtual void LoadImage()
         {
-            ms.SetLength(0);
-            using (Bitmap bitmap = UIElement.GetBitmap())
+            try
             {
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-            }
-            BitmapImage image = new BitmapImage();
-            image.BeginInit();
-            ms.Seek(0, SeekOrigin.Begin);
-            image.StreamSource = ms;
-            image.EndInit();
+                ms.SetLength(0);
+                using (Bitmap bitmap = UIElement.GetBitmap())
+                {
+                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                BitmapImage image = new BitmapImage();
+                image.BeginInit();
+                ms.Seek(0, SeekOrigin.Begin);
+                image.StreamSource = ms;
+                image.EndInit();
 
-            ImageSource = image;
+                ImageSource = image;
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
         }
 
         #region IDisposable

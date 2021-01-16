@@ -21,14 +21,17 @@ namespace Imas.UI
         public byte alpha, red, green, blue;
         public float scaleX, scaleY;
         public float sourceRight, sourceBottom;
-        public int d1; // 7 usually
+        public int d1;
         public SpriteGroup specialSprite;
+        public int[] extData;
 
         public string Name
         {
             get => ImasEncoding.Ascii.GetString(nameBuffer);
             set => ImasEncoding.Ascii.GetBytes(value, nameBuffer);
         }
+
+        public bool HasExtData => (d1 & 0x04000000) != 0;
 
         public override string ToString() => Name;
 
@@ -63,6 +66,18 @@ namespace Imas.UI
             sourceBottom = binary.ReadFloat();
             d1 = binary.ReadInt32();
             specialSprite = SpriteGroup.CreateFromStream(parent, stream);
+
+            extData = new int[4];
+            if (d1 >> 16 != 0)
+            {
+                if (HasExtData)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        extData[i] = binary.ReadInt32();
+                    }
+                }
+            }
         }
 
         public virtual void Serialise(Stream stream)
@@ -96,6 +111,13 @@ namespace Imas.UI
             binary.WriteFloat(sourceBottom);
             binary.WriteInt32(d1);
             specialSprite.Serialise(stream);
+            if (HasExtData)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                     binary.WriteInt32(extData[i]);
+                }
+            }
         }
 
         public static Control Create(UISubcomponent parent, Stream stream)

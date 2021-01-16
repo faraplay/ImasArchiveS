@@ -59,6 +59,11 @@ namespace ImasArchiveApp
                 };
                 foreach (string name in model._component.SubcomponentNames)
                     model.SubcomponentNames.Add(name);
+                if (model.SubcomponentNames.Count == 1)
+                {
+                    model.SelectedName = model.SubcomponentNames[0];
+                    await model.LoadSubcomponent(model.SelectedName);
+                }
                 return model;
             }
             catch
