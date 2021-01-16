@@ -6,13 +6,15 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Imas.UI;
 
 namespace ImasArchiveApp
 {
     public class UISubcomponentModel : FileModel
     {
-        private UISubcomponent uiComponent;
+        private readonly UISubcomponent uiComponent;
+        private readonly IGetFileName _getfileName;
         private UIElementModel _selectedModel;
         public ObservableCollection<UIControlModel> ControlModel { get; }
         public UIElementModel SelectedModel
@@ -25,13 +27,15 @@ namespace ImasArchiveApp
             }
         }
 
-        public UISubcomponentModel(IReport parent, UISubcomponent subcomponent, string filename) : base(parent, filename)
+        public UISubcomponentModel(IReport parent, UISubcomponent subcomponent, string filename, IGetFileName getFileName) : base(parent, filename)
         {
+            _getfileName = getFileName;
             uiComponent = subcomponent;
             ControlModel = new ObservableCollection<UIControlModel>
             {
                 UIControlModel.CreateModel(this, uiComponent.control)
             };
         }
+
     }
 }

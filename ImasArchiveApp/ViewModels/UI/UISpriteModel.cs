@@ -24,6 +24,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[0] = value;
+                LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -33,6 +34,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[1] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -42,6 +44,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[2] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -51,6 +54,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[3] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -60,6 +64,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[4] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -69,6 +74,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[5] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -78,6 +84,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[6] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -87,6 +94,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[7] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -96,6 +104,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[8] = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -105,6 +114,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.xpos = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -114,6 +124,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.ypos = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -123,6 +134,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.width = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -132,6 +144,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.height = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -141,6 +154,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.a1 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -150,6 +164,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.a2 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -159,6 +174,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b1 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -168,6 +184,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b2 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -177,6 +194,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b3 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -186,6 +204,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b4 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -195,6 +214,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.srcImageID = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -204,6 +224,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.alpha = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -213,6 +234,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.red = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -222,6 +244,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.green = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -231,6 +254,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.blue = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -240,6 +264,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.SourceX = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -249,6 +274,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.SourceY = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -258,6 +284,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.SourceWidth = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -267,31 +294,12 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.SourceHeight = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
 
         #endregion Properties
-
-
-        private RelayCommand _selectCommand;
-
-        public override ICommand SelectCommand
-        {
-            get
-            {
-                if (_selectCommand == null)
-                {
-                    _selectCommand = new RelayCommand(
-                        _ => {
-                            LoadImage();
-                            LoadSpriteSheetImage();
-                            parent.SelectedModel = this;
-                        });
-                }
-                return _selectCommand;
-            }
-        }
 
         #region ImageSource
         private readonly MemoryStream ms;
@@ -310,6 +318,12 @@ namespace ImasArchiveApp
         {
             _sprite = sprite;
             ms = new MemoryStream();
+        }
+
+        protected override void LoadImage()
+        {
+            base.LoadImage();
+            LoadSpriteSheetImage();
         }
         protected void LoadSpriteSheetImage()
         {

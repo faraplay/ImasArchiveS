@@ -180,7 +180,7 @@ namespace ImasArchiveApp
                 if (_openComponentCommand == null)
                 {
                     _openComponentCommand = new AsyncCommand(() =>
-                        OpenWithFilter("Par files (*.par)|*.par|All files (*.*)|*.*", UIComponentModel.Builder));
+                        OpenUIComponent("Par files (*.par)|*.par|All files (*.*)|*.*"));
                 }
                 return _openComponentCommand;
             }
@@ -348,25 +348,27 @@ namespace ImasArchiveApp
             }
         }
 
-        //public async Task OpenUIComponent(string filter)
-        //{
-        //    try
-        //    {
-        //        ClearStatus();
-        //        string fileName = _getFileName.OpenGetFileName("Open", filter);
-        //        if (fileName != null)
-        //        {
-        //            if (FileModel != null)
-        //                Close();
-        //            FileModel = await UISubcomponentModel.CreateUIComponentModel(FileModelFactory.report, new FileStream(fileName, FileMode.Open), fileName);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ReportException(ex);
-        //        FileModel = null;
-        //    }
-        //}
+        public async Task OpenUIComponent(string filter)
+        {
+            try
+            {
+                ClearStatus();
+                string fileName = _getFileName.OpenGetFileName("Open", filter);
+                if (fileName != null)
+                {
+                    if (FileModel != null)
+                        Close();
+                    ReportMessage($"Opening {fileName}...");
+                    FileModel = await UIComponentModel.CreateComponentModel(FileModelFactory.report, new FileStream(fileName, FileMode.Open), fileName, _getFileName);
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                FileModel = null;
+            }
+        }
 
         public void Close()
         {

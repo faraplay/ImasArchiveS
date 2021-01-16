@@ -20,10 +20,13 @@ namespace Imas.UI
             angle = Binary.ReadFloat(stream, true);
             e2 = Binary.ReadFloat(stream, true);
             e3 = Binary.ReadFloat(stream, true);
-            if (e2 != 0 || e3 != 0)
-            {
-                angle = angle;
-            }
+        }
+        public override void Serialise(Stream stream)
+        {
+            base.Serialise(stream);
+            Binary.WriteFloat(stream, true, angle);
+            Binary.WriteFloat(stream, true, e2);
+            Binary.WriteFloat(stream, true, e3);
         }
         public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {

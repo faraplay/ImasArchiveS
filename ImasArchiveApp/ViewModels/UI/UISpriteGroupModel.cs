@@ -9,7 +9,7 @@ namespace ImasArchiveApp
     {
         private readonly SpriteGroup _spriteGroup;
         protected override UIElement UIElement => _spriteGroup;
-        public override string ModelName => $"({_spriteGroup.spriteCount} sprites)";
+        public override string ModelName => $"({_spriteGroup.sprites.Count} sprites)";
         public UISpriteGroupModel(UISubcomponentModel parent, SpriteGroup spriteGroup) : base(parent, "spriteGroup")
         {
             _spriteGroup = spriteGroup;

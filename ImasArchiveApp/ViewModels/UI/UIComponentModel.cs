@@ -15,6 +15,7 @@ namespace ImasArchiveApp
     {
         private UIComponent _component;
         private IFileModel _fileModel;
+        private readonly IGetFileName _getFileName;
         private string _selectedName;
 
         public ObservableCollection<string> SubcomponentNames { get; }
@@ -40,26 +41,33 @@ namespace ImasArchiveApp
             }
         }
 
-        protected UIComponentModel(IReport parent, string filename) : base(parent, filename) { }
-        public UIComponentModel(IReport parent, Stream stream, string fileName, IGetFileName getFileName)
+        private UIComponentModel(IReport parent, string fileName, IGetFileName getFileName)
             : base(parent, fileName)
         {
+            _getFileName = getFileName;
+            SubcomponentNames = new ObservableCollection<string>();
+        }
+
+        public static async Task<UIComponentModel> CreateComponentModel(IReport parent, Stream stream, string fileName, IGetFileName getFileName)
+        {
+            UIComponentModel model = null;
             try
             {
-                _component = new UIComponent(stream);
-                SubcomponentNames = new ObservableCollection<string>();
-                foreach (string name in _component.SubcomponentNames)
-                    SubcomponentNames.Add(name);
+                model = new UIComponentModel(parent, fileName, getFileName)
+                {
+                    _component = await UIComponent.CreateUIComponent(stream)
+                };
+                foreach (string name in model._component.SubcomponentNames)
+                    model.SubcomponentNames.Add(name);
+                return model;
             }
             catch
             {
-                Dispose();
+                model?.Dispose();
                 throw;
             }
-        }
 
-        internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
-            (report, filename, getFilename, stream) => new UIComponentModel(report, stream, filename, getFilename);
+        }
 
         private AsyncCommand _loadSubComponentCommand;
 
@@ -87,7 +95,6 @@ namespace ImasArchiveApp
             {
                 try
                 {
-                    ClearStatus();
                     if (TextBox.font == null)
                     {
                         ReportMessage("Loading font");
@@ -100,7 +107,7 @@ namespace ImasArchiveApp
 
                     }
                     ReportMessage("Loading subcomponent " + subName);
-                    FileModel = new UISubcomponentModel(FileModelFactory.report, await _component.CreateComponent(subName), subName);
+                    FileModel = new UISubcomponentModel(FileModelFactory.report, _component[subName], subName, _getFileName);
                     ReportMessage("Loaded subcomponent " + subName);
                 }
                 catch (Exception ex)
@@ -108,6 +115,44 @@ namespace ImasArchiveApp
                     ReportException(ex);
                     FileModel = null;
                 }
+            }
+        }
+
+        private AsyncCommand _saveAsCommand;
+
+        public ICommand SaveAsCommand
+        {
+            get
+            {
+                if (_saveAsCommand == null)
+                {
+                    _saveAsCommand = new AsyncCommand(
+                        () => SaveAs());
+                }
+                return _saveAsCommand;
+            }
+        }
+
+        public async Task SaveAs()
+        {
+            try
+            {
+                string fileName = _getFileName.SaveGetFileName("Save As...", FileName, "Par files (*.par)|*.par");
+                if (fileName != null)
+                {
+                    ClearStatus();
+                    ReportMessage("Saving component...");
+                    using (FileStream outStream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                    {
+                        await _component.SaveTo(outStream);
+                    }
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                FileModel = null;
             }
         }
 

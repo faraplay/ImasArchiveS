@@ -16,5 +16,10 @@ namespace Imas.UI
             type = 9;
             e1 = Binary.ReadInt32(stream, true);
         }
+        public override void Serialise(Stream stream)
+        {
+            base.Serialise(stream);
+            Binary.WriteInt32(stream, true, e1);
+        }
     }
 }

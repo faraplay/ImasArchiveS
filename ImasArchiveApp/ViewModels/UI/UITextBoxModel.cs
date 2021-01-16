@@ -15,6 +15,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textAlpha = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -24,6 +25,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textRed = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -33,6 +35,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textGreen = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -42,6 +45,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textBlue = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -51,15 +55,17 @@ namespace ImasArchiveApp
             set
             {
                 _control.lineSpacing = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
         public string FontName
         {
-            get => _control.fontName;
+            get => _control.FontName;
             set
             {
-                _control.fontName = value;
+                _control.FontName = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -69,15 +75,17 @@ namespace ImasArchiveApp
             set
             {
                 _control.charLimit = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
         public string Text
         {
-            get => _control.text;
+            get => _control.Text;
             set
             {
-                _control.text = value;
+                _control.Text = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }

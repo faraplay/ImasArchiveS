@@ -10,6 +10,9 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <DockPanel Margin="10">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Command="{Binding Path=SaveAsCommand}" Header="Save" />
+        </Menu>
         <ComboBox
             DockPanel.Dock="Top"
             ItemsSource="{Binding Path=SubcomponentNames}"

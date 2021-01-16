@@ -41,7 +41,7 @@ namespace ImasArchiveApp
 
         private RelayCommand _selectCommand;
 
-        public virtual ICommand SelectCommand
+        public ICommand SelectCommand
         {
             get
             {
@@ -57,7 +57,7 @@ namespace ImasArchiveApp
             }
         }
 
-        protected void LoadImage()
+        protected virtual void LoadImage()
         {
             ms.SetLength(0);
             using (Bitmap bitmap = UIElement.GetBitmap())

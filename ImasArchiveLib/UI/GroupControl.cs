@@ -10,7 +10,6 @@ namespace Imas.UI
 {
     public class GroupControl : Control
     {
-        public int childCount;
         public List<Control> childControls;
 
         protected override void Deserialise(Stream stream)
@@ -18,11 +17,21 @@ namespace Imas.UI
             type = 4;
             base.Deserialise(stream);
 
-            childCount = Binary.ReadInt32(stream, true);
+            int childCount = Binary.ReadInt32(stream, true);
             childControls = new List<Control>(childCount);
             for (int i = 0; i < childCount; i++)
             {
                 childControls.Add(Control.Create(parent, stream));
+            }
+        }
+        public override void Serialise(Stream stream)
+        {
+            base.Serialise(stream);
+
+            Binary.WriteInt32(stream, true, childControls.Count);
+            foreach (Control child in childControls)
+            {
+                child.Serialise(stream);
             }
         }
 

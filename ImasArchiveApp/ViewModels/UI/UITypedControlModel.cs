@@ -10,7 +10,7 @@ namespace ImasArchiveApp
         public UITypedControlModel(UISubcomponentModel parent, T control) : base(parent, control.ToString())
         {
             _control = control;
-            if (control.specialSprite.spriteCount != 0)
+            if (control.specialSprite.sprites.Count != 0)
             {
                 Children.Add(new UISpriteGroupModel(parent, control.specialSprite));
             }

@@ -24,8 +24,29 @@ namespace ImasArchiveLibTest
             {
                 using (EntryStack entryStack = await arcFile.GetEntryRecursive(parName))
                 {
-                    using UIComponent component = new UIComponent(await entryStack.Entry.GetData());
-                    using UISubcomponent uIComponent = await component.CreateComponent(0);
+                    using UIComponent component = await UIComponent.CreateUIComponent(await entryStack.Entry.GetData());
+                    using UISubcomponent uIComponent = component[0];
+                }
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("hdd.arc", "ui/menu/option/optionComponent.par", "playground/option.pau")]
+        public async Task WritePau(string inArc, string parName, string outputName)
+        {
+            using (ArcFile arcFile = new ArcFile(inArc))
+            {
+                using (EntryStack entryStack = await arcFile.GetEntryRecursive(parName))
+                {
+                    using UIComponent component = await UIComponent.CreateUIComponent(await entryStack.Entry.GetData());
+                    using UISubcomponent uIComponent = component[0];
+
+                    using (FileStream outStream = new FileStream("temp.pau", FileMode.Create, FileAccess.Write))
+                    {
+                        uIComponent.WritePauStream(outStream);
+                    }
+
+                    Assert.IsTrue(Compare.CompareFiles("temp.pau", outputName));
                 }
             }
         }
@@ -43,8 +64,8 @@ namespace ImasArchiveLibTest
             {
                 using (EntryStack entryStack = await arcFile.GetEntryRecursive(parName))
                 {
-                    using UIComponent component = new UIComponent(await entryStack.Entry.GetData());
-                    using UISubcomponent uIComponent = await component.CreateComponent(componentName);
+                    using UIComponent component = await UIComponent.CreateUIComponent(await entryStack.Entry.GetData());
+                    using UISubcomponent uIComponent = component[componentName];
 
                     using Stream fontStream = new FileStream("patch/font_fromFolder.par", FileMode.Open, FileAccess.Read);
                     TextBox.font = new Imas.Font();

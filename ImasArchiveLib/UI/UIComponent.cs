@@ -10,29 +10,74 @@ namespace Imas.UI
 {
     public class UIComponent : IDisposable
     {
-        private ParFile parFile;
-        private List<string> _subNames;
+        private readonly ParFile parFile;
+        private readonly List<string> _subNames;
+        private readonly List<UISubcomponent> _subcomponents;
 
+        public int Count { get; private set; }
         public IReadOnlyList<string> SubcomponentNames => _subNames;
 
-        public UIComponent(Stream parStream)
+        public UISubcomponent this[int i]
+        {
+            get
+            {
+                if (i < 0 || i >= Count)
+                    throw new ArgumentOutOfRangeException();
+                else
+                    return _subcomponents[i];
+            }
+        }
+        public UISubcomponent this[string key]
+        {
+            get
+            {
+                int index = _subNames.IndexOf(key);
+                if (index == -1)
+                    return null;
+                else
+                    return _subcomponents[index];
+            }
+        }
+
+        private UIComponent(Stream parStream)
         {
             parFile = new ParFile(parStream);
-            _subNames = new List<string>();
-            foreach (string entryName in parFile.Entries.Select(entry => entry.FileName).Where(name => name.EndsWith(".pau")))
+            var entryNames = parFile.Entries.Select(entry => entry.FileName).Where(name => name.EndsWith(".pau"));
+            Count = entryNames.Count();
+            _subNames = new List<string>(Count);
+            _subcomponents = new List<UISubcomponent>(Count);
+            foreach (string entryName in entryNames)
             {
                 _subNames.Add(entryName[..^4]);
             }
         }
 
-        public async Task<UISubcomponent> CreateComponent(string name)
+        private async Task CreateAllSubcomponents()
         {
-            return await UISubcomponent.CreateComponent(parFile, name);
+            foreach (string entryName in _subNames)
+            {
+                _subcomponents.Add(await UISubcomponent.CreateComponent(parFile, entryName));
+            }
         }
 
-        public async Task<UISubcomponent> CreateComponent(int index)
+        public static async Task<UIComponent> CreateUIComponent(Stream parStream)
         {
-            return await CreateComponent(SubcomponentNames[index]);
+            UIComponent uiComponent = new UIComponent(parStream);
+            await uiComponent.CreateAllSubcomponents();
+            return uiComponent;
+        }
+
+        public async Task SaveTo(Stream stream)
+        {
+            foreach (UISubcomponent subcomponent in _subcomponents)
+            {
+                var entry = parFile.GetEntry(subcomponent.Name + ".pau");
+                using MemoryStream memStream = new MemoryStream();
+                subcomponent.WritePauStream(memStream);
+                memStream.Seek(0, SeekOrigin.Begin);
+                await entry.SetData(memStream);
+            }
+            await parFile.SaveTo(stream);
         }
 
         #region IDisposable

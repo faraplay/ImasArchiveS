@@ -223,7 +223,7 @@
             <TabItem Header="Spritesheet">
                 <Grid Width="1280" Height="720">
                     <Image Source="/Icons/checkerboard.png" Stretch="UniformToFill" />
-                    <Image Source="{Binding Path=SpriteSheetImageSource}" />
+                    <Image RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=SpriteSheetImageSource}" />
                 </Grid>
             </TabItem>
         </TabControl>

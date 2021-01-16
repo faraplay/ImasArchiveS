@@ -10,22 +10,31 @@ namespace Imas.UI
 {
     public class SpriteGroup : UIElement
     {
-        public int spriteCount;
         public List<Sprite> sprites = new List<Sprite>();
 
         internal static SpriteGroup CreateFromStream(UISubcomponent parent, Stream stream)
         {
-            SpriteGroup spriteGroup = new SpriteGroup();
-            spriteGroup.parent = parent;
+            SpriteGroup spriteGroup = new SpriteGroup
+            {
+                parent = parent
+            };
             spriteGroup.Deserialise(stream);
             return spriteGroup;
         }
         private void Deserialise(Stream stream)
         {
-            spriteCount = Binary.ReadInt32(stream, true);
+            int spriteCount = Binary.ReadInt32(stream, true);
             for (int i = 0; i < spriteCount; i++)
             {
                 sprites.Add(Sprite.CreateFromStream(parent, stream));
+            }
+        }
+        public void Serialise(Stream stream)
+        {
+            Binary.WriteInt32(stream, true, sprites.Count);
+            foreach (Sprite sprite in sprites)
+            {
+                sprite.Serialise(stream);
             }
         }
 

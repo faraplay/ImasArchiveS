@@ -10,51 +10,52 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <DockPanel>
-        <TreeView
-            Name="trvComponent"
-            MinWidth="150"
-            DockPanel.Dock="Left"
-            ItemsSource="{Binding Path=ControlModel}">
-            <TreeView.Resources>
-                <local:ObjectToTypeConverter x:Key="ObjectToType" />
-                <HierarchicalDataTemplate DataType="{x:Type local:UIElementModel}" ItemsSource="{Binding Children}">
-                    <ContentControl>
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseDown">
-                                <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <WrapPanel>
-                            <Image>
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Setter Property="Source" Value="/Icons/Item_16x.png" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UITextBoxModel}">
-                                                <Setter Property="Source" Value="/Icons/TextElement_16x.png" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UIGroupControlModel}">
-                                                <Setter Property="Source" Value="/Icons/FolderClosed_16x.png" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteCollectionModel}">
-                                                <Setter Property="Source" Value="/Icons/ImageGroup_16x.png" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteGroupModel}">
-                                                <Setter Property="Source" Value="/Icons/Image_16x.png" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteModel}">
-                                                <Setter Property="Source" Value="/Icons/ImageChisel_16x.png" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
-                            </Image>
-                            <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
-                        </WrapPanel>
-                    </ContentControl>
-                </HierarchicalDataTemplate>
-            </TreeView.Resources>
-        </TreeView>
+        <DockPanel DockPanel.Dock="Left">
+            <TreeView
+                Name="trvComponent"
+                MinWidth="150"
+                ItemsSource="{Binding Path=ControlModel}">
+                <TreeView.Resources>
+                    <local:ObjectToTypeConverter x:Key="ObjectToType" />
+                    <HierarchicalDataTemplate DataType="{x:Type local:UIElementModel}" ItemsSource="{Binding Children}">
+                        <ContentControl>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseDown">
+                                    <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <WrapPanel>
+                                <Image>
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="Source" Value="/Icons/Item_16x.png" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UITextBoxModel}">
+                                                    <Setter Property="Source" Value="/Icons/TextElement_16x.png" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UIGroupControlModel}">
+                                                    <Setter Property="Source" Value="/Icons/FolderClosed_16x.png" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteCollectionModel}">
+                                                    <Setter Property="Source" Value="/Icons/ImageGroup_16x.png" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteGroupModel}">
+                                                    <Setter Property="Source" Value="/Icons/Image_16x.png" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteModel}">
+                                                    <Setter Property="Source" Value="/Icons/ImageChisel_16x.png" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                                <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                            </WrapPanel>
+                        </ContentControl>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </DockPanel>
         <ContentControl Content="{Binding Path=SelectedModel}">
             <ContentControl.Resources>
                 <DataTemplate DataType="{x:Type local:UIControlModel}">

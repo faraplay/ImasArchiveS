@@ -12,7 +12,7 @@ namespace Imas.UI
     {
 
         public int type;
-        public string name;
+        public byte[] nameBuffer;
         public float xpos, ypos;
         public float width, height;
         public int a1, a2, a3, a4;
@@ -24,14 +24,19 @@ namespace Imas.UI
         public int d1; // 7 usually
         public SpriteGroup specialSprite;
 
-        public override string ToString() => name;
+        public string Name
+        {
+            get => ImasEncoding.Ascii.GetString(nameBuffer);
+            set => ImasEncoding.Ascii.GetBytes(value, nameBuffer);
+        }
+
+        public override string ToString() => Name;
 
         protected virtual void Deserialise(Stream stream)
         {
             Binary binary = new Binary(stream, true);
-            byte[] buffer = new byte[16];
-            stream.Read(buffer);
-            name = ImasEncoding.Ascii.GetString(buffer);
+            nameBuffer = new byte[16];
+            stream.Read(nameBuffer);
             xpos = binary.ReadFloat();
             ypos = binary.ReadFloat();
             width = binary.ReadFloat();
@@ -58,6 +63,39 @@ namespace Imas.UI
             sourceBottom = binary.ReadFloat();
             d1 = binary.ReadInt32();
             specialSprite = SpriteGroup.CreateFromStream(parent, stream);
+        }
+
+        public virtual void Serialise(Stream stream)
+        {
+            Binary binary = new Binary(stream, true);
+            binary.WriteInt32(type);
+            stream.Write(nameBuffer);
+            binary.WriteFloat(xpos);
+            binary.WriteFloat(ypos);
+            binary.WriteFloat(width);
+            binary.WriteFloat(height);
+            binary.WriteInt32(a1);
+            binary.WriteInt32(a2);
+            binary.WriteInt32(a3);
+            binary.WriteInt32(a4);
+            binary.WriteFloat(b1);
+            binary.WriteFloat(b2);
+            binary.WriteFloat(b3);
+            binary.WriteFloat(b4);
+            binary.WriteInt32(c1);
+            binary.WriteInt32(c2);
+            binary.WriteInt32(c3);
+            binary.WriteInt32(c4);
+            binary.WriteByte(alpha);
+            binary.WriteByte(red);
+            binary.WriteByte(green);
+            binary.WriteByte(blue);
+            binary.WriteFloat(scaleX);
+            binary.WriteFloat(scaleY);
+            binary.WriteFloat(sourceRight);
+            binary.WriteFloat(sourceBottom);
+            binary.WriteInt32(d1);
+            specialSprite.Serialise(stream);
         }
 
         public static Control Create(UISubcomponent parent, Stream stream)

@@ -64,8 +64,10 @@ namespace Imas.UI
 
         internal static Sprite CreateFromStream(UISubcomponent parent, Stream stream)
         {
-            Sprite sprite = new Sprite();
-            sprite.parent = parent;
+            Sprite sprite = new Sprite
+            {
+                parent = parent
+            };
             sprite.Deserialise(stream);
             return sprite;
         }
@@ -96,6 +98,33 @@ namespace Imas.UI
             srcFracBottom = binary.ReadFloat();
         }
 
+        public void Serialise(Stream stream)
+        {
+            Binary binary = new Binary(stream, true);
+            for (int i = 0; i < 9; i++)
+                binary.WriteInt32(start[i]);
+
+            binary.WriteFloat(xpos);
+            binary.WriteFloat(ypos);
+            binary.WriteFloat(width);
+            binary.WriteFloat(height);
+            binary.WriteInt32(a1);
+            binary.WriteInt32(a2);
+            binary.WriteFloat(b1);
+            binary.WriteFloat(b2);
+            binary.WriteFloat(b3);
+            binary.WriteFloat(b4);
+            binary.WriteInt32(srcImageID);
+            binary.WriteByte(alpha);
+            binary.WriteByte(red);
+            binary.WriteByte(green);
+            binary.WriteByte(blue);
+            binary.WriteFloat(srcFracLeft);
+            binary.WriteFloat(srcFracTop);
+            binary.WriteFloat(srcFracRight);
+            binary.WriteFloat(srcFracBottom);
+        }
+
         public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             transform.Translate(xpos, ypos);
@@ -103,7 +132,7 @@ namespace Imas.UI
 
             using ImageAttributes imageAttributes = new ImageAttributes();
             ColorMatrix newColor = ScaleMatrix(color, alpha, red, green, blue);
-            imageAttributes.SetColorMatrix(newColor, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+            imageAttributes.SetColorMatrix(newColor, ColorMatrixFlag.Default, ColorAdjustType.Default);
             if (srcImageID == -1)
             {
                 Brush brush = new SolidBrush(Color.FromArgb(
@@ -115,13 +144,27 @@ namespace Imas.UI
             }
             else
             {
-                g.DrawImage(
-                    SourceImage,
-                    new Rectangle(new Point(0, 0), new Size((int)width, (int)height)),
-                    SourceX, SourceY,
-                    SourceWidth, SourceHeight,
-                    GraphicsUnit.Pixel,
-                    imageAttributes);
+                if (start[0] != 1)
+                {
+                    g.DrawImage(
+                        SourceImage,
+                        new Rectangle(new Point(0, 0), new Size((int)width, (int)height)),
+                        SourceX, SourceY,
+                        SourceWidth, SourceHeight,
+                        GraphicsUnit.Pixel,
+                        imageAttributes);
+                }
+                else
+                {
+                    imageAttributes.SetWrapMode(WrapMode.Tile);
+                    TextureBrush textureBrush = new TextureBrush(SourceImage,
+                        new RectangleF(SourceX, SourceY, SourceWidth, SourceHeight),
+                        imageAttributes);
+                    g.FillRectangle(
+                        textureBrush,
+                        new Rectangle(new Point(0, 0), new Size((int)width, (int)height))
+                        );
+                }
             }
         }
 
@@ -139,7 +182,7 @@ namespace Imas.UI
                 using (Graphics g = Graphics.FromImage(bitmap))
                 {
                     g.DrawImage(SourceImage, new Point());
-                    g.DrawRectangle(Pens.Red, SourceX, SourceY, SourceWidth, SourceHeight);
+                    g.DrawRectangle(Pens.Red, SourceX, SourceY, SourceWidth - 1, SourceHeight - 1);
                 }
                 return bitmap;
             }

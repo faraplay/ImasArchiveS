@@ -15,6 +15,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.e1 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -24,6 +25,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.e2 = value;
+				LoadImage();
                 OnPropertyChanged();
             }
         }
