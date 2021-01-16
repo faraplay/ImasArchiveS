@@ -157,13 +157,16 @@ namespace Imas.UI
                 else
                 {
                     imageAttributes.SetWrapMode(WrapMode.Tile);
-                    using Bitmap texture = new Bitmap((int)SourceWidth, (int)SourceHeight);
+                    using Bitmap texture = new Bitmap((int)Math.Abs(SourceWidth), (int)Math.Abs(SourceHeight));
                     using (Graphics g2 = Graphics.FromImage(texture))
                     {
-                        g2.DrawImage(SourceImage, 0, 0, new RectangleF(SourceX, SourceY, SourceWidth, SourceHeight), GraphicsUnit.Pixel);
+                        g2.DrawImage(SourceImage,
+                            (SourceWidth < 0) ? Math.Abs(SourceWidth) : 0,
+                            (SourceHeight < 0) ? Math.Abs(SourceHeight) : 0, 
+                            new RectangleF(SourceX, SourceY, SourceWidth, SourceHeight), GraphicsUnit.Pixel);
                     }
                     TextureBrush textureBrush = new TextureBrush(texture,
-                        new RectangleF(0, 0, SourceWidth, SourceHeight),
+                        new RectangleF(0, 0, Math.Abs(SourceWidth), Math.Abs(SourceHeight)),
                         imageAttributes);
                     g.FillRectangle(
                         textureBrush,

@@ -14,15 +14,19 @@ namespace Imas.UI
         public Control control;
         internal ImageSource imageSource;
 
+        public byte version;
+
         public string Name { get; }
 
         private UISubcomponent(string name) { Name = name; }
 
         private void ReadPauStream()
         {
-            uint header = Binary.ReadUInt32(pauStream, true);
-            if (header != 0x50415505 && header != 0x50415504) // "PAU\x05", "PAU\x04"
+            if (pauStream.ReadByte() != 0x50 ||
+                pauStream.ReadByte() != 0x41 ||
+                pauStream.ReadByte() != 0x55)
                 throw new InvalidDataException("Unrecognised PAU header");
+            version = (byte)pauStream.ReadByte();
             control = Control.Create(this, pauStream);
         }
 

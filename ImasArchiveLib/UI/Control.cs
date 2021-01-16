@@ -126,8 +126,10 @@ namespace Imas.UI
             Control control = type switch
             {
                 2 => CreateFromStream<TextBox>(parent, stream),
+                3 => CreateFromStream<Control3>(parent, stream),
                 4 => CreateFromStream<GroupControl>(parent, stream),
                 5 => CreateFromStream<Icon>(parent, stream),
+                6 => CreateFromStream<ScrollControl>(parent, stream),
                 9 => CreateFromStream<Control9>(parent, stream),
                 10 => CreateFromStream<SpriteCollection>(parent, stream),
                 _ => throw new InvalidDataException("Unrecognised control type"),
@@ -148,7 +150,7 @@ namespace Imas.UI
         public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         {
             transform.Translate(xpos, ypos);
-            transform.Scale(scaleX, scaleY);
+            transform.Scale(scaleX == 0 ? 1 : scaleX, scaleY);
             g.Transform = transform;
             specialSprite.Draw(g, transform, ScaleMatrix(color, alpha, red, green, blue));
         }
