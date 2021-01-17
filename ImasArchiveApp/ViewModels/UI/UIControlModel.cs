@@ -17,7 +17,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.type = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -27,7 +27,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.Name = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -37,7 +37,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.xpos = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -47,7 +47,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.ypos = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -57,7 +57,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.width = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -67,7 +67,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.height = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -77,7 +77,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a1 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -87,7 +87,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a2 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -97,7 +97,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a3 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -107,7 +107,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a4 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -117,7 +117,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b1 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -127,7 +127,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b2 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -137,7 +137,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b3 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -147,7 +147,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b4 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -157,7 +157,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c1 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -167,7 +167,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c2 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -177,7 +177,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c3 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -187,7 +187,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c4 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -197,7 +197,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.alpha = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -207,7 +207,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.red = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -217,7 +217,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.green = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -227,7 +227,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.blue = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -237,7 +237,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.scaleX = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -247,7 +247,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.scaleY = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -257,7 +257,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.sourceRight = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -267,7 +267,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.sourceBottom = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -277,7 +277,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.d1 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -288,7 +288,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[0] = value;
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -298,7 +298,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[1] = value;
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -308,7 +308,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[2] = value;
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -318,23 +318,23 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[3] = value;
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
             }
         }
 
         #endregion Properties
 
-        protected UIControlModel(UISubcomponentModel parent, string name) : base(parent, name) { }
+        protected UIControlModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, parent, name) { }
 
-        public static UIControlModel CreateModel(UISubcomponentModel parent, Control control)
+        public static UIControlModel CreateModel(UISubcomponentModel subcomponent, UIElementModel parent, Control control)
         {
             return control switch
             {
-                GroupControl gc => new UIGroupControlModel(parent, gc),
-                SpriteCollection sc => new UISpriteCollectionModel(parent, sc),
-                TextBox tb => new UITextBoxModel(parent, tb),
-                _ => new UITypedControlModel<Control>(parent, control),
+                GroupControl gc => new UIGroupControlModel(subcomponent, parent, gc),
+                SpriteCollection sc => new UISpriteCollectionModel(subcomponent, parent, sc),
+                TextBox tb => new UITextBoxModel(subcomponent, parent, tb),
+                _ => new UITypedControlModel<Control>(subcomponent, parent, control),
             };
         }
     }

@@ -21,7 +21,7 @@ namespace Imas.UI
             childControls = new List<Control>(childCount);
             for (int i = 0; i < childCount; i++)
             {
-                childControls.Add(Control.Create(parent, stream));
+                childControls.Add(Control.Create(subcomponent, this, stream));
             }
         }
         public override void Serialise(Stream stream)
@@ -42,7 +42,7 @@ namespace Imas.UI
             foreach (Control childControl in childControls)
             {
                 using Matrix childTransform = transform.Clone();
-                childControl.Draw(g, childTransform, newColor);
+                childControl.DrawIfVisible(g, childTransform, newColor);
             }
         }
     }

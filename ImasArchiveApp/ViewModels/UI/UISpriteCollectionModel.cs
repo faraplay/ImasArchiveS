@@ -15,7 +15,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.e1 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -25,18 +25,18 @@ namespace ImasArchiveApp
             set
             {
                 _control.e2 = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
 
         #endregion
 
-        public UISpriteCollectionModel(UISubcomponentModel parent, SpriteCollection control) : base(parent, control)
+        public UISpriteCollectionModel(UISubcomponentModel subcomponent, UIElementModel parent, SpriteCollection control) : base(subcomponent, parent, control)
         {
             foreach (SpriteGroup child in control.childSpriteGroups)
             {
-                Children.Add(new UISpriteGroupModel(parent, child));
+                Children.Add(new UISpriteGroupModel(subcomponent, this, child));
             }
         }
     }

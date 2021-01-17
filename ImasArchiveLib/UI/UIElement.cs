@@ -3,20 +3,43 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Text;
 
 namespace Imas.UI
 {
     public abstract class UIElement
     {
-        protected UISubcomponent parent;
+        protected UISubcomponent subcomponent;
+        protected UIElement parent;
+
+        public bool myVisible = true;
+
+        protected static T CreateFromStream<T>(UISubcomponent subcomponent, UIElement parent, Stream stream) where T : UIElement, new()
+        {
+            T newControl = new T
+            {
+                subcomponent = subcomponent,
+                parent = parent
+            };
+            newControl.Deserialise(stream);
+            return newControl;
+        }
+
+        protected abstract void Deserialise(Stream stream);
+        public abstract void Serialise(Stream stream);
 
         public abstract void Draw(Graphics g, Matrix transform, ColorMatrix color);
+        public void DrawIfVisible(Graphics g, Matrix transform, ColorMatrix color)
+        {
+            if (myVisible)
+                Draw(g, transform, color);
+        }
 
         public void Draw(Graphics g)
         {
             using Matrix matrix = new Matrix();
-            Draw(g, matrix, Identity);
+            DrawIfVisible(g, matrix, Identity);
         }
 
         public Bitmap GetBitmap()

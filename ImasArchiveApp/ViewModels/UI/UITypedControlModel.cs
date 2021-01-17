@@ -7,12 +7,12 @@ namespace ImasArchiveApp
         protected readonly T _control;
         protected override Control Control => _control;
 
-        public UITypedControlModel(UISubcomponentModel parent, T control) : base(parent, control.ToString())
+        public UITypedControlModel(UISubcomponentModel subcomponent, UIElementModel parent, T control) : base(subcomponent, parent, control.ToString())
         {
             _control = control;
             if (control.specialSprite.sprites.Count != 0)
             {
-                Children.Add(new UISpriteGroupModel(parent, control.specialSprite));
+                Children.Add(new UISpriteGroupModel(subcomponent, this, control.specialSprite));
             }
         }
     }

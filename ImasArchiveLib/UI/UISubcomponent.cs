@@ -27,7 +27,7 @@ namespace Imas.UI
                 pauStream.ReadByte() != 0x55)
                 throw new InvalidDataException("Unrecognised PAU header");
             version = (byte)pauStream.ReadByte();
-            control = Control.Create(this, pauStream);
+            control = Control.Create(this, null, pauStream);
         }
 
         private async Task LoadImageSource()

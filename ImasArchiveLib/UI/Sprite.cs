@@ -22,7 +22,7 @@ namespace Imas.UI
         public byte alpha, red, green, blue;
         public float srcFracLeft, srcFracTop, srcFracRight, srcFracBottom;
 
-        private Bitmap SourceImage => parent.imageSource[srcImageID];
+        private Bitmap SourceImage => subcomponent.imageSource[srcImageID];
         private int SrcImgWidth => (srcImageID == -1) ? 1 : SourceImage.Width;
         private int SrcImgHeight => (srcImageID == -1) ? 1 : SourceImage.Height;
         public float SourceX
@@ -62,16 +62,7 @@ namespace Imas.UI
             }
         }
 
-        internal static Sprite CreateFromStream(UISubcomponent parent, Stream stream)
-        {
-            Sprite sprite = new Sprite
-            {
-                parent = parent
-            };
-            sprite.Deserialise(stream);
-            return sprite;
-        }
-        private void Deserialise(Stream stream)
+        protected override void Deserialise(Stream stream)
         {
             Binary binary = new Binary(stream, true);
             for (int i = 0; i < 9; i++)
@@ -98,7 +89,7 @@ namespace Imas.UI
             srcFracBottom = binary.ReadFloat();
         }
 
-        public void Serialise(Stream stream)
+        public override void Serialise(Stream stream)
         {
             Binary binary = new Binary(stream, true);
             for (int i = 0; i < 9; i++)

@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
@@ -15,9 +16,59 @@ namespace ImasArchiveApp
 {
     public abstract class UIElementModel : FileModel
     {
-        protected readonly UISubcomponentModel parent;
+        protected readonly UISubcomponentModel subcomponent;
+        protected readonly UIElementModel parent;
         private readonly MemoryStream ms;
         private ImageSource _imageSource;
+
+        private bool? cacheVisible;
+        public virtual bool? Visible
+        {
+            get => cacheVisible;
+            set
+            {
+                if (value != cacheVisible)
+                {
+                    cacheVisible = value;
+                    if (value == null) // being set by a child
+                    {
+                        cacheVisible = null;
+                        if (parent != null) 
+                            parent.Visible = null;
+                    }
+                    else
+                    {
+                        foreach (var child in Children)
+                        {
+                            child.Visible = value;
+                        }
+                        if (parent != null)
+                        {
+                            if (parent.Children.All(model => model.Visible == value))
+                            {
+                                parent.Visible = value;
+                            }
+                            else
+                            {
+                                parent.Visible = null;
+                            }
+                        }
+                    }
+                    OnPropertyChanged(nameof(BindVisible));
+                }
+            }
+        }
+        public bool VisibleIsNull => Visible == null;
+        public bool? BindVisible
+        {
+            get => Visible;
+            set
+            {
+                Visible = value;
+                LoadActiveImage();
+                OnPropertyChanged();
+            }
+        }
 
         public ObservableCollection<UIElementModel> Children { get; set; }
         protected abstract UIElement UIElement { get; }
@@ -32,9 +83,11 @@ namespace ImasArchiveApp
         }
         public abstract string ModelName { get; }
 
-        protected UIElementModel(UISubcomponentModel parent, string name) : base(parent, name)
+        protected UIElementModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, name)
         {
+            this.subcomponent = subcomponent;
             this.parent = parent;
+            cacheVisible = true;
             Children = new ObservableCollection<UIElementModel>();
             ms = new MemoryStream();
         }
@@ -50,14 +103,16 @@ namespace ImasArchiveApp
                     _selectCommand = new RelayCommand(
                         _ => {
                             LoadImage();
-                            parent.SelectedModel = this;
+                            subcomponent.SelectedModel = this;
                         });
                 }
                 return _selectCommand;
             }
         }
 
-        protected virtual void LoadImage()
+        protected void LoadActiveImage() => subcomponent.SelectedModel?.LoadImage();
+
+        public virtual void LoadImage()
         {
             try
             {

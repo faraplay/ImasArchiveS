@@ -20,11 +20,12 @@
                     <HierarchicalDataTemplate DataType="{x:Type local:UIElementModel}" ItemsSource="{Binding Children}">
                         <ContentControl>
                             <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="MouseDown">
+                                <i:EventTrigger EventName="MouseDoubleClick">
                                     <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                             <WrapPanel>
+                                <CheckBox IsChecked="{Binding Path=BindVisible}" />
                                 <Image>
                                     <Image.Style>
                                         <Style TargetType="Image">

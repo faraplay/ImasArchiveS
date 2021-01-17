@@ -22,7 +22,7 @@ namespace Imas.UI
             childSpriteGroups = new List<SpriteGroup>(childCount);
             for (int i = 0; i < childCount; i++)
             {
-                childSpriteGroups.Add(SpriteGroup.CreateFromStream(parent, stream));
+                childSpriteGroups.Add(CreateFromStream<SpriteGroup>(subcomponent, this, stream));
             }
         }
         public override void Serialise(Stream stream)

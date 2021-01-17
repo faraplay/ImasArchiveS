@@ -33,8 +33,10 @@ namespace ImasArchiveApp
             uiComponent = subcomponent;
             ControlModel = new ObservableCollection<UIControlModel>
             {
-                UIControlModel.CreateModel(this, uiComponent.control)
+                UIControlModel.CreateModel(this, null, uiComponent.control)
             };
+            ControlModel[0].LoadImage();
+            SelectedModel = ControlModel[0];
         }
 
     }

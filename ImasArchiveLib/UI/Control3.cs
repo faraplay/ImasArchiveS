@@ -15,7 +15,7 @@ namespace Imas.UI
             type = 3;
             base.Deserialise(stream);
             e1 = Binary.ReadFloat(stream, true);
-            otherSprite = SpriteGroup.CreateFromStream(parent, stream);
+            otherSprite = CreateFromStream<SpriteGroup>(subcomponent, this, stream);
             e2 = Binary.ReadFloat(stream, true);
 
         }

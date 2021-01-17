@@ -35,7 +35,7 @@ namespace Imas.UI
 
         public override string ToString() => Name;
 
-        protected virtual void Deserialise(Stream stream)
+        protected override void Deserialise(Stream stream)
         {
             Binary binary = new Binary(stream, true);
             nameBuffer = new byte[16];
@@ -65,7 +65,7 @@ namespace Imas.UI
             sourceRight = binary.ReadFloat();
             sourceBottom = binary.ReadFloat();
             d1 = binary.ReadInt32();
-            specialSprite = SpriteGroup.CreateFromStream(parent, stream);
+            specialSprite = CreateFromStream<SpriteGroup>(subcomponent, this, stream);
 
             extData = new int[4];
             if (d1 >> 16 != 0)
@@ -80,7 +80,7 @@ namespace Imas.UI
             }
         }
 
-        public virtual void Serialise(Stream stream)
+        public override void Serialise(Stream stream)
         {
             Binary binary = new Binary(stream, true);
             binary.WriteInt32(type);
@@ -120,31 +120,21 @@ namespace Imas.UI
             }
         }
 
-        public static Control Create(UISubcomponent parent, Stream stream)
+        public static Control Create(UISubcomponent subcomponent, UIElement parent, Stream stream)
         {
             int type = Binary.ReadInt32(stream, true);
             Control control = type switch
             {
-                2 => CreateFromStream<TextBox>(parent, stream),
-                3 => CreateFromStream<Control3>(parent, stream),
-                4 => CreateFromStream<GroupControl>(parent, stream),
-                5 => CreateFromStream<Icon>(parent, stream),
-                6 => CreateFromStream<ScrollControl>(parent, stream),
-                9 => CreateFromStream<Control9>(parent, stream),
-                10 => CreateFromStream<SpriteCollection>(parent, stream),
+                2 => CreateFromStream<TextBox>(subcomponent, parent, stream),
+                3 => CreateFromStream<Control3>(subcomponent, parent, stream),
+                4 => CreateFromStream<GroupControl>(subcomponent, parent, stream),
+                5 => CreateFromStream<Icon>(subcomponent, parent, stream),
+                6 => CreateFromStream<ScrollControl>(subcomponent, parent, stream),
+                9 => CreateFromStream<Control9>(subcomponent, parent, stream),
+                10 => CreateFromStream<SpriteCollection>(subcomponent, parent, stream),
                 _ => throw new InvalidDataException("Unrecognised control type"),
             };
             return control;
-        }
-
-        private static T CreateFromStream<T>(UISubcomponent parent, Stream stream) where T : Control, new()
-        {
-            T newControl = new T
-            {
-                parent = parent
-            };
-            newControl.Deserialise(stream);
-            return newControl;
         }
 
         public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
@@ -152,7 +142,7 @@ namespace Imas.UI
             transform.Translate(xpos, ypos);
             transform.Scale(scaleX == 0 ? 1 : scaleX, scaleY);
             g.Transform = transform;
-            specialSprite.Draw(g, transform, ScaleMatrix(color, alpha, red, green, blue));
+            specialSprite.DrawIfVisible(g, transform, ScaleMatrix(color, alpha, red, green, blue));
         }
     }
 }

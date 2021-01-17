@@ -16,7 +16,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textAlpha = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -26,7 +26,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textRed = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -36,7 +36,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textGreen = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -46,7 +46,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textBlue = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -56,7 +56,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textAttributes = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(XAlignment));
                 OnPropertyChanged(nameof(YAlignment));
@@ -70,7 +70,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.XAlignment = (HorizontalAlignment)value;
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -81,7 +81,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.YAlignment = (VerticalAlignment)(value * 4);
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -92,7 +92,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.Multiline = value;
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -103,7 +103,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.WordWrap = value;
-                LoadImage();
+                LoadActiveImage();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -114,7 +114,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.FontName = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -124,7 +124,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.charLimit = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
             }
         }
@@ -134,13 +134,24 @@ namespace ImasArchiveApp
             set
             {
                 _control.Text = value;
-				LoadImage();
+				LoadActiveImage();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CharLimit));
             }
         }
 
         #endregion Properties
-        public UITextBoxModel(UISubcomponentModel parent, TextBox control) : base(parent, control) { }
+
+        public override bool? Visible
+        {
+            get => base.Visible;
+            set
+            {
+                if (value.HasValue)
+                    UIElement.myVisible = value.Value;
+                base.Visible = value;
+            }
+        }
+        public UITextBoxModel(UISubcomponentModel subcomponent, UIElementModel parent, TextBox control) : base(subcomponent, parent, control) { }
     }
 }

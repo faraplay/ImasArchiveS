@@ -12,24 +12,15 @@ namespace Imas.UI
     {
         public List<Sprite> sprites = new List<Sprite>();
 
-        internal static SpriteGroup CreateFromStream(UISubcomponent parent, Stream stream)
-        {
-            SpriteGroup spriteGroup = new SpriteGroup
-            {
-                parent = parent
-            };
-            spriteGroup.Deserialise(stream);
-            return spriteGroup;
-        }
-        private void Deserialise(Stream stream)
+        protected override void Deserialise(Stream stream)
         {
             int spriteCount = Binary.ReadInt32(stream, true);
             for (int i = 0; i < spriteCount; i++)
             {
-                sprites.Add(Sprite.CreateFromStream(parent, stream));
+                sprites.Add(CreateFromStream<Sprite>(subcomponent, this, stream));
             }
         }
-        public void Serialise(Stream stream)
+        public override void Serialise(Stream stream)
         {
             Binary.WriteInt32(stream, true, sprites.Count);
             foreach (Sprite sprite in sprites)
@@ -43,7 +34,7 @@ namespace Imas.UI
             foreach (Sprite sprite in sprites)
             {
                 using Matrix childTransform = transform.Clone();
-                sprite.Draw(g, childTransform, color);
+                sprite.DrawIfVisible(g, childTransform, color);
             }
         }
     }
