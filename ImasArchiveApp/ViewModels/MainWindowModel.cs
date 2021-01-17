@@ -98,7 +98,7 @@ namespace ImasArchiveApp
 
         #region Commands
 
-        private RelayCommand _openArcCommand;
+        private AsyncCommand _openArcCommand;
 
         public ICommand OpenArcCommand
         {
@@ -106,13 +106,13 @@ namespace ImasArchiveApp
             {
                 if (_openArcCommand == null)
                 {
-                    _openArcCommand = new RelayCommand(_ => OpenWithFilter("Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat"));
+                    _openArcCommand = new AsyncCommand(() => OpenWithFilter("Arc files (*.arc;*.arc.dat)|*.arc;*.arc.dat"));
                 }
                 return _openArcCommand;
             }
         }
 
-        private RelayCommand _openPatchZipCommand;
+        private AsyncCommand _openPatchZipCommand;
 
         public ICommand OpenPatchZipCommand
         {
@@ -120,13 +120,13 @@ namespace ImasArchiveApp
             {
                 if (_openPatchZipCommand == null)
                 {
-                    _openPatchZipCommand = new RelayCommand(_ => OpenWithFilter("Zip files (*.zip)|*zip"));
+                    _openPatchZipCommand = new AsyncCommand(() => OpenWithFilter("Zip files (*.zip)|*zip"));
                 }
                 return _openPatchZipCommand;
             }
         }
 
-        private RelayCommand _openParCommand;
+        private AsyncCommand _openParCommand;
 
         public ICommand OpenParCommand
         {
@@ -134,14 +134,14 @@ namespace ImasArchiveApp
             {
                 if (_openParCommand == null)
                 {
-                    _openParCommand = new RelayCommand(_ =>
+                    _openParCommand = new AsyncCommand(() =>
                         OpenWithFilter("Par files (*.par)|*.par|All files (*.*)|*.*", ParModel.Builder));
                 }
                 return _openParCommand;
             }
         }
 
-        private RelayCommand _openGtfCommand;
+        private AsyncCommand _openGtfCommand;
 
         public ICommand OpenGtfCommand
         {
@@ -149,14 +149,14 @@ namespace ImasArchiveApp
             {
                 if (_openGtfCommand == null)
                 {
-                    _openGtfCommand = new RelayCommand(_ =>
+                    _openGtfCommand = new AsyncCommand(() =>
                         OpenWithFilter("GTF files (*.gtf;*.dds;*.tex)|*.gtf;*.dds;*.tex|All files (*.*)|*.*", GTFModel.Builder));
                 }
                 return _openGtfCommand;
             }
         }
 
-        private RelayCommand _openHexCommand;
+        private AsyncCommand _openHexCommand;
 
         public ICommand OpenHexCommand
         {
@@ -164,10 +164,25 @@ namespace ImasArchiveApp
             {
                 if (_openHexCommand == null)
                 {
-                    _openHexCommand = new RelayCommand(_ =>
+                    _openHexCommand = new AsyncCommand(() =>
                         OpenWithFilter("All files (*.*)|*.*", HexViewModel.Builder));
                 }
                 return _openHexCommand;
+            }
+        }
+
+        private AsyncCommand _openComponentCommand;
+
+        public ICommand OpenComponentCommand
+        {
+            get
+            {
+                if (_openComponentCommand == null)
+                {
+                    _openComponentCommand = new AsyncCommand(() =>
+                        OpenUIComponent("Par files (*.par)|*.par|All files (*.*)|*.*"));
+                }
+                return _openComponentCommand;
             }
         }
 
@@ -203,7 +218,7 @@ namespace ImasArchiveApp
 
         public bool CanNewFromFolder() => FileModel == null;
 
-        private RelayCommand _newPatchCommand;
+        private AsyncCommand _newPatchCommand;
 
         public ICommand NewPatchCommand
         {
@@ -211,7 +226,7 @@ namespace ImasArchiveApp
             {
                 if (_newPatchCommand == null)
                 {
-                    _newPatchCommand = new RelayCommand(_ => CreateNewPatch(), _ => CanNewPatch());
+                    _newPatchCommand = new AsyncCommand(() => CreateNewPatch(), () => CanNewPatch());
                 }
                 return _newPatchCommand;
             }
@@ -283,23 +298,23 @@ namespace ImasArchiveApp
 
         #region Command Methods
 
-        public void OpenWithFilter(string filter, FileModelFactory.FileModelBuilder fileModelBuilder)
+        public async Task OpenWithFilter(string filter, FileModelFactory.FileModelBuilder fileModelBuilder)
         {
             string fileName = _getFileName.OpenGetFileName("Open", filter);
             if (fileName != null)
             {
                 if (FileModel != null)
                     Close();
-                Open(fileName, fileModelBuilder);
+                await Open(fileName, fileModelBuilder);
             }
         }
 
-        private void Open(string inPath, FileModelFactory.FileModelBuilder fileModelBuilder)
+        private async Task Open(string inPath, FileModelFactory.FileModelBuilder fileModelBuilder)
         {
             try
             {
                 ClearStatus();
-                FileModel = FileModelFactory.CreateFileModel(inPath, fileModelBuilder);
+                FileModel = await Task.Run(() => FileModelFactory.CreateFileModel(inPath, fileModelBuilder));
             }
             catch (Exception ex)
             {
@@ -308,23 +323,45 @@ namespace ImasArchiveApp
             }
         }
 
-        public void OpenWithFilter(string filter)
+        public async Task OpenWithFilter(string filter)
         {
             string fileName = _getFileName.OpenGetFileName("Open", filter);
             if (fileName != null)
             {
                 if (FileModel != null)
                     Close();
-                Open(fileName);
+                await Open(fileName);
             }
         }
 
-        public void Open(string inPath)
+        public async Task Open(string inPath)
         {
             try
             {
                 ClearStatus();
-                FileModel = FileModelFactory.CreateFileModel(inPath);
+                FileModel = await Task.Run(() => FileModelFactory.CreateFileModel(inPath));
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                FileModel = null;
+            }
+        }
+
+        public async Task OpenUIComponent(string filter)
+        {
+            try
+            {
+                ClearStatus();
+                string fileName = _getFileName.OpenGetFileName("Open", filter);
+                if (fileName != null)
+                {
+                    if (FileModel != null)
+                        Close();
+                    ReportMessage($"Opening {fileName}...");
+                    FileModel = await UIComponentModel.CreateComponentModel(FileModelFactory.report, new FileStream(fileName, FileMode.Open), fileName, _getFileName);
+                    ReportMessage("Done.");
+                }
             }
             catch (Exception ex)
             {
@@ -352,7 +389,7 @@ namespace ImasArchiveApp
                     {
                         await ArcFile.BuildFromDirectory(inFileName, outFileName, progress);
                         ReportMessage("Done.");
-                        Open(outFileName);
+                        await Open(outFileName);
                     }
                 }
             }
@@ -363,7 +400,7 @@ namespace ImasArchiveApp
             }
         }
 
-        public void CreateNewPatch()
+        public async Task CreateNewPatch()
         {
             try
             {
@@ -371,7 +408,7 @@ namespace ImasArchiveApp
                 string outFileName = _getFileName.SaveGetFileName("Save As", "patch", "Zip file (*.zip)|*.zip");
                 if (outFileName != null)
                 {
-                    Open(outFileName);
+                    await Open(outFileName);
                     ReportMessage("Done.");
                 }
             }
@@ -426,7 +463,7 @@ namespace ImasArchiveApp
                         progress);
                 }
                 ReportMessage("Done.");
-                Open(outFileName);
+                await Open(outFileName);
             }
             catch (Exception ex)
             {
@@ -456,7 +493,7 @@ namespace ImasArchiveApp
                         using Bitmap bitmap = new Bitmap(imagePath);
                         await GTF.WriteGTF(gtfStream, bitmap, type);
                     }
-                    Open(gtfPath);
+                    await Open(gtfPath);
                 }
             }
             catch (Exception ex)

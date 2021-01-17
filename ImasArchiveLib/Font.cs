@@ -334,6 +334,103 @@ namespace Imas
 
         #endregion Bitmaps
 
+        #region Graphics Draw
+
+        private List<(CharData[], int)> GetLines(Span<byte> chars, float maxWidth, bool wordWrap)
+        {
+            List<(CharData[], int)> lines = new List<(CharData[], int)>();
+            List<CharData> line = new List<CharData>();
+            int lineWidth = 0;
+            for (int i = 0; i < chars.Length; i += 2)
+            {
+                ushort cID = (ushort)(chars[i] * 0x100 + chars[i + 1]);
+                if (cID == 0)
+                    break;
+                if (cID == '\n')
+                {
+                    lines.Add((line.ToArray(), lineWidth));
+                    line.Clear();
+                    lineWidth = 0;
+                }
+                CharData charData = Find(cID);
+                if (charData != null)
+                {
+                    if (lineWidth + charData.width > maxWidth && wordWrap)
+                    {
+                        lines.Add((line.ToArray(), lineWidth));
+                        line.Clear();
+                        lineWidth = 0;
+                    }
+                    line.Add(charData);
+                    lineWidth += charData.width;
+                }
+            }
+            lines.Add((line.ToArray(), lineWidth));
+            return lines;
+        }
+
+        private void DrawChar(Graphics g, CharData charData, ImageAttributes imageAttributes, float x, float y)
+        {
+            if (!charsHaveBitmaps)
+            {
+                g.DrawImage(
+                    BigBitmap,
+                    new PointF[] {
+                        new PointF(x + charData.offsetx, y + charData.offsety),
+                        new PointF(x + charData.offsetx + charData.datawidth, y + charData.offsety),
+                        new PointF(x + charData.offsetx, y + charData.offsety + charData.dataheight),
+                    },
+                    new Rectangle(charData.datax, charData.datay, charData.datawidth, charData.dataheight),
+                    GraphicsUnit.Pixel,
+                    imageAttributes
+                    );
+            }
+        }
+        private void DrawLine(Graphics g, CharData[] line, ImageAttributes imageAttributes, float x, float y)
+        {
+            foreach (CharData charData in line)
+            {
+                DrawChar(g, charData, imageAttributes, x, y);
+                x += charData.width;
+            }
+        }
+
+        public void DrawByteArray(Graphics g, Span<byte> chars, ImageAttributes imageAttributes, 
+            float boxWidth, float boxHeight, TextBoxAttributes textBoxAttributes)
+        {
+            var lines = GetLines(chars, boxWidth, textBoxAttributes.wordWrap);
+            if (lines.Count == 0 || 
+                textBoxAttributes.xAlign == HorizontalAlignment.None ||
+                textBoxAttributes.yAlign == VerticalAlignment.None)
+                return;
+            if (!textBoxAttributes.multiline)
+            {
+                lines.RemoveRange(1, lines.Count - 1);
+            }
+            int lineHeight = 29;
+            float y = textBoxAttributes.yAlign switch
+            {
+                VerticalAlignment.Top => 0,
+                VerticalAlignment.Center => (boxHeight / 2) - (lines.Count * lineHeight / 2),
+                VerticalAlignment.Bottom => boxHeight - (lines.Count * lineHeight),
+                _ => 0,
+            } + lineHeight;
+            foreach (var (line, lineWidth) in lines)
+            {
+                float x = textBoxAttributes.xAlign switch
+                {
+                    HorizontalAlignment.Left => 0,
+                    HorizontalAlignment.Center => (boxWidth / 2) - (lineWidth / 2),
+                    HorizontalAlignment.Right => boxWidth - lineWidth,
+                    _ => 0,
+                };
+                DrawLine(g, line, imageAttributes, x, y);
+                y += lineHeight;
+            }
+        }
+
+        #endregion Graphics Draw
+
         #region Digraph
 
         // Do not rebuild big bitmap after calling this function!
@@ -632,6 +729,23 @@ namespace Imas
                 CheckSubTree(span.Slice(midpoint + 1), span[midpoint].right);
         }
 
+        private CharData Find(ushort charID)
+        {
+            int index = root;
+            while (true)
+            {
+                if (index == -1)
+                    return null;
+                ushort ikey = chars[index].key;
+                if (charID < ikey)
+                    index = chars[index].left;
+                else if (charID > ikey)
+                    index = chars[index].right;
+                else
+                    return chars[index];
+            }
+        }
+
         #endregion Tree
 
         #region IDisposable
@@ -707,5 +821,29 @@ namespace Imas
         }
 
         #endregion IDisposable
+    }
+
+    public struct TextBoxAttributes
+    {
+        public HorizontalAlignment xAlign;
+        public VerticalAlignment yAlign;
+        public bool multiline;
+        public bool wordWrap;
+    }
+
+    public enum HorizontalAlignment
+    {
+        Left = 0,
+        Center = 1,
+        Right = 2,
+        None = 3,
+    }
+
+    public enum VerticalAlignment
+    {
+        Top = 0,
+        Center = 4,
+        Bottom = 8,
+        None = 12,
     }
 }

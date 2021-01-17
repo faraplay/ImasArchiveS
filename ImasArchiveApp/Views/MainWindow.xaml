@@ -23,6 +23,12 @@
         <DataTemplate DataType="{x:Type local:GTFModel}">
             <local:GTFView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type local:UIComponentModel}">
+            <local:UIComponentView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:UISubcomponentModel}">
+            <local:UISubcomponentView />
+        </DataTemplate>
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -33,6 +39,7 @@
                     <MenuItem Command="{Binding Path=OpenParCommand}" Header="Open Par" />
                     <MenuItem Command="{Binding Path=OpenGtfCommand}" Header="Open GTF" />
                     <MenuItem Command="{Binding Path=OpenHexCommand}" Header="Open in Hex Viewer" />
+                    <MenuItem Command="{Binding Path=OpenComponentCommand}" Header="Open Component Par" />
                 </MenuItem>
                 <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
                 <Separator />
