@@ -12,7 +12,7 @@ namespace Imas.UI
         private Stream pauStream;
         private ParFile ptaFile;
         public Control control;
-        internal ImageSource imageSource;
+        public SpriteSheetSource imageSource;
 
         public byte version;
 
@@ -32,7 +32,7 @@ namespace Imas.UI
 
         private async Task LoadImageSource()
         {
-            imageSource = await ImageSource.CreateImageSource(ptaFile);
+            imageSource = await SpriteSheetSource.CreateImageSource(ptaFile);
         }
 
         public static async Task<UISubcomponent> CreateComponent(ParFile componentPar, string name)
@@ -51,6 +51,11 @@ namespace Imas.UI
         {
             Binary.WriteUInt32(stream, true, 0x50415505);
             control.Serialise(stream);
+        }
+
+        public async Task WritePtaStream(Stream stream)
+        {
+            await ptaFile.SaveTo(stream);
         }
 
         #region IDisposable

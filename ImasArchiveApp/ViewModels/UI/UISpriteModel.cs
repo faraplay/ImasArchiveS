@@ -10,10 +10,12 @@ using System.Windows.Media.Imaging;
 
 namespace ImasArchiveApp
 {
-    class UISpriteModel : UIElementModel
+    public class UISpriteModel : UIElementModel
     {
         private readonly Sprite _sprite;
         protected override UIElement UIElement => _sprite;
+
+        private UISpriteSheetModel ParentSheet => subcomponent.SpriteSheets[_sprite.srcImageID];
         public override string ModelName => $"({_sprite.width}x{_sprite.height})";
 
         #region Properties
@@ -24,7 +26,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[0] = value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -34,7 +36,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[1] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -44,7 +46,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[2] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -54,7 +56,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[3] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -64,7 +66,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[4] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -74,7 +76,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[5] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -84,7 +86,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[6] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -94,7 +96,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[7] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -104,7 +106,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[8] = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -114,7 +116,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.xpos = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -124,7 +126,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.ypos = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -134,7 +136,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.width = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -144,7 +146,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.height = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -154,7 +156,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.a1 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -164,7 +166,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.a2 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -174,7 +176,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b1 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -184,7 +186,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b2 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -194,7 +196,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b3 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -204,7 +206,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b4 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -214,7 +216,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.srcImageID = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -224,7 +226,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.alpha = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -234,7 +236,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.red = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -244,7 +246,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.green = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -254,17 +256,57 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.blue = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
+        #region Quiet
+        // These update without re-rendering the active image
+        internal float SourceXQuiet
+        {
+            get => _sprite.SourceX;
+            set
+            {
+                _sprite.SourceX = value;
+                OnPropertyChanged();
+            }
+        }
+        internal float SourceYQuiet
+        {
+            get => _sprite.SourceY;
+            set
+            {
+                _sprite.SourceY = value;
+                OnPropertyChanged();
+            }
+        }
+        internal float SourceWidthQuiet
+        {
+            get => _sprite.SourceWidth;
+            set
+            {
+                _sprite.SourceWidth = value;
+                OnPropertyChanged();
+            }
+        }
+        internal float SourceHeightQuiet
+        {
+            get => _sprite.SourceHeight;
+            set
+            {
+                _sprite.SourceHeight = value;
+                OnPropertyChanged();
+            }
+        }
+        #endregion Quiet
         public float SourceX
         {
             get => _sprite.SourceX;
             set
             {
                 _sprite.SourceX = value;
-				LoadActiveImage();
+                ParentSheet.UpdateRectangles();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -274,7 +316,8 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.SourceY = value;
-				LoadActiveImage();
+                ParentSheet.UpdateRectangles();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -284,7 +327,8 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.SourceWidth = value;
-				LoadActiveImage();
+                ParentSheet.UpdateRectangles();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -294,7 +338,8 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.SourceHeight = value;
-				LoadActiveImage();
+                ParentSheet.UpdateRectangles();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -328,7 +373,10 @@ namespace ImasArchiveApp
         public UISpriteModel(UISubcomponentModel subcomponent, UIElementModel parent, Sprite sprite) : base(subcomponent, parent, "sprite")
         {
             _sprite = sprite;
+            centerRender = _sprite.xpos < 0 || _sprite.ypos < 0;
             ms = new MemoryStream();
+            if (_sprite.srcImageID >= 0)
+                ParentSheet.Sprites.Add(this);
         }
 
         public override void LoadImage()

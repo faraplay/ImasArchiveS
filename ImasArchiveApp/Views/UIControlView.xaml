@@ -9,21 +9,6 @@
     d:DesignWidth="1500"
     mc:Ignorable="d">
     <DockPanel>
-        <ScrollViewer DockPanel.Dock="Right">
-            <ContentControl Content="{Binding}">
-                <ContentControl.Resources>
-                    <DataTemplate DataType="{x:Type local:UITextBoxModel}">
-                        <local:UITextBoxPropertyView />
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type local:UISpriteCollectionModel}">
-                        <local:UISpriteCollectionPropertyView />
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type local:UIControlModel}">
-                        <local:UIControlPropertyView />
-                    </DataTemplate>
-                </ContentControl.Resources>
-            </ContentControl>
-        </ScrollViewer>
         <local:UIElementImageView />
     </DockPanel>
 </UserControl>

@@ -17,7 +17,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.type = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -27,7 +27,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.Name = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -37,7 +37,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.xpos = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -47,7 +47,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.ypos = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -57,7 +57,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.width = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -67,7 +67,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.height = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -77,7 +77,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a1 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -87,7 +87,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a2 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -97,7 +97,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a3 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -107,7 +107,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.a4 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -117,7 +117,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b1 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -127,7 +127,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b2 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -137,7 +137,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b3 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -147,7 +147,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.b4 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -157,7 +157,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c1 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -167,7 +167,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c2 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -177,7 +177,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c3 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -187,7 +187,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.c4 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -197,7 +197,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.alpha = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -207,7 +207,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.red = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -217,7 +217,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.green = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -227,7 +227,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.blue = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -237,7 +237,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.scaleX = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -247,7 +247,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.scaleY = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -257,7 +257,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.sourceRight = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -267,7 +267,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.sourceBottom = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -277,7 +277,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.d1 = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -288,7 +288,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[0] = value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -298,7 +298,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[1] = value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -308,7 +308,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[2] = value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -318,7 +318,7 @@ namespace ImasArchiveApp
             set
             {
                 Control.extData[3] = value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }

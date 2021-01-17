@@ -8,8 +8,32 @@
     d:DesignHeight="720"
     d:DesignWidth="1280"
     mc:Ignorable="d">
-    <Grid Width="1280" Height="720">
-        <Image Source="/Icons/checkerboard.png" Stretch="UniformToFill" />
-        <Image Source="{Binding Path=ImageSource}" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ContentControl Grid.Row="0" Content="{Binding}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type local:UISpriteModel}">
+                    <WrapPanel>
+                        <CheckBox Margin="4" IsChecked="{Binding Path=CenterRender}" />
+                        <Label>Center sprite</Label>
+                    </WrapPanel>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type local:UIElementModel}">
+                    <WrapPanel>
+                        <CheckBox Margin="4" IsChecked="{Binding Path=CenterRender}" />
+                        <Label>Center sprite</Label>
+                    </WrapPanel>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type local:UIModel}" />
+            </ContentControl.Resources>
+        </ContentControl>
+        <Image
+            Grid.Row="1"
+            Source="/Icons/checkerboard.png"
+            Stretch="UniformToFill" />
+        <Image Grid.Row="1" Source="{Binding Path=ImageSource}" />
     </Grid>
 </UserControl>

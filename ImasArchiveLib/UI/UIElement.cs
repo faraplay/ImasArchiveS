@@ -42,11 +42,11 @@ namespace Imas.UI
             DrawIfVisible(g, matrix, Identity);
         }
 
-        public Bitmap GetBitmap()
+        public Bitmap GetBitmap(PointF point)
         {
             Bitmap bitmap = new Bitmap(1280, 720);
             using Graphics g = Graphics.FromImage(bitmap);
-            Draw(g);
+            Draw(g, new Matrix(1, 0, 0, 1, point.X, point.Y), Identity);
             return bitmap;
         }
 

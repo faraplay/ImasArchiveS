@@ -76,11 +76,17 @@ namespace Imas.UI
         {
             foreach (UISubcomponent subcomponent in _subcomponents)
             {
-                var entry = parFile.GetEntry(subcomponent.Name + ".pau");
+                var pauEntry = parFile.GetEntry(subcomponent.Name + ".pau");
                 using MemoryStream memStream = new MemoryStream();
                 subcomponent.WritePauStream(memStream);
                 memStream.Seek(0, SeekOrigin.Begin);
-                await entry.SetData(memStream);
+                await pauEntry.SetData(memStream);
+
+                var ptaEntry = parFile.GetEntry(subcomponent.Name + ".pta");
+                memStream.SetLength(0);
+                await subcomponent.WritePtaStream(memStream);
+                memStream.Seek(0, SeekOrigin.Begin);
+                await ptaEntry.SetData(memStream);
             }
             await parFile.SaveTo(stream);
         }

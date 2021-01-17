@@ -9,7 +9,7 @@ namespace Imas.Archive
 {
     public interface IContainerFile
     {
-        public IReadOnlyCollection<ContainerEntry> Entries { get; }
+        public IReadOnlyList<ContainerEntry> Entries { get; }
 
         public ContainerEntry GetEntry(string fileName);
     }
@@ -21,7 +21,7 @@ namespace Imas.Archive
 
         #region Properties
 
-        public IReadOnlyCollection<ContainerEntry> Entries => new ReadOnlyCollection<T>(_entries);
+        public IReadOnlyList<ContainerEntry> Entries => _entries;
 
         #endregion Properties
 

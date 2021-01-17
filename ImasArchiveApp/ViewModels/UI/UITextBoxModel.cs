@@ -16,7 +16,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textAlpha = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -26,7 +26,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textRed = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -36,7 +36,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textGreen = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -46,7 +46,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textBlue = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -56,7 +56,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.textAttributes = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(XAlignment));
                 OnPropertyChanged(nameof(YAlignment));
@@ -70,7 +70,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.XAlignment = (HorizontalAlignment)value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -81,7 +81,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.YAlignment = (VerticalAlignment)(value * 4);
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -92,7 +92,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.Multiline = value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -103,7 +103,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.WordWrap = value;
-                LoadActiveImage();
+                LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(TextAttributes));
             }
@@ -114,7 +114,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.FontName = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -124,7 +124,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.charLimit = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -134,7 +134,7 @@ namespace ImasArchiveApp
             set
             {
                 _control.Text = value;
-				LoadActiveImage();
+				LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CharLimit));
             }
