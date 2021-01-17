@@ -325,7 +325,7 @@ namespace ImasArchiveApp
 
         #endregion Properties
 
-        protected UIControlModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, parent, name) { }
+        protected UIControlModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, parent, name, true) { }
 
         public static UIControlModel CreateModel(UISubcomponentModel subcomponent, UIElementModel parent, Control control)
         {

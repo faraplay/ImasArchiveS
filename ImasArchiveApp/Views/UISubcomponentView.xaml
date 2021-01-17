@@ -34,7 +34,30 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                     <WrapPanel>
-                                        <CheckBox IsChecked="{Binding Path=BindVisible}" />
+                                        <ContentControl Content="{Binding}">
+                                            <ContentControl.Style>
+                                                <Style TargetType="ContentControl">
+                                                    <Setter Property="ContentTemplate">
+                                                        <Setter.Value>
+                                                            <DataTemplate>
+                                                                <CheckBox IsChecked="{Binding Path=BindVisible}" />
+                                                            </DataTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=IsInCollection}" Value="True">
+                                                            <Setter Property="ContentTemplate">
+                                                                <Setter.Value>
+                                                                    <DataTemplate>
+                                                                        <RadioButton GroupName="{Binding Path=ParentUniqueID}" IsChecked="{Binding Path=BindVisible}" />
+                                                                    </DataTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ContentControl.Style>
+                                        </ContentControl>
                                         <Image>
                                             <Image.Style>
                                                 <Style TargetType="Image">

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
@@ -22,7 +25,9 @@ namespace Imas.UI
             childSpriteGroups = new List<SpriteGroup>(childCount);
             for (int i = 0; i < childCount; i++)
             {
-                childSpriteGroups.Add(CreateFromStream<SpriteGroup>(subcomponent, this, stream));
+                SpriteGroup spriteGroup = CreateFromStream<SpriteGroup>(subcomponent, this, stream);
+                spriteGroup.myVisible = false;
+                childSpriteGroups.Add(spriteGroup);
             }
         }
         public override void Serialise(Stream stream)
@@ -35,6 +40,16 @@ namespace Imas.UI
             foreach (SpriteGroup spriteGroup in childSpriteGroups)
             {
                 spriteGroup.Serialise(stream);
+            }
+        }
+        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
+        {
+            base.Draw(g, transform, color); // this changes the matrix transform but not the color
+            ColorMatrix newColor = ScaleMatrix(color, alpha, red, green, blue);
+            foreach (SpriteGroup spriteGroup in childSpriteGroups)
+            {
+                using Matrix childTransform = transform.Clone();
+                spriteGroup.DrawIfVisible(g, childTransform, newColor);
             }
         }
     }

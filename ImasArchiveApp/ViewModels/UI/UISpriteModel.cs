@@ -353,7 +353,7 @@ namespace ImasArchiveApp
             {
                 if (value.HasValue)
                     UIElement.myVisible = value.Value;
-                base.Visible = value;
+                cacheVisible = value;
             }
         }
 
@@ -370,7 +370,7 @@ namespace ImasArchiveApp
             }
         }
 
-        public UISpriteModel(UISubcomponentModel subcomponent, UIElementModel parent, Sprite sprite) : base(subcomponent, parent, "sprite")
+        public UISpriteModel(UISubcomponentModel subcomponent, UIElementModel parent, Sprite sprite) : base(subcomponent, parent, "sprite", sprite.myVisible)
         {
             _sprite = sprite;
             centerRender = _sprite.xpos < 0 || _sprite.ypos < 0;
