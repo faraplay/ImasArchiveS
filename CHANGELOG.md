@@ -1,6 +1,8 @@
-## Version 0.5.2
+## Version 0.6.0
 
 ### Added
+New UI component editor that can display UI components
+
 Program now extracts stage info
 
 ### Changed

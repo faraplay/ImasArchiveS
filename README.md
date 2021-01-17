@@ -12,6 +12,8 @@ Click on "File >> Open >> Open Par" to open a par file, and "File >> Open >> Ope
 
 To view a file in the hex viewer, click "File >> Open >> Open in Hex Viewer".
 
+To open a UI component file, click on "File >> Open >> Open Component Par".
+
 Alternatively, you can click on "File >> New Arc" to select a folder from which a new .arc file (and corresponding .bin)
 will be built.
 
@@ -90,6 +92,51 @@ This process may take a very long time.
 To patch the font (stored in disc.arc) for the patched commus, choose "Arc >> Patch Font"
 while disc.arc is opened. Note that the default font included with the game is quite wonky, and
 it's better to use a custom-edited font when patching.
+
+### UI Component Options
+#### Viewing UI Component
+Simply select a UI component file (it will be a .par file) to open it. The program will display a layout with 
+several panes. The sizes of these panes can be adjusted by dragging the splitters between the panes.
+
+#### Subcomponent selection
+At the very top there will be a dropdown box where you can pick the subcomponent to view. If there is only one subcomponent 
+then it will automatically be selected. Otherwise, you will have to click on one yourself to view it.
+
+Once a subcomponent has been selected, there will be several more panes.
+
+#### Control browser
+The Elements tab on the pane on the left shows the elements that make up the subcomponent, shown in a tree format. Click on the 
+little triangle to the left of an element to expand it and see its child elements.
+
+You can click on an element to view its data in the rightmost pane.
+Double-clicking on a control will display it in the centre pane.
+
+The checkbox next to the element's name toggles the visibility of a element. You can hide elements 
+from being displayed in the center pane by toggling the checkbox.
+
+There are various different types of elements that behave differently. One type of element (has a stack of images as an icon)
+can have several different appearances, which you can select from by expanding and clicking on one of its children's radio buttons.
+
+#### Spritesheet browser 
+The Spritesheets tab on the left pane shows the spritesheets used in the control. Click on a spritesheet to view it
+in the right pane, or double-click it to display it in the centre pane.
+You can also right-click on a spritesheet to replace it with another .png image.
+
+#### Control view 
+This displays the control on a checkered background.
+Note that the rendering may not be 100% accurate to the ingame appearance.
+
+Text elements with no text specified will be rendered with a string of lowercase 'a's.
+
+The "Center sprite" checkbox will render the sprite in the center of the pane, instead of near the top left corner.
+
+#### Details view
+This displays the details of the selected control. There are multiple textboxes where you can edit the 
+various parameters of the control, which will affect the appearance of the control.
+To edit a value, click on the box, type in the new value, and then click on another box in the pane.
+
+
+To save your changes to the UI component file, click on the Save button just under the main menu pane.
 
 ### Other file options
 
