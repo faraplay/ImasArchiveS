@@ -34,6 +34,12 @@
             Grid.Row="1"
             Source="/Icons/checkerboard.png"
             Stretch="UniformToFill" />
-        <Image Grid.Row="1" Source="{Binding Path=ImageSource}" />
+        <Image Grid.Row="1" Source="{Binding Path=ImageSource}">
+            <Image.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding Path=SaveImageCommand}" Header="Save" />
+                </ContextMenu>
+            </Image.ContextMenu>
+        </Image>
     </Grid>
 </UserControl>

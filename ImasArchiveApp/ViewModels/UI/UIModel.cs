@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -64,6 +65,21 @@ namespace ImasArchiveApp
             }
         }
 
+        private AsyncCommand _saveImageCommand;
+
+        public ICommand SaveImageCommand
+        {
+            get
+            {
+                if (_saveImageCommand == null)
+                {
+                    _saveImageCommand = new AsyncCommand(
+                        () => SaveImage());
+                }
+                return _saveImageCommand;
+            }
+        }
+
         protected abstract Bitmap GetBitmap();
 
         protected void LoadActiveImages()
@@ -93,6 +109,30 @@ namespace ImasArchiveApp
             {
                 ReportException(ex);
             }
+        }
+
+        private async Task SaveImage()
+        {
+            try
+            {
+                ClearStatus();
+                string imgName = subcomponent.GetFileName.SaveGetFileName("Save Image", "", "Portable Network Graphic (*.png)|*.png");
+                if (imgName != null)
+                {
+                    ReportMessage("Saving image");
+                    ms.Seek(0, SeekOrigin.Begin);
+                    using (FileStream outStream = new FileStream(imgName, FileMode.Create, FileAccess.Write))
+                    {
+                        await ms.CopyToAsync(outStream);
+                    }
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+            }
+
         }
 
         #region IDisposable

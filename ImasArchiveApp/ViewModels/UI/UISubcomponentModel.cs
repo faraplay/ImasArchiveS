@@ -15,7 +15,8 @@ namespace ImasArchiveApp
     public class UISubcomponentModel : FileModel
     {
         private readonly UISubcomponent uiComponent;
-        private readonly IGetFileName _getfileName;
+
+        public IGetFileName GetFileName { get; }
         public ObservableCollection<UIControlModel> ControlModel { get; }
         public ObservableCollection<UISpriteSheetModel> SpriteSheets { get; }
         private UIModel _displayedModel;
@@ -43,7 +44,7 @@ namespace ImasArchiveApp
 
         public UISubcomponentModel(IReport parent, UISubcomponent subcomponent, string filename, IGetFileName getFileName) : base(parent, filename)
         {
-            _getfileName = getFileName;
+            GetFileName = getFileName;
             uiComponent = subcomponent;
             SpriteSheets = new ObservableCollection<UISpriteSheetModel>();
             for (int i = 0; i < uiComponent.imageSource.Count; i++)
@@ -68,7 +69,7 @@ namespace ImasArchiveApp
             try
             {
                 ClearStatus();
-                string imgName = _getfileName.OpenGetFileName("Open Image", "Portable Network Graphic (*.png)|*.png");
+                string imgName = GetFileName.OpenGetFileName("Open Image", "Portable Network Graphic (*.png)|*.png");
                 if (imgName != null)
                 {
                     ReportMessage("Replacing image");
