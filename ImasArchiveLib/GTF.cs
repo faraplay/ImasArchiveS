@@ -599,6 +599,10 @@ namespace Imas
                 int x, y;
                 (x, y) = order.GetXY();
                 uint b = (uint)bitmapArray[y * stride + x];
+                if ((b & 0xFF000000) == 0)
+                {
+                    b = 0x00FFFFFF;
+                }
                 binary.WriteUInt16((ushort)(
                     ((b >> 16) & 0x8000) ^
                     ((b >> 9) & 0x7C00) ^
@@ -614,7 +618,11 @@ namespace Imas
             {
                 int x, y;
                 (x, y) = order.GetXY();
-                uint b = (uint)bitmapArray[y * stride + x]; // 0xabcdefgh
+                uint b = (uint)bitmapArray[y * stride + x];
+                if ((b & 0xFF000000) == 0)
+                {
+                    b = 0x00FFFFFF;
+                }                                           // 0xabcdefgh
                 b &= 0xF0F0F0F0;                            // 0xa0c0e0g0
                 b >>= 4;                                    // 0x0a0c0e0g
                 b = (b ^ (b >> 4)) & 0x00FF00FF;            // 0x00ac00eg
@@ -630,6 +638,10 @@ namespace Imas
                 int x, y;
                 (x, y) = order.GetXY();
                 uint b = (uint)bitmapArray[y * stride + x];
+                if ((b & 0xFF000000) == 0)
+                {
+                    b = 0x00FFFFFF;
+                }
                 binary.WriteUInt32(b);
             }
         }
@@ -647,7 +659,12 @@ namespace Imas
                     {
                         for (int xx = 0; xx < 4; xx++)
                         {
-                            colors[4 * yy + xx] = Color.FromArgb(bitmapArray[(4 * y + yy) * stride + 4 * x + xx]);
+                            int b = bitmapArray[(4 * y + yy) * stride + 4 * x + xx];
+                            if ((b & 0xFF000000) == 0)
+                            {
+                                b = 0x00FFFFFF;
+                            }
+                            colors[4 * yy + xx] = Color.FromArgb(b);
                         }
                     }
                     ushort b0, b1;
@@ -681,7 +698,12 @@ namespace Imas
                     {
                         for (int xx = 0; xx < 4; xx++)
                         {
-                            colors[4 * yy + xx] = Color.FromArgb(bitmapArray[(4 * y + yy) * stride + 4 * x + xx]);
+                            int b = bitmapArray[(4 * y + yy) * stride + 4 * x + xx];
+                            if ((b & 0xFF000000) == 0)
+                            {
+                                b = 0x00FFFFFF;
+                            }
+                            colors[4 * yy + xx] = Color.FromArgb(b);
                         }
                     }
 
@@ -723,7 +745,12 @@ namespace Imas
                     {
                         for (int xx = 0; xx < 4; xx++)
                         {
-                            colors[4 * yy + xx] = Color.FromArgb(bitmapArray[(4 * y + yy) * stride + 4 * x + xx]);
+                            int b = bitmapArray[(4 * y + yy) * stride + 4 * x + xx];
+                            if ((b & 0xFF000000) == 0)
+                            {
+                                b = 0x00FFFFFF;
+                            }
+                            colors[4 * yy + xx] = Color.FromArgb(b);
                         }
                     }
 
