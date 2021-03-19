@@ -56,6 +56,7 @@ namespace Imas.Spreadsheet
             "jaJpStrings",
             "workInfo",
             "rivalInfo",
+            "dlcWorkInfo",
             "pastbl",
             "songInfo",
             "skillBoardStrings",

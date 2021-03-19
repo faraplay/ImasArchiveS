@@ -97,6 +97,11 @@
                     "", "", "", "", "", "", "", "", "", "",
                     "", "", "",
                     "Skill", "Description", "Name",
+                }),
+            new RecordFormat("work/dlcWorkInfo.bin", "dlcWorkInfo", "bbbbbbbbc020", new string[]
+                {
+                    "", "", "", "", "", "", "", "",
+                    "Name",
                 })
         };
 
