@@ -28,6 +28,7 @@ namespace Imas.Spreadsheet
             "album",
             "albumCommu",
             "costume",
+            "catalog",
             "dlcName",
             "item",
             "lesson_menu",

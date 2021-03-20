@@ -615,6 +615,17 @@ namespace Imas.Archive
                     xlsxWriter.AppendRows("pastbl", newRecords);
                 }
             }
+            foreach (string fileName in Catalog.fileNames)
+            {
+                using EntryStack entryStack = await GetEntryRecursive(fileName);
+                if (entryStack != null)
+                {
+                    progress?.Report(new ProgressData { filename = fileName });
+                    using Stream stream = await entryStack.Entry.GetData();
+                    var newRecords = Catalog.ReadFile(stream, fileName);
+                    xlsxWriter.AppendRows("catalog", newRecords);
+                }
+            }
             using (EntryStack entryStack = await GetEntryRecursive("songinfo/songResource.bin"))
             {
                 if (!xlsxWriter.HasWorksheet("songInfo") && entryStack != null)

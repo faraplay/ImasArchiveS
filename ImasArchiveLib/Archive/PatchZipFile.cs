@@ -156,6 +156,7 @@ namespace Imas.Archive
             AddSkillBoard(xlsx, progress);
             AddJaJp(xlsx, progress);
             AddIdolMail(xlsx, progress);
+            AddCatalogFiles(xlsx, progress);
         }
 
         private void AddIdolMail(XlsxReader xlsx, IProgress<string> progress)
@@ -281,6 +282,26 @@ namespace Imas.Archive
                 using Stream entryStream = entry.Open();
                 record.Serialise(entryStream);
                 _entries.Add(new PatchZipEntry(entry));
+            }
+        }
+
+        private void AddCatalogFiles(XlsxReader xlsx, IProgress<string> progress)
+        {
+            progress?.Report(string.Format("Adding catalogs"));
+            IEnumerable<Record> records = xlsx.GetRows(Catalog.format, Catalog.sheetName);
+            foreach (string filename in Catalog.fileNames)
+            {
+                var fileRecords = records.Where(record => (string)record[0] == filename).ToList();
+                if (fileRecords.Any())
+                {
+                    ZipArchiveEntry entry = zipArchive.CreateEntry(filename);
+                    using Stream entryStream = entry.Open();
+                    foreach (Record record in fileRecords)
+                    {
+                        record.Serialise(entryStream);
+                    }
+                    _entries.Add(new PatchZipEntry(entry));
+                }
             }
         }
 
