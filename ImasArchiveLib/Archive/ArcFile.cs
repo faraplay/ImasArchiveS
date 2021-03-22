@@ -667,7 +667,7 @@ namespace Imas.Archive
             }
         }
 
-        public async Task ExtractLyrics(string outDir, IProgress<ProgressData> progress = null)
+        public async Task ExtractLyrics(string outDir, bool overwrite, IProgress<ProgressData> progress = null)
         {
             Directory.CreateDirectory(outDir);
             IEnumerable<ContainerEntry> commuEntries = Entries.Where(entry => entry.FileName.StartsWith("songinfo/") && entry.FileName.EndsWith(".xmb"));
@@ -688,7 +688,7 @@ namespace Imas.Archive
                 record[1] = newName;
                 records.Add(record);
             }
-            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx", true);
+            using XlsxWriter xlsxWriter = new XlsxWriter(outDir + "/filenames.xlsx", overwrite);
             xlsxWriter.AppendRows("filenames", records);
         }
 

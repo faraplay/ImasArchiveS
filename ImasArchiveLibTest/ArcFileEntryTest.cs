@@ -315,7 +315,7 @@ namespace ImasArchiveLibTest
         public async Task ExtractLyricsTest(string arcName, string outDir)
         {
             using ArcFile arcFile = new ArcFile(arcName);
-            await arcFile.ExtractLyrics(outDir);
+            await arcFile.ExtractLyrics(outDir, true);
         }
     }
 }

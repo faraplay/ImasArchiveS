@@ -304,7 +304,7 @@ namespace ImasArchiveApp
                 string dirName = _getFileName.SaveGetFileName("Select New Folder", ArcFile.RemoveArcExtension(ArcPath).Item1 + "_lyrics", "");
                 if (dirName != null)
                 {
-                    await ArcFile.ExtractLyrics(dirName, ProgressReporter);
+                    await ArcFile.ExtractLyrics(dirName, true, ProgressReporter);
                     ReportMessage("Done.");
                 }
             }

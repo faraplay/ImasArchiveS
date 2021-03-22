@@ -191,7 +191,7 @@ namespace ImasArchiveConsole
                 {
                     Directory.Delete(o.Output, true);
                 }
-                await arcFile.ExtractLyrics(o.Output, progress);
+                await arcFile.ExtractLyrics(o.Output, o.Overwrite, progress);
             }
             if (o.All)
             {
