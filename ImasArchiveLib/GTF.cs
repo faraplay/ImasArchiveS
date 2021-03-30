@@ -531,9 +531,18 @@ namespace Imas
             for (int i = 0; i < 0x100; i++)
             {
                 binary.WriteByte(palette.Entries[i].A);
-                binary.WriteByte(palette.Entries[i].B);
-                binary.WriteByte(palette.Entries[i].G);
-                binary.WriteByte(palette.Entries[i].R);
+                if (palette.Entries[i].A == 0)
+                {
+                    binary.WriteByte(0xFF);
+                    binary.WriteByte(0xFF);
+                    binary.WriteByte(0xFF);
+                }
+                else
+                {
+                    binary.WriteByte(palette.Entries[i].B);
+                    binary.WriteByte(palette.Entries[i].G);
+                    binary.WriteByte(palette.Entries[i].R);
+                }
             }
 
             memStream.Position = 0;

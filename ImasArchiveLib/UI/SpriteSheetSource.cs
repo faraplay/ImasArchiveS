@@ -48,7 +48,7 @@ namespace Imas.UI
             int encodingType = gtfs[index].Type;
             gtfs[index].Dispose();
             using MemoryStream ms = new MemoryStream();
-            await GTF.WriteGTF(ms, bitmap, 8);
+            await GTF.WriteGTF(ms, bitmap, encodingType);
             ms.Seek(0, SeekOrigin.Begin);
             gtfs[index] = GTF.ReadGTF(ms);
             ms.Seek(0, SeekOrigin.Begin);
