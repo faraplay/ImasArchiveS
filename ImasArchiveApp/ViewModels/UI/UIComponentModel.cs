@@ -14,19 +14,19 @@ namespace ImasArchiveApp
     class UIComponentModel : FileModel
     {
         private UIComponent _component;
-        private IFileModel _fileModel;
+        private UISubcomponentModel _subcompModel;
         private readonly IGetFileName _getFileName;
         private string _selectedName;
 
         public ObservableCollection<string> SubcomponentNames { get; }
 
-        public IFileModel FileModel
+        public UISubcomponentModel FileModel
         {
-            get => _fileModel;
+            get => _subcompModel;
             set
             {
-                _fileModel?.Dispose();
-                _fileModel = value;
+                _subcompModel?.Dispose();
+                _subcompModel = value;
                 OnPropertyChanged();
             }
         }
@@ -161,6 +161,43 @@ namespace ImasArchiveApp
             }
         }
 
+        private RelayCommand _savePauCommand;
+
+        public ICommand SavePauCommand
+        {
+            get
+            {
+                if (_savePauCommand == null)
+                {
+                    _savePauCommand = new RelayCommand(
+                        _ => SavePau(), _ => CanSavePau());
+                }
+                return _savePauCommand;
+            }
+        }
+
+        public bool CanSavePau() => _subcompModel != null;
+
+        public void SavePau()
+        {
+            try
+            {
+                string fileName = _getFileName.SaveGetFileName("Save As...", null, _subcompModel.FileName, "Pau files (*.pau)|*.pau");
+                if (fileName != null)
+                {
+                    ClearStatus();
+                    ReportMessage("Saving PAU file...");
+                    _subcompModel.SavePau(fileName);
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                FileModel = null;
+            }
+        }
+
         #region IDisposable
 
         private bool disposed = false;
@@ -171,7 +208,7 @@ namespace ImasArchiveApp
                 return;
             if (disposing)
             {
-                _fileModel?.Dispose();
+                _subcompModel?.Dispose();
                 _component?.Dispose();
             }
             disposed = true;

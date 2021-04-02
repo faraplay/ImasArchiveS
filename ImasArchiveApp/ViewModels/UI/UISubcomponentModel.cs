@@ -84,5 +84,11 @@ namespace ImasArchiveApp
                 ReportException(ex);
             }
         }
+
+        public void SavePau(string fileName)
+        {
+            using FileStream outStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            uiComponent.WritePauStream(outStream);
+        }
     }
 }

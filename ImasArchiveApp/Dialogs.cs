@@ -32,6 +32,16 @@ namespace ImasArchiveApp
 
         public string SaveGetFileName(string title, string defaultDir, string defaultName, string filter)
         {
+            if (defaultDir == null)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Title = title,
+                    Filter = filter
+                };
+                saveFileDialog.FileName = defaultName;
+                return (saveFileDialog.ShowDialog() == true) ? saveFileDialog.FileName : null;
+            }
             return SaveGetFileName(title, defaultDir + '\\' + defaultName, filter);
         }
 
