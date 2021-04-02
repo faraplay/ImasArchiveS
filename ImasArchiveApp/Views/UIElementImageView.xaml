@@ -35,11 +35,27 @@
             Source="/Icons/checkerboard.png"
             Stretch="UniformToFill" />
         <Image Grid.Row="1" Source="{Binding Path=ImageSource}">
+            <Image.Resources>
+                <local:ObjectToTypeConverter x:Key="ObjectToType" />
+            </Image.Resources>
             <Image.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="{Binding Path=SaveImageCommand}" Header="Save" />
                 </ContextMenu>
             </Image.ContextMenu>
+            <Image.Style>
+                <Style TargetType="Image">
+                    <Setter Property="RenderOptions.BitmapScalingMode" Value="Fant" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteSheetModel}">
+                            <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Converter={StaticResource ObjectToType}}" Value="{x:Type local:UISpriteSheetRectangleModel}">
+                            <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
         </Image>
     </Grid>
 </UserControl>
