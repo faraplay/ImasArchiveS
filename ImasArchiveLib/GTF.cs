@@ -499,8 +499,9 @@ namespace Imas
 
         private static async Task WriteGTFIndexed(Stream stream, Bitmap bitmap)
         {
-            nQuant.WuQuantizer wuQuantizer = new nQuant.WuQuantizer();
-            using Bitmap qBitmap = (Bitmap)wuQuantizer.QuantizeImage(bitmap);
+            //nQuant.WuQuantizer wuQuantizer = new nQuant.WuQuantizer();
+            //using Bitmap qBitmap = (Bitmap)wuQuantizer.QuantizeImage(bitmap);
+            using Bitmap qBitmap = MyQuantizer.QuantizeImage(bitmap);
 
             if (qBitmap.PixelFormat != PixelFormat.Format8bppIndexed)
                 throw new NotSupportedException("Wrong pixel format - expected 8bppIndexed");
