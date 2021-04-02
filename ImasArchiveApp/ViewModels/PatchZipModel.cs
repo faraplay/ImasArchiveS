@@ -15,7 +15,7 @@ namespace ImasArchiveApp
 
         #region Properties
 
-        protected override IContainerFile ContainerFile => _patchZipFile;
+        protected override IContainerFile ContainerFile => _patchZipFile.patchZipContainer;
 
         #endregion Properties
 

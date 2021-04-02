@@ -42,7 +42,7 @@ namespace Imas
 
         #region Write Commus
 
-        public async Task GetAndWriteAllCommus(PatchZipFile patchZipFile, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
+        public async Task GetAndWriteAllCommus(PatchFile patchZipFile, IProgress<ProgressData> progress1 = null, IProgress<ProgressData> progress2 = null)
         {
             var commuSheets = xlsx.Sheets.Descendants<Sheet>().Where(sheet => CommuLine.commuSheetNames.Contains(sheet.Name));
             int total1 = commuSheets.Count();
