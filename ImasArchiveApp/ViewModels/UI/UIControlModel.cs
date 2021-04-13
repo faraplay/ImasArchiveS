@@ -337,5 +337,17 @@ namespace ImasArchiveApp
                 _ => new UITypedControlModel<Control>(subcomponent, parent, control),
             };
         }
+
+        protected override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)
+        {
+            drawingContext.PushTransform(new TranslateTransform(Xpos, Ypos));
+            drawingContext.PushTransform(new ScaleTransform(ScaleX == 0 ? 1 : ScaleX, ScaleY));
+            drawingContext.PushOpacity(Alpha / 255.0);
+            multiplier.Scale(Red / 255.0, Green / 255.0, Blue / 255.0);
+            base.RenderElement(drawingContext, multiplier);
+            drawingContext.Pop();
+            drawingContext.Pop();
+            drawingContext.Pop();
+        }
     }
 }

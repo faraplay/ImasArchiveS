@@ -400,23 +400,96 @@ namespace ImasArchiveApp
             SpriteSheetImageSource = image;
         }
 
-        private ImageBrush imageBrush;
-        public void RenderSprite(DrawingContext drawingContext)
+        private SolidColorBrush colorBrush;
+        private System.Windows.Media.ImageBrush imageBrush;
+        private bool imageXIsFlipped, imageYIsFlipped;
+        protected override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)
         {
-            if (imageBrush == null)
+            double red = (_sprite.red / 255.0) * multiplier.r;
+            double green = (_sprite.green / 255.0) * multiplier.g;
+            double blue = (_sprite.blue / 255.0) * multiplier.b;
+            if (colorBrush == null)
             {
-                imageBrush = new ImageBrush(subcomponent.SpriteSheets[_sprite.srcImageID].BitmapSource);
-                imageBrush.Viewbox = new System.Windows.Rect(
-                    new System.Windows.Point(_sprite.srcFracLeft, _sprite.srcFracTop),
-                    new System.Windows.Point(_sprite.srcFracRight, _sprite.srcFracBottom)
-                    );
-                imageBrush.Stretch = Stretch.Fill;
+                InitialiseColorBrush(red, green, blue);
             }
+            if (imageBrush == null && _sprite.srcImageID != -1)
+            {
+                InitialiseImageBrush();
+            }
+            drawingContext.PushOpacity(_sprite.alpha / 255.0);
+            if (_sprite.srcImageID == -1)
+            {
+                DrawRectangle(drawingContext, colorBrush);
+            }
+            else 
+            {
+                double brightness = (red + green + blue) / 3;
+                if (Math.Abs(brightness - 1) < 1 / 255.0)
+                {
+                    DrawRectangle(drawingContext, imageBrush);
+                }
+                else
+                {
+                    drawingContext.PushOpacity(brightness);
+                    DrawRectangle(drawingContext, imageBrush);
+                    drawingContext.Pop();
+
+                    drawingContext.PushOpacity(1.0 - brightness);
+                    drawingContext.PushOpacityMask(imageBrush);
+                    DrawRectangle(drawingContext, colorBrush);
+                    drawingContext.Pop();
+                    drawingContext.Pop();
+                }
+            }
+            drawingContext.Pop();
+        }
+
+        private void DrawRectangle(DrawingContext drawingContext, System.Windows.Media.Brush brush)
+        {
+            drawingContext.PushTransform(new TranslateTransform(_sprite.xpos, _sprite.ypos));
+            drawingContext.PushTransform(new ScaleTransform(
+                imageXIsFlipped ? -1 : 1,
+                imageYIsFlipped ? -1 : 1,
+                -0.5 * SourceWidth,
+                -0.5 * SourceHeight
+                ));
             drawingContext.DrawRectangle(
-                imageBrush, 
-                null, 
-                new System.Windows.Rect(new System.Windows.Size(_sprite.width, _sprite.height))
+                            brush,
+                            null,
+                            new System.Windows.Rect(
+                                new System.Windows.Size(_sprite.width, _sprite.height))
+                            );
+            drawingContext.Pop();
+            drawingContext.Pop();
+        }
+
+        private void InitialiseColorBrush(double red, double green, double blue)
+        {
+            colorBrush = new SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(
+                        (byte)(red * 255),
+                        (byte)(green * 255),
+                        (byte)(blue * 255)
+                        ));
+        }
+
+        private void InitialiseImageBrush()
+        {
+            imageBrush = new ImageBrush(subcomponent.SpriteSheets[_sprite.srcImageID].BitmapSource);
+            imageBrush.Viewbox = new System.Windows.Rect(
+                new System.Windows.Point(_sprite.srcFracLeft, _sprite.srcFracTop),
+                new System.Windows.Point(_sprite.srcFracRight, _sprite.srcFracBottom)
                 );
+            if (_sprite.start[0] == 1)
+            {
+                imageBrush.TileMode = TileMode.Tile;
+                imageBrush.Viewport = new System.Windows.Rect(
+                    new System.Windows.Size(Math.Abs(_sprite.SourceWidth), Math.Abs(_sprite.SourceHeight))
+                    );
+                imageBrush.ViewportUnits = BrushMappingMode.Absolute;
+            }
+            imageXIsFlipped = (SourceWidth < 0);
+            imageYIsFlipped = (SourceHeight < 0);
         }
 
         #region IDisposable

@@ -137,11 +137,8 @@
             VerticalAlignment="Stretch" />
         <ContentControl Grid.Column="2" Content="{Binding Path=DisplayedModel}">
             <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type local:UISpriteModel}">
-                    <local:UIElementRenderer SpriteModel="{Binding}" />
-                </DataTemplate>
                 <DataTemplate DataType="{x:Type local:UIModel}">
-                    <local:UIElementImageView />
+                    <local:UIElementRenderer ElementModel="{Binding}" />
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>

@@ -95,5 +95,15 @@ namespace ImasArchiveApp
         }
 
         protected override Bitmap GetBitmap() => UIElement.GetBitmap(CenterRender ? new PointF(640, 360) : new PointF());
+
+        public void RenderElement(DrawingContext drawingContext) => RenderElement(drawingContext, ColorMultiplier.One());
+
+        protected virtual void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)
+        {
+            foreach (UIElementModel child in Children)
+            {
+                child.RenderElement(drawingContext, multiplier);
+            }
+        }
     }
 }

@@ -9,19 +9,19 @@ namespace ImasArchiveApp
     public class UIElementRenderer : FrameworkElement
     {
 
-        public static readonly DependencyProperty SpriteModelProperty =
-            DependencyProperty.Register("SpriteModel", typeof(UISpriteModel), typeof(UIElementRenderer), 
+        public static readonly DependencyProperty ElementModelProperty =
+            DependencyProperty.Register("ElementModel", typeof(UIElementModel), typeof(UIElementRenderer), 
                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
-        public UISpriteModel SpriteModel
+        public UIElementModel ElementModel
         {
-            get { return (UISpriteModel)GetValue(SpriteModelProperty); }
-            set { SetValue(SpriteModelProperty, value); }
+            get { return (UIElementModel)GetValue(ElementModelProperty); }
+            set { SetValue(ElementModelProperty, value); }
         }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-            SpriteModel?.RenderSprite(drawingContext);
+            ElementModel?.RenderElement(drawingContext);
         }
     }
 }
