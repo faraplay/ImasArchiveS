@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace ImasArchiveApp
 {
@@ -84,6 +85,35 @@ namespace ImasArchiveApp
         {
             await subcomponent.ReplaceImage(index);
             bitmap = subcomponent.GetSpritesheet(index);
+        }
+
+        private BitmapSource _bitmapSource;
+        public BitmapSource BitmapSource
+        {
+            get {
+                if (_bitmapSource == null)
+                {
+                    _bitmapSource = BmpImageFromBmp(bitmap);
+                }
+                return _bitmapSource;
+            }
+        }
+        private BitmapImage BmpImageFromBmp(Bitmap bmp)
+        {
+            using (var memory = new System.IO.MemoryStream())
+            {
+                bmp.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                memory.Position = 0;
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+
+                return bitmapImage;
+            }
         }
     }
 

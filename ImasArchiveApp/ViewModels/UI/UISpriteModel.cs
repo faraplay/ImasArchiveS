@@ -400,6 +400,25 @@ namespace ImasArchiveApp
             SpriteSheetImageSource = image;
         }
 
+        private ImageBrush imageBrush;
+        public void RenderSprite(DrawingContext drawingContext)
+        {
+            if (imageBrush == null)
+            {
+                imageBrush = new ImageBrush(subcomponent.SpriteSheets[_sprite.srcImageID].BitmapSource);
+                imageBrush.Viewbox = new System.Windows.Rect(
+                    new System.Windows.Point(_sprite.srcFracLeft, _sprite.srcFracTop),
+                    new System.Windows.Point(_sprite.srcFracRight, _sprite.srcFracBottom)
+                    );
+                imageBrush.Stretch = Stretch.Fill;
+            }
+            drawingContext.DrawRectangle(
+                imageBrush, 
+                null, 
+                new System.Windows.Rect(new System.Windows.Size(_sprite.width, _sprite.height))
+                );
+        }
+
         #region IDisposable
 
         private bool disposed = false;
