@@ -11,27 +11,28 @@ namespace Imas.UI
 {
     public class Sprite : UIElement
     {
+        [SerialiseField(0, ArraySize = 9)]
         // (9*4 bytes of 0s)
         public int[] start = new int[9];
 
-        [SerialiseField(0)]
-        public int start0;
-        [SerialiseField(1)]
-        public int start1;
-        [SerialiseField(2)]
-        public int start2;
-        [SerialiseField(3)]
-        public int start3;
-        [SerialiseField(4)]
-        public int start4;
-        [SerialiseField(5)]
-        public int start5;
-        [SerialiseField(6)]
-        public int start6;
-        [SerialiseField(7)]
-        public int start7;
-        [SerialiseField(8)]
-        public int start8;
+        //[SerialiseField(0)]
+        //public int start0;
+        //[SerialiseField(1)]
+        //public int start1;
+        //[SerialiseField(2)]
+        //public int start2;
+        //[SerialiseField(3)]
+        //public int start3;
+        //[SerialiseField(4)]
+        //public int start4;
+        //[SerialiseField(5)]
+        //public int start5;
+        //[SerialiseField(6)]
+        //public int start6;
+        //[SerialiseField(7)]
+        //public int start7;
+        //[SerialiseField(8)]
+        //public int start8;
 
         [SerialiseField(9)]
         public float xpos;
@@ -61,18 +62,18 @@ namespace Imas.UI
         public byte alpha;
         [SerialiseField(21)]
         public byte red;
-        [SerialiseField(20)]
+        [SerialiseField(22)]
         public byte green;
-        [SerialiseField(20)]
+        [SerialiseField(23)]
         public byte blue;
 
-        [SerialiseField(21)]
-        public float srcFracLeft;
-        [SerialiseField(22)]
-        public float srcFracTop;
-        [SerialiseField(23)]
-        public float srcFracRight;
         [SerialiseField(24)]
+        public float srcFracLeft;
+        [SerialiseField(25)]
+        public float srcFracTop;
+        [SerialiseField(26)]
+        public float srcFracRight;
+        [SerialiseField(27)]
         public float srcFracBottom;
 
         private Bitmap SourceImage => subcomponent.imageSource[srcImageID];

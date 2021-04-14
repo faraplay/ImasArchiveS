@@ -31,17 +31,80 @@ namespace Imas.UI
 
         public object DeserialiseClass(Binary binary, Type type)
         {
-            var fields = type.GetFields();
+            if (type.GetCustomAttributes(typeof(SerialisationBaseTypeAttribute), false).Length > 0)
+            {
+                return DeserialiseBaseClass(binary, type);
+            }
             object newObject = Activator.CreateInstance(type);
-            ;
+            SetFields(binary, type, newObject);
+            return newObject;
+        }
+
+        private object DeserialiseBaseClass(Binary binary, Type type)
+        {
+            int derivedTypeID = binary.ReadInt32();
+            var rightType = type.Assembly.GetTypes()
+                .Where(dType => dType != type
+                && type.IsAssignableFrom(dType)
+                && IsDerivedWithID(dType, derivedTypeID))
+                .ToArray();
+            if (rightType.Length == 0)
+            {
+                throw new NotSupportedException($"A derived class with type ID {derivedTypeID} could not be found.");
+            }
+            if (rightType.Length > 1)
+            {
+                throw new Exception("Multiple classes have the same type ID.");
+            }
+            return DeserialiseClass(binary, rightType[0]);
+        }
+
+        private bool IsDerivedWithID(Type dType, int derivedTypeID)
+        {
+            object[] attributes = dType.GetCustomAttributes(typeof(SerialisationDerivedTypeAttribute), false);
+            return attributes.Length > 0 && ((SerialisationDerivedTypeAttribute)attributes[0]).DerivedTypeID == derivedTypeID;
+        }
+
+        private void SetFields(Binary binary, Type type, object newObject)
+        {
+            var fields = type.GetFields();
             foreach (var tuple in fields
                 .Select(field => (field, field.GetCustomAttributes(typeof(SerialiseFieldAttribute), true)))
                 .Where(tuple => tuple.Item2.Length == 1)
-                .OrderBy(tuple => ((SerialiseFieldAttribute)tuple.Item2[0]).Order))
+                .Select(tuple => (tuple.field, (SerialiseFieldAttribute)tuple.Item2[0]))
+                .OrderBy(tuple => tuple.Item2.Order))
             {
-                tuple.field.SetValue(newObject, Deserialise(binary, tuple.field.FieldType));
+                if (tuple.Item2.Condition != null)
+                {
+                    var conditionProperty = type.GetProperty(tuple.Item2.Condition);
+                    if (conditionProperty != null
+                        && conditionProperty.PropertyType == typeof(bool)
+                        && !(bool)conditionProperty.GetMethod.Invoke(newObject, null))
+                    {
+                        continue;
+                    }
+                }
+                if (tuple.field.FieldType.IsArray)
+                {
+                    tuple.field.SetValue(newObject, DeserialiseArray(binary, tuple.field.FieldType, tuple.Item2.ArraySize));
+                }
+                else
+                {
+                    tuple.field.SetValue(newObject, Deserialise(binary, tuple.field.FieldType));
+                }
             }
-            return newObject;
+        }
+
+        public Array DeserialiseArray(Binary binary, Type arrayType, int count)
+        {
+            Type elementType = arrayType.GetElementType();
+            Array newArray = Array.CreateInstance(elementType, count);
+            for (int i = 0; i < count; i++)
+            {
+                newArray.SetValue(Deserialise(binary, elementType), i);
+            }
+            return newArray;
+
         }
 
         public object DeserialiseList(Binary binary, Type listType)

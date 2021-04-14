@@ -21,5 +21,9 @@ namespace Imas.UI
         {
             get { return order; }
         }
+
+        // This is a named argument
+        public int ArraySize { get; set; }
+        public string Condition { get; set; }
     }
 }

@@ -8,21 +8,72 @@ using System.Text;
 
 namespace Imas.UI
 {
+    [SerialisationBaseType]
     public abstract class Control : UIElement
     {
 
         public int type;
+
+        [SerialiseField(0, ArraySize = 16)]
         public byte[] nameBuffer;
-        public float xpos, ypos;
-        public float width, height;
-        public int a1, a2, a3, a4;
-        public float b1, b2, b3, b4;
-        public int c1, c2, c3, c4;
-        public byte alpha, red, green, blue;
-        public float scaleX, scaleY;
-        public float sourceRight, sourceBottom;
+
+        [SerialiseField(1)]
+        public float xpos;
+        [SerialiseField(2)]
+        public float ypos;
+        [SerialiseField(3)]
+        public float width;
+        [SerialiseField(4)]
+        public float height;
+
+        [SerialiseField(5)]
+        public int a1;
+        [SerialiseField(6)]
+        public int a2;
+        [SerialiseField(7)]
+        public int a3;
+        [SerialiseField(8)]
+        public int a4;
+        [SerialiseField(9)]
+        public float b1;
+        [SerialiseField(10)]
+        public float b2;
+        [SerialiseField(11)]
+        public float b3;
+        [SerialiseField(12)]
+        public float b4;
+        [SerialiseField(13)]
+        public int c1;
+        [SerialiseField(14)]
+        public int c2;
+        [SerialiseField(15)]
+        public int c3;
+        [SerialiseField(16)]
+        public int c4;
+
+        [SerialiseField(17)]
+        public byte alpha;
+        [SerialiseField(18)]
+        public byte red;
+        [SerialiseField(19)]
+        public byte green;
+        [SerialiseField(20)]
+        public byte blue;
+
+        [SerialiseField(21)]
+        public float scaleX;
+        [SerialiseField(22)]
+        public float scaleY;
+        [SerialiseField(23)]
+        public float sourceRight;
+        [SerialiseField(24)]
+        public float sourceBottom;
+
+        [SerialiseField(25)]
         public int d1;
+        [SerialiseField(26)]
         public SpriteGroup specialSprite;
+        [SerialiseField(27, ArraySize = 4, Condition = nameof(HasExtData))]
         public int[] extData;
 
         public string Name
