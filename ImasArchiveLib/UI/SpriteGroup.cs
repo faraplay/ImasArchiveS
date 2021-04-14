@@ -10,6 +10,7 @@ namespace Imas.UI
 {
     public class SpriteGroup : UIElement
     {
+        [SerialiseField(0)]
         public List<Sprite> sprites = new List<Sprite>();
 
         protected override void Deserialise(Stream stream)

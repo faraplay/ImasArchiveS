@@ -14,13 +14,66 @@ namespace Imas.UI
         // (9*4 bytes of 0s)
         public int[] start = new int[9];
 
-        public float xpos, ypos;
-        public float width, height;
-        public int a1, a2;
-        public float b1, b2, b3, b4;
+        [SerialiseField(0)]
+        public int start0;
+        [SerialiseField(1)]
+        public int start1;
+        [SerialiseField(2)]
+        public int start2;
+        [SerialiseField(3)]
+        public int start3;
+        [SerialiseField(4)]
+        public int start4;
+        [SerialiseField(5)]
+        public int start5;
+        [SerialiseField(6)]
+        public int start6;
+        [SerialiseField(7)]
+        public int start7;
+        [SerialiseField(8)]
+        public int start8;
+
+        [SerialiseField(9)]
+        public float xpos;
+        [SerialiseField(10)]
+        public float ypos;
+        [SerialiseField(11)]
+        public float width;
+        [SerialiseField(12)]
+        public float height;
+
+        [SerialiseField(13)]
+        public int a1;
+        [SerialiseField(14)]
+        public int a2;
+        [SerialiseField(15)]
+        public float b1;
+        [SerialiseField(16)]
+        public float b2;
+        [SerialiseField(17)]
+        public float b3;
+        [SerialiseField(18)]
+        public float b4;
+        [SerialiseField(19)]
         public int srcImageID;
-        public byte alpha, red, green, blue;
-        public float srcFracLeft, srcFracTop, srcFracRight, srcFracBottom;
+
+        [SerialiseField(20)]
+        public byte alpha;
+        [SerialiseField(21)]
+        public byte red;
+        [SerialiseField(20)]
+        public byte green;
+        [SerialiseField(20)]
+        public byte blue;
+
+        [SerialiseField(21)]
+        public float srcFracLeft;
+        [SerialiseField(22)]
+        public float srcFracTop;
+        [SerialiseField(23)]
+        public float srcFracRight;
+        [SerialiseField(24)]
+        public float srcFracBottom;
 
         private Bitmap SourceImage => subcomponent.imageSource[srcImageID];
         private int SrcImgWidth => (srcImageID == -1) ? 1 : SourceImage.Width;
