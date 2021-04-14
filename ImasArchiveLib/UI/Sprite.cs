@@ -11,7 +11,7 @@ namespace Imas.UI
 {
     public class Sprite : UIElement
     {
-        [SerialiseField(0, ArraySize = 9)]
+        [SerialiseField(0, FixedCount = 9)]
         // (9*4 bytes of 0s)
         public int[] start = new int[9];
 

@@ -8,14 +8,29 @@ using System.Text;
 
 namespace Imas.UI
 {
+    [SerialisationDerivedType(2)]
     public class TextBox : Control
     {
         public static Font font;
-        public byte textAlpha, textRed, textGreen, textBlue;
+
+        [SerialiseField(100)]
+        public byte textAlpha;
+        [SerialiseField(101)]
+        public byte textRed;
+        [SerialiseField(102)]
+        public byte textGreen;
+        [SerialiseField(103)]
+        public byte textBlue;
+
+        [SerialiseField(104)]
         public uint textAttributes;
+        [SerialiseField(105, FixedCount = 16)]
         public byte[] fontNameBuffer;
+        [SerialiseField(106)]
         public int charLimit;
+        [SerialiseField(107)]
         public int textLength;
+        [SerialiseField(108, CountProperty = nameof(TextBufferLength))]
         public byte[] textBuffer;
 
         public HorizontalAlignment XAlignment
@@ -76,6 +91,10 @@ namespace Imas.UI
                 textBuffer = new byte[lengthWithPad];
                 Array.Copy(newBytes, textBuffer, 2 * textLength);
             }
+        }
+        public int TextBufferLength
+        {
+            get => (2 * textLength + 15) & ~0xF;
         }
 
         protected override void Deserialise(Stream stream)

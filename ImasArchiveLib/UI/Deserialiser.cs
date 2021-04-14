@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Imas.UI
@@ -11,6 +12,7 @@ namespace Imas.UI
         Dictionary<Type, Func<Binary, object>> deserialiseMethods = new Dictionary<Type, Func<Binary, object>>
         {
             { typeof(byte), binary => binary.ReadByte() },
+            { typeof(uint), binary => binary.ReadUInt32() },
             { typeof(int), binary => binary.ReadInt32() },
             { typeof(float), binary => binary.ReadFloat() },
         };
@@ -70,38 +72,58 @@ namespace Imas.UI
                 .Select(tuple => (tuple.field, (SerialiseFieldAttribute)tuple.Item2[0]))
                 .OrderBy(tuple => tuple.Item2.Order))
             {
-                if (tuple.Item2.ConditionProperty != null)
+                SetField(binary, objType, newObject, tuple.field, tuple.Item2);
+            }
+        }
+
+        private void SetField(Binary binary, Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
+        {
+            if (attribute.ConditionProperty != null)
+            {
+                var conditionProperty = objType.GetProperty(attribute.ConditionProperty);
+                if (conditionProperty == null)
+                    throw new Exception($"Field {attribute.ConditionProperty} was not found.");
+                if (conditionProperty.PropertyType != typeof(bool))
+                    throw new Exception($"Field {attribute.ConditionProperty} is not of type bool.");
+                if (!(bool)conditionProperty.GetValue(newObject))
                 {
-                    var conditionProperty = objType.GetProperty(tuple.Item2.ConditionProperty);
-                    if (conditionProperty == null)
-                        throw new Exception($"Field {tuple.Item2.ConditionProperty} was not found.");
-                    if (conditionProperty.PropertyType != typeof(bool))
-                        throw new Exception($"Field {tuple.Item2.ConditionProperty} is not of type bool.");
-                    if (!(bool)conditionProperty.GetMethod.Invoke(newObject, null))
-                    {
-                        continue;
-                    }
-                }
-                if (tuple.field.FieldType.IsArray)
-                {
-                    tuple.field.SetValue(newObject, DeserialiseArray(binary, tuple.field.FieldType, tuple.Item2.ArraySize));
-                }
-                else if (tuple.field.FieldType.IsGenericType && tuple.field.FieldType.GetGenericTypeDefinition() == typeof(List<>))
-                {
-                    if (tuple.Item2.CountField == null)
-                        throw new Exception($"Parameter CountField of attribute of field {tuple.field} is not set");
-                    var countField = objType.GetField(tuple.Item2.CountField);
-                    if (countField == null)
-                        throw new Exception($"Field {tuple.Item2.CountField} was not found.");
-                    if (countField.FieldType != typeof(int))
-                        throw new Exception($"Field {tuple.Item2.CountField} is not of type int.");
-                    tuple.field.SetValue(newObject, DeserialiseList(binary, tuple.field.FieldType, (int)countField.GetValue(newObject)));
-                }
-                else
-                {
-                    tuple.field.SetValue(newObject, Deserialise(binary, tuple.field.FieldType));
+                    return;
                 }
             }
+            if (field.FieldType.IsArray)
+            {
+                int count = GetCount(objType, newObject, field, attribute);
+                field.SetValue(newObject, DeserialiseArray(binary, field.FieldType, count));
+                return;
+            }
+            if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                int count = GetCount(objType, newObject, field, attribute);
+                field.SetValue(newObject, DeserialiseList(binary, field.FieldType, count));
+                return;
+            }
+            field.SetValue(newObject, Deserialise(binary, field.FieldType));
+        }
+
+        private int GetCount(Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
+        {
+            if (attribute.CountProperty == null)
+                return attribute.FixedCount;
+            var countField = objType.GetField(attribute.CountProperty);
+            if (countField != null)
+            {
+                if (countField.FieldType != typeof(int))
+                    throw new Exception($"Field {attribute.CountProperty} is not of type int.");
+                return (int)countField.GetValue(newObject);
+            }
+            var countProperty = objType.GetProperty(attribute.CountProperty);
+            if (countProperty != null)
+            {
+                if (countProperty.PropertyType != typeof(int))
+                    throw new Exception($"Property {attribute.CountProperty} is not of type int.");
+                return (int)countProperty.GetValue(newObject);
+            }
+            throw new Exception($"Field/property {attribute.CountProperty} was not found, and FixedCount is not set.");
         }
 
         public Array DeserialiseArray(Binary binary, Type arrayType, int count)

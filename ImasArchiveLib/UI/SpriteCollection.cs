@@ -17,7 +17,7 @@ namespace Imas.UI
         public int e1;
         [SerialiseField(102)]
         public int e2;
-        [SerialiseField(103, CountField = nameof(childSpriteGroupCount))]
+        [SerialiseField(103, CountProperty = nameof(childSpriteGroupCount))]
         public List<SpriteGroup> childSpriteGroups;
 
         protected override void Deserialise(Stream stream)

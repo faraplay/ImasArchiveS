@@ -14,7 +14,7 @@ namespace Imas.UI
 
         public int type;
 
-        [SerialiseField(0, ArraySize = 16)]
+        [SerialiseField(0, FixedCount = 16)]
         public byte[] nameBuffer;
 
         [SerialiseField(1)]
@@ -73,7 +73,7 @@ namespace Imas.UI
         public int d1;
         [SerialiseField(26)]
         public SpriteGroup specialSprite;
-        [SerialiseField(27, ArraySize = 4, ConditionProperty = nameof(HasExtData))]
+        [SerialiseField(27, FixedCount = 4, ConditionProperty = nameof(HasExtData))]
         public int[] extData;
 
         public string Name

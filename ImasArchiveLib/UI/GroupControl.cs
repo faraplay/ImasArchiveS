@@ -13,7 +13,7 @@ namespace Imas.UI
     {
         [SerialiseField(100)]
         public int childCount;
-        [SerialiseField(101, CountField = nameof(childCount))]
+        [SerialiseField(101, CountProperty = nameof(childCount))]
         public List<Control> childControls;
 
         protected override void Deserialise(Stream stream)
