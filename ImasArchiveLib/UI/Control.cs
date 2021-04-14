@@ -73,7 +73,7 @@ namespace Imas.UI
         public int d1;
         [SerialiseField(26)]
         public SpriteGroup specialSprite;
-        [SerialiseField(27, ArraySize = 4, Condition = nameof(HasExtData))]
+        [SerialiseField(27, ArraySize = 4, ConditionProperty = nameof(HasExtData))]
         public int[] extData;
 
         public string Name

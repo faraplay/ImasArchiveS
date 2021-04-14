@@ -24,6 +24,7 @@ namespace Imas.UI
 
         // This is a named argument
         public int ArraySize { get; set; }
-        public string Condition { get; set; }
+        public string ConditionProperty { get; set; }
+        public string CountField { get; set; }
     }
 }

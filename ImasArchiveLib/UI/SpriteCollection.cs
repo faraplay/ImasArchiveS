@@ -8,9 +8,16 @@ using System.Text;
 
 namespace Imas.UI
 {
+    [SerialisationDerivedType(10)]
     public class SpriteCollection : Control
     {
-        public int e1, e2;
+        [SerialiseField(100)]
+        public int childSpriteGroupCount;
+        [SerialiseField(101)]
+        public int e1;
+        [SerialiseField(102)]
+        public int e2;
+        [SerialiseField(103, CountField = nameof(childSpriteGroupCount))]
         public List<SpriteGroup> childSpriteGroups;
 
         protected override void Deserialise(Stream stream)

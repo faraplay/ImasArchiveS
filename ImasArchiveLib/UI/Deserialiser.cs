@@ -21,10 +21,6 @@ namespace Imas.UI
             {
                 return method(binary);
             }
-            else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-            {
-                return DeserialiseList(binary, type);
-            }
             else
                 return DeserialiseClass(binary, type);
         }
@@ -65,21 +61,23 @@ namespace Imas.UI
             return attributes.Length > 0 && ((SerialisationDerivedTypeAttribute)attributes[0]).DerivedTypeID == derivedTypeID;
         }
 
-        private void SetFields(Binary binary, Type type, object newObject)
+        private void SetFields(Binary binary, Type objType, object newObject)
         {
-            var fields = type.GetFields();
+            var fields = objType.GetFields();
             foreach (var tuple in fields
                 .Select(field => (field, field.GetCustomAttributes(typeof(SerialiseFieldAttribute), true)))
                 .Where(tuple => tuple.Item2.Length == 1)
                 .Select(tuple => (tuple.field, (SerialiseFieldAttribute)tuple.Item2[0]))
                 .OrderBy(tuple => tuple.Item2.Order))
             {
-                if (tuple.Item2.Condition != null)
+                if (tuple.Item2.ConditionProperty != null)
                 {
-                    var conditionProperty = type.GetProperty(tuple.Item2.Condition);
-                    if (conditionProperty != null
-                        && conditionProperty.PropertyType == typeof(bool)
-                        && !(bool)conditionProperty.GetMethod.Invoke(newObject, null))
+                    var conditionProperty = objType.GetProperty(tuple.Item2.ConditionProperty);
+                    if (conditionProperty == null)
+                        throw new Exception($"Field {tuple.Item2.ConditionProperty} was not found.");
+                    if (conditionProperty.PropertyType != typeof(bool))
+                        throw new Exception($"Field {tuple.Item2.ConditionProperty} is not of type bool.");
+                    if (!(bool)conditionProperty.GetMethod.Invoke(newObject, null))
                     {
                         continue;
                     }
@@ -87,6 +85,17 @@ namespace Imas.UI
                 if (tuple.field.FieldType.IsArray)
                 {
                     tuple.field.SetValue(newObject, DeserialiseArray(binary, tuple.field.FieldType, tuple.Item2.ArraySize));
+                }
+                else if (tuple.field.FieldType.IsGenericType && tuple.field.FieldType.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    if (tuple.Item2.CountField == null)
+                        throw new Exception($"Parameter CountField of attribute of field {tuple.field} is not set");
+                    var countField = objType.GetField(tuple.Item2.CountField);
+                    if (countField == null)
+                        throw new Exception($"Field {tuple.Item2.CountField} was not found.");
+                    if (countField.FieldType != typeof(int))
+                        throw new Exception($"Field {tuple.Item2.CountField} is not of type int.");
+                    tuple.field.SetValue(newObject, DeserialiseList(binary, tuple.field.FieldType, (int)countField.GetValue(newObject)));
                 }
                 else
                 {
@@ -107,11 +116,10 @@ namespace Imas.UI
 
         }
 
-        public object DeserialiseList(Binary binary, Type listType)
+        public object DeserialiseList(Binary binary, Type listType, int count)
         {
             //Type listType = typeof(List<>).MakeGenericType(genericParameter);
             Type genericParameter = listType.GenericTypeArguments[0];
-            int count = binary.ReadInt32();
             object newList = Activator.CreateInstance(listType, count);
             for (int i = 0; i < count; i++)
             {

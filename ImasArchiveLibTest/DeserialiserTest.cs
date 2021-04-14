@@ -67,7 +67,7 @@ namespace ImasArchiveLibTest
         }
 
         [TestMethod]
-        public void DeserialiseControlTest()
+        public void DeserialiseGroupControlTest()
         {
             byte[] spriteData = new byte[]
             {
@@ -108,6 +108,15 @@ namespace ImasArchiveLibTest
             MemoryStream memoryStream = new MemoryStream(spriteData);
             Deserialiser deserialiser = new Deserialiser();
             var obj = deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(Control));
+        }
+
+        [TestMethod]
+        public void DeserialiseControlTest()
+        {
+            FileStream fileStream = new FileStream("playground/lessonCommon.pau", FileMode.Open);
+            fileStream.Seek(4, SeekOrigin.Begin);
+            Deserialiser deserialiser = new Deserialiser();
+            var obj = deserialiser.Deserialise(new Imas.Binary(fileStream, true), typeof(Control));
         }
     }
 }
