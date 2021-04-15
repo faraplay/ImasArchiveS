@@ -71,11 +71,13 @@ namespace ImasArchiveApp
             {
                 mouseDelta %= 120;
                 matrix.ScaleAt(1.1, 1.1, mousePoint.X, mousePoint.Y);
+                InvalidateVisual();
             }
             else if (mouseDelta <= -120)
             {
                 mouseDelta %= 120;
                 matrix.ScaleAt(1/1.1, 1/1.1, mousePoint.X, mousePoint.Y);
+                InvalidateVisual();
             }
         }
 
