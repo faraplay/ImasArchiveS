@@ -10,9 +10,9 @@ namespace Imas.UI
 {
     public class SpriteGroup : UIElement
     {
-        [SerialiseField(0)]
+        [SerialiseField(0, IsCountOf = nameof(sprites))]
         public int spriteCount;
-        [SerialiseField(1, CountProperty = nameof(spriteCount))]
+        [SerialiseField(1, CountField = nameof(spriteCount))]
         public List<Sprite> sprites = new List<Sprite>();
 
         protected override void Deserialise(Stream stream)

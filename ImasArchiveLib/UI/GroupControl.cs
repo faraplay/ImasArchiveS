@@ -11,9 +11,9 @@ namespace Imas.UI
     [SerialisationDerivedType(4)]
     public class GroupControl : Control
     {
-        [SerialiseField(100)]
+        [SerialiseField(100, IsCountOf = nameof(childControls))]
         public int childCount;
-        [SerialiseField(101, CountProperty = nameof(childCount))]
+        [SerialiseField(101, CountField = nameof(childCount))]
         public List<Control> childControls;
 
         protected override void Deserialise(Stream stream)

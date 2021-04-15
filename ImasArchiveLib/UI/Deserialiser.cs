@@ -9,7 +9,7 @@ namespace Imas.UI
 {
     class Deserialiser
     {
-        Dictionary<Type, Func<Binary, object>> deserialiseMethods = new Dictionary<Type, Func<Binary, object>>
+        private static Dictionary<Type, Func<Binary, object>> deserialiseMethods = new Dictionary<Type, Func<Binary, object>>
         {
             { typeof(byte), binary => binary.ReadByte() },
             { typeof(uint), binary => binary.ReadUInt32() },
@@ -17,7 +17,7 @@ namespace Imas.UI
             { typeof(float), binary => binary.ReadFloat() },
         };
 
-        public object Deserialise(Binary binary, Type type)
+        public static object Deserialise(Binary binary, Type type)
         {
             if (deserialiseMethods.TryGetValue(type, out var method))
             {
@@ -27,7 +27,7 @@ namespace Imas.UI
                 return DeserialiseClass(binary, type);
         }
 
-        public object DeserialiseClass(Binary binary, Type type)
+        public static object DeserialiseClass(Binary binary, Type type)
         {
             if (type.GetCustomAttributes(typeof(SerialisationBaseTypeAttribute), false).Length > 0)
             {
@@ -38,7 +38,7 @@ namespace Imas.UI
             return newObject;
         }
 
-        private object DeserialiseBaseClass(Binary binary, Type type)
+        private static object DeserialiseBaseClass(Binary binary, Type type)
         {
             int derivedTypeID = binary.ReadInt32();
             var rightType = type.Assembly.GetTypes()
@@ -57,13 +57,13 @@ namespace Imas.UI
             return DeserialiseClass(binary, rightType[0]);
         }
 
-        private bool IsDerivedWithID(Type dType, int derivedTypeID)
+        private static bool IsDerivedWithID(Type dType, int derivedTypeID)
         {
             object[] attributes = dType.GetCustomAttributes(typeof(SerialisationDerivedTypeAttribute), false);
             return attributes.Length > 0 && ((SerialisationDerivedTypeAttribute)attributes[0]).DerivedTypeID == derivedTypeID;
         }
 
-        private void SetFields(Binary binary, Type objType, object newObject)
+        private static void SetFields(Binary binary, Type objType, object newObject)
         {
             var fields = objType.GetFields();
             foreach (var tuple in fields
@@ -76,7 +76,7 @@ namespace Imas.UI
             }
         }
 
-        private void SetField(Binary binary, Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
+        private static void SetField(Binary binary, Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
         {
             if (attribute.ConditionProperty != null)
             {
@@ -105,28 +105,30 @@ namespace Imas.UI
             field.SetValue(newObject, Deserialise(binary, field.FieldType));
         }
 
-        private int GetCount(Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
+        private static int GetCount(Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
         {
-            if (attribute.CountProperty == null)
-                return attribute.FixedCount;
-            var countField = objType.GetField(attribute.CountProperty);
-            if (countField != null)
+            if (attribute.CountField != null)
             {
+                var countField = objType.GetField(attribute.CountField);
+                if (countField == null)
+                    throw new Exception($"Field {attribute.CountField} was not found.");
                 if (countField.FieldType != typeof(int))
-                    throw new Exception($"Field {attribute.CountProperty} is not of type int.");
+                    throw new Exception($"Field {attribute.CountField} is not of type int.");
                 return (int)countField.GetValue(newObject);
             }
-            var countProperty = objType.GetProperty(attribute.CountProperty);
-            if (countProperty != null)
+            if (attribute.CountProperty != null)
             {
+                var countProperty = objType.GetProperty(attribute.CountProperty);
+                if (countProperty == null)
+                    throw new Exception($"Property {attribute.CountProperty} was not found.");
                 if (countProperty.PropertyType != typeof(int))
                     throw new Exception($"Property {attribute.CountProperty} is not of type int.");
                 return (int)countProperty.GetValue(newObject);
             }
-            throw new Exception($"Field/property {attribute.CountProperty} was not found, and FixedCount is not set.");
+            return attribute.FixedCount;
         }
 
-        public Array DeserialiseArray(Binary binary, Type arrayType, int count)
+        public static Array DeserialiseArray(Binary binary, Type arrayType, int count)
         {
             Type elementType = arrayType.GetElementType();
             Array newArray = Array.CreateInstance(elementType, count);
@@ -138,7 +140,7 @@ namespace Imas.UI
 
         }
 
-        public object DeserialiseList(Binary binary, Type listType, int count)
+        public static object DeserialiseList(Binary binary, Type listType, int count)
         {
             //Type listType = typeof(List<>).MakeGenericType(genericParameter);
             Type genericParameter = listType.GenericTypeArguments[0];

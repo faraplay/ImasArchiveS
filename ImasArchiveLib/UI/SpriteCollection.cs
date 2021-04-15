@@ -11,13 +11,13 @@ namespace Imas.UI
     [SerialisationDerivedType(10)]
     public class SpriteCollection : Control
     {
-        [SerialiseField(100)]
+        [SerialiseField(100, IsCountOf = nameof(childSpriteGroups))]
         public int childSpriteGroupCount;
         [SerialiseField(101)]
         public int e1;
         [SerialiseField(102)]
         public int e2;
-        [SerialiseField(103, CountProperty = nameof(childSpriteGroupCount))]
+        [SerialiseField(103, CountField = nameof(childSpriteGroupCount))]
         public List<SpriteGroup> childSpriteGroups;
 
         protected override void Deserialise(Stream stream)

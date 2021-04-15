@@ -25,8 +25,7 @@ namespace ImasArchiveLibTest
                 0x3E, 0x78, 0x00, 0x00,
             };
             MemoryStream memoryStream = new MemoryStream(spriteData);
-            Deserialiser deserialiser = new Deserialiser();
-            var obj = deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(Sprite));
+            var obj = Deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(Sprite));
         }
 
         [TestMethod]
@@ -62,8 +61,7 @@ namespace ImasArchiveLibTest
                 0x3E, 0x78, 0x00, 0x00,
             };
             MemoryStream memoryStream = new MemoryStream(spriteGroupData);
-            Deserialiser deserialiser = new Deserialiser();
-            var obj = deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(SpriteGroup));
+            var obj = Deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(SpriteGroup));
         }
 
         [TestMethod]
@@ -106,17 +104,15 @@ namespace ImasArchiveLibTest
                 0x00, 0x00, 0x00, 0x00,
             };
             MemoryStream memoryStream = new MemoryStream(spriteData);
-            Deserialiser deserialiser = new Deserialiser();
-            var obj = deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(Control));
+            var obj = Deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(Control));
         }
 
         [TestMethod]
         public void DeserialiseControlTest()
         {
-            FileStream fileStream = new FileStream("playground/lessonCommon.pau", FileMode.Open);
+            FileStream fileStream = new FileStream("playground/topS4U.pau", FileMode.Open);
             fileStream.Seek(4, SeekOrigin.Begin);
-            Deserialiser deserialiser = new Deserialiser();
-            var obj = deserialiser.Deserialise(new Imas.Binary(fileStream, true), typeof(Control));
+            var obj = Deserialiser.Deserialise(new Imas.Binary(fileStream, true), typeof(Control));
         }
     }
 }
