@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace ImasArchiveApp
         public IGetFileName GetFileName { get; }
         public ObservableCollection<UIControlModel> ControlModel { get; }
         public ObservableCollection<UISpriteSheetModel> SpriteSheets { get; }
+        public ObservableCollection<UIElementPropertyModel> UIProperties { get; }
         private UIModel _displayedModel;
         public UIModel DisplayedModel
         {
@@ -37,6 +39,7 @@ namespace ImasArchiveApp
             set
             {
                 _selectedModel = value;
+                RefreshPropertiesList();
                 _selectedModel?.LoadImage();
                 OnPropertyChanged();
             }
@@ -55,6 +58,7 @@ namespace ImasArchiveApp
             {
                 UIControlModel.CreateModel(this, null, uiComponent.control)
             };
+            UIProperties = new ObservableCollection<UIElementPropertyModel>();
             foreach (var spritesheet in SpriteSheets)
             {
                 spritesheet.UpdateRectangles();
@@ -63,6 +67,20 @@ namespace ImasArchiveApp
         }
 
         public Bitmap GetSpritesheet(int index) => uiComponent.imageSource[index];
+
+        private void RefreshPropertiesList()
+        {
+            UIProperties.Clear();
+            if (SelectedModel is UIElementModel uiElementModel)
+            {
+                UIElement element = uiElementModel.MyUIElement;
+                var properties = element.GetType().GetProperties();
+                foreach (var property in properties)
+                {
+                    UIProperties.Add(new UIElementPropertyModel(property, element));
+                }
+            }
+        }
 
         public async Task ReplaceImage(int index)
         {

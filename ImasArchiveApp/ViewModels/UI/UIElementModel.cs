@@ -81,6 +81,7 @@ namespace ImasArchiveApp
 
         public ObservableCollection<UIElementModel> Children { get; set; }
         protected abstract UIElement UIElement { get; }
+        public UIElement MyUIElement => UIElement;
         public abstract string ModelName { get; }
 
         public string GetUniqueString() => parent == null ? "0" : $"{parent.GetUniqueString()},{parent.Children.IndexOf(this)}";
