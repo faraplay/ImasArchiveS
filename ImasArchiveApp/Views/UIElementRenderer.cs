@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -46,9 +47,15 @@ namespace ImasArchiveApp
             CheckerBrush.Viewport = new Rect(new Point(0, 0), new Size(32, 32));
         }
 
+        private bool firstRender = true;
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
+            if (firstRender)
+            {
+                firstRender = false;
+                SetMatrix();
+            }
             Rect appRect = new Rect(new Size(ActualWidth, ActualHeight));
             Rect gameScreenRect = new Rect(0, 0, 1280, 720);
             drawingContext.PushClip(new RectangleGeometry(appRect));
@@ -59,6 +66,18 @@ namespace ImasArchiveApp
             ElementModel?.RenderElement(drawingContext);
             drawingContext.Pop();
             drawingContext.Pop();
+        }
+
+        private void SetMatrix()
+        {
+            double scale = Math.Min(ActualWidth / 1280, ActualHeight / 720);
+            if (scale < 0.01)
+                scale = 0.01;
+            matrix = new Matrix(
+                scale, 0,
+                0, scale,
+                0.5 * (ActualWidth - scale * 1280),
+                0.5 * (ActualHeight - scale * 720));
         }
 
         private int mouseDelta = 0;
