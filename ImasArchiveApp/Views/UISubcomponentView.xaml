@@ -6,6 +6,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:UISubcomponentModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -169,7 +170,14 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Center" />
             <ScrollViewer Grid.Row="2">
-                <ContentControl Content="{Binding Path=SelectedModel}">
+                <ItemsControl ItemsSource="{Binding Path=UIProperties}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:UIPropertyView />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <!--<ContentControl Content="{Binding Path=SelectedModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type local:UITextBoxModel}">
                             <local:UITextBoxPropertyView />
@@ -188,7 +196,7 @@
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type local:UIModel}" />
                     </ContentControl.Resources>
-                </ContentControl>
+                </ContentControl>-->
             </ScrollViewer>
         </Grid>
     </Grid>
