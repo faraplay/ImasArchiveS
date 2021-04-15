@@ -74,8 +74,12 @@ namespace ImasArchiveApp
             if (SelectedModel is UIElementModel uiElementModel)
             {
                 UIElement element = uiElementModel.MyUIElement;
-                var properties = element.GetType().GetProperties();
-                foreach (var property in properties)
+                foreach ((var property, var attr) in element.GetType()
+                    .GetProperties()
+                    .Select(p => (p, p.GetCustomAttributes(typeof(ListedAttribute), false)))
+                    .Where(tuple => tuple.Item2.Length > 0)
+                    .Select(tuple => (tuple.p, (ListedAttribute)tuple.Item2[0]))
+                    .OrderBy(tuple => tuple.Item2.Order))
                 {
                     UIProperties.Add(new UIElementPropertyModel(property, element));
                 }

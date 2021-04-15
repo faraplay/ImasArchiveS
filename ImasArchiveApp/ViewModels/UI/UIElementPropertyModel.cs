@@ -13,7 +13,7 @@ namespace ImasArchiveApp
         private PropertyInfo PropertyInfo { get; }
         public override string ToString()
         {
-            return PropertyName;
+            return $"{ PropertyName }: { PropertyValue }";
         }
         public string PropertyName => PropertyInfo.Name;
         public Imas.UI.UIElement Element { get; }
