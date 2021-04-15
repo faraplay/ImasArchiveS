@@ -173,7 +173,13 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Center" />
             <ScrollViewer Grid.Row="2">
-                <ListView ItemsSource="{Binding Path=UIProperties}" />
+                <ItemsControl ItemsSource="{Binding Path=UIProperties}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:UIPropertyView />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
                 <!--<ContentControl Content="{Binding Path=SelectedModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type local:UITextBoxModel}">
