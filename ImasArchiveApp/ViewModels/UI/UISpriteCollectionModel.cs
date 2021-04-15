@@ -33,49 +33,11 @@ namespace ImasArchiveApp
 
         #endregion
 
-        public override bool? Visible
-        {
-            get => cacheVisible;
-            set
-            {
-                if (value != cacheVisible)
-                {
-                    cacheVisible = value;
-                    if (value != null)
-                    {
-                        if (value == false)
-                        {
-                            foreach (var child in Children)
-                            {
-                                child.Visible = false;
-                            }
-                        }
-                        else if (Children.All(model => model.Visible == false))
-                        {
-                            Children[0].Visible = true;
-                        }
-                        if (parent != null)
-                        {
-                            if (parent.Children.All(model => model.Visible == value))
-                            {
-                                parent.Visible = value;
-                            }
-                            else
-                            {
-                                parent.Visible = null;
-                            }
-                        }
-                    }
-                    OnPropertyChanged(nameof(BindVisible));
-                }
-            }
-        }
-
         public UISpriteCollectionModel(UISubcomponentModel subcomponent, UIElementModel parent, SpriteCollection control) : base(subcomponent, parent, control)
         {
             foreach (SpriteGroup child in control.childSpriteGroups)
             {
-                Children.Add(new UISpriteGroupModel(subcomponent, this, child));
+                Children.Add(new UISpriteGroupModel(subcomponent, this, child) { CurrentVisibility = false });
             }
         }
     }

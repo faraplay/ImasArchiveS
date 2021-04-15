@@ -134,6 +134,7 @@ namespace Imas.UI
 
 
         public bool HasExtData => (d1 & 0x04000000) != 0;
+        public bool DefaultVisibility => (d1 & 0x04) != 0;
 
         public override string ToString() => Name;
 

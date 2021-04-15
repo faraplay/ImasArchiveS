@@ -41,7 +41,7 @@
                                                     <Setter Property="ContentTemplate">
                                                         <Setter.Value>
                                                             <DataTemplate>
-                                                                <CheckBox IsChecked="{Binding Path=BindVisible}" />
+                                                                <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
                                                             </DataTemplate>
                                                         </Setter.Value>
                                                     </Setter>
@@ -50,7 +50,7 @@
                                                             <Setter Property="ContentTemplate">
                                                                 <Setter.Value>
                                                                     <DataTemplate>
-                                                                        <RadioButton GroupName="{Binding Path=ParentUniqueID}" IsChecked="{Binding Path=BindVisible}" />
+                                                                        <RadioButton GroupName="{Binding Path=ParentUniqueID}" IsChecked="{Binding Path=CurrentVisibility}" />
                                                                     </DataTemplate>
                                                                 </Setter.Value>
                                                             </Setter>

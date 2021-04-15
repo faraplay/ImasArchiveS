@@ -142,16 +142,6 @@ namespace ImasArchiveApp
 
         #endregion Properties
 
-        public override bool? Visible
-        {
-            get => base.Visible;
-            set
-            {
-                if (value.HasValue)
-                    UIElement.myVisible = value.Value;
-                base.Visible = value;
-            }
-        }
         public UITextBoxModel(UISubcomponentModel subcomponent, UIElementModel parent, TextBox control) : base(subcomponent, parent, control) { }
     }
 }

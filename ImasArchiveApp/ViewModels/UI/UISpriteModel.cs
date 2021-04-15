@@ -346,17 +346,6 @@ namespace ImasArchiveApp
 
         #endregion Properties
 
-        public override bool? Visible
-        {
-            get => base.Visible;
-            set
-            {
-                if (value.HasValue)
-                    UIElement.myVisible = value.Value;
-                cacheVisible = value;
-            }
-        }
-
         #region ImageSource
         private readonly MemoryStream ms;
         private ImageSource _imageSource;

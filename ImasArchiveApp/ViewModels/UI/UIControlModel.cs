@@ -329,13 +329,15 @@ namespace ImasArchiveApp
 
         public static UIControlModel CreateModel(UISubcomponentModel subcomponent, UIElementModel parent, Control control)
         {
-            return control switch
+            UIControlModel newControlModel = control switch
             {
                 GroupControl gc => new UIGroupControlModel(subcomponent, parent, gc),
                 SpriteCollection sc => new UISpriteCollectionModel(subcomponent, parent, sc),
                 TextBox tb => new UITextBoxModel(subcomponent, parent, tb),
                 _ => new UITypedControlModel<Control>(subcomponent, parent, control),
             };
+            newControlModel.currentVisibility = control.DefaultVisibility;
+            return newControlModel;
         }
 
         protected override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)

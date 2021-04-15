@@ -18,51 +18,62 @@ namespace ImasArchiveApp
     {
         protected readonly UIElementModel parent;
 
-        protected bool? cacheVisible;
-        public virtual bool? Visible
+        //protected bool? cacheVisible;
+        //public virtual bool? Visible
+        //{
+        //    get => cacheVisible;
+        //    set
+        //    {
+        //        if (value != cacheVisible)
+        //        {
+        //            cacheVisible = value;
+        //            if (value == null) // being set by a child
+        //            {
+        //                cacheVisible = null;
+        //                if (parent != null) 
+        //                    parent.Visible = null;
+        //            }
+        //            else
+        //            {
+        //                foreach (var child in Children)
+        //                {
+        //                    child.Visible = value;
+        //                }
+        //                if (parent != null)
+        //                {
+        //                    if (parent.Children.All(model => model.Visible == value))
+        //                    {
+        //                        parent.Visible = value;
+        //                    }
+        //                    else
+        //                    {
+        //                        parent.Visible = null;
+        //                    }
+        //                }
+        //            }
+        //            OnPropertyChanged(nameof(BindVisible));
+        //        }
+        //    }
+        //}
+        //public bool VisibleIsNull => Visible == null;
+        //public bool? BindVisible
+        //{
+        //    get => Visible;
+        //    set
+        //    {
+        //        Visible = value;
+        //        LoadActiveImages();
+        //        OnPropertyChanged();
+        //    }
+        //}
+
+        protected bool currentVisibility = true;
+        public bool CurrentVisibility
         {
-            get => cacheVisible;
+            get => currentVisibility;
             set
             {
-                if (value != cacheVisible)
-                {
-                    cacheVisible = value;
-                    if (value == null) // being set by a child
-                    {
-                        cacheVisible = null;
-                        if (parent != null) 
-                            parent.Visible = null;
-                    }
-                    else
-                    {
-                        foreach (var child in Children)
-                        {
-                            child.Visible = value;
-                        }
-                        if (parent != null)
-                        {
-                            if (parent.Children.All(model => model.Visible == value))
-                            {
-                                parent.Visible = value;
-                            }
-                            else
-                            {
-                                parent.Visible = null;
-                            }
-                        }
-                    }
-                    OnPropertyChanged(nameof(BindVisible));
-                }
-            }
-        }
-        public bool VisibleIsNull => Visible == null;
-        public bool? BindVisible
-        {
-            get => Visible;
-            set
-            {
-                Visible = value;
-                LoadActiveImages();
+                currentVisibility = value;
                 OnPropertyChanged();
             }
         }
@@ -91,7 +102,6 @@ namespace ImasArchiveApp
         protected UIElementModel(UISubcomponentModel subcomponent, UIElementModel parent, string name, bool visible) : base(subcomponent, name)
         {
             this.parent = parent;
-            cacheVisible = visible;
             Children = new ObservableCollection<UIElementModel>();
         }
 
@@ -101,6 +111,8 @@ namespace ImasArchiveApp
 
         protected virtual void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)
         {
+            if (!CurrentVisibility)
+                return;
             foreach (UIElementModel child in Children)
             {
                 child.RenderElement(drawingContext, multiplier);
