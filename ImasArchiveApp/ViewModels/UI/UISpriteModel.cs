@@ -390,13 +390,13 @@ namespace ImasArchiveApp
         }
 
         private SolidColorBrush colorBrush;
-        private System.Windows.Media.ImageBrush imageBrush;
+        private ImageBrush imageBrush;
         private bool imageXIsFlipped, imageYIsFlipped;
         protected override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)
         {
-            double red = (_sprite.red / 255.0) * multiplier.r;
-            double green = (_sprite.green / 255.0) * multiplier.g;
-            double blue = (_sprite.blue / 255.0) * multiplier.b;
+            double red = _sprite.red / 255.0 * multiplier.r;
+            double green = _sprite.green / 255.0 * multiplier.g;
+            double blue = _sprite.blue / 255.0 * multiplier.b;
             if (colorBrush == null)
             {
                 InitialiseColorBrush(red, green, blue);
@@ -405,6 +405,13 @@ namespace ImasArchiveApp
             {
                 InitialiseImageBrush();
             }
+            drawingContext.PushTransform(new TranslateTransform(_sprite.xpos, _sprite.ypos));
+            drawingContext.PushTransform(new ScaleTransform(
+                imageXIsFlipped ? -1 : 1,
+                imageYIsFlipped ? -1 : 1,
+                -0.5 * SourceWidth,
+                -0.5 * SourceHeight
+                ));
             drawingContext.PushOpacity(_sprite.alpha / 255.0);
             if (_sprite.srcImageID == -1)
             {
@@ -431,25 +438,18 @@ namespace ImasArchiveApp
                 }
             }
             drawingContext.Pop();
+            drawingContext.Pop();
+            drawingContext.Pop();
         }
 
         private void DrawRectangle(DrawingContext drawingContext, System.Windows.Media.Brush brush)
         {
-            drawingContext.PushTransform(new TranslateTransform(_sprite.xpos, _sprite.ypos));
-            drawingContext.PushTransform(new ScaleTransform(
-                imageXIsFlipped ? -1 : 1,
-                imageYIsFlipped ? -1 : 1,
-                -0.5 * SourceWidth,
-                -0.5 * SourceHeight
-                ));
             drawingContext.DrawRectangle(
                             brush,
                             null,
                             new System.Windows.Rect(
                                 new System.Windows.Size(_sprite.width, _sprite.height))
                             );
-            drawingContext.Pop();
-            drawingContext.Pop();
         }
 
         private void InitialiseColorBrush(double red, double green, double blue)
