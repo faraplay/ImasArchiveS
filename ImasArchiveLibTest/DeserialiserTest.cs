@@ -24,8 +24,10 @@ namespace ImasArchiveLibTest
                 0xFF, 0xFF, 0xFF, 0xFF, 0x3F, 0x42, 0x00, 0x00, 0x3B, 0x80, 0x00, 0x00, 0x3F, 0x7F, 0x00, 0x00,
                 0x3E, 0x78, 0x00, 0x00,
             };
-            MemoryStream memoryStream = new MemoryStream(spriteData);
+            using MemoryStream memoryStream = new MemoryStream(spriteData);
             var obj = Deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(Sprite));
+            using MemoryStream memoryStream1 = new MemoryStream();
+            Serialiser.Serialise(new Imas.Binary(memoryStream1, true), obj);
         }
 
         [TestMethod]
@@ -60,7 +62,7 @@ namespace ImasArchiveLibTest
                 0xFF, 0xFF, 0xFF, 0xFF, 0x3F, 0x7F, 0x00, 0x00, 0x3B, 0x80, 0x00, 0x00, 0x3F, 0x42, 0x00, 0x00,
                 0x3E, 0x78, 0x00, 0x00,
             };
-            MemoryStream memoryStream = new MemoryStream(spriteGroupData);
+            using MemoryStream memoryStream = new MemoryStream(spriteGroupData);
             var obj = Deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(SpriteGroup));
         }
 
@@ -103,16 +105,18 @@ namespace ImasArchiveLibTest
                 0x3F, 0x7F, 0x00, 0x00, 0x3B, 0x80, 0x00, 0x00, 0x3F, 0x42, 0x00, 0x00, 0x3E, 0x78, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00,
             };
-            MemoryStream memoryStream = new MemoryStream(spriteData);
+            using MemoryStream memoryStream = new MemoryStream(spriteData);
             var obj = Deserialiser.Deserialise(new Imas.Binary(memoryStream, true), typeof(Control));
         }
 
         [TestMethod]
         public void DeserialiseControlTest()
         {
-            FileStream fileStream = new FileStream("playground/topS4U.pau", FileMode.Open);
+            using FileStream fileStream = new FileStream("playground/topS4U.pau", FileMode.Open);
             fileStream.Seek(4, SeekOrigin.Begin);
             var obj = Deserialiser.Deserialise(new Imas.Binary(fileStream, true), typeof(Control));
+            using FileStream memoryStream1 = new FileStream("playground/topS4Uout.pau", FileMode.Create);
+            Serialiser.Serialise(new Imas.Binary(memoryStream1, true), obj);
         }
     }
 }
