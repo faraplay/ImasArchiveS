@@ -340,13 +340,13 @@ namespace ImasArchiveApp
             return newControlModel;
         }
 
-        protected override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)
+        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
             drawingContext.PushTransform(new TranslateTransform(Xpos, Ypos));
             drawingContext.PushTransform(new ScaleTransform(ScaleX == 0 ? 1 : ScaleX, ScaleY));
             drawingContext.PushOpacity(Alpha / 255.0);
             multiplier.Scale(Red / 255.0, Green / 255.0, Blue / 255.0);
-            base.RenderElement(drawingContext, multiplier);
+            base.RenderElement(drawingContext, multiplier, isTop);
             drawingContext.Pop();
             drawingContext.Pop();
             drawingContext.Pop();

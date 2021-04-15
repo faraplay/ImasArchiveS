@@ -5,16 +5,16 @@ using System.Windows.Media;
 
 namespace ImasArchiveApp
 {
-    public class UIElementRenderer : FrameworkElement
+    public class UIModelRenderer : FrameworkElement
     {
 
-        public static readonly DependencyProperty ElementModelProperty =
-            DependencyProperty.Register("ElementModel", typeof(UIElementModel), typeof(UIElementRenderer), 
+        public static readonly DependencyProperty ModelProperty =
+            DependencyProperty.Register("Model", typeof(UIModel), typeof(UIModelRenderer), 
                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
-        public UIElementModel ElementModel
+        public UIModel Model
         {
-            get { return (UIElementModel)GetValue(ElementModelProperty); }
-            set { SetValue(ElementModelProperty, value); }
+            get { return (UIModel)GetValue(ModelProperty); }
+            set { SetValue(ModelProperty, value); }
         }
 
         private Matrix matrix = new Matrix(1, 0, 0, 1, 0, 0);
@@ -63,7 +63,7 @@ namespace ImasArchiveApp
             drawingContext.PushTransform(new MatrixTransform(matrix));
             drawingContext.DrawRectangle(CheckerBrush, null, gameScreenRect);
             drawingContext.DrawRectangle(null, new Pen(Brushes.Yellow, 1), gameScreenRect);
-            ElementModel?.RenderElement(drawingContext);
+            Model?.RenderElement(drawingContext);
             drawingContext.Pop();
             drawingContext.Pop();
         }

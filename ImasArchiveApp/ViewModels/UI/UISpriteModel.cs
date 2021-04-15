@@ -15,7 +15,7 @@ namespace ImasArchiveApp
         private readonly Sprite _sprite;
         protected override UIElement UIElement => _sprite;
 
-        private UISpriteSheetModel ParentSheet => subcomponent.SpriteSheets[_sprite.srcImageID];
+        public UISpriteSheetModel ParentSheet => subcomponent.SpriteSheets[_sprite.srcImageID];
         public override string ModelName => $"({_sprite.width}x{_sprite.height})";
 
         #region Properties
@@ -392,7 +392,7 @@ namespace ImasArchiveApp
         private SolidColorBrush colorBrush;
         private ImageBrush imageBrush;
         private bool imageXIsFlipped, imageYIsFlipped;
-        protected override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier)
+        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
             double red = _sprite.red / 255.0 * multiplier.r;
             double green = _sprite.green / 255.0 * multiplier.g;

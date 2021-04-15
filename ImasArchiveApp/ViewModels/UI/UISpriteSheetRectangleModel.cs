@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Text;
+using System.Windows.Media;
 
 namespace ImasArchiveApp
 {
@@ -97,6 +98,12 @@ namespace ImasArchiveApp
             g.DrawImage(parent.bitmap, new Point());
             g.DrawRectangle(Pens.Yellow, System.Drawing.Rectangle.Round(rectangle));
             return newBitmap;
+        }
+
+        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
+        {
+            parent.RenderElement(drawingContext, multiplier, isTop);
+            drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Yellow, 1), new System.Windows.Rect(X, Y, Width, Height));
         }
     }
 }

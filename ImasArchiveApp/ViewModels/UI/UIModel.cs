@@ -134,6 +134,8 @@ namespace ImasArchiveApp
             }
 
         }
+        public void RenderElement(DrawingContext drawingContext) => RenderElement(drawingContext, ColorMultiplier.One(), true);
+        internal abstract void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop);
 
         #region IDisposable
 

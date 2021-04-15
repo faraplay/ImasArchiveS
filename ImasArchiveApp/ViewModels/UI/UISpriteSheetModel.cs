@@ -115,6 +115,14 @@ namespace ImasArchiveApp
                 return bitmapImage;
             }
         }
+
+        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
+        {
+            drawingContext.DrawImage(
+                BitmapSource,
+                new System.Windows.Rect(new System.Windows.Size(BitmapSource.Width, BitmapSource.Height))
+                );
+        }
     }
 
 }

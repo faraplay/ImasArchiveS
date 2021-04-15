@@ -5,18 +5,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:UISpriteModel}"
     d:DesignHeight="720"
     d:DesignWidth="200"
     mc:Ignorable="d">
     <TabControl>
         <TabItem Header="Sprite">
-            <local:UIElementImageView />
+            <local:UIModelRenderer Model="{Binding}" />
         </TabItem>
         <TabItem Header="Spritesheet">
-            <Grid>
-                <Image Source="/Icons/checkerboard.png" Stretch="UniformToFill" />
-                <Image RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=SpriteSheetImageSource}" />
-            </Grid>
+            <local:UIModelRenderer Model="{Binding Path=ParentSheet}" />
         </TabItem>
     </TabControl>
 </UserControl>
