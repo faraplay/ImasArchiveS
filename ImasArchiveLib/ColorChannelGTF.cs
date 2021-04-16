@@ -7,7 +7,7 @@ namespace Imas
 {
     public class ColorChannelGTF : IDisposable
     {
-        private GTF gtf;
+        public GTF Gtf { get; } // ColorChannelGTF does not own this gtf
 
         private readonly IntPtr[] intPtrs = new IntPtr[7];
 
@@ -104,10 +104,6 @@ namespace Imas
             if (disposed)
                 return;
 
-            if (disposing)
-            {
-                gtf?.Dispose();
-            }
             foreach (IntPtr ptr in intPtrs)
             {
                 if (ptr != IntPtr.Zero)
@@ -127,18 +123,18 @@ namespace Imas
 
         public ColorChannelGTF(GTF gtf)
         {
-            this.gtf = gtf;
+            Gtf = gtf;
         }
 
         private IntPtr CreatePixelData(uint pixelMask)
         {
-            int[] newData = (int[])gtf.BitmapArray.Clone();
+            int[] newData = (int[])Gtf.BitmapArray.Clone();
             for (int i = 0; i < newData.Length; i++)
             {
                 newData[i] = (int)((newData[i] & pixelMask) | 0xFF000000);
             }
-            IntPtr ptr = Marshal.AllocHGlobal(4 * gtf.Stride * gtf.Height);
-            Marshal.Copy(newData, 0, ptr, gtf.Stride * gtf.Height);
+            IntPtr ptr = Marshal.AllocHGlobal(4 * Gtf.Stride * Gtf.Height);
+            Marshal.Copy(newData, 0, ptr, Gtf.Stride * Gtf.Height);
             return ptr;
         }
     }

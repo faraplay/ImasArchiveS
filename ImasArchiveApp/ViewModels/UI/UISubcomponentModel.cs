@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Imas;
 using Imas.UI;
 
 namespace ImasArchiveApp
@@ -61,7 +62,7 @@ namespace ImasArchiveApp
             DisplayedModel = ControlModel[0];
         }
 
-        public Bitmap GetSpritesheet(int index) => uiComponent.imageSource[index];
+        public GTF GetSpritesheet(int index) => uiComponent.imageSource[index];
 
         private void RefreshPropertiesList()
         {

@@ -37,7 +37,7 @@ namespace Imas.UI
             return imageSource;
         }
 
-        public Bitmap this[int i] => gtfs[i].Bitmap;
+        public GTF this[int i] => gtfs[i];
 
         public int Count => gtfs.Count;
 
