@@ -38,6 +38,7 @@ namespace ImasArchiveApp
                 gtf.BitmapPtr,
                 4 * gtf.Stride * gtf.Height,
                 4 * gtf.Stride);
+            _bitmapSource.Freeze();
             _getfileName = getFileName;
             Sprites = new List<UISpriteModel>();
             Rectangles = new ObservableCollection<UISpriteSheetRectangleModel>();
@@ -130,6 +131,7 @@ namespace ImasArchiveApp
             get
             {
                 if (whiteBitmap == null)
+                {
                     whiteBitmap = BitmapSource.Create(
                         colorGtfs.Gtf.Width,
                         colorGtfs.Gtf.Height,
@@ -140,6 +142,8 @@ namespace ImasArchiveApp
                         colorGtfs.PtrWhite,
                         4 * colorGtfs.Gtf.Stride * colorGtfs.Gtf.Height,
                         4 * colorGtfs.Gtf.Stride);
+                    whiteBitmap.Freeze();
+                }
                 return whiteBitmap;
             }
         }
@@ -149,6 +153,7 @@ namespace ImasArchiveApp
             get
             {
                 if (yellowBitmap == null)
+                {
                     yellowBitmap = BitmapSource.Create(
                         colorGtfs.Gtf.Width,
                         colorGtfs.Gtf.Height,
@@ -159,6 +164,8 @@ namespace ImasArchiveApp
                         colorGtfs.PtrYellow,
                         4 * colorGtfs.Gtf.Stride * colorGtfs.Gtf.Height,
                         4 * colorGtfs.Gtf.Stride);
+                    yellowBitmap.Freeze();
+                }
                 return yellowBitmap;
             }
         }
@@ -168,6 +175,7 @@ namespace ImasArchiveApp
             get
             {
                 if (magentaBitmap == null)
+                {
                     magentaBitmap = BitmapSource.Create(
                         colorGtfs.Gtf.Width,
                         colorGtfs.Gtf.Height,
@@ -178,6 +186,8 @@ namespace ImasArchiveApp
                         colorGtfs.PtrMagenta,
                         4 * colorGtfs.Gtf.Stride * colorGtfs.Gtf.Height,
                         4 * colorGtfs.Gtf.Stride);
+                    magentaBitmap.Freeze();
+                }
                 return magentaBitmap;
             }
         }
@@ -187,6 +197,7 @@ namespace ImasArchiveApp
             get
             {
                 if (cyanBitmap == null)
+                {
                     cyanBitmap = BitmapSource.Create(
                         colorGtfs.Gtf.Width,
                         colorGtfs.Gtf.Height,
@@ -197,6 +208,8 @@ namespace ImasArchiveApp
                         colorGtfs.PtrCyan,
                         4 * colorGtfs.Gtf.Stride * colorGtfs.Gtf.Height,
                         4 * colorGtfs.Gtf.Stride);
+                    cyanBitmap.Freeze();
+                }
                 return cyanBitmap;
             }
         }
@@ -206,6 +219,7 @@ namespace ImasArchiveApp
             get
             {
                 if (redBitmap == null)
+                {
                     redBitmap = BitmapSource.Create(
                         colorGtfs.Gtf.Width,
                         colorGtfs.Gtf.Height,
@@ -216,6 +230,8 @@ namespace ImasArchiveApp
                         colorGtfs.PtrRed,
                         4 * colorGtfs.Gtf.Stride * colorGtfs.Gtf.Height,
                         4 * colorGtfs.Gtf.Stride);
+                    redBitmap.Freeze();
+                }
                 return redBitmap;
             }
         }
@@ -225,6 +241,7 @@ namespace ImasArchiveApp
             get
             {
                 if (greenBitmap == null)
+                {
                     greenBitmap = BitmapSource.Create(
                         colorGtfs.Gtf.Width,
                         colorGtfs.Gtf.Height,
@@ -235,6 +252,8 @@ namespace ImasArchiveApp
                         colorGtfs.PtrGreen,
                         4 * colorGtfs.Gtf.Stride * colorGtfs.Gtf.Height,
                         4 * colorGtfs.Gtf.Stride);
+                    greenBitmap.Freeze();
+                }
                 return greenBitmap;
             }
         }
@@ -244,6 +263,7 @@ namespace ImasArchiveApp
             get
             {
                 if (blueBitmap == null)
+                {
                     blueBitmap = BitmapSource.Create(
                         colorGtfs.Gtf.Width,
                         colorGtfs.Gtf.Height,
@@ -254,6 +274,8 @@ namespace ImasArchiveApp
                         colorGtfs.PtrBlue,
                         4 * colorGtfs.Gtf.Stride * colorGtfs.Gtf.Height,
                         4 * colorGtfs.Gtf.Stride);
+                    blueBitmap.Freeze();
+                }
                 return blueBitmap;
             }
         }
