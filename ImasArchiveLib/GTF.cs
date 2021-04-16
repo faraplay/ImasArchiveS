@@ -17,6 +17,10 @@ namespace Imas
         public int Height { get; }
         public int Stride { get; }
 
+        public IntPtr BitmapPtr => bitmapPtr;
+
+        public int[] BitmapArray => bitmapArray;
+
         private GTF(Bitmap bitmap, IntPtr bitmapPtr, int[] bitmapArray, int type, int width, int height, int stride)
         {
             Bitmap = bitmap;
