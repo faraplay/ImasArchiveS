@@ -1,30 +1,28 @@
 ﻿namespace Imas.UI
 {
+    [SerialisationDerivedType(6)]
     class ScrollControl : GroupControl
     {
-        public float e1, e2, e3, e4;
+        [SerialiseField(200)]
+        public float e1;
+        [Listed(200)]
+        public float E1 { get => e1; set => e1 = value; }
+        [SerialiseField(201)]
+        public float e2;
+        [Listed(201)]
+        public float E2 { get => e2; set => e2 = value; }
+        [SerialiseField(202)]
+        public float e3;
+        [Listed(202)]
+        public float E3 { get => e3; set => e3 = value; }
+        [SerialiseField(203)]
+        public float e4;
+        [Listed(203)]
+        public float E4 { get => e4; set => e4 = value; }
+
+        [SerialiseField(204)]
         public uint f1;
-
-        //protected override void Deserialise(Stream stream)
-        //{
-        //    base.Deserialise(stream);
-        //    type = 6;
-
-        //    e1 = Binary.ReadFloat(stream, true);
-        //    e2 = Binary.ReadFloat(stream, true);
-        //    e3 = Binary.ReadFloat(stream, true);
-        //    e4 = Binary.ReadFloat(stream, true);
-        //    f1 = Binary.ReadUInt32(stream, true);
-        //}
-        //public override void Serialise(Stream stream)
-        //{
-        //    base.Serialise(stream);
-        //    Binary.WriteFloat(stream, true, e1);
-        //    Binary.WriteFloat(stream, true, e2);
-        //    Binary.WriteFloat(stream, true, e3);
-        //    Binary.WriteFloat(stream, true, e4);
-        //    Binary.WriteUInt32(stream, true, f1);
-        //}
-
+        [Listed(204)]
+        public uint F1 { get => f1; set => f1 = value; }
     }
 }

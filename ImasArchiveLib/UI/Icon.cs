@@ -1,25 +1,22 @@
 ﻿namespace Imas.UI
 {
+    [SerialisationDerivedType(5)]
     class Icon : GroupControl
     {
-        public float angle, e2, e3;
+        [SerialiseField(200)]
+        public float angle;
+        [Listed(200)]
+        public float Angle { get => angle; set => angle = value; }
 
-        //protected override void Deserialise(Stream stream)
-        //{
-        //    base.Deserialise(stream);
-        //    type = 5;
+        [SerialiseField(201)]
+        public float e2;
+        [Listed(201)]
+        public float E2 { get => e2; set => e2 = value; }
+        [SerialiseField(201)]
+        public float e3;
+        [Listed(202)]
+        public float E3 { get => e3; set => e3 = value; }
 
-        //    angle = Binary.ReadFloat(stream, true);
-        //    e2 = Binary.ReadFloat(stream, true);
-        //    e3 = Binary.ReadFloat(stream, true);
-        //}
-        //public override void Serialise(Stream stream)
-        //{
-        //    base.Serialise(stream);
-        //    Binary.WriteFloat(stream, true, angle);
-        //    Binary.WriteFloat(stream, true, e2);
-        //    Binary.WriteFloat(stream, true, e3);
-        //}
         //public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
         //{
         //    transform.RotateAt(-angle * (180 / (float)Math.PI), new PointF(xpos, ypos));

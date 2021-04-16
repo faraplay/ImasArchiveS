@@ -1,19 +1,11 @@
 ﻿namespace Imas.UI
 {
+    [SerialisationDerivedType(9)]
     class Control9 : GroupControl
     {
+        [SerialiseField(200)]
         public int e1;
-
-        //protected override void Deserialise(Stream stream)
-        //{
-        //    base.Deserialise(stream);
-        //    type = 9;
-        //    e1 = Binary.ReadInt32(stream, true);
-        //}
-        //public override void Serialise(Stream stream)
-        //{
-        //    base.Serialise(stream);
-        //    Binary.WriteInt32(stream, true, e1);
-        //}
+        [Listed(200)]
+        public int E1 { get => e1; set => e1 = value; }
     }
 }

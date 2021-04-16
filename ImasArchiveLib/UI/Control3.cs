@@ -1,25 +1,19 @@
 ﻿namespace Imas.UI
 {
+    [SerialisationDerivedType(3)]
     class Control3 : Control
     {
+        [SerialiseField(200)]
+        public float e1;
+        [Listed(201)]
+        public float E1 { get => e1; set => e1 = value; }
+
+        [SerialiseField(101)]
         public SpriteGroup otherSprite;
-        public float e1, e2;
 
-        //protected override void Deserialise(Stream stream)
-        //{
-        //    type = 3;
-        //    base.Deserialise(stream);
-        //    e1 = Binary.ReadFloat(stream, true);
-        //    otherSprite = CreateFromStream<SpriteGroup>(subcomponent, this, stream);
-        //    e2 = Binary.ReadFloat(stream, true);
-
-        //}
-        //public override void Serialise(Stream stream)
-        //{
-        //    base.Serialise(stream);
-        //    Binary.WriteFloat(stream, true, e1);
-        //    otherSprite.Serialise(stream);
-        //    Binary.WriteFloat(stream, true, e2);
-        //}
+        [SerialiseField(202)]
+        public float e2;
+        [Listed(202)]
+        public float E2 { get => e2; set => e2 = value; }
     }
 }
