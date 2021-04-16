@@ -135,8 +135,8 @@ namespace ImasArchiveApp
             drawingContext.PushTransform(new ScaleTransform(
                 imageXIsFlipped ? -1 : 1,
                 imageYIsFlipped ? -1 : 1,
-                -0.5 * SourceWidth,
-                -0.5 * SourceHeight
+                0.5 * _sprite.width,
+                0.5 * _sprite.height
                 ));
             drawingContext.PushOpacity(_sprite.alpha / 255.0);
             if (_sprite.srcImageID == -1)
