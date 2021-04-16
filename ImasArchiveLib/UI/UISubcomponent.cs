@@ -1,8 +1,6 @@
 ﻿using Imas.Archive;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Imas.UI
@@ -27,7 +25,7 @@ namespace Imas.UI
                 pauStream.ReadByte() != 0x55)
                 throw new InvalidDataException("Unrecognised PAU header");
             version = (byte)pauStream.ReadByte();
-            control = Control.Create(this, null, pauStream);
+            control = (Control)Deserialiser.Deserialise(new Binary(pauStream, true), typeof(Control));
         }
 
         private async Task LoadImageSource()
@@ -50,7 +48,7 @@ namespace Imas.UI
         public void WritePauStream(Stream stream)
         {
             Binary.WriteUInt32(stream, true, 0x50415505);
-            control.Serialise(stream);
+            Serialiser.Serialise(new Binary(stream, true), control);
         }
 
         public async Task WritePtaStream(Stream stream)
