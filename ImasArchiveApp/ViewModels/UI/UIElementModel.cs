@@ -58,5 +58,8 @@ namespace ImasArchiveApp
                 child.RenderElement(drawingContext, multiplier, false);
             }
         }
+
+        public override int BoundingPixelWidth => 1280;
+        public override int BoundingPixelHeight => 720;
     }
 }

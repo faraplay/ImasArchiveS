@@ -123,6 +123,9 @@ namespace ImasArchiveApp
                 new System.Windows.Rect(new System.Windows.Size(BitmapSource.Width, BitmapSource.Height))
                 );
         }
+
+        public override int BoundingPixelWidth => BitmapSource.PixelWidth;
+        public override int BoundingPixelHeight => BitmapSource.PixelHeight;
     }
 
 }

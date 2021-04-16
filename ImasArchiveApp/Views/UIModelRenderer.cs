@@ -48,6 +48,8 @@ namespace ImasArchiveApp
         }
 
         private bool firstRender = true;
+        private int ModelWidth => Model?.BoundingPixelWidth ?? 1280;
+        private int ModelHeight => Model?.BoundingPixelHeight ?? 720;
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
@@ -57,12 +59,11 @@ namespace ImasArchiveApp
                 SetMatrix();
             }
             Rect appRect = new Rect(new Size(ActualWidth, ActualHeight));
-            Rect gameScreenRect = new Rect(0, 0, 1280, 720);
+            Rect gameScreenRect = new Rect(0, 0, ModelWidth, ModelHeight);
             drawingContext.PushClip(new RectangleGeometry(appRect));
             drawingContext.DrawRectangle(Brushes.DimGray, null, appRect);
             drawingContext.PushTransform(new MatrixTransform(matrix));
             drawingContext.DrawRectangle(CheckerBrush, null, gameScreenRect);
-            drawingContext.DrawRectangle(null, new Pen(Brushes.Yellow, 1), gameScreenRect);
             Model?.RenderElement(drawingContext);
             drawingContext.Pop();
             drawingContext.Pop();
@@ -70,14 +71,14 @@ namespace ImasArchiveApp
 
         private void SetMatrix()
         {
-            double scale = Math.Min(ActualWidth / 1280, ActualHeight / 720);
+            double scale = Math.Min(ActualWidth / ModelWidth, ActualHeight / ModelHeight);
             if (scale < 0.01)
                 scale = 0.01;
             matrix = new Matrix(
                 scale, 0,
                 0, scale,
-                0.5 * (ActualWidth - scale * 1280),
-                0.5 * (ActualHeight - scale * 720));
+                0.5 * (ActualWidth - scale * ModelWidth),
+                0.5 * (ActualHeight - scale * ModelHeight));
         }
 
         private int mouseDelta = 0;

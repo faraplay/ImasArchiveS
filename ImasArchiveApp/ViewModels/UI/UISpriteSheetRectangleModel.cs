@@ -105,5 +105,8 @@ namespace ImasArchiveApp
             parent.RenderElement(drawingContext, multiplier, isTop);
             drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Yellow, 1), new System.Windows.Rect(X, Y, Width, Height));
         }
+
+        public override int BoundingPixelWidth => parent.BoundingPixelWidth;
+        public override int BoundingPixelHeight => parent.BoundingPixelHeight;
     }
 }

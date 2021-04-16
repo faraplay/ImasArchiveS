@@ -111,6 +111,9 @@ namespace ImasArchiveApp
             }
         }
 
+        public abstract int BoundingPixelWidth { get; }
+        public abstract int BoundingPixelHeight { get; }
+
         private async Task SaveImage()
         {
             try
