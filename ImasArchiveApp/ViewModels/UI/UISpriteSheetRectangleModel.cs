@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Text;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Media;
 
 namespace ImasArchiveApp
@@ -10,8 +7,8 @@ namespace ImasArchiveApp
     public class UISpriteSheetRectangleModel : UIModel
     {
         private readonly UISpriteSheetModel parent;
-        private RectangleF rectangle;
-        public RectangleF Rectangle => rectangle;
+        private Rect rectangle;
+        public Rect Rectangle => rectangle;
         public ObservableCollection<UISpriteModel> Sprites { get; }
 
         public string Description
@@ -23,7 +20,7 @@ namespace ImasArchiveApp
 
         public float X
         {
-            get => rectangle.X;
+            get => (float)rectangle.X;
             set
             {
                 rectangle.X = value;
@@ -31,14 +28,14 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceXQuiet = X;
                 }
-                LoadActiveImages();
+                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Description));
             }
         }
         public float Y
         {
-            get => rectangle.Y;
+            get => (float)rectangle.Y;
             set
             {
                 rectangle.Y = value;
@@ -46,14 +43,14 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceYQuiet = Y;
                 }
-                LoadActiveImages();
+                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Description));
             }
         }
         public float Width
         {
-            get => rectangle.Width;
+            get => (float)rectangle.Width;
             set
             {
                 rectangle.Width = value;
@@ -61,14 +58,14 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceWidthQuiet = Width;
                 }
-                LoadActiveImages();
+                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Description));
             }
         }
         public float Height
         {
-            get => rectangle.Height;
+            get => (float)rectangle.Height;
             set
             {
                 rectangle.Height = value;
@@ -76,7 +73,7 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceHeightQuiet = Height;
                 }
-                LoadActiveImages();
+                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Description));
             }
@@ -84,26 +81,18 @@ namespace ImasArchiveApp
 
         #endregion
 
-        public UISpriteSheetRectangleModel(UISubcomponentModel subcomponent, UISpriteSheetModel parent, RectangleF rectangle) : base(subcomponent, rectangle.ToString())
+        public UISpriteSheetRectangleModel(UISubcomponentModel subcomponent, UISpriteSheetModel parent, Rect rectangle) 
+            : base(subcomponent, rectangle.ToString())
         {
             this.parent = parent;
             this.rectangle = rectangle;
             Sprites = new ObservableCollection<UISpriteModel>();
         }
 
-        protected override Bitmap GetBitmap()
-        {
-            Bitmap newBitmap = new Bitmap(parent.bitmap.Width + 1, parent.bitmap.Height + 1);
-            using Graphics g = Graphics.FromImage(newBitmap);
-            g.DrawImage(parent.bitmap, new Point());
-            g.DrawRectangle(Pens.Yellow, System.Drawing.Rectangle.Round(rectangle));
-            return newBitmap;
-        }
-
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
             parent.RenderElement(drawingContext, multiplier, isTop);
-            drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Yellow, 1), new System.Windows.Rect(X, Y, Width, Height));
+            drawingContext.DrawRectangle(null, new Pen(Brushes.Yellow, 1), rectangle);
         }
 
         public override int BoundingPixelWidth => parent.BoundingPixelWidth;

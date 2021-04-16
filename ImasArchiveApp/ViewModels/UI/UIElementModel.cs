@@ -1,6 +1,5 @@
 ﻿using Imas.UI;
 using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Windows.Media;
 
 namespace ImasArchiveApp
@@ -20,18 +19,6 @@ namespace ImasArchiveApp
             }
         }
 
-        protected bool centerRender = false;
-        public bool CenterRender
-        {
-            get => centerRender;
-            set
-            {
-                centerRender = value;
-                LoadActiveImages();
-                OnPropertyChanged();
-            }
-        }
-
         public ObservableCollection<UIElementModel> Children { get; set; }
         protected abstract UIElement UIElement { get; }
         public UIElement MyUIElement => UIElement;
@@ -46,8 +33,6 @@ namespace ImasArchiveApp
             this.parent = parent;
             Children = new ObservableCollection<UIElementModel>();
         }
-
-        protected override Bitmap GetBitmap() => UIElement.GetBitmap(CenterRender ? new PointF(640, 360) : new PointF());
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using Imas.UI;
 
 namespace ImasArchiveApp
@@ -28,7 +23,7 @@ namespace ImasArchiveApp
             set
             {
                 _displayedModel = value;
-                _displayedModel?.LoadImage();
+                //_displayedModel?.LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -40,7 +35,7 @@ namespace ImasArchiveApp
             {
                 _selectedModel = value;
                 RefreshPropertiesList();
-                _selectedModel?.LoadImage();
+                //_selectedModel?.LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -99,7 +94,7 @@ namespace ImasArchiveApp
                     await uiComponent.imageSource.ReplaceGTF(index, bitmap);
                     ReportMessage("Done.");
                 }
-                DisplayedModel.LoadImage();
+                //DisplayedModel.LoadImage();
             }
             catch (Exception ex)
             {

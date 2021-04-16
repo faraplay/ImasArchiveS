@@ -1,11 +1,9 @@
-﻿using Imas.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -20,7 +18,7 @@ namespace ImasArchiveApp
 
         public List<UISpriteModel> Sprites { get; }
 
-        private Dictionary<RectangleF, UISpriteSheetRectangleModel> rectLookup;
+        private Dictionary<Rect, UISpriteSheetRectangleModel> rectLookup;
 
         public ObservableCollection<UISpriteSheetRectangleModel> Rectangles { get; }
 
@@ -35,11 +33,14 @@ namespace ImasArchiveApp
 
         public void UpdateRectangles()
         {
-            rectLookup = new Dictionary<RectangleF, UISpriteSheetRectangleModel>();
+            rectLookup = new Dictionary<Rect, UISpriteSheetRectangleModel>();
             Rectangles.Clear();
             foreach (UISpriteModel sprite in Sprites)
             {
-                RectangleF rectangle = new RectangleF(sprite.SourceX, sprite.SourceY, sprite.SourceWidth, sprite.SourceHeight);
+                Rect rectangle = new Rect(
+                    new System.Windows.Point(sprite.SourceX, sprite.SourceY),
+                    new Vector(sprite.SourceWidth, sprite.SourceHeight)
+                    );
                 if (rectLookup.TryGetValue(rectangle, out var model))
                 {
                     model.Sprites.Add(sprite);
@@ -53,18 +54,6 @@ namespace ImasArchiveApp
                 }
                 sprite.SpriteSheetRectangleModel = model;
             }
-        }
-
-        protected override Bitmap GetBitmap()
-        {
-            Bitmap newBitmap = new Bitmap(bitmap.Width + 1, bitmap.Height + 1);
-            using Graphics g = Graphics.FromImage(newBitmap);
-            g.DrawImage(bitmap, new Point());
-            foreach (var rectangle in Rectangles)
-            {
-                g.DrawRectangle(Pens.Yellow, Rectangle.Round(rectangle.Rectangle));
-            }
-            return newBitmap;
         }
 
         private AsyncCommand _replaceImageCommand;
@@ -121,7 +110,7 @@ namespace ImasArchiveApp
         {
             drawingContext.DrawImage(
                 BitmapSource,
-                new System.Windows.Rect(new System.Windows.Size(BitmapSource.Width, BitmapSource.Height))
+                new Rect(new System.Windows.Size(BitmapSource.Width, BitmapSource.Height))
                 );
         }
 
