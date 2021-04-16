@@ -115,56 +115,171 @@ namespace ImasArchiveApp
                 ParentSheet.Sprites.Add(this);
         }
 
-        private SolidColorBrush colorBrush;
-        private ImageBrush imageBrush;
-        private bool imageXIsFlipped, imageYIsFlipped;
+        private ImageBrush alphaImageBrush;
+        public ImageBrush AlphaImageBrush
+        {
+            get
+            {
+                if (alphaImageBrush == null)
+                    alphaImageBrush = CreateImageBrush(ParentSheet.BitmapSource);
+                return alphaImageBrush;
+            }
+        }
+        private ImageBrush whiteImageBrush;
+        public ImageBrush WhiteImageBrush
+        {
+            get
+            {
+                if (whiteImageBrush == null)
+                    whiteImageBrush = CreateImageBrush(ParentSheet.WhiteBitmap);
+                return whiteImageBrush;
+            }
+        }
+        private ImageBrush yellowImageBrush;
+        public ImageBrush YellowImageBrush
+        {
+            get
+            {
+                if (yellowImageBrush == null)
+                    yellowImageBrush = CreateImageBrush(ParentSheet.YellowBitmap);
+                return yellowImageBrush;
+            }
+        }
+        private ImageBrush magentaImageBrush;
+        public ImageBrush MagentaImageBrush
+        {
+            get
+            {
+                if (magentaImageBrush == null)
+                    magentaImageBrush = CreateImageBrush(ParentSheet.MagentaBitmap);
+                return magentaImageBrush;
+            }
+        }
+        private ImageBrush cyanImageBrush;
+        public ImageBrush CyanImageBrush
+        {
+            get
+            {
+                if (cyanImageBrush == null)
+                    cyanImageBrush = CreateImageBrush(ParentSheet.CyanBitmap);
+                return cyanImageBrush;
+            }
+        }
+        private ImageBrush redImageBrush;
+        public ImageBrush RedImageBrush
+        {
+            get
+            {
+                if (redImageBrush == null)
+                    redImageBrush = CreateImageBrush(ParentSheet.RedBitmap);
+                return redImageBrush;
+            }
+        }
+        private ImageBrush greenImageBrush;
+        public ImageBrush GreenImageBrush
+        {
+            get
+            {
+                if (greenImageBrush == null)
+                    greenImageBrush = CreateImageBrush(ParentSheet.GreenBitmap);
+                return greenImageBrush;
+            }
+        }
+        private ImageBrush blueImageBrush;
+        public ImageBrush BlueImageBrush
+        {
+            get
+            {
+                if (blueImageBrush == null)
+                    blueImageBrush = CreateImageBrush(ParentSheet.BlueBitmap);
+                return blueImageBrush;
+            }
+        }
+
+        private bool ImageXIsFlipped => SourceWidthQuiet < 0;
+        private bool ImageYIsFlipped => SourceHeightQuiet < 0;
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
             double red = _sprite.red / 255.0 * multiplier.r;
             double green = _sprite.green / 255.0 * multiplier.g;
             double blue = _sprite.blue / 255.0 * multiplier.b;
-            if (colorBrush == null)
-            {
-                InitialiseColorBrush(red, green, blue);
-            }
-            if (imageBrush == null && _sprite.srcImageID != -1)
-            {
-                InitialiseImageBrush();
-            }
             drawingContext.PushTransform(new TranslateTransform(_sprite.xpos, _sprite.ypos));
             drawingContext.PushTransform(new ScaleTransform(
-                imageXIsFlipped ? -1 : 1,
-                imageYIsFlipped ? -1 : 1,
+                ImageXIsFlipped ? -1 : 1,
+                ImageYIsFlipped ? -1 : 1,
                 0.5 * _sprite.width,
                 0.5 * _sprite.height
                 ));
             drawingContext.PushOpacity(_sprite.alpha / 255.0);
             if (_sprite.srcImageID == -1)
             {
-                DrawRectangle(drawingContext, colorBrush);
+                DrawRectangle(drawingContext, CreateColorBrush(red, green, blue));
             }
             else
             {
-                double brightness = (red + green + blue) / 3;
-                if (Math.Abs(brightness - 1) < 1 / 255.0)
-                {
-                    DrawRectangle(drawingContext, imageBrush);
-                }
-                else
-                {
-                    drawingContext.PushOpacity(brightness);
-                    DrawRectangle(drawingContext, imageBrush);
-                    drawingContext.Pop();
-
-                    drawingContext.PushOpacity(1.0 - brightness);
-                    drawingContext.PushOpacityMask(imageBrush);
-                    DrawRectangle(drawingContext, colorBrush);
-                    drawingContext.Pop();
-                    drawingContext.Pop();
-                }
+                DrawImageRectangle(drawingContext, red, green, blue);
             }
             drawingContext.Pop();
             drawingContext.Pop();
+            drawingContext.Pop();
+        }
+
+        private void DrawImageRectangle(DrawingContext drawingContext, double red, double green, double blue)
+        {
+            drawingContext.PushOpacityMask(AlphaImageBrush);
+            DrawRectangle(drawingContext, WhiteImageBrush);
+            double middle;
+            if (red < green && red < blue)
+            {
+                middle = Math.Min(green, blue);
+                drawingContext.PushOpacity((middle - red) / middle);
+                DrawRectangle(drawingContext, CyanImageBrush);
+                drawingContext.Pop();
+            }
+            if (green < blue && green < red)
+            {
+                middle = Math.Min(blue, red);
+                drawingContext.PushOpacity((middle - green) / middle);
+                DrawRectangle(drawingContext, MagentaImageBrush);
+                drawingContext.Pop();
+            }
+            if (blue < red && blue < green)
+            {
+                middle = Math.Min(red, green);
+                drawingContext.PushOpacity((middle - blue) / middle);
+                DrawRectangle(drawingContext, YellowImageBrush);
+                drawingContext.Pop();
+            }
+
+            if (red > green && red > blue)
+            {
+                middle = Math.Max(green, blue);
+                drawingContext.PushOpacity((red - middle) / red);
+                DrawRectangle(drawingContext, RedImageBrush);
+                drawingContext.Pop();
+            }
+            if (green > blue && green > red)
+            {
+                middle = Math.Max(blue, red);
+                drawingContext.PushOpacity((green - middle) / green);
+                DrawRectangle(drawingContext, GreenImageBrush);
+                drawingContext.Pop();
+            }
+            if (blue > red && blue > green)
+            {
+                middle = Math.Max(red, green);
+                drawingContext.PushOpacity((blue - middle) / blue);
+                DrawRectangle(drawingContext, BlueImageBrush);
+                drawingContext.Pop();
+            }
+
+            double max = Math.Max(red, Math.Max(green, blue));
+            if (max < 1)
+            {
+                drawingContext.PushOpacity(1 - max);
+                DrawRectangle(drawingContext, Brushes.Black);
+                drawingContext.Pop();
+            }
             drawingContext.Pop();
         }
 
@@ -178,9 +293,9 @@ namespace ImasArchiveApp
                             );
         }
 
-        private void InitialiseColorBrush(double red, double green, double blue)
+        private SolidColorBrush CreateColorBrush(double red, double green, double blue)
         {
-            colorBrush = new SolidColorBrush(
+            return new SolidColorBrush(
                     Color.FromRgb(
                         (byte)(red * 255),
                         (byte)(green * 255),
@@ -188,9 +303,9 @@ namespace ImasArchiveApp
                         ));
         }
 
-        private void InitialiseImageBrush()
+        private ImageBrush CreateImageBrush(ImageSource imageSource)
         {
-            imageBrush = new ImageBrush(subcomponent.SpriteSheets[_sprite.srcImageID].BitmapSource);
+            ImageBrush imageBrush = new ImageBrush(imageSource);
             imageBrush.Viewbox = new System.Windows.Rect(
                 new System.Windows.Point(_sprite.srcFracLeft, _sprite.srcFracTop),
                 new System.Windows.Point(_sprite.srcFracRight, _sprite.srcFracBottom)
@@ -203,8 +318,7 @@ namespace ImasArchiveApp
                     );
                 imageBrush.ViewportUnits = BrushMappingMode.Absolute;
             }
-            imageXIsFlipped = (SourceWidth < 0);
-            imageYIsFlipped = (SourceHeight < 0);
+            return imageBrush;
         }
     }
 }
