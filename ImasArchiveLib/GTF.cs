@@ -7,17 +7,25 @@ using System.Threading.Tasks;
 
 namespace Imas
 {
-    public class GTF : IDisposable
+    public partial class GTF : IDisposable
     {
         public Bitmap Bitmap { get; private set; }
         private readonly IntPtr bitmapPtr;
+        private readonly int[] bitmapArray;
         public int Type { get; }
+        public int Width { get; }
+        public int Height { get; }
+        public int Stride { get; }
 
-        private GTF(Bitmap bitmap, IntPtr bitmapPtr, int type)
+        private GTF(Bitmap bitmap, IntPtr bitmapPtr, int[] bitmapArray, int type, int width, int height, int stride)
         {
             Bitmap = bitmap;
             this.bitmapPtr = bitmapPtr;
+            this.bitmapArray = bitmapArray;
             Type = type;
+            Width = width;
+            Height = height;
+            Stride = stride;
         }
 
         #region IDisposable
@@ -106,185 +114,59 @@ namespace Imas
                 stream.Position = pos + 128;
             }
 
-            return (type & 15) switch
-            {
-                //1 => ReadGTFIndexed(stream, width, height, palette),
-                //2 => ReadGTF1555(stream, width, height),
-                //3 => ReadGTF4444(stream, width, height),
-                //5 => ReadGTF8888(stream, width, height),
-                //6 => ReadGTF565Block4Color(stream, width, height),
-                //7 => ReadGTF565Block8Alpha4Color(stream, width, height),
-                //8 => ReadGTF565Block8RelAlpha4Color(stream, width, height),
-                //0xE => ReadGTF8888(stream, width, height),
+            int stride = width;
+            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
+            int[] bitmapArray = new int[stride * height];
 
-                1 => ReadGTFPixels(stream, width, height, type, stream => GetPixelIndexed(stream, palette)),
-                2 => ReadGTFPixels(stream, width, height, type, GetPixel1555),
-                3 => ReadGTFPixels(stream, width, height, type, GetPixel4444),
-                5 => ReadGTFPixels(stream, width, height, type, GetPixel8888),
-                6 => ReadGTFBlocks(stream, width, height, type, GetGTFBlockNoAlpha),
-                7 => ReadGTFBlocks(stream, width, height, type, GetGTFBlock4Alpha),
-                8 => ReadGTFBlocks(stream, width, height, type, GetGTFBlock8RelAlpha),
-                0xE => ReadGTFPixels(stream, width, height, type, GetPixel8888),
-                _ => throw new NotSupportedException()
-            };
+            switch (type & 15)
+            {
+                case 1:
+                    ReadPixels(stream, width, height, stream => GetPixelIndexed(stream, palette), stride, bitmapArray);
+                    break;
+                case 2:
+                    ReadPixels(stream, width, height, GetPixel1555, stride, bitmapArray);
+                    break;
+                case 3:
+                    ReadPixels(stream, width, height, GetPixel4444, stride, bitmapArray);
+                    break;
+                case 5:
+                case 0xE:
+                    ReadPixels(stream, width, height, GetPixel8888, stride, bitmapArray);
+                    break;
+                case 6:
+                    ReadBlocks(stream, width, height, GetBlockNoAlpha, stride, bitmapArray);
+                    break;
+                case 7:
+                    ReadBlocks(stream, width, height, GetBlock4Alpha, stride, bitmapArray);
+                    break;
+                case 8:
+                    ReadBlocks(stream, width, height, GetBlock8RelAlpha, stride, bitmapArray);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+
+            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
+            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
+            return new GTF(bitmap, bitmapPtr, bitmapArray, type, width, height, stride);
         }
 
         #region Read GTF
 
-        private static GTF ReadGTFPixels(Stream stream, int width, int height, int type, Func<Stream, uint> pixelGet)
+        private static void ReadPixels(Stream stream, int width, int height, Func<Stream, uint> getPixel, int stride, int[] bitmapArray)
         {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            int[] bitmapArray = new int[stride * height];
-
             Order order = new Order(width, height);
-
             for (int n = 0; n < width * height; n++)
             {
-                uint b = pixelGet(stream);
                 int x, y;
                 (x, y) = order.GetXY();
-                bitmapArray[y * stride + x] = (int)b;
+                bitmapArray[y * stride + x] = (int)getPixel(stream);
             }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, type);
         }
 
-        private static GTF ReadGTFIndexed(Stream stream, int width, int height, Color[] palette)
+        private static void ReadBlocks(Stream stream, int width, int height, Action<Binary, int[,], int[]> getBlock, int stride, int[] bitmapArray)
         {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            int[] bitmapArray = new int[stride * height];
-
-            Order order = new Order(width, height);
-
-            for (int n = 0; n < width * height; n++)
-            {
-                uint b = GetPixelIndexed(stream, palette);
-                int x, y;
-                (x, y) = order.GetXY();
-                bitmapArray[y * stride + x] = (int)b;
-            }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            //ColorPalette colorPalette = bitmap.Palette;
-            //for (int i = 0; i < 0x100; i++)
-            //    colorPalette.Entries[i] = palette[i];
-            //bitmap.Palette = colorPalette;
-
-            return new GTF(bitmap, bitmapPtr, 1);
-        }
-
-        private static uint GetPixelIndexed(Stream stream, Color[] palette)
-        {
-            return (uint)palette[Binary.ReadByte(stream, true)].ToArgb();
-        }
-
-        private static GTF ReadGTF1555(Stream stream, int width, int height)
-        {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            int[] bitmapArray = new int[stride * height];
-
-            Order order = new Order(width, height);
-
-            for (int n = 0; n < width * height; n++)
-            {
-                uint b = GetPixel1555(stream);
-                int x, y;
-                (x, y) = order.GetXY();
-                bitmapArray[y * stride + x] = (int)b;
-            }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, 2);
-        }
-
-        private static uint GetPixel1555(Stream stream)
-        {
-            uint b = Binary.ReadUInt16(stream, true); // 0x0000 0000 0000 0000 arrr rrgg gggb bbbb
-            uint alpha = (b & 0x8000) >> 15;
-            alpha *= 0xFF;
-            uint red = (b & 0x7C00) >> 10;
-            red = (red << 3) ^ (red >> 2);
-            uint green = (b & 0x03E0) >> 5;
-            green = (green << 3) ^ (green >> 2);
-            uint blue = b & 0x001F;
-            blue = (blue << 3) ^ (blue >> 2);
-            b = (alpha << 24) ^ (red << 16) ^ (green << 8) ^ blue;
-            return b;
-        }
-
-        private static GTF ReadGTF4444(Stream stream, int width, int height)
-        {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            int[] bitmapArray = new int[stride * height];
-            Order order = new Order(width, height);
-
-            for (int n = 0; n < width * height; n++)
-            {
-                uint b = GetPixel4444(stream);
-                int x, y;
-                (x, y) = order.GetXY();
-                bitmapArray[y * stride + x] = (int)b;
-            }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, 3);
-        }
-
-        private static uint GetPixel4444(Stream stream)
-        {
-            uint b = Binary.ReadUInt16(stream, true); // 0x0000abcd
-            b = (b ^ (b << 8)) & 0x00FF00FF;          // 0x00ab00cd
-            b = (b ^ (b << 4)) & 0x0F0F0F0F;          // 0x0a0b0c0d
-            b ^= b << 4;                              // 0xaabbccdd
-            return b;
-        }
-
-        private static GTF ReadGTF8888(Stream stream, int width, int height)
-        {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            int[] bitmapArray = new int[stride * height];
-            Order order = new Order(width, height);
-
-            for (int n = 0; n < width * height; n++)
-            {
-                uint b = GetPixel8888(stream);
-                int x, y;
-                (x, y) = order.GetXY();
-                bitmapArray[y * stride + x] = (int)b;
-            }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, 5);
-        }
-
-        private static uint GetPixel8888(Stream stream)
-        {
-            return Binary.ReadUInt32(stream, true);
-        }
-
-        private static GTF ReadGTFBlocks(Stream stream, int width, int height, int type, Action<Binary, int[,], int[]> getBlock)
-        {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
             Binary binary = new Binary(stream, false);
-            int[] bitmapArray = new int[stride * height];
-
             for (int y = 0; y < height / 4; y++)
                 for (int x = 0; x < width / 4; x++)
                 {
@@ -303,46 +185,34 @@ namespace Imas
                         }
                     }
                 }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, type);
         }
 
-        private static GTF ReadGTF565Block4Color(Stream stream, int width, int height)
+        private static uint GetPixelIndexed(Stream stream, Color[] palette)
         {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            Binary binary = new Binary(stream, false);
-            int[] bitmapArray = new int[stride * height];
-
-            for (int y = 0; y < height / 4; y++)
-                for (int x = 0; x < width / 4; x++)
-                {
-                    int[,] alphas = new int[4, 4];
-                    int[] colorVals = new int[4];
-                    GetGTFBlockNoAlpha(binary, alphas, colorVals);
-
-                    for (int yy = 0; yy < 4; yy++)
-                    {
-                        byte k = binary.ReadByte();
-                        for (int xx = 0; xx < 4; xx++)
-                        {
-                            int t = k & 3;
-                            bitmapArray[(4 * y + yy) * stride + 4 * x + xx] = (alphas[xx, yy] << 24) | colorVals[t];
-                            k >>= 2;
-                        }
-                    }
-                }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, 6);
+            return (uint)palette[Binary.ReadByte(stream, true)].ToArgb();
         }
 
-        private static void GetGTFBlockNoAlpha(Binary binary, int[,] alphas, int[] colorVals)
+        private static uint GetPixel1555(Stream stream)
+        {
+            ushort b = Binary.ReadUInt16(stream, true);
+            return (uint)ColorHelp.From1555(b).ToArgb();
+        }
+
+        private static uint GetPixel4444(Stream stream)
+        {
+            uint b = Binary.ReadUInt16(stream, true); // 0x0000abcd
+            b = (b ^ (b << 8)) & 0x00FF00FF;          // 0x00ab00cd
+            b = (b ^ (b << 4)) & 0x0F0F0F0F;          // 0x0a0b0c0d
+            b ^= b << 4;                              // 0xaabbccdd
+            return b;
+        }
+
+        private static uint GetPixel8888(Stream stream)
+        {
+            return Binary.ReadUInt32(stream, true);
+        }
+
+        private static void GetBlockNoAlpha(Binary binary, int[,] alphas, int[] colorVals)
         {
             ushort c0 = binary.ReadUInt16();
             ushort c1 = binary.ReadUInt16();
@@ -364,39 +234,7 @@ namespace Imas
                 colorVals[i] = color[i].ToArgb();
         }
 
-        private static GTF ReadGTF565Block8Alpha4Color(Stream stream, int width, int height)
-        {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            Binary binary = new Binary(stream, false);
-            int[] bitmapArray = new int[stride * height];
-
-            for (int y = 0; y < height / 4; y++)
-                for (int x = 0; x < width / 4; x++)
-                {
-                    int[,] alphas = new int[4, 4];
-                    int[] colorVals = new int[4];
-                    GetGTFBlock4Alpha(binary, alphas, colorVals);
-
-                    for (int yy = 0; yy < 4; yy++)
-                    {
-                        byte k = binary.ReadByte();
-                        for (int xx = 0; xx < 4; xx++)
-                        {
-                            int t = k & 3;
-                            bitmapArray[(4 * y + yy) * stride + 4 * x + xx] = (alphas[xx, yy] << 24) | colorVals[t];
-                            k >>= 2;
-                        }
-                    }
-                }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, 7);
-        }
-
-        private static void GetGTFBlock4Alpha(Binary binary, int[,] alphas, int[] colorVals)
+        private static void GetBlock4Alpha(Binary binary, int[,] alphas, int[] colorVals)
         {
             ulong n = binary.ReadUInt64();
             for (int i = 0; i < 4; i++)
@@ -420,39 +258,7 @@ namespace Imas
                 colorVals[i] = color[i].ToArgb() & 0x00FFFFFF;
         }
 
-        private static GTF ReadGTF565Block8RelAlpha4Color(Stream stream, int width, int height)
-        {
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            Binary binary = new Binary(stream, false);
-            int[] bitmapArray = new int[stride * height];
-
-            for (int y = 0; y < height / 4; y++)
-                for (int x = 0; x < width / 4; x++)
-                {
-                    int[,] alphas = new int[4, 4];
-                    int[] colorVals = new int[4];
-                    GetGTFBlock8RelAlpha(binary, alphas, colorVals);
-
-                    for (int yy = 0; yy < 4; yy++)
-                    {
-                        byte k = binary.ReadByte();
-                        for (int xx = 0; xx < 4; xx++)
-                        {
-                            int t = k & 3;
-                            bitmapArray[(4 * y + yy) * stride + 4 * x + xx] = (alphas[xx, yy] << 24) | colorVals[t];
-                            k >>= 2;
-                        }
-                    }
-                }
-
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-
-            return new GTF(bitmap, bitmapPtr, 8);
-        }
-
-        private static void GetGTFBlock8RelAlpha(Binary binary, int[,] alphas, int[] colorVals)
+        private static void GetBlock8RelAlpha(Binary binary, int[,] alphas, int[] colorVals)
         {
             ulong n = binary.ReadUInt64();
             int a0 = (byte)(n & 0xFF);
@@ -1038,109 +844,5 @@ namespace Imas
         #endregion Write GTF
 
         private static bool IsPow2(int n) => (n & (n - 1)) == 0;
-
-        private class Order
-        {
-            private readonly int width;
-            private readonly int height;
-            private readonly uint xmax;
-            private readonly uint ymax;
-            private int x, y;
-            private readonly bool zOrder;
-
-            public Order(int width, int height) :
-                this(width, height, IsPow2(width) && IsPow2(height))
-            { }
-
-            public Order(int width, int height, bool isZOrder)
-            {
-                this.width = width;
-                this.height = height;
-                xmax = (uint)(width - 1);
-                ymax = (uint)(height - 1);
-                x = 0;
-                y = 0;
-                zOrder = isZOrder;
-            }
-
-            public (int, int) GetXY()
-            {
-                (int, int) result = (x, y);
-                if (zOrder)
-                {
-                    uint xTrail1 = (uint)((x - width) ^ (x - width + 1));
-                    uint yTrail1 = (uint)((y - height) ^ (y - height + 1));
-                    x ^= (int)(xTrail1 & yTrail1 & xmax);
-                    y ^= (int)((xTrail1 >> 1) & yTrail1 & ymax);
-                }
-                else
-                {
-                    x++;
-                    if (x >= width)
-                    {
-                        x = 0;
-                        y++;
-                    }
-                }
-                return result;
-            }
-        }
-
-        private static class ColorHelp
-        {
-            public static Color From565(ushort x)
-            {
-                int r0 = (x >> 11) * 8;
-                int g0 = ((x >> 5) & 0x3F) * 4;
-                int b0 = (x & 0x1F) * 8;
-                return Color.FromArgb(r0, g0, b0);
-            }
-
-            public static Color From1555(ushort x)
-            {
-                int a0 = (x >> 15) * 255;
-                int r0 = ((x >> 10) & 0x1F) * 8;
-                int g0 = ((x >> 5) & 0x1F) * 8;
-                int b0 = (x & 0x1F) * 8;
-                return Color.FromArgb(a0, r0, g0, b0);
-            }
-
-            public static Color From4444(int x)
-            {
-                int b = (x & 15) * 17;
-                x >>= 4;
-                int g = (x & 15) * 17;
-                x >>= 4;
-                int r = (x & 15) * 17;
-                x >>= 4;
-                int a = (x & 15) * 17;
-                return Color.FromArgb(a, r, g, b);
-            }
-
-            public static ushort To4444(Color color)
-            {
-                return (ushort)(
-                    ((color.A >> 4) << 12)
-                    + ((color.R >> 4) << 8)
-                    + ((color.G >> 4) << 4)
-                    + (color.B >> 4));
-            }
-
-            public static ushort To565(Color color)
-            {
-                return (ushort)(
-                    ((color.R >> 3) << 11)
-                    + ((color.G >> 2) << 5)
-                    + (color.B >> 3));
-            }
-
-            public static Color MixRatio(Color c0, Color c1, int m0, int m1)
-            {
-                int r = (m0 * c0.R + m1 * c1.R) / (m0 + m1);
-                int g = (m0 * c0.G + m1 * c1.G) / (m0 + m1);
-                int b = (m0 * c0.B + m1 * c1.B) / (m0 + m1);
-                return Color.FromArgb(r, g, b);
-            }
-        }
     }
 }
