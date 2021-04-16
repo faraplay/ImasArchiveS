@@ -51,6 +51,7 @@ namespace ImasArchiveApp
                     Rectangles.Add(model);
                     rectLookup.Add(rectangle, model);
                 }
+                sprite.SpriteSheetRectangleModel = model;
             }
         }
 

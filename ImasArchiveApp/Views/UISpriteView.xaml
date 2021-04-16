@@ -11,10 +11,10 @@
     mc:Ignorable="d">
     <TabControl>
         <TabItem Header="Sprite">
-            <local:UIModelRenderer Model="{Binding}" />
+            <local:UIModelDisplay />
         </TabItem>
         <TabItem Header="Spritesheet">
-            <local:UIModelRenderer Model="{Binding Path=ParentSheet}" />
+            <local:UIModelDisplay DataContext="{Binding Path=SpriteSheetRectangleModel}" />
         </TabItem>
     </TabControl>
 </UserControl>

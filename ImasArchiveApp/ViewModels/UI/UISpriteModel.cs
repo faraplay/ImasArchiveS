@@ -16,6 +16,15 @@ namespace ImasArchiveApp
         protected override UIElement UIElement => _sprite;
 
         public UISpriteSheetModel ParentSheet => subcomponent.SpriteSheets[_sprite.srcImageID];
+        public UISpriteSheetRectangleModel SpriteSheetRectangleModel 
+        { 
+            get => spriteSheetRectangleModel; 
+            set
+            {
+                spriteSheetRectangleModel = value;
+                OnPropertyChanged();
+            }
+        }
         public override string ModelName => $"({_sprite.width}x{_sprite.height})";
 
         #region Properties
@@ -36,7 +45,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[1] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -46,7 +55,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[2] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -56,7 +65,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[3] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -66,7 +75,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[4] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -76,7 +85,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[5] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -86,7 +95,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[6] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -96,7 +105,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[7] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -106,7 +115,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.start[8] = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -116,7 +125,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.xpos = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -126,7 +135,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.ypos = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -136,7 +145,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.width = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -146,7 +155,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.height = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -156,7 +165,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.a1 = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -166,7 +175,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.a2 = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -176,7 +185,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b1 = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -186,7 +195,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b2 = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -196,7 +205,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b3 = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -206,7 +215,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.b4 = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -216,7 +225,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.srcImageID = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -226,7 +235,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.alpha = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -236,7 +245,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.red = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -246,7 +255,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.green = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -256,7 +265,7 @@ namespace ImasArchiveApp
             set
             {
                 _sprite.blue = value;
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -306,7 +315,7 @@ namespace ImasArchiveApp
             {
                 _sprite.SourceX = value;
                 ParentSheet.UpdateRectangles();
-				LoadActiveImages();
+                LoadActiveImages();
                 OnPropertyChanged();
             }
         }
@@ -417,7 +426,7 @@ namespace ImasArchiveApp
             {
                 DrawRectangle(drawingContext, colorBrush);
             }
-            else 
+            else
             {
                 double brightness = (red + green + blue) / 3;
                 if (Math.Abs(brightness - 1) < 1 / 255.0)
@@ -484,6 +493,7 @@ namespace ImasArchiveApp
         #region IDisposable
 
         private bool disposed = false;
+        private UISpriteSheetRectangleModel spriteSheetRectangleModel;
 
         protected override void Dispose(bool disposing)
         {

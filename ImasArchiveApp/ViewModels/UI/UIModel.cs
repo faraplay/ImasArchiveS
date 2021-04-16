@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -123,10 +124,17 @@ namespace ImasArchiveApp
                 if (imgName != null)
                 {
                     ReportMessage("Saving image");
-                    ms.Seek(0, SeekOrigin.Begin);
+                    DrawingVisual drawingVisual = new DrawingVisual();
+                    DrawingContext drawingContext = drawingVisual.RenderOpen();
+                    RenderElement(drawingContext);
+                    drawingContext.Close();
+                    RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap(BoundingPixelWidth, BoundingPixelHeight, 96, 96, PixelFormats.Default);
+                    renderTargetBitmap.Render(drawingVisual);
+                    BitmapEncoder bitmapEncoder = new PngBitmapEncoder();
+                    bitmapEncoder.Frames.Add(BitmapFrame.Create(renderTargetBitmap));
                     using (FileStream outStream = new FileStream(imgName, FileMode.Create, FileAccess.Write))
                     {
-                        await ms.CopyToAsync(outStream);
+                        bitmapEncoder.Save(outStream);
                     }
                     ReportMessage("Done.");
                 }

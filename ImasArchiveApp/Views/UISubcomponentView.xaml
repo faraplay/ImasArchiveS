@@ -139,7 +139,7 @@
         <ContentControl Grid.Column="2" Content="{Binding Path=DisplayedModel}">
             <ContentControl.Resources>
                 <DataTemplate DataType="{x:Type local:UIModel}">
-                    <local:UIModelRenderer Model="{Binding}" />
+                    <local:UIModelDisplay />
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
@@ -160,7 +160,7 @@
                         <local:UISpriteView />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type local:UIModel}">
-                        <local:UIModelRenderer Model="{Binding}" />
+                        <local:UIModelDisplay />
                     </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>
