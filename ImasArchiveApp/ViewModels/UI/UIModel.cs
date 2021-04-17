@@ -7,11 +7,11 @@ using System.Windows.Media.Imaging;
 
 namespace ImasArchiveApp
 {
-    public abstract class UIModel : FileModel
+    public abstract class UIModel : RenderableModel
     {
         protected readonly UISubcomponentModel subcomponent;
 
-        protected UIModel(UISubcomponentModel subcomponent, string name) : base(subcomponent, name)
+        protected UIModel(UISubcomponentModel subcomponent, string name) : base(subcomponent, name, subcomponent.GetFileName)
         {
             this.subcomponent = subcomponent;
             //ms = new MemoryStream();
@@ -50,57 +50,5 @@ namespace ImasArchiveApp
                 return _selectCommand;
             }
         }
-
-        private AsyncCommand _saveImageCommand;
-
-        public ICommand SaveImageCommand
-        {
-            get
-            {
-                if (_saveImageCommand == null)
-                {
-                    _saveImageCommand = new AsyncCommand(
-                        () => SaveImage());
-                }
-                return _saveImageCommand;
-            }
-        }
-
-        public abstract int BoundingPixelWidth { get; }
-        public abstract int BoundingPixelHeight { get; }
-
-        private async Task SaveImage()
-        {
-            try
-            {
-                ClearStatus();
-                string imgName = subcomponent.GetFileName.SaveGetFileName("Save Image", "", "Portable Network Graphic (*.png)|*.png");
-                if (imgName != null)
-                {
-                    ReportMessage("Saving image");
-                    DrawingVisual drawingVisual = new DrawingVisual();
-                    DrawingContext drawingContext = drawingVisual.RenderOpen();
-                    RenderElement(drawingContext);
-                    drawingContext.Close();
-                    RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap(BoundingPixelWidth, BoundingPixelHeight, 96, 96, PixelFormats.Default);
-                    renderTargetBitmap.Render(drawingVisual);
-                    BitmapEncoder bitmapEncoder = new PngBitmapEncoder();
-                    bitmapEncoder.Frames.Add(BitmapFrame.Create(renderTargetBitmap));
-                    using (FileStream outStream = new FileStream(imgName, FileMode.Create, FileAccess.Write))
-                    {
-                        bitmapEncoder.Save(outStream);
-                    }
-                    ReportMessage("Done.");
-                }
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-            }
-
-        }
-        public void RenderElement(DrawingContext drawingContext) => RenderElement(drawingContext, ColorMultiplier.One(), true);
-        internal abstract void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop);
-
     }
 }

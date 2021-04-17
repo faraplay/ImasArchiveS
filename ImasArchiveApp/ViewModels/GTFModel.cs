@@ -1,19 +1,18 @@
 ﻿using Imas;
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace ImasArchiveApp
 {
-    public class GTFModel : FileModel
+    public class GTFModel : RenderableModel
     {
+        private readonly GTF gtf;
         private ImageSource _imageSource;
-        private readonly MemoryStream ms;
         private readonly IGetFileName getFileName;
 
-        #region Properties
 
         public ImageSource ImageSource
         {
@@ -25,28 +24,24 @@ namespace ImasArchiveApp
             }
         }
 
-        #endregion Properties
 
-        #region Constructors
-
-        public GTFModel(IReport report, string fileName, IGetFileName getFileName, Stream stream) : base(report, fileName)
+        public GTFModel(IReport report, string fileName, IGetFileName getFileName, Stream stream) : base(report, fileName, getFileName)
         {
             try
             {
                 this.getFileName = getFileName;
-                ms = new MemoryStream();
-                stream.CopyTo(ms);
-                ms.Position = 0;
-                using GTF gtf = GTF.ReadGTF(ms);
-                ms.SetLength(0);
-                gtf.Bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                BitmapImage image = new BitmapImage();
-                image.BeginInit();
-                ms.Seek(0, SeekOrigin.Begin);
-                image.StreamSource = ms;
-                image.EndInit();
-
-                ImageSource = image;
+                gtf = GTF.ReadGTF(stream);
+                _imageSource = BitmapSource.Create(
+                    gtf.Width,
+                    gtf.Height,
+                    96,
+                    96,
+                    PixelFormats.Bgra32,
+                    null,
+                    gtf.BitmapPtr,
+                    4 * gtf.Stride * gtf.Height,
+                    4 * gtf.Stride);
+                _imageSource.Freeze();
             }
             catch (Exception ex)
             {
@@ -58,7 +53,6 @@ namespace ImasArchiveApp
         internal static FileModelFactory.FileModelBuilder Builder { get; set; } =
             (report, filename, getFilename, stream) => new GTFModel(report, filename, getFilename, stream);
 
-        #endregion Constructors
 
         #region IDisposable
 
@@ -70,7 +64,7 @@ namespace ImasArchiveApp
                 return;
             if (disposing)
             {
-                ms?.Dispose();
+                gtf?.Dispose();
             }
             disposed = true;
             base.Dispose(disposing);
@@ -78,49 +72,14 @@ namespace ImasArchiveApp
 
         #endregion IDisposable
 
-        #region Commands
-
-        private AsyncCommand _savePngCommand;
-
-        public IAsyncCommand SavePngCommand
+        public override int BoundingPixelWidth => gtf.Width;
+        public override int BoundingPixelHeight => gtf.Height;
+        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            get
-            {
-                if (_savePngCommand == null)
-                {
-                    _savePngCommand = new AsyncCommand(() => SavePng());
-                }
-                return _savePngCommand;
-            }
+            drawingContext.DrawImage(
+                ImageSource,
+                new Rect(new Size(ImageSource.Width, ImageSource.Height))
+                );
         }
-
-        #endregion Commands
-
-        #region Command Methods
-
-        public async Task SavePng()
-        {
-            try
-            {
-                ClearStatus();
-                string name = FileName.Substring(FileName.LastIndexOf('/') + 1);
-                string nameNoExtension = name.Contains('.') ? name.Substring(0, name.LastIndexOf('.')) : name;
-                string pngName = getFileName.SaveGetFileName("Save As Png", "", nameNoExtension, "PNG file (*.png)|*.png");
-
-                if (pngName != null)
-                {
-                    using FileStream fileStream = new FileStream(pngName, FileMode.Create, FileAccess.Write);
-                    ms.Position = 0;
-                    await ms.CopyToAsync(fileStream);
-                    ReportMessage("Saved to " + pngName);
-                }
-            }
-            catch (Exception ex)
-            {
-                ReportException(ex);
-            }
-        }
-
-        #endregion Command Methods
     }
 }

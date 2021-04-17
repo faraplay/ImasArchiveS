@@ -9,11 +9,11 @@ namespace ImasArchiveApp
     {
 
         public static readonly DependencyProperty ModelProperty =
-            DependencyProperty.Register("Model", typeof(UIModel), typeof(UIModelRenderer), 
+            DependencyProperty.Register("Model", typeof(RenderableModel), typeof(UIModelRenderer), 
                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
-        public UIModel Model
+        public RenderableModel Model
         {
-            get { return (UIModel)GetValue(ModelProperty); }
+            get { return (RenderableModel)GetValue(ModelProperty); }
             set { SetValue(ModelProperty, value); }
         }
 
