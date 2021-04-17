@@ -21,6 +21,7 @@
                 <local:IntToStringConverter x:Key="IntToString" />
                 <local:ByteToStringConverter x:Key="ByteToString" />
                 <local:FloatToStringConverter x:Key="FloatToString" />
+                <local:UIntToStringConverter x:Key="UIntToString" />
             </TextBox.Resources>
             <TextBox.Style>
                 <Style TargetType="TextBox">
@@ -34,6 +35,9 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type sys:Single}">
                             <Setter Property="Text" Value="{Binding Path=PropertyValue, Converter={StaticResource FloatToString}}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type sys:UInt32}">
+                            <Setter Property="Text" Value="{Binding Path=PropertyValue, Converter={StaticResource UIntToString}}" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

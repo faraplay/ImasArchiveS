@@ -13,9 +13,9 @@ namespace Imas.UI
         [Listed(101)]
         public int E1 { get => e1; set => e1 = value; }
         [SerialiseField(102)]
-        public int e2;
+        public uint e2;
         [Listed(102)]
-        public int E2 { get => e2; set => e2 = value; }
+        public uint E2 { get => e2; set => e2 = value; }
 
         [SerialiseField(103, CountField = nameof(childSpriteGroupCount))]
         public List<SpriteGroup> childSpriteGroups;

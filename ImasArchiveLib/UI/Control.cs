@@ -116,9 +116,9 @@
         public float SourceBottom { get => sourceBottom; set => sourceBottom = value; }
 
         [SerialiseField(25)]
-        public int d1;
+        public uint d1;
         [Listed(25)]
-        public int D1 { get => d1; set => d1 = value; }
+        public uint D1 { get => d1; set => d1 = value; }
 
         [SerialiseField(26)]
         public SpriteGroup specialSprite;
