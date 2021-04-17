@@ -170,6 +170,7 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Center" />
             <ScrollViewer Grid.Row="2">
+                <StackPanel Orientation="Vertical">
                 <ItemsControl ItemsSource="{Binding Path=UIProperties}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -177,26 +178,18 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <!--<ContentControl Content="{Binding Path=SelectedModel}">
-                    <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type local:UITextBoxModel}">
-                            <local:UITextBoxPropertyView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type local:UISpriteCollectionModel}">
-                            <local:UISpriteCollectionPropertyView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type local:UIControlModel}">
-                            <local:UIControlPropertyView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type local:UISpriteModel}">
-                            <local:UISpritePropertyView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type local:UISpriteSheetRectangleModel}">
-                            <local:UISpriteSheetRectanglePropertyView />
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type local:UIModel}" />
-                    </ContentControl.Resources>
-                </ContentControl>-->
+                    <ContentControl Content="{Binding Path=SelectedModel}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type local:UISpriteModel}">
+                                <local:UISpritePropertyView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type local:UISpriteSheetRectangleModel}">
+                                <local:UISpriteSheetRectanglePropertyView />
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type local:UIModel}" />
+                        </ContentControl.Resources>
+                    </ContentControl>
+                </StackPanel>
             </ScrollViewer>
         </Grid>
     </Grid>

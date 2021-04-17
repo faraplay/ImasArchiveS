@@ -5,12 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="720"
+    d:DataContext="{d:DesignInstance Type=local:UISpriteModel}"
+    d:DesignHeight="200"
     d:DesignWidth="240"
     mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="90" />
             <ColumnDefinition MinWidth="120" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -18,197 +19,28 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Grid.Column="0">Int0</Label>
+        <Label Grid.Row="0" Grid.Column="0">SourceX</Label>
         <TextBox
             Grid.Row="0"
             Grid.Column="1"
             Padding="4"
-            Text="{Binding Path=Int0}" />
-        <Label Grid.Row="1" Grid.Column="0">Int1</Label>
+            Text="{Binding Path=SourceX}" />
+        <Label Grid.Row="1" Grid.Column="0">SourceY</Label>
         <TextBox
             Grid.Row="1"
             Grid.Column="1"
             Padding="4"
-            Text="{Binding Path=Int1}" />
-        <Label Grid.Row="2" Grid.Column="0">Int2</Label>
+            Text="{Binding Path=SourceY}" />
+        <Label Grid.Row="2" Grid.Column="0">SourceWidth</Label>
         <TextBox
             Grid.Row="2"
             Grid.Column="1"
             Padding="4"
-            Text="{Binding Path=Int2}" />
-        <Label Grid.Row="3" Grid.Column="0">Int3</Label>
+            Text="{Binding Path=SourceWidth}" />
+        <Label Grid.Row="3" Grid.Column="0">SourceHeight</Label>
         <TextBox
             Grid.Row="3"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Int3}" />
-        <Label Grid.Row="4" Grid.Column="0">Int4</Label>
-        <TextBox
-            Grid.Row="4"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Int4}" />
-        <Label Grid.Row="5" Grid.Column="0">Int5</Label>
-        <TextBox
-            Grid.Row="5"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Int5}" />
-        <Label Grid.Row="6" Grid.Column="0">Int6</Label>
-        <TextBox
-            Grid.Row="6"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Int6}" />
-        <Label Grid.Row="7" Grid.Column="0">Int7</Label>
-        <TextBox
-            Grid.Row="7"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Int7}" />
-        <Label Grid.Row="8" Grid.Column="0">Int8</Label>
-        <TextBox
-            Grid.Row="8"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Int8}" />
-        <Label Grid.Row="9" Grid.Column="0">Xpos</Label>
-        <TextBox
-            Grid.Row="9"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Xpos}" />
-        <Label Grid.Row="10" Grid.Column="0">Ypos</Label>
-        <TextBox
-            Grid.Row="10"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Ypos}" />
-        <Label Grid.Row="11" Grid.Column="0">Width</Label>
-        <TextBox
-            Grid.Row="11"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Width}" />
-        <Label Grid.Row="12" Grid.Column="0">Height</Label>
-        <TextBox
-            Grid.Row="12"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Height}" />
-        <Label Grid.Row="13" Grid.Column="0">A1</Label>
-        <TextBox
-            Grid.Row="13"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=A1}" />
-        <Label Grid.Row="14" Grid.Column="0">A2</Label>
-        <TextBox
-            Grid.Row="14"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=A2}" />
-        <Label Grid.Row="15" Grid.Column="0">B1</Label>
-        <TextBox
-            Grid.Row="15"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=B1}" />
-        <Label Grid.Row="16" Grid.Column="0">B2</Label>
-        <TextBox
-            Grid.Row="16"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=B2}" />
-        <Label Grid.Row="17" Grid.Column="0">B3</Label>
-        <TextBox
-            Grid.Row="17"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=B3}" />
-        <Label Grid.Row="18" Grid.Column="0">B4</Label>
-        <TextBox
-            Grid.Row="18"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=B4}" />
-        <Label Grid.Row="19" Grid.Column="0">SourceImageID</Label>
-        <TextBox
-            Grid.Row="19"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=SourceImageID}" />
-        <Label Grid.Row="20" Grid.Column="0">Alpha</Label>
-        <TextBox
-            Grid.Row="20"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Alpha}" />
-        <Label Grid.Row="21" Grid.Column="0">Red</Label>
-        <TextBox
-            Grid.Row="21"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Red}" />
-        <Label Grid.Row="22" Grid.Column="0">Green</Label>
-        <TextBox
-            Grid.Row="22"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Green}" />
-        <Label Grid.Row="23" Grid.Column="0">Blue</Label>
-        <TextBox
-            Grid.Row="23"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=Blue}" />
-        <Label Grid.Row="24" Grid.Column="0">SourceX</Label>
-        <TextBox
-            Grid.Row="24"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=SourceX}" />
-        <Label Grid.Row="25" Grid.Column="0">SourceY</Label>
-        <TextBox
-            Grid.Row="25"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=SourceY}" />
-        <Label Grid.Row="26" Grid.Column="0">SourceWidth</Label>
-        <TextBox
-            Grid.Row="26"
-            Grid.Column="1"
-            Padding="4"
-            Text="{Binding Path=SourceWidth}" />
-        <Label Grid.Row="27" Grid.Column="0">SourceHeight</Label>
-        <TextBox
-            Grid.Row="27"
             Grid.Column="1"
             Padding="4"
             Text="{Binding Path=SourceHeight}" />

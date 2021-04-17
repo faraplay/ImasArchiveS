@@ -30,8 +30,9 @@ namespace ImasArchiveApp
             get => _sprite.srcFracLeft * SrcImgWidth;
             set
             {
+                float srcFracWidth = _sprite.srcFracRight - _sprite.srcFracLeft;
                 _sprite.srcFracLeft = value / SrcImgWidth;
-                _sprite.srcFracRight = _sprite.srcFracLeft + SrcFracWidth;
+                _sprite.srcFracRight = _sprite.srcFracLeft + srcFracWidth;
             }
         }
         internal float SourceYQuiet
@@ -39,27 +40,25 @@ namespace ImasArchiveApp
             get => _sprite.srcFracTop * SrcImgHeight;
             set
             {
+                float srcFracHeight = _sprite.srcFracBottom - _sprite.srcFracTop;
                 _sprite.srcFracTop = value / SrcImgHeight;
-                _sprite.srcFracBottom = _sprite.srcFracTop + SrcFracHeight;
-                OnPropertyChanged();
+                _sprite.srcFracBottom = _sprite.srcFracTop + srcFracHeight;
             }
         }
         internal float SourceWidthQuiet
         {
-            get => SrcFracWidth * SrcImgWidth;
+            get => (_sprite.srcFracRight - _sprite.srcFracLeft) * SrcImgWidth;
             set
             {
                 _sprite.srcFracRight = _sprite.srcFracLeft + (value / SrcImgWidth);
-                OnPropertyChanged();
             }
         }
         internal float SourceHeightQuiet
         {
-            get => SrcFracHeight * SrcImgHeight;
+            get => (_sprite.srcFracBottom - _sprite.srcFracTop) * SrcImgHeight;
             set
             {
                 _sprite.srcFracBottom = _sprite.srcFracTop + (value / SrcImgHeight);
-                OnPropertyChanged();
             }
         }
         //#endregion Quiet
@@ -70,7 +69,7 @@ namespace ImasArchiveApp
             {
                 SourceXQuiet = value;
                 ParentSheet.UpdateRectangles();
-                //LoadActiveImages();
+                InvalidateBrushes();
                 OnPropertyChanged();
             }
         }
@@ -81,7 +80,7 @@ namespace ImasArchiveApp
             {
                 SourceYQuiet = value;
                 ParentSheet.UpdateRectangles();
-                //LoadActiveImages();
+                InvalidateBrushes();
                 OnPropertyChanged();
             }
         }
@@ -92,7 +91,7 @@ namespace ImasArchiveApp
             {
                 SourceWidthQuiet = value;
                 ParentSheet.UpdateRectangles();
-                //LoadActiveImages();
+                InvalidateBrushes();
                 OnPropertyChanged();
             }
         }
@@ -103,7 +102,7 @@ namespace ImasArchiveApp
             {
                 SourceHeightQuiet = value;
                 ParentSheet.UpdateRectangles();
-                //LoadActiveImages();
+                InvalidateBrushes();
                 OnPropertyChanged();
             }
         }
@@ -319,6 +318,18 @@ namespace ImasArchiveApp
                 imageBrush.ViewportUnits = BrushMappingMode.Absolute;
             }
             return imageBrush;
+        }
+
+        private void InvalidateBrushes()
+        {
+            alphaImageBrush = null;
+            whiteImageBrush = null;
+            yellowImageBrush = null;
+            magentaImageBrush = null;
+            cyanImageBrush = null;
+            redImageBrush = null;
+            greenImageBrush = null;
+            blueImageBrush = null;
         }
     }
 }

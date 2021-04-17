@@ -89,19 +89,11 @@
 
         [SerialiseField(24)]
         public float srcFracLeft;
-        [Listed(24)]
-        public float SrcFracLeft { get => srcFracLeft; set => srcFracLeft = value; }
         [SerialiseField(25)]
         public float srcFracTop;
-        [Listed(25)]
-        public float SrcFracTop { get => srcFracTop; set => srcFracTop = value; }
         [SerialiseField(26)]
         public float srcFracRight;
-        [Listed(26)]
-        public float SrcFracRight { get => srcFracRight; set => srcFracRight = value; }
         [SerialiseField(27)]
         public float srcFracBottom;
-        [Listed(27)]
-        public float SrcFracBottom { get => srcFracBottom; set => srcFracBottom = value; }
     }
 }
