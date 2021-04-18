@@ -1,14 +1,10 @@
-﻿using Imas;
-using Imas.Records;
-using Imas.Spreadsheet;
+﻿using Imas.Gtf;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest

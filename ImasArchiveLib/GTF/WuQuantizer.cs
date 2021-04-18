@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Imas
+namespace Imas.Gtf
 {
     partial class WuQuantizer
     {

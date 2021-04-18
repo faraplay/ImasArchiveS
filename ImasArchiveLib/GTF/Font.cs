@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Imas
+namespace Imas.Gtf
 {
     public class Font : IDisposable
     {

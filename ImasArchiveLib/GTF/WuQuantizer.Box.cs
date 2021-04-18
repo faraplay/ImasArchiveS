@@ -1,4 +1,4 @@
-﻿namespace Imas
+﻿namespace Imas.Gtf
 {
     partial class WuQuantizer
     {

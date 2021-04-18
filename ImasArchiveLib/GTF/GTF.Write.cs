@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Imas
+namespace Imas.Gtf
 {
     public partial class GTF
     {

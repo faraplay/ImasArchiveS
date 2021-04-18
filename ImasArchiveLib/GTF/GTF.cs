@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace Imas
+namespace Imas.Gtf
 {
     public partial class GTF : IDisposable
     {

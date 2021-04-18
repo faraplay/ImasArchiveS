@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Imas;
+using Imas.Gtf;
 using Imas.UI;
 
 namespace ImasArchiveApp
