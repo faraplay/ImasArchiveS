@@ -26,24 +26,24 @@ namespace ImasArchiveLibTest
             Assert.IsTrue(eq);
         }
 
-        //[DataTestMethod]
-        //[DataRow("disc/im2nx_font.par", "font")]
-        //public async Task SaveFontCharsTest(string inFile, string expectedDir)
-        //{
-        //    using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
-        //    {
-        //        using Font font = new Font();
-        //        await font.ReadFontPar(inStream);
-        //        font.SaveAllCharBitmaps("tempdir");
-        //    }
+        [DataTestMethod]
+        [DataRow("font/im2nx_font.par", "font/font_chars")]
+        public async Task SaveFontCharsTest(string inFile, string expectedDir)
+        {
+            using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
+            {
+                using Font font = new Font();
+                await font.ReadFontPar(inStream);
+                font.SaveAllCharBitmaps("tempdir");
+            }
 
-        //    bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
-        //    Directory.Delete("tempdir", true);
-        //    Assert.IsTrue(eq);
-        //}
+            bool eq = Compare.CompareDirectories(expectedDir, "tempdir");
+            Directory.Delete("tempdir", true);
+            Assert.IsTrue(eq);
+        }
 
         [DataTestMethod]
-        [DataRow("font/font_chars", "other/font_fromFolder.png")]
+        [DataRow("font/font_chars", "font/font_fromFolder.png")]
         public void ReadFontFolderTest(string inDir, string expectedFile)
         {
             using Font font = new Font();
@@ -67,7 +67,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("font/im2nx_font.par", "other/font_remade.png", "font_remade")]
+        [DataRow("font/im2nx_font.par", "font/font_remade.png", "font/font_remade")]
         public async Task BuildBitmapTest(string inFile, string expectedFile, string expectedDir)
         {
             using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
@@ -130,7 +130,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("font/font_chars", "abcdefghijklmnopqrstuvwxyz", "digraphs")]
+        [DataRow("font/font_chars", "abcdefghijklmnopqrstuvwxyz", "font/digraphs")]
         public void SaveFontDigraphsTest(string inDir, string charset, string expectedDir)
         {
             using Font font = new Font();
@@ -144,7 +144,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("font/font_chars", "abcdefghijklmnopqrstuvwxyz", "other/digraphs.png", "other/digraphs.par")]
+        [DataRow("font/font_chars", "abcdefghijklmnopqrstuvwxyz", "font/digraphs.png", "font/digraphs.par")]
         public async Task AddSpecifiedDigraphsToFontTest(string inDir, string charset, string expectedPng, string expectedPar)
         {
             using (Font font = new Font())
@@ -165,7 +165,7 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("font/im2nx_font.par", "other/newfont.png", "other/newfont.par")]
+        [DataRow("font/im2nx_font.par", "font/newfont.png", "font/newfont.par")]
         public async Task AddAllDigraphsToFontTest(string inFile, string expectedPng, string expectedPar)
         {
             using (FileStream inStream = new FileStream(inFile, FileMode.Open, FileAccess.Read))
