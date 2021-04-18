@@ -25,8 +25,6 @@ namespace Imas.UI
 
         [SerialiseField(104)]
         public uint textAttributes;
-        [Listed(104)]
-        public uint TextAttributes { get => textAttributes; set => textAttributes = value; }
 
         [SerialiseField(105, FixedCount = 16)]
         public byte[] fontNameBuffer;
@@ -48,7 +46,7 @@ namespace Imas.UI
 
         [SerialiseField(108, CountProperty = nameof(TextBufferLength))]
         public byte[] textBuffer;
-        [Listed(108)]
+        [Listed(108, StringMultiline = true)]
         public string Text
         {
             get => ImasEncoding.Custom.GetString(textBuffer);
@@ -66,6 +64,7 @@ namespace Imas.UI
             }
         }
 
+        [Listed(109)]
         public HorizontalAlignment XAlignment
         {
             get => (HorizontalAlignment)(textAttributes & 0x03u);
@@ -74,6 +73,7 @@ namespace Imas.UI
                 textAttributes = (textAttributes & ~0x3u) ^ ((uint)value & 0x3u);
             }
         }
+        [Listed(110)]
         public VerticalAlignment YAlignment
         {
             get => (VerticalAlignment)(textAttributes & 0xCu);
@@ -82,6 +82,7 @@ namespace Imas.UI
                 textAttributes = (textAttributes & ~0xCu) ^ ((uint)value & 0xCu);
             }
         }
+        [Listed(111)]
         public bool Multiline
         {
             get => (textAttributes & 0x10u) != 0;
@@ -93,6 +94,7 @@ namespace Imas.UI
                     textAttributes &= ~0x10u;
             }
         }
+        [Listed(112)]
         public bool WordWrap
         {
             get => (textAttributes & 0x20u) != 0;

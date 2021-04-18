@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Imas.UI;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -11,6 +12,7 @@ namespace ImasArchiveApp
     public class UIElementPropertyModel : INotifyPropertyChanged
     {
         private PropertyInfo PropertyInfo { get; }
+        private ListedAttribute Attribute { get; }
         public override string ToString()
         {
             return $"{ PropertyName }: { PropertyValue }";
@@ -27,11 +29,13 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
+        public bool PropertyStringMultiline => Attribute.StringMultiline;
 
 
         public UIElementPropertyModel(PropertyInfo propertyInfo, Imas.UI.UIElement element)
         {
             PropertyInfo = propertyInfo;
+            Attribute = (ListedAttribute)propertyInfo.GetCustomAttributes(typeof(ListedAttribute), false)[0];
             Element = element;
         }
 

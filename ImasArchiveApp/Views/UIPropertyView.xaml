@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:libgtf="clr-namespace:Imas.Gtf;assembly=ImasArchiveLib"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -16,32 +17,96 @@
             <ColumnDefinition MinWidth="120" />
         </Grid.ColumnDefinitions>
         <Label Grid.Column="0" Content="{Binding Path=PropertyName}" />
-        <TextBox Grid.Column="1" Padding="4">
-            <TextBox.Resources>
+        <ContentControl Grid.Column="1">
+            <ContentControl.Resources>
                 <local:IntToStringConverter x:Key="IntToString" />
                 <local:ByteToStringConverter x:Key="ByteToString" />
                 <local:FloatToStringConverter x:Key="FloatToString" />
                 <local:UIntToStringConverter x:Key="UIntToString" />
-            </TextBox.Resources>
-            <TextBox.Style>
-                <Style TargetType="TextBox">
-                    <Setter Property="Text" Value="{Binding Path=PropertyValue}" />
+                <local:HorizontalAlignmentToInt x:Key="HorizontalToInt" />
+                <local:VerticalAlignmentToInt x:Key="VerticalToInt" />
+            </ContentControl.Resources>
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="Content">
+                        <Setter.Value>
+                            <TextBox Padding="4" Text="{Binding Path=PropertyValue}" />
+                        </Setter.Value>
+                    </Setter>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type sys:Int32}">
-                            <Setter Property="Text" Value="{Binding Path=PropertyValue, Converter={StaticResource IntToString}}" />
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <TextBox Padding="4" Text="{Binding Path=PropertyValue, Converter={StaticResource IntToString}}" />
+                                </Setter.Value>
+                            </Setter>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type sys:Byte}">
-                            <Setter Property="Text" Value="{Binding Path=PropertyValue, Converter={StaticResource ByteToString}}" />
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <TextBox Padding="4" Text="{Binding Path=PropertyValue, Converter={StaticResource ByteToString}}" />
+                                </Setter.Value>
+                            </Setter>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type sys:Single}">
-                            <Setter Property="Text" Value="{Binding Path=PropertyValue, Converter={StaticResource FloatToString}}" />
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <TextBox Padding="4" Text="{Binding Path=PropertyValue, Converter={StaticResource FloatToString}}" />
+                                </Setter.Value>
+                            </Setter>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type sys:UInt32}">
-                            <Setter Property="Text" Value="{Binding Path=PropertyValue, Converter={StaticResource UIntToString}}" />
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <TextBox Padding="4" Text="{Binding Path=PropertyValue, Converter={StaticResource UIntToString}}" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type sys:Boolean}">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <CheckBox Margin="4" IsChecked="{Binding Path=PropertyValue}" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type libgtf:HorizontalAlignment}">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <ComboBox Padding="4" SelectedIndex="{Binding Path=PropertyValue, Converter={StaticResource HorizontalToInt}}">
+                                        <ComboBoxItem>Left</ComboBoxItem>
+                                        <ComboBoxItem>Center</ComboBoxItem>
+                                        <ComboBoxItem>Right</ComboBoxItem>
+                                        <ComboBoxItem>None</ComboBoxItem>
+                                    </ComboBox>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type libgtf:VerticalAlignment}">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <ComboBox Padding="4" SelectedIndex="{Binding Path=PropertyValue, Converter={StaticResource VerticalToInt}}">
+                                        <ComboBoxItem>Top</ComboBoxItem>
+                                        <ComboBoxItem>Center</ComboBoxItem>
+                                        <ComboBoxItem>Bottom</ComboBoxItem>
+                                        <ComboBoxItem>None</ComboBoxItem>
+                                    </ComboBox>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=PropertyStringMultiline}" Value="True">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <TextBox
+                                        Padding="4"
+                                        AcceptsReturn="True"
+                                        Text="{Binding Path=PropertyValue}"
+                                        TextWrapping="Wrap" />
+                                </Setter.Value>
+                            </Setter>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </TextBox.Style>
-        </TextBox>
+            </ContentControl.Style>
+        </ContentControl>
     </Grid>
 </UserControl>

@@ -21,6 +21,6 @@ namespace Imas.UI
         }
 
         // This is a named argument
-        public int NamedInt { get; set; }
+        public bool StringMultiline { get; set; }
     }
 }
