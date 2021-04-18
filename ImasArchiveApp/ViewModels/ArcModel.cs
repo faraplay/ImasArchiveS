@@ -325,13 +325,10 @@ namespace ImasArchiveApp
                 {
                     throw new FileNotFoundException("File im2nx_font.par not found. Make sure you are opening disc.arc");
                 }
-                using (Font font = new Font())
+                using (Stream parStream = await fontEntry.GetData())
                 {
-                    using (Stream parStream = await fontEntry.GetData())
-                    {
-                        ReportMessage("Reading im2nx_font.par...");
-                        await Task.Run(() => font.ReadFontPar(parStream));
-                    }
+                    ReportMessage("Reading im2nx_font.par...");
+                    Font font = await Task.Run(() => Font.CreateFromPar(parStream));
                     ReportMessage("Patching font...");
                     await Task.Run(() => font.AddDigraphs());
 

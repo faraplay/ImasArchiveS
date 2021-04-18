@@ -12,41 +12,26 @@ namespace Imas.Gtf
         public static async Task WriteGTF(Stream outStream, Bitmap bitmap, int encodingType)
         {
             GTF gtf = CreateFromBitmap(bitmap, encodingType);
-            using Stream gtfStream = gtf.OpenStream();
+            using Stream gtfStream = gtf.GetGtfStream();
             await gtfStream.CopyToAsync(outStream);
         }
 
-        public static GTF CreateFromBitmap(Bitmap bitmap, int encodingType)
-        {
-            int width = bitmap.Width;
-            int height = bitmap.Height;
-            int stride = width;
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            int[] bitmapArray = new int[stride * height];
-            GTF gtf = new GTF(bitmap, bitmapPtr, bitmapArray, encodingType, width, height, stride);
-            gtf.LoadBitmapIntoArray(bitmap);
-            return gtf;
-        }
-
-        private void LoadBitmapIntoArray(Bitmap bitmap)
+        private void LoadBitmap(Bitmap bitmap)
         {
             BitmapData bitmapData = bitmap.LockBits(
                 new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                 ImageLockMode.ReadWrite,
                 PixelFormat.Format32bppArgb);
             IntPtr bitmapPtr = bitmapData.Scan0;
-            Marshal.Copy(bitmapPtr, pixelDataArray, 0, Stride * Height);
-            Marshal.Copy(pixelDataArray, 0, pixelDataPtr, Stride * Height);
+            Marshal.Copy(bitmapPtr, pixelData, 0, Stride * Height);
+            Marshal.Copy(pixelData, 0, bitmapDataPtr, Stride * Height);
             bitmap.UnlockBits(bitmapData);
         }
 
-        public Stream OpenStream()
+        public void LoadPixelData(int[] newPixelData)
         {
-            MemoryStream memStream = new MemoryStream();
-            WriteHeader(memStream);
-            WriteBody(memStream);
-            memStream.Position = 0;
-            return memStream;
+            Array.Copy(newPixelData, pixelData, Stride * Height);
+            Marshal.Copy(pixelData, 0, bitmapDataPtr, Stride * Height);
         }
 
         private void WriteHeader(Stream stream)
@@ -163,7 +148,7 @@ namespace Imas.Gtf
 
         private void WriteIndexedPixels(Binary binary)
         {
-            (byte[] indexedData, uint[] palette) = WuQuantizer.QuantizeImage(BitmapArray, 0x100);
+            (byte[] indexedData, uint[] palette) = WuQuantizer.QuantizeImage(PixelData, 0x100);
             Order order = new Order(Width, Height);
             for (int n = 0; n < Width * Height; n++)
             {
@@ -189,11 +174,11 @@ namespace Imas.Gtf
             {
                 int x, y;
                 (x, y) = order.GetXY();
-                uint b = (uint)pixelDataArray[y * Stride + x];
-                if ((b & 0xFF000000) == 0)
-                {
-                    b = 0x00FFFFFF;
-                }
+                uint b = (uint)pixelData[y * Stride + x];
+                //if ((b & 0xFF000000) == 0)
+                //{
+                //    b = 0x00FFFFFF;
+                //}
                 writePixel(binary, b);
             }
         }
@@ -234,11 +219,11 @@ namespace Imas.Gtf
                     {
                         for (int xx = 0; xx < 4; xx++)
                         {
-                            int b = pixelDataArray[(4 * y + yy) * Stride + 4 * x + xx];
-                            if ((b & 0xFF000000) == 0)
-                            {
-                                b = 0x00FFFFFF;
-                            }
+                            int b = pixelData[(4 * y + yy) * Stride + 4 * x + xx];
+                            //if ((b & 0xFF000000) == 0)
+                            //{
+                            //    b = 0x00FFFFFF;
+                            //}
                             colors[4 * yy + xx] = Color.FromArgb(b);
                         }
                     }

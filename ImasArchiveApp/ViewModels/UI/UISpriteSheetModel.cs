@@ -36,7 +36,7 @@ namespace ImasArchiveApp
                 96,
                 PixelFormats.Bgra32,
                 null,
-                gtf.BitmapPtr,
+                gtf.BitmapDataPtr,
                 4 * gtf.Stride * gtf.Height,
                 4 * gtf.Stride);
             _bitmapSource.Freeze();
@@ -116,7 +116,7 @@ namespace ImasArchiveApp
                 96,
                 PixelFormats.Bgra32,
                 null,
-                gtf.BitmapPtr,
+                gtf.BitmapDataPtr,
                 4 * gtf.Stride * gtf.Height,
                 4 * gtf.Stride);
         }

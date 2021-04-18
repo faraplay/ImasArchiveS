@@ -103,10 +103,9 @@ namespace ImasArchiveApp
                     if (TextBox.font == null)
                     {
                         ReportMessage("Loading font");
-                        TextBox.font = new Imas.Gtf.Font();
                         using (MemoryStream stream = new MemoryStream(FontResource.im2nx_font))
                         {
-                            await TextBox.font.ReadFontPar(stream);
+                            TextBox.font = await Imas.Gtf.Font.CreateFromPar(stream);
                         }
                         ReportMessage("Loaded font.");
 

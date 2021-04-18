@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -8,30 +7,6 @@ namespace Imas.Gtf
 {
     public partial class GTF
     {
-        public static GTF ReadGTF(Stream stream)
-        {
-            ReadHeader(stream, out int type, out int width, out int height, out Color[] palette);
-
-            int stride = width;
-            int[] bitmapArray = (type & 15) switch
-            {
-                1 => ReadPixels(stream, width, height, stream => GetPixelIndexed(stream, palette), stride),
-                2 => ReadPixels(stream, width, height, GetPixel1555, stride),
-                3 => ReadPixels(stream, width, height, GetPixel4444, stride),
-                5 => ReadPixels(stream, width, height, GetPixel8888, stride),
-                6 => ReadBlocks(stream, width, height, GetBlockNoAlpha, stride),
-                7 => ReadBlocks(stream, width, height, GetBlock4Alpha, stride),
-                8 => ReadBlocks(stream, width, height, GetBlock8RelAlpha, stride),
-                0xE => ReadPixels(stream, width, height, GetPixel8888, stride),
-                _ => throw new NotSupportedException()
-            };
-
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-            return new GTF(bitmap, bitmapPtr, bitmapArray, type, width, height, stride);
-        }
-
         private static void ReadHeader(Stream stream, out int type, out int width, out int height, out Color[] palette)
         {
             long pos = stream.Position;
@@ -87,6 +62,11 @@ namespace Imas.Gtf
                 }
                 stream.Position = pos + 128;
             }
+        }
+
+        public void CopyPixelDataToBitmap()
+        {
+            Marshal.Copy(PixelData, 0, BitmapDataPtr, Stride * Height);
         }
 
         private static int[] ReadPixels(Stream stream, int width, int height, Func<Stream, uint> getPixel, int stride)

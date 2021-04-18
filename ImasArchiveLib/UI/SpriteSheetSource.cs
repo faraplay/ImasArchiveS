@@ -25,7 +25,7 @@ namespace Imas.UI
                 try
                 {
                     imageSource.filenames.Add(entry.FileName);
-                    GTF gtf = GTF.ReadGTF(await entry.GetData());
+                    GTF gtf = GTF.CreateFromGtfStream(await entry.GetData());
                     imageSource.gtfs.Add(gtf);
                 }
                 catch (Exception)
@@ -50,7 +50,7 @@ namespace Imas.UI
             using MemoryStream ms = new MemoryStream();
             await GTF.WriteGTF(ms, bitmap, encodingType);
             ms.Seek(0, SeekOrigin.Begin);
-            gtfs[index] = GTF.ReadGTF(ms);
+            gtfs[index] = GTF.CreateFromGtfStream(ms);
             ms.Seek(0, SeekOrigin.Begin);
             await gtfSource.Entries[index].SetData(ms);
         }

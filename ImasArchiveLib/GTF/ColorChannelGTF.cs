@@ -128,7 +128,7 @@ namespace Imas.Gtf
 
         private IntPtr CreatePixelData(uint pixelMask)
         {
-            int[] newData = (int[])Gtf.BitmapArray.Clone();
+            int[] newData = (int[])Gtf.PixelData.Clone();
             for (int i = 0; i < newData.Length; i++)
             {
                 newData[i] = (int)((newData[i] & pixelMask) | 0xFF000000);

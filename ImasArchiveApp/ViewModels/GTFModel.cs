@@ -31,7 +31,7 @@ namespace ImasArchiveApp
             try
             {
                 this.getFileName = getFileName;
-                gtf = GTF.ReadGTF(stream);
+                gtf = GTF.CreateFromGtfStream(stream);
                 _imageSource = BitmapSource.Create(
                     gtf.Width,
                     gtf.Height,
@@ -39,7 +39,7 @@ namespace ImasArchiveApp
                     96,
                     PixelFormats.Bgra32,
                     null,
-                    gtf.BitmapPtr,
+                    gtf.BitmapDataPtr,
                     4 * gtf.Stride * gtf.Height,
                     4 * gtf.Stride);
                 _imageSource.Freeze();
