@@ -318,12 +318,11 @@ namespace Imas
 
         #region Write GTF
 
-        public static async Task WriteGTF(Stream stream, Bitmap bitmap, int encodingType)
+        public static async Task WriteGTF(Stream outStream, Bitmap bitmap, int encodingType)
         {
             GTF gtf = CreateFromBitmap(bitmap, encodingType);
-
-            gtf.WriteHeader(stream);
-            await gtf.WriteGTFBody(stream);
+            using Stream gtfStream = gtf.OpenStream();
+            await gtfStream.CopyToAsync(outStream);
         }
 
         public static GTF CreateFromBitmap(Bitmap bitmap, int encodingType)
@@ -348,6 +347,15 @@ namespace Imas
             Marshal.Copy(bitmapPtr, pixelDataArray, 0, Stride * Height);
             Marshal.Copy(pixelDataArray, 0, pixelDataPtr, Stride * Height);
             bitmap.UnlockBits(bitmapData);
+        }
+
+        public Stream OpenStream()
+        {
+            MemoryStream memStream = new MemoryStream();
+            WriteHeader(memStream);
+            WriteBody(memStream);
+            memStream.Position = 0;
+            return memStream;
         }
 
         private void WriteHeader(Stream stream)
@@ -425,14 +433,13 @@ namespace Imas
             stream.Write(new byte[0x2C]);
         }
 
-        private async Task WriteGTFBody(Stream stream)
+        private void WriteBody(Stream stream)
         {
-            using MemoryStream memStream = new MemoryStream();
-            Binary binary = new Binary(memStream, true);
+            Binary binary = new Binary(stream, true);
             switch (Type & 15)
             {
                 case 1:
-                    WriteGTFIndexed(binary);
+                    WriteIndexedPixels(binary);
                     break;
 
                 case 2:
@@ -461,12 +468,9 @@ namespace Imas
                 default:
                     throw new NotSupportedException();
             }
-
-            memStream.Position = 0;
-            await memStream.CopyToAsync(stream);
         }
 
-        private void WriteGTFIndexed(Binary binary)
+        private void WriteIndexedPixels(Binary binary)
         {
             (byte[] indexedData, uint[] palette) = WuQuantizer.QuantizeImage(BitmapArray, 0x100);
             Order order = new Order(Width, Height);
@@ -485,8 +489,6 @@ namespace Imas
                 binary.WriteByte((byte)((palette[i] & 0x00FF0000) >> 16));
             }
         }
-
-        #region Write Pixels
 
         private void WritePixels(Binary binary, Action<Binary, uint> writePixel)
         {
@@ -529,8 +531,6 @@ namespace Imas
         {
             binary.WriteUInt32(b);
         }
-
-        #endregion Write Pixels
 
         private void WriteBlocks(Stream stream, Action<Stream, Color[]> writeBlock)
         {
