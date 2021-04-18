@@ -5,7 +5,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -173,6 +175,39 @@ namespace ImasArchiveLibTest
             using Bitmap bitmap = new Bitmap(fileName);
             using FileStream outStream = new FileStream(outGtf, FileMode.Create, FileAccess.Write);
             await GTF.WriteGTF(outStream, bitmap, type);
+        }
+
+        [DataTestMethod]
+        [DataRow("gtf/produceMenuIcon.png", "gtf/indexed/produceMenuIcon.png")]
+        [DataRow("gtf/sakura.png", "gtf/indexed/sakura.png")]
+        [DataRow("gtf/bg2d_0065.png", "gtf/indexed/bg2d_0065.png")]
+        public void MyQuantiserTest(string fileName, string outName)
+        {
+            using Bitmap bitmap = new Bitmap(fileName);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format32bppArgb);
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            int[] pixelDataArray = new int[bitmap.Width * bitmap.Height];
+            Marshal.Copy(bitmapPtr, pixelDataArray, 0, bitmap.Width * bitmap.Height);
+            bitmap.UnlockBits(bitmapData);
+            byte[] indexedData;
+            uint[] palette;
+
+            (indexedData, palette) = WuQuantizer.QuantizeImage(pixelDataArray, 256);
+
+            IntPtr newPtr = Marshal.AllocHGlobal(bitmap.Width * bitmap.Height);
+            Marshal.Copy(indexedData, 0, newPtr, bitmap.Width * bitmap.Height);
+            Bitmap newBitmap = new Bitmap(bitmap.Width, bitmap.Height, bitmap.Width, PixelFormat.Format8bppIndexed, newPtr);
+            ColorPalette colorPalette = newBitmap.Palette;
+            for (int i = 0; i < 256; i++)
+            {
+                colorPalette.Entries[i] = (i < palette.Length) ? Color.FromArgb((int)palette[i]) : Color.Transparent;
+            }
+            newBitmap.Palette = colorPalette;
+            newBitmap.Save(outName, ImageFormat.Png);
+            Marshal.FreeHGlobal(newPtr);
         }
     }
 }

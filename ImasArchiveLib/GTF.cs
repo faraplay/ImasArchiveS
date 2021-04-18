@@ -468,49 +468,21 @@ namespace Imas
 
         private void WriteGTFIndexed(Binary binary)
         {
-            //nQuant.WuQuantizer wuQuantizer = new nQuant.WuQuantizer();
-            //using Bitmap qBitmap = (Bitmap)wuQuantizer.QuantizeImage(bitmap);
-            using Bitmap qBitmap = MyQuantizer.QuantizeImage(Bitmap);
-
-            if (qBitmap.PixelFormat != PixelFormat.Format8bppIndexed)
-                throw new NotSupportedException("Wrong pixel format - expected 8bppIndexed");
-            int pixelCount = qBitmap.Width * qBitmap.Height;
-
-            BitmapData bitmapData = qBitmap.LockBits(
-                new Rectangle(0, 0, qBitmap.Width, qBitmap.Height),
-                ImageLockMode.ReadWrite,
-                PixelFormat.Format8bppIndexed);
-            IntPtr bitmapPtr = bitmapData.Scan0;
-            int stride = bitmapData.Stride;
-            byte[] bitmapArray = new byte[stride * qBitmap.Height];
-            Marshal.Copy(bitmapPtr, bitmapArray, 0, stride * qBitmap.Height);
-            qBitmap.UnlockBits(bitmapData);
-
-            Order order = new Order(qBitmap.Width, qBitmap.Height);
-            for (int n = 0; n < pixelCount; n++)
+            (byte[] indexedData, uint[] palette) = WuQuantizer.QuantizeImage(BitmapArray, 0x100);
+            Order order = new Order(Width, Height);
+            for (int n = 0; n < Width * Height; n++)
             {
                 int x, y;
                 (x, y) = order.GetXY();
-                byte b = bitmapArray[y * stride + x];
+                byte b = indexedData[y * Stride + x];
                 binary.WriteByte(b);
             }
-
-            ColorPalette palette = qBitmap.Palette;
             for (int i = 0; i < 0x100; i++)
             {
-                binary.WriteByte(palette.Entries[i].A);
-                if (palette.Entries[i].A == 0)
-                {
-                    binary.WriteByte(0xFF);
-                    binary.WriteByte(0xFF);
-                    binary.WriteByte(0xFF);
-                }
-                else
-                {
-                    binary.WriteByte(palette.Entries[i].B);
-                    binary.WriteByte(palette.Entries[i].G);
-                    binary.WriteByte(palette.Entries[i].R);
-                }
+                binary.WriteByte((byte)((palette[i] & 0xFF000000) >> 24));
+                binary.WriteByte((byte)((palette[i] & 0x000000FF) >> 0));
+                binary.WriteByte((byte)((palette[i] & 0x0000FF00) >> 8));
+                binary.WriteByte((byte)((palette[i] & 0x00FF0000) >> 16));
             }
         }
 
