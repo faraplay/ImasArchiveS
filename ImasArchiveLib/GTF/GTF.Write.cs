@@ -39,6 +39,12 @@ namespace Imas.Gtf
             bitmap.UnlockBits(bitmapData);
         }
 
+        public void LoadPixelData(int[] newPixelData)
+        {
+            Array.Copy(newPixelData, pixelData, Stride * Height);
+            Marshal.Copy(pixelData, 0, bitmapDataPtr, Stride * Height);
+        }
+
         public Stream OpenStream()
         {
             MemoryStream memStream = new MemoryStream();

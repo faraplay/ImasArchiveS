@@ -24,10 +24,7 @@ namespace Imas.Gtf
                 0xE => ReadPixels(stream, width, height, GetPixel8888, stride),
                 _ => throw new NotSupportedException()
             };
-
-            GTF newGtf = new GTF(pixelData, type, width, height, stride);
-            newGtf.CopyPixelDataToBitmap();
-            return newGtf;
+            return CreateFromPixelData(pixelData, type, width, height, stride);
         }
 
         private static void ReadHeader(Stream stream, out int type, out int width, out int height, out Color[] palette)
@@ -85,6 +82,13 @@ namespace Imas.Gtf
                 }
                 stream.Position = pos + 128;
             }
+        }
+
+        public static GTF CreateFromPixelData(int[] pixelData, int encodingType, int width, int height, int stride)
+        {
+            GTF gtf = new GTF(pixelData, encodingType, width, height, stride);
+            gtf.CopyPixelDataToBitmap();
+            return gtf;
         }
 
         public void CopyPixelDataToBitmap()
