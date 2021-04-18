@@ -37,10 +37,6 @@ namespace Imas.Gtf
             if (disposing)
             {
                 ClearBigBitmap();
-                foreach (CharData c in chars)
-                {
-                    c?.Dispose();
-                }
             }
         }
 

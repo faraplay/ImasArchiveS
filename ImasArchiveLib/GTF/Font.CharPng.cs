@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Imas.Gtf
 {
@@ -11,11 +13,13 @@ namespace Imas.Gtf
         {
             DirectoryInfo dInfo = new DirectoryInfo(destDir);
             dInfo.Create();
-            UseCharBitmaps();
+            UpdateBigBitmapPixelData();
+            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
             SaveCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
             for (int i = 0; i < chars.Length; i++)
             {
-                chars[i].bitmap.Save(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png", ImageFormat.Png);
+                using FileStream fileStream = new FileStream($"{dInfo.FullName}\\{chars[i].key:X4}.png", FileMode.Create);
+                SavePngFromPixelData(fileStream, charBitmaps[chars[i].key], chars[i].datawidth, chars[i].dataheight);
             }
         }
 
@@ -40,14 +44,45 @@ namespace Imas.Gtf
             if (!dInfo.Exists)
                 throw new FileNotFoundException();
             LoadCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
+            Dictionary<ushort, int[]> charBitmaps = new Dictionary<ushort, int[]>();
             for (int i = 0; i < chars.Length; i++)
             {
-                chars[i].bitmap = new Bitmap(dInfo.FullName + "\\" + chars[i].key.ToString("X4") + ".png");
-                chars[i].datawidth = (byte)chars[i].bitmap.Width;
-                chars[i].dataheight = (byte)chars[i].bitmap.Height;
+                using Bitmap bitmap = new Bitmap($"{dInfo.FullName}\\{chars[i].key:X4}.png");
+                charBitmaps.Add(chars[i].key,
+                    GetPixelData(
+                        bitmap,
+                        out int width,
+                        out int height));
+                if (width > 255 || height > 255)
+                    throw new Exception("Bitmap is too big for a character (should be at most 255x255 px).");
+                chars[i].datawidth = (byte)width;
+                chars[i].dataheight = (byte)height;
             }
-            charsHaveBitmaps = true;
+            BuildBigBitmap(charBitmaps, chars);
             BuildTree();
+        }
+        private Dictionary<ushort, int[]> CharBitmapsFromFile(string srcDir)
+        {
+            DirectoryInfo dInfo = new DirectoryInfo(srcDir);
+            if (!dInfo.Exists)
+                throw new FileNotFoundException();
+            LoadCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
+            Dictionary<ushort, int[]> charBitmaps = new Dictionary<ushort, int[]>();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                using Bitmap bitmap = new Bitmap($"{dInfo.FullName}\\{chars[i].key:X4}.png");
+                charBitmaps.Add(chars[i].key,
+                    GetPixelData(
+                        bitmap,
+                        out int width,
+                        out int height));
+                if (width > 255 || height > 255)
+                    throw new Exception("Bitmap is too big for a character (should be at most 255x255 px).");
+                chars[i].datawidth = (byte)width;
+                chars[i].dataheight = (byte)height;
+            }
+            BuildTree();
+            return charBitmaps;
         }
 
         private void LoadCharBitmapExtraData(string inFile)

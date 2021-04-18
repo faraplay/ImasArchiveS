@@ -57,7 +57,7 @@ namespace Imas.Gtf
             int gtfPad, nxPad, nxpPad;
             using (MemoryStream memStream = new MemoryStream())
             {
-                UseBigBitmap();
+                //UseBigBitmap();
                 BuildTree();
 
                 long pos = 0;
@@ -112,7 +112,11 @@ namespace Imas.Gtf
                 await memStream.CopyToAsync(stream);
             }
 
-            await GTF.WriteGTF(stream, BigBitmap, 0x83);
+            //await GTF.WriteGTF(stream, BigBitmap, 0x83);
+            using (GTF gtf = GTF.CreateFromPixelData(BigBitmapPixelData, 0x83, BigBitmapWidth, BigBitmapHeight, BigBitmapStride))
+            {
+                await gtf.GetGtfStream().CopyToAsync(stream);
+            }
             await stream.WriteAsync(zeros, 0, gtfPad);
 
             await WritePaf(stream, false, nxFixedWidth);

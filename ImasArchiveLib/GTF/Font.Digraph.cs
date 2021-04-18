@@ -21,7 +21,6 @@ namespace Imas.Gtf
         // Do not rebuild big bitmap after calling this function!
         private void AddSpaceDigraphsToFont(char[] charset)
         {
-            UseBigBitmap();
             List<CharData> list = new List<CharData>();
             foreach (char char1 in charset)
             {
@@ -36,7 +35,6 @@ namespace Imas.Gtf
                 charsNew.Add(new CharData
                 {
                     key = (ushort)(((c.key & 0xFF | 0x80) << 8) + 0xA0),
-                    bitmap = null,
                     datawidth = c.datawidth,
                     dataheight = c.dataheight,
                     datax = c.datax,
@@ -50,7 +48,6 @@ namespace Imas.Gtf
                     charsNew.Add(new CharData
                     {
                         key = (ushort)(0xA000 + (c.key & 0xFF | 0x80)),
-                        bitmap = null,
                         datawidth = c.datawidth,
                         dataheight = c.dataheight,
                         datax = c.datax,
@@ -68,7 +65,6 @@ namespace Imas.Gtf
         // Do not rebuild big bitmap after calling this function!
         private void AddAlternateASCIIToFont(char[] charset)
         {
-            UseBigBitmap();
             List<CharData> list = new List<CharData>();
             foreach (char char1 in charset)
             {
@@ -83,7 +79,6 @@ namespace Imas.Gtf
                 charsNew.Add(new CharData
                 {
                     key = (ushort)((c.key & 0xFF | 0x80) << 8),
-                    bitmap = null,
                     datawidth = c.datawidth,
                     dataheight = c.dataheight,
                     datax = c.datax,
@@ -99,7 +94,7 @@ namespace Imas.Gtf
 
         public void AddDigraphsToFont(char[] charset1, char[] charset2)
         {
-            UseCharBitmaps();
+            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
             List<CharData> list1 = new List<CharData>();
             foreach (char char1 in charset1)
             {
@@ -120,16 +115,21 @@ namespace Imas.Gtf
             {
                 foreach (CharData c2 in list2)
                 {
-                    charsNew.Add(CreateDigraph(c1, c2));
+                    (CharData newC, int[] newPixelData) = CreateDigraph(
+                        c1, charBitmaps[c1.key],
+                        c2, charBitmaps[c2.key]);
+                    charBitmaps.Add(newC.key, newPixelData);
+                    charsNew.Add(newC);
                 }
             }
             chars = charsNew.ToArray();
+            BuildBigBitmap(charBitmaps, chars);
             BuildTree();
         }
 
         public void CreateDigraphs(string destDir, char[] charset1, char[] charset2)
         {
-            UseCharBitmaps();
+            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
             DirectoryInfo dInfo = new DirectoryInfo(destDir);
             dInfo.Create();
             List<CharData> list1 = new List<CharData>();
@@ -150,14 +150,16 @@ namespace Imas.Gtf
             {
                 foreach (CharData c2 in list2)
                 {
-                    using CharData c = CreateDigraph(c1, c2);
-                    c.bitmap.Save(dInfo.FullName + "\\" + c1.key.ToString("X4") + c2.key.ToString("X4") + ".png",
-                        ImageFormat.Png);
+                    (CharData newC, int[] newPixelData) = CreateDigraph(
+                        c1, charBitmaps[c1.key],
+                        c2, charBitmaps[c2.key]);
+                    using FileStream fileStream = new FileStream($"{dInfo.FullName}\\{c1.key:X4}{c2.key:X4}.png", FileMode.Create);
+                    SavePngFromPixelData(fileStream, newPixelData, newC.datawidth, newC.dataheight);
                 }
             }
         }
 
-        private CharData CreateDigraph(CharData c1, CharData c2)
+        private (CharData, int[]) CreateDigraph(CharData c1, int[] pix1, CharData c2, int[] pix2)
         {
             int offsetxmin = Math.Min(c1.offsetx, c2.offsetx + c1.width);
             int offsetymin = Math.Min(c1.offsety, c2.offsety);
@@ -165,27 +167,51 @@ namespace Imas.Gtf
             int offsetymax = Math.Max(c1.offsety + c1.dataheight, c2.offsety + c2.dataheight);
             int width = offsetxmax - offsetxmin;
             int height = offsetymax - offsetymin;
-            Bitmap bitmap = new Bitmap(width, height);
 
-            using (Graphics graphics = Graphics.FromImage(bitmap))
+            int[] newPixelData = new int[width * height];
+
+            int x = c1.offsetx - offsetxmin;
+            int y = c1.offsety - offsetymin;
+            for (int yy = 0; yy < c1.dataheight; ++yy)
             {
-                graphics.DrawImage(c1.bitmap, c1.offsetx - offsetxmin, c1.offsety - offsetymin);
-                graphics.DrawImage(c2.bitmap, c2.offsetx + c1.width - offsetxmin, c2.offsety - offsetymin);
+                for (int xx = 0; xx < c1.datawidth; ++xx)
+                {
+                    newPixelData[(y + yy) * width + (x + xx)] = pix1[yy * c1.datawidth + xx];
+                }
+            }
+            x = c2.offsetx - offsetxmin + c1.width;
+            y = c2.offsety - offsetymin;
+            for (int yy = 0; yy < c2.dataheight; ++yy)
+            {
+                for (int xx = 0; xx < c2.datawidth; ++xx)
+                {
+                    Color colorBottom = Color.FromArgb(newPixelData[(y + yy) * width + (x + xx)]);
+                    Color colorTop = Color.FromArgb(pix2[yy * c2.datawidth + xx]);
+                    float bottomAFrac = (colorBottom.A / 255f);
+                    float topAFrac = (colorTop.A / 255f);
+                    float newA = (colorBottom.A * (1 - topAFrac)) + colorTop.A;
+                    float newR = (colorBottom.R * bottomAFrac * (1f - topAFrac)) + (colorTop.R * topAFrac);
+                    float newG = (colorBottom.G * bottomAFrac * (1f - topAFrac)) + (colorTop.G * topAFrac);
+                    float newB = (colorBottom.B * bottomAFrac * (1f - topAFrac)) + (colorTop.B * topAFrac);
+                    float newAFrac = newA / 255f;
+                    Color newColor = newA == 0 ? Color.Transparent : Color.FromArgb(
+                        (int)newA,
+                        (int)(newR / newAFrac),
+                        (int)(newG / newAFrac),
+                        (int)(newB / newAFrac));
+                    newPixelData[(y + yy) * width + (x + xx)] = newColor.ToArgb();
+                }
             }
 
-            //    CopyCharBitmap(bitmap, c1, c1.offsetx - offsetxmin, c1.offsety - offsetymin);
-            //CopyCharBitmap(bitmap, c2, c2.offsetx + c1.width - offsetxmin, c2.offsety - offsetymin);
-
-            return new CharData
+            return (new CharData
             {
                 key = (ushort)(((c1.key & 0xFF | 0x80) << 8) + (c2.key & 0xFF | 0x80)),
-                bitmap = bitmap,
                 datawidth = (byte)width,
                 dataheight = (byte)height,
                 offsetx = (short)offsetxmin,
                 offsety = (short)offsetymin,
                 width = (short)(c1.width + c2.width)
-            };
+            }, newPixelData);
         }
     }
 }

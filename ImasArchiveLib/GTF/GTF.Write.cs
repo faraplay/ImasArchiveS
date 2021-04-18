@@ -175,10 +175,10 @@ namespace Imas.Gtf
                 int x, y;
                 (x, y) = order.GetXY();
                 uint b = (uint)pixelData[y * Stride + x];
-                if ((b & 0xFF000000) == 0)
-                {
-                    b = 0x00FFFFFF;
-                }
+                //if ((b & 0xFF000000) == 0)
+                //{
+                //    b = 0x00FFFFFF;
+                //}
                 writePixel(binary, b);
             }
         }
@@ -220,10 +220,10 @@ namespace Imas.Gtf
                         for (int xx = 0; xx < 4; xx++)
                         {
                             int b = pixelData[(4 * y + yy) * Stride + 4 * x + xx];
-                            if ((b & 0xFF000000) == 0)
-                            {
-                                b = 0x00FFFFFF;
-                            }
+                            //if ((b & 0xFF000000) == 0)
+                            //{
+                            //    b = 0x00FFFFFF;
+                            //}
                             colors[4 * yy + xx] = Color.FromArgb(b);
                         }
                     }

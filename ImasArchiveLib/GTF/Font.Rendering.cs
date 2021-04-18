@@ -42,20 +42,17 @@ namespace Imas.Gtf
 
         private void DrawChar(Graphics g, CharData charData, ImageAttributes imageAttributes, float x, float y)
         {
-            if (!charsHaveBitmaps)
-            {
-                g.DrawImage(
-                    BigBitmap,
-                    new PointF[] {
-                        new PointF(x + charData.offsetx, y + charData.offsety),
-                        new PointF(x + charData.offsetx + charData.datawidth, y + charData.offsety),
-                        new PointF(x + charData.offsetx, y + charData.offsety + charData.dataheight),
-                    },
-                    new Rectangle(charData.datax, charData.datay, charData.datawidth, charData.dataheight),
-                    GraphicsUnit.Pixel,
-                    imageAttributes
-                    );
-            }
+            g.DrawImage(
+                BigBitmap,
+                new PointF[] {
+                    new PointF(x + charData.offsetx, y + charData.offsety),
+                    new PointF(x + charData.offsetx + charData.datawidth, y + charData.offsety),
+                    new PointF(x + charData.offsetx, y + charData.offsety + charData.dataheight),
+                },
+                new Rectangle(charData.datax, charData.datay, charData.datawidth, charData.dataheight),
+                GraphicsUnit.Pixel,
+                imageAttributes
+                );
         }
         private void DrawLine(Graphics g, CharData[] line, ImageAttributes imageAttributes, float x, float y)
         {

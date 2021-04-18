@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Drawing;
 
 namespace Imas.Gtf
 {
     public partial class Font
     {
-        private class CharData : IComparable<CharData>, IDisposable
+        private class CharData : IComparable<CharData>
         {
             public ushort key;
             public byte datawidth;
@@ -23,33 +22,7 @@ namespace Imas.Gtf
 
             public ushort isEmoji;
 
-            public Bitmap bitmap;
-
             public int CompareTo(CharData other) => key.CompareTo(other.key);
-
-            #region IDisposable
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            protected virtual void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    bitmap?.Dispose();
-                    bitmap = null;
-                }
-            }
-
-            ~CharData()
-            {
-                Dispose(false);
-            }
-
-            #endregion IDisposable
         }
     }
 
