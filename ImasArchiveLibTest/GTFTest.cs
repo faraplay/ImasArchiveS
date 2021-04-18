@@ -151,8 +151,9 @@ namespace ImasArchiveLibTest
         public void ReadGtfTest(string fileName, string outPath)
         {
             using FileStream inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-            using GTF gtf = GTF.ReadGTF(inStream);
-            gtf.Bitmap.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
+            using GTF gtf = GTF.CreateFromGtfStream(inStream);
+            using FileStream outStream = new FileStream(outPath, FileMode.Create);
+            gtf.SavePngTo(outStream);
         }
 
         [DataTestMethod]

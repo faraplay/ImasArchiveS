@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Imas.Gtf
@@ -60,5 +61,19 @@ namespace Imas.Gtf
         #endregion IDisposable
 
         private static bool IsPow2(int n) => (n & (n - 1)) == 0;
+
+        public Stream GetGtfStream()
+        {
+            MemoryStream memStream = new MemoryStream();
+            WriteHeader(memStream);
+            WriteBody(memStream);
+            memStream.Position = 0;
+            return memStream;
+        }
+
+        public void SavePngTo(Stream outStream)
+        {
+            Bitmap.Save(outStream, System.Drawing.Imaging.ImageFormat.Png);
+        }
     }
 }

@@ -12,19 +12,8 @@ namespace Imas.Gtf
         public static async Task WriteGTF(Stream outStream, Bitmap bitmap, int encodingType)
         {
             GTF gtf = CreateFromBitmap(bitmap, encodingType);
-            using Stream gtfStream = gtf.OpenStream();
+            using Stream gtfStream = gtf.GetGtfStream();
             await gtfStream.CopyToAsync(outStream);
-        }
-
-        public static GTF CreateFromBitmap(Bitmap bitmap, int encodingType)
-        {
-            int width = bitmap.Width;
-            int height = bitmap.Height;
-            int stride = width;
-            int[] pixelData = new int[stride * height];
-            GTF gtf = new GTF(pixelData, encodingType, width, height, stride);
-            gtf.LoadBitmap(bitmap);
-            return gtf;
         }
 
         private void LoadBitmap(Bitmap bitmap)
@@ -43,15 +32,6 @@ namespace Imas.Gtf
         {
             Array.Copy(newPixelData, pixelData, Stride * Height);
             Marshal.Copy(pixelData, 0, bitmapDataPtr, Stride * Height);
-        }
-
-        public Stream OpenStream()
-        {
-            MemoryStream memStream = new MemoryStream();
-            WriteHeader(memStream);
-            WriteBody(memStream);
-            memStream.Position = 0;
-            return memStream;
         }
 
         private void WriteHeader(Stream stream)

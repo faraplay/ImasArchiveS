@@ -23,7 +23,7 @@ namespace Imas.Gtf
             int nxpPos = binary.ReadInt32();
 
             memStream.Position = gtfPos;
-            SetGtf(GTF.ReadGTF(memStream));
+            SetGtf(GTF.CreateFromGtfStream(memStream));
 
             memStream.Position = nxpPos + 8;
             int charCount = binary.ReadInt32();
