@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace Imas.Gtf
 {
@@ -40,31 +38,33 @@ namespace Imas.Gtf
             return lines;
         }
 
-        private void DrawChar(Graphics g, CharData charData, ImageAttributes imageAttributes, float x, float y)
-        {
-            g.DrawImage(
-                BigBitmap,
-                new PointF[] {
-                    new PointF(x + charData.offsetx, y + charData.offsety),
-                    new PointF(x + charData.offsetx + charData.datawidth, y + charData.offsety),
-                    new PointF(x + charData.offsetx, y + charData.offsety + charData.dataheight),
-                },
-                new Rectangle(charData.datax, charData.datay, charData.datawidth, charData.dataheight),
-                GraphicsUnit.Pixel,
-                imageAttributes
-                );
-        }
-        private void DrawLine(Graphics g, CharData[] line, ImageAttributes imageAttributes, float x, float y)
+        //private void DrawChar(Graphics g, CharData charData, ImageAttributes imageAttributes, float x, float y)
+        //{
+        //    g.DrawImage(
+        //        BigBitmap,
+        //        new PointF[] {
+        //            new PointF(x + charData.offsetx, y + charData.offsety),
+        //            new PointF(x + charData.offsetx + charData.datawidth, y + charData.offsety),
+        //            new PointF(x + charData.offsetx, y + charData.offsety + charData.dataheight),
+        //        },
+        //        new Rectangle(charData.datax, charData.datay, charData.datawidth, charData.dataheight),
+        //        GraphicsUnit.Pixel,
+        //        imageAttributes
+        //        );
+        //}
+        private void DrawLine(CharData[] line, float x, float y, Action<float, float, int, int, int, int> drawChar)
         {
             foreach (CharData charData in line)
             {
-                DrawChar(g, charData, imageAttributes, x, y);
+                drawChar(x, y, charData.offsetx, charData.offsety, charData.datawidth, charData.dataheight);
                 x += charData.width;
             }
         }
 
-        public void DrawByteArray(Graphics g, Span<byte> chars, ImageAttributes imageAttributes,
-            float boxWidth, float boxHeight, TextBoxAttributes textBoxAttributes)
+        public void DrawByteArray(Span<byte> chars, 
+            float boxWidth, float boxHeight, 
+            TextBoxAttributes textBoxAttributes,
+            Action<float, float, int, int, int, int> drawChar)
         {
             var lines = GetLines(chars, boxWidth, textBoxAttributes.wordWrap);
             if (lines.Count == 0 ||
@@ -92,7 +92,7 @@ namespace Imas.Gtf
                     HorizontalAlignment.Right => boxWidth - lineWidth,
                     _ => 0,
                 };
-                DrawLine(g, line, imageAttributes, x, y);
+                DrawLine(line, x, y, drawChar);
                 y += lineHeight;
             }
         }

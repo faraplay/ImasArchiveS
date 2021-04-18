@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 
 namespace Imas.Gtf
@@ -94,7 +93,7 @@ namespace Imas.Gtf
 
         public void AddDigraphsToFont(char[] charset1, char[] charset2)
         {
-            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
+            var charBitmaps = GetCharBitmaps();
             List<CharData> list1 = new List<CharData>();
             foreach (char char1 in charset1)
             {
@@ -123,13 +122,13 @@ namespace Imas.Gtf
                 }
             }
             chars = charsNew.ToArray();
-            BuildBigBitmap(charBitmaps, chars);
+            RebuildMyBitmap(charBitmaps, chars);
             BuildTree();
         }
 
         public void CreateDigraphs(string destDir, char[] charset1, char[] charset2)
         {
-            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
+            var charBitmaps = GetCharBitmaps();
             DirectoryInfo dInfo = new DirectoryInfo(destDir);
             dInfo.Create();
             List<CharData> list1 = new List<CharData>();

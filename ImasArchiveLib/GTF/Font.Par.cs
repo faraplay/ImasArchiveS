@@ -7,28 +7,29 @@ namespace Imas.Gtf
 {
     public partial class Font : IDisposable
     {
-        private readonly byte[] zeros = new byte[256];
-        private byte[] parHeader;
+        private static readonly byte[] zeros = new byte[256];
 
-        public async Task ReadFontPar(Stream stream)
+        public static async Task<Font> CreateFromPar(Stream stream)
         {
             using MemoryStream memStream = new MemoryStream();
             await stream.CopyToAsync(memStream);
             memStream.Position = 0;
+
             Binary binary = new Binary(memStream, true);
-            parHeader = new byte[16];
+            byte[] parHeader = new byte[16];
             memStream.Read(parHeader);
             int gtfPos = binary.ReadInt32();
             _ = binary.ReadInt32();
             int nxpPos = binary.ReadInt32();
 
             memStream.Position = gtfPos;
-            SetGtf(GTF.CreateFromGtfStream(memStream));
+            GTF gtf = GTF.CreateFromGtfStream(memStream);
+            //SetGtf(GTF.CreateFromGtfStream(memStream));
 
             memStream.Position = nxpPos + 8;
             int charCount = binary.ReadInt32();
-            root = binary.ReadInt32();
-            chars = new CharData[charCount];
+            int root = binary.ReadInt32();
+            CharData[] chars = new CharData[charCount];
             memStream.Position = nxpPos + 48;
             for (int i = 0; i < charCount; i++)
             {
@@ -50,6 +51,8 @@ namespace Imas.Gtf
                 };
                 memStream.Position += 6;
             }
+
+            return new Font(gtf, chars, root);
         }
 
         public async Task WriteFontPar(Stream stream, bool nxFixedWidth = true)
@@ -57,16 +60,14 @@ namespace Imas.Gtf
             int gtfPad, nxPad, nxpPad;
             using (MemoryStream memStream = new MemoryStream())
             {
-                //UseBigBitmap();
                 BuildTree();
 
                 long pos = 0;
-                parHeader = new byte[16] {
+
+                memStream.Write(new byte[16] {
                     0x50, 0x41, 0x52, 0x02, 0x00, 0x00, 0x00, 0x03,
                     0x00, 0x00, 0x00, 0x03, 0x03, 0x00, 0x00, 0x00,
-                };
-
-                memStream.Write(parHeader);
+                });
 
                 int gtfPos = 0x200;
                 int gtfLen = 0x800080;
@@ -112,11 +113,7 @@ namespace Imas.Gtf
                 await memStream.CopyToAsync(stream);
             }
 
-            //await GTF.WriteGTF(stream, BigBitmap, 0x83);
-            using (GTF gtf = GTF.CreateFromPixelData(BigBitmapPixelData, 0x83, BigBitmapWidth, BigBitmapHeight, BigBitmapStride))
-            {
-                await gtf.GetGtfStream().CopyToAsync(stream);
-            }
+            await Gtf.GetGtfStream().CopyToAsync(stream);
             await stream.WriteAsync(zeros, 0, gtfPad);
 
             await WritePaf(stream, false, nxFixedWidth);

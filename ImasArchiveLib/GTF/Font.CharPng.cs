@@ -13,8 +13,7 @@ namespace Imas.Gtf
         {
             DirectoryInfo dInfo = new DirectoryInfo(destDir);
             dInfo.Create();
-            UpdateBigBitmapPixelData();
-            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
+            var charBitmaps = GetCharBitmaps();
             SaveCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
             for (int i = 0; i < chars.Length; i++)
             {
@@ -38,12 +37,12 @@ namespace Imas.Gtf
             }
         }
 
-        public void LoadCharBitmaps(string srcDir)
+        public static Font CreateFromCharsDir(string srcDir)
         {
             DirectoryInfo dInfo = new DirectoryInfo(srcDir);
             if (!dInfo.Exists)
                 throw new FileNotFoundException();
-            LoadCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
+            CharData[] chars = LoadCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
             Dictionary<ushort, int[]> charBitmaps = new Dictionary<ushort, int[]>();
             for (int i = 0; i < chars.Length; i++)
             {
@@ -58,39 +57,20 @@ namespace Imas.Gtf
                 chars[i].datawidth = (byte)width;
                 chars[i].dataheight = (byte)height;
             }
-            BuildBigBitmap(charBitmaps, chars);
-            BuildTree();
-        }
-        private Dictionary<ushort, int[]> CharBitmapsFromFile(string srcDir)
-        {
-            DirectoryInfo dInfo = new DirectoryInfo(srcDir);
-            if (!dInfo.Exists)
-                throw new FileNotFoundException();
-            LoadCharBitmapExtraData(dInfo.FullName + "/fontdata.dat");
-            Dictionary<ushort, int[]> charBitmaps = new Dictionary<ushort, int[]>();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                using Bitmap bitmap = new Bitmap($"{dInfo.FullName}\\{chars[i].key:X4}.png");
-                charBitmaps.Add(chars[i].key,
-                    GetPixelData(
-                        bitmap,
-                        out int width,
-                        out int height));
-                if (width > 255 || height > 255)
-                    throw new Exception("Bitmap is too big for a character (should be at most 255x255 px).");
-                chars[i].datawidth = (byte)width;
-                chars[i].dataheight = (byte)height;
-            }
-            BuildTree();
-            return charBitmaps;
+            int[] newBitmap = BuildBitmap(charBitmaps, chars);
+            Font font = new Font(
+                GTF.CreateFromPixelData(newBitmap, 0x83, BigBitmapWidth, BigBitmapHeight, BigBitmapStride),
+                chars, 0);
+            font.BuildTree();
+            return font;
         }
 
-        private void LoadCharBitmapExtraData(string inFile)
+        private static CharData[] LoadCharBitmapExtraData(string inFile)
         {
             using FileStream stream = new FileStream(inFile, FileMode.Open, FileAccess.Read);
             Binary binary = new Binary(stream, true);
             int charCount = binary.ReadInt32();
-            chars = new CharData[charCount];
+            CharData[] chars = new CharData[charCount];
             for (int i = 0; i < charCount; i++)
             {
                 chars[i] = new CharData
@@ -102,6 +82,7 @@ namespace Imas.Gtf
                     isEmoji = binary.ReadUInt16()
                 };
             }
+            return chars;
         }
     }
 }

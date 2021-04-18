@@ -10,62 +10,9 @@ namespace Imas.Gtf
 {
     public partial class Font : IDisposable
     {
-        private GTF gtf;
-        private Bitmap NonGtfBitmap { get; set; }
-
-        private void SetGtf(GTF value)
-        {
-            NonGtfBitmap?.Dispose();
-            gtf = value;
-        }
-
-        public Bitmap BigBitmap
-        {
-            get => gtf != null ? gtf.Bitmap : NonGtfBitmap;
-            set
-            {
-                gtf?.Dispose();
-                NonGtfBitmap = value;
-                _bigBitmapPixelData = GetPixelData(BigBitmap, out _, out _);
-            }
-        }
-        private int BigBitmapWidth => 2048;
-        private int BigBitmapHeight => 2048;
-        private int BigBitmapStride => 2048;
-
-        private int[] _bigBitmapPixelData;
-        private int[] BigBitmapPixelData
-        {
-            get
-            {
-                if (_bigBitmapPixelData == null)
-                    _bigBitmapPixelData = GetPixelData(BigBitmap, out _, out _);
-                return _bigBitmapPixelData;
-            }
-        }
-        private void UpdateBigBitmapPixelData() => _bigBitmapPixelData = GetPixelData(BigBitmap, out _, out _);
-        private void UpdateBigBitmap()
-        {
-            if (_bigBitmapPixelData == null)
-                return;
-            if (BigBitmap == null)
-                NonGtfBitmap = new Bitmap(BigBitmapWidth, BigBitmapHeight, PixelFormat.Format32bppArgb);
-            BitmapData bitmapData = BigBitmap.LockBits(
-                new Rectangle(0, 0, BigBitmap.Width, BigBitmap.Height),
-                ImageLockMode.ReadWrite,
-                PixelFormat.Format32bppArgb);
-            IntPtr bitmapPtr = bitmapData.Scan0;
-            Marshal.Copy(_bigBitmapPixelData, 0, bitmapPtr, BigBitmapWidth * BigBitmapHeight);
-            BigBitmap.UnlockBits(bitmapData);
-        }
-
-        private void ClearBigBitmap()
-        {
-            gtf?.Dispose();
-            gtf = null;
-            NonGtfBitmap?.Dispose();
-            NonGtfBitmap = null;
-        }
+        private const int BigBitmapWidth = 2048;
+        private const int BigBitmapHeight = 2048;
+        private const int BigBitmapStride = 2048;
 
         private int[] GetCharPixelData(int[] bigBitmap, CharData c)
         {
@@ -88,19 +35,19 @@ namespace Imas.Gtf
             return pixelData;
         }
 
-        private Dictionary<ushort, int[]> GetCharBitmaps(int[] bigBitmap, IEnumerable<CharData> chars)
+        private Dictionary<ushort, int[]> GetCharBitmaps()
         {
             Dictionary<ushort, int[]> charBitmaps = new Dictionary<ushort, int[]>();
             foreach (CharData c in chars)
             {
-                charBitmaps.Add(c.key, GetCharPixelData(bigBitmap, c));
+                charBitmaps.Add(c.key, GetCharPixelData(Gtf.PixelData, c));
             }
             return charBitmaps;
         }
 
         public void UseBlackBitmaps()
         {
-            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
+            var charBitmaps = GetCharBitmaps();
             foreach (CharData c in chars)
             {
                 if (c.isEmoji == 0)
@@ -114,12 +61,17 @@ namespace Imas.Gtf
                     }
                 }
             }
-            BuildBigBitmap(charBitmaps, chars);
+            RebuildMyBitmap(charBitmaps, chars);
+        }
+
+        private void RebuildMyBitmap(Dictionary<ushort, int[]> charBitmaps, IEnumerable<CharData> chars)
+        {
+            Gtf.LoadPixelData(BuildBitmap(charBitmaps, chars));
         }
 
         // have 2 pixels of space between chars
         // 1 pixel led to artifacts around the chars :(
-        private void BuildBigBitmap(Dictionary<ushort, int[]> charBitmaps, IEnumerable<CharData> chars)
+        private static int[] BuildBitmap(Dictionary<ushort, int[]> charBitmaps, IEnumerable<CharData> chars)
         {
             int[] newPixelData = new int[BigBitmapWidth * BigBitmapHeight];
             short x = 2049;
@@ -138,11 +90,10 @@ namespace Imas.Gtf
                 c.datay = y;
                 x += c.datawidth;
             }
-            _bigBitmapPixelData = newPixelData;
-            UpdateBigBitmap();
+            return newPixelData;
         }
 
-        private void CopyCharBitmap(int[] charBitmap, CharData c, int[] destBitmap, int stride, int destX, int destY)
+        private static void CopyCharBitmap(int[] charBitmap, CharData c, int[] destBitmap, int stride, int destX, int destY)
         {
             for (int yy = 1; yy < c.dataheight - 1; yy++)
             {
@@ -153,10 +104,10 @@ namespace Imas.Gtf
             }
         }
 
-        public void RecreateBigBitmap()
+        public void CompressBitmap()
         {
-            var charBitmaps = GetCharBitmaps(BigBitmapPixelData, chars);
-            BuildBigBitmap(charBitmaps, chars);
+            var charBitmaps = GetCharBitmaps();
+            RebuildMyBitmap(charBitmaps, chars);
         }
 
         private static int[] GetPixelData(Bitmap bitmap, out int width, out int height)
@@ -187,7 +138,7 @@ namespace Imas.Gtf
         {
             int stride = width;
             IntPtr bitmapDataPtr = Marshal.AllocHGlobal(4 * stride * height);
-            using (Bitmap bitmap = new Bitmap(width, height, 4 * stride, System.Drawing.Imaging.PixelFormat.Format32bppArgb, bitmapDataPtr))
+            using (Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapDataPtr))
             {
                 Marshal.Copy(pixelData, 0, bitmapDataPtr, stride * height);
                 bitmap.Save(outStream, ImageFormat.Png);
@@ -198,7 +149,7 @@ namespace Imas.Gtf
         public void SaveBigBitmap(string saveLocation)
         {
             using FileStream fileStream = new FileStream(saveLocation, FileMode.Create);
-            SavePngFromPixelData(fileStream, BigBitmapPixelData, BigBitmapWidth, BigBitmapHeight);
+            Gtf.SavePngTo(fileStream);
         }
     }
 }
