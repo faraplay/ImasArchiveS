@@ -1,12 +1,10 @@
-﻿using Imas;
-using Imas.Records;
-using Imas.Spreadsheet;
+﻿using Imas.Gtf;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
-using System.Security.Cryptography;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace ImasArchiveLibTest
@@ -158,21 +156,54 @@ namespace ImasArchiveLibTest
         }
 
         [DataTestMethod]
-        [DataRow("../data/gtf/firework2.png", "../data/gtf/rebuild/firework2.gtf", 0x85)]
-        [DataRow("../data/gtf/logoc.png", "../data/gtf/rebuild/logoc.gtf", 0xA7)]
-        [DataRow("../data/gtf/baton.png", "../data/gtf/rebuild/baton.gtf", 0x82)]
-        [DataRow("../data/gtf/sakura.png", "../data/gtf/rebuild/sakura.gtf", 0xA3)]
-        [DataRow("../data/gtf/commonRankUp.png", "../data/gtf/rebuild/commonRankUp.gtf", 0x81)]
-        [DataRow("../data/gtf/books.png", "../data/gtf/rebuild/books.gtf", 0x85)]
-        [DataRow("../data/gtf/tutorial.png", "../data/gtf/rebuild/tutorial.gtf", 0x81)]
-        [DataRow("../data/gtf/acc2.png", "../data/gtf/rebuild/acc2.gtf", 0x86)]
-        [DataRow("../data/gtf/mail_tex.png", "../data/gtf/rebuild/mail_tex.gtf", 0x81)]
-        [DataRow("../data/gtf/tree.png", "../data/gtf/rebuild/tree.gtf", 0x88)]
+        [DataRow("gtf/ideal/firework2.png", "gtf/rebuild/firework2.gtf", 0x85)]
+        [DataRow("gtf/ideal/logoc.png", "gtf/rebuild/logoc.gtf", 0xA7)]
+        [DataRow("gtf/ideal/baton.png", "gtf/rebuild/baton.gtf", 0x82)]
+        [DataRow("gtf/ideal/sakura.png", "gtf/rebuild/sakura.gtf", 0xA3)]
+        [DataRow("gtf/ideal/commonRankUp.png", "gtf/rebuild/commonRankUp.gtf", 0x81)]
+        [DataRow("gtf/ideal/books.png", "gtf/rebuild/books.gtf", 0x85)]
+        [DataRow("gtf/ideal/tutorial.png", "gtf/rebuild/tutorial.gtf", 0x81)]
+        [DataRow("gtf/ideal/acc2.png", "gtf/rebuild/acc2.gtf", 0x86)]
+        [DataRow("gtf/ideal/mail_tex.png", "gtf/rebuild/mail_tex.gtf", 0x81)]
+        [DataRow("gtf/ideal/tree.png", "gtf/rebuild/tree.gtf", 0x88)]
         public async Task WriteGtfTest(string fileName, string outGtf, int type)
         {
             using Bitmap bitmap = new Bitmap(fileName);
             using FileStream outStream = new FileStream(outGtf, FileMode.Create, FileAccess.Write);
             await GTF.WriteGTF(outStream, bitmap, type);
+        }
+
+        [DataTestMethod]
+        [DataRow("gtf/produceMenuIcon.png", "gtf/indexed/produceMenuIcon.png")]
+        [DataRow("gtf/sakura.png", "gtf/indexed/sakura.png")]
+        [DataRow("gtf/bg2d_0065.png", "gtf/indexed/bg2d_0065.png")]
+        public void MyQuantiserTest(string fileName, string outName)
+        {
+            using Bitmap bitmap = new Bitmap(fileName);
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format32bppArgb);
+            IntPtr bitmapPtr = bitmapData.Scan0;
+            int[] pixelDataArray = new int[bitmap.Width * bitmap.Height];
+            Marshal.Copy(bitmapPtr, pixelDataArray, 0, bitmap.Width * bitmap.Height);
+            bitmap.UnlockBits(bitmapData);
+            byte[] indexedData;
+            uint[] palette;
+
+            (indexedData, palette) = WuQuantizer.QuantizeImage(pixelDataArray, 256);
+
+            IntPtr newPtr = Marshal.AllocHGlobal(bitmap.Width * bitmap.Height);
+            Marshal.Copy(indexedData, 0, newPtr, bitmap.Width * bitmap.Height);
+            Bitmap newBitmap = new Bitmap(bitmap.Width, bitmap.Height, bitmap.Width, PixelFormat.Format8bppIndexed, newPtr);
+            ColorPalette colorPalette = newBitmap.Palette;
+            for (int i = 0; i < 256; i++)
+            {
+                colorPalette.Entries[i] = (i < palette.Length) ? Color.FromArgb((int)palette[i]) : Color.Transparent;
+            }
+            newBitmap.Palette = colorPalette;
+            newBitmap.Save(outName, ImageFormat.Png);
+            Marshal.FreeHGlobal(newPtr);
         }
     }
 }

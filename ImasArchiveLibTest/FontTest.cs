@@ -1,4 +1,5 @@
 ﻿using Imas;
+using Imas.Gtf;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing.Imaging;
 using System.IO;

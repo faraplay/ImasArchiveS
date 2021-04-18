@@ -1,4 +1,4 @@
-﻿namespace Imas
+﻿namespace Imas.Gtf
 {
     public partial class GTF
     {
