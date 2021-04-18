@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -13,7 +12,7 @@ namespace Imas.Gtf
             ReadHeader(stream, out int type, out int width, out int height, out Color[] palette);
 
             int stride = width;
-            int[] bitmapArray = (type & 15) switch
+            int[] pixelData = (type & 15) switch
             {
                 1 => ReadPixels(stream, width, height, stream => GetPixelIndexed(stream, palette), stride),
                 2 => ReadPixels(stream, width, height, GetPixel1555, stride),
@@ -26,10 +25,9 @@ namespace Imas.Gtf
                 _ => throw new NotSupportedException()
             };
 
-            IntPtr bitmapPtr = Marshal.AllocHGlobal(4 * stride * height);
-            Marshal.Copy(bitmapArray, 0, bitmapPtr, stride * height);
-            Bitmap bitmap = new Bitmap(width, height, 4 * stride, PixelFormat.Format32bppArgb, bitmapPtr);
-            return new GTF(bitmap, bitmapPtr, bitmapArray, type, width, height, stride);
+            GTF newGtf = new GTF(pixelData, type, width, height, stride);
+            newGtf.CopyPixelDataToBitmap();
+            return newGtf;
         }
 
         private static void ReadHeader(Stream stream, out int type, out int width, out int height, out Color[] palette)
@@ -87,6 +85,11 @@ namespace Imas.Gtf
                 }
                 stream.Position = pos + 128;
             }
+        }
+
+        public void CopyPixelDataToBitmap()
+        {
+            Marshal.Copy(PixelData, 0, BitmapDataPtr, Stride * Height);
         }
 
         private static int[] ReadPixels(Stream stream, int width, int height, Func<Stream, uint> getPixel, int stride)

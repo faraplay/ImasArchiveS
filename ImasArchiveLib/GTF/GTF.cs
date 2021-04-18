@@ -7,22 +7,22 @@ namespace Imas.Gtf
     public partial class GTF : IDisposable
     {
         public Bitmap Bitmap { get; private set; }
-        private readonly IntPtr pixelDataPtr;
-        private readonly int[] pixelDataArray;
+        private readonly IntPtr bitmapDataPtr;
+        private readonly int[] pixelData;
         public int Type { get; }
         public int Width { get; }
         public int Height { get; }
         public int Stride { get; }
 
-        public IntPtr BitmapPtr => pixelDataPtr;
+        public IntPtr BitmapDataPtr => bitmapDataPtr;
 
-        public int[] BitmapArray => pixelDataArray;
+        public int[] PixelData => pixelData;
 
-        private GTF(Bitmap bitmap, IntPtr bitmapPtr, int[] bitmapArray, int type, int width, int height, int stride)
+        private GTF(int[] pixelData, int type, int width, int height, int stride)
         {
-            Bitmap = bitmap;
-            this.pixelDataPtr = bitmapPtr;
-            this.pixelDataArray = bitmapArray;
+            bitmapDataPtr = Marshal.AllocHGlobal(4 * stride * height);
+            Bitmap = new Bitmap(width, height, 4 * stride, System.Drawing.Imaging.PixelFormat.Format32bppArgb, bitmapDataPtr);
+            this.pixelData = pixelData;
             Type = type;
             Width = width;
             Height = height;
@@ -48,7 +48,7 @@ namespace Imas.Gtf
             {
                 Bitmap?.Dispose();
             }
-            Marshal.FreeHGlobal(pixelDataPtr);
+            Marshal.FreeHGlobal(bitmapDataPtr);
             disposed = true;
         }
 
