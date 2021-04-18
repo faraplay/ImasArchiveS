@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Resources;
 
 namespace ImasArchiveApp
@@ -100,12 +102,12 @@ namespace ImasArchiveApp
             {
                 try
                 {
-                    if (TextBox.font == null)
+                    if (UITextBoxModel.font == null)
                     {
                         ReportMessage("Loading font");
                         using (MemoryStream stream = new MemoryStream(FontResource.im2nx_font))
                         {
-                            TextBox.font = await Imas.Gtf.Font.CreateFromPar(stream);
+                            await UITextBoxModel.LoadFontFromStreamAsync(stream);
                         }
                         ReportMessage("Loaded font.");
 

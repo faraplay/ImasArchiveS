@@ -31,11 +31,14 @@ namespace ImasArchiveApp
             drawingContext.PushTransform(new TranslateTransform(Control.Xpos, Control.Ypos));
             drawingContext.PushTransform(new ScaleTransform(Control.ScaleX == 0 ? 1 : Control.ScaleX, Control.ScaleY));
             drawingContext.PushOpacity(Control.Alpha / 255.0);
-            multiplier.Scale(Control.Red / 255.0, Control.Green / 255.0, Control.Blue / 255.0);
-            base.RenderElement(drawingContext, multiplier, isTop);
+            multiplier.Scale(Control.Red / 255.0f, Control.Green / 255.0f, Control.Blue / 255.0f);
+            RenderElementUntransformed(drawingContext, multiplier, isTop);
             drawingContext.Pop();
             drawingContext.Pop();
             drawingContext.Pop();
         }
+
+        protected virtual void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
+            => base.RenderElement(drawingContext, multiplier, isTop);
     }
 }

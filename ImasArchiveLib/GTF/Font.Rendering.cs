@@ -56,7 +56,13 @@ namespace Imas.Gtf
         {
             foreach (CharData charData in line)
             {
-                drawChar(x, y, charData.offsetx, charData.offsety, charData.datawidth, charData.dataheight);
+                drawChar(
+                    x + charData.offsetx,
+                    y + charData.offsety,
+                    charData.datax,
+                    charData.datay,
+                    charData.datawidth,
+                    charData.dataheight);
                 x += charData.width;
             }
         }

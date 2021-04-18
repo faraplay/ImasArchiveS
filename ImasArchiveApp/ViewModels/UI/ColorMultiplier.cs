@@ -2,18 +2,18 @@
 {
     public struct ColorMultiplier
     {
-        public double r;
-        public double g;
-        public double b;
+        public float r;
+        public float g;
+        public float b;
 
         public static ColorMultiplier One() => new ColorMultiplier
         {
-            r = 1.0,
-            g = 1.0,
-            b = 1.0
+            r = 1.0f,
+            g = 1.0f,
+            b = 1.0f
         };
 
-        public void Scale(double red, double green, double blue)
+        public void Scale(float red, float green, float blue)
         {
             r *= red;
             g *= green;

@@ -6,8 +6,6 @@ namespace Imas.UI
     [SerialisationDerivedType(2)]
     public class TextBox : Control
     {
-        public static Font font;
-
         [SerialiseField(100)]
         public byte textAlpha;
         [Listed(100)]
