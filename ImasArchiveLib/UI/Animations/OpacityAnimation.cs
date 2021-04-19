@@ -1,7 +1,7 @@
 ﻿namespace Imas.UI
 {
     [SerialisationDerivedType(5)]
-    public class OpacityTransformation : Animation
+    public class OpacityAnimation : Animation
     {
         [SerialiseField(100)]
         public float startTime;

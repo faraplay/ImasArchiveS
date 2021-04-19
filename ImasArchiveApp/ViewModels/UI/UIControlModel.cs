@@ -13,7 +13,12 @@ namespace ImasArchiveApp
         public override string ModelName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
 
 
-        protected UIControlModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, parent, name, true) { }
+        protected UIControlModel(Control control, UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, parent, name, true)
+        {
+            PositionTransform = new TranslateTransform(control.Xpos, control.Ypos);
+            //ScaleTransform = new ScaleTransform(Control.ScaleX == 0 ? 1 : Control.ScaleX, Control.ScaleY);
+            ScaleTransform = new ScaleTransform(control.ScaleX, control.ScaleY);
+        }
 
         public static UIControlModel CreateModel(UISubcomponentModel subcomponent, UIElementModel parent, Control control)
         {
@@ -42,8 +47,8 @@ namespace ImasArchiveApp
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            drawingContext.PushTransform(new TranslateTransform(Control.Xpos, Control.Ypos));
-            drawingContext.PushTransform(new ScaleTransform(Control.ScaleX == 0 ? 1 : Control.ScaleX, Control.ScaleY));
+            drawingContext.PushTransform(PositionTransform);
+            drawingContext.PushTransform(ScaleTransform);
             drawingContext.PushOpacity(Control.Alpha / 255.0, OpacityClock);
             multiplier.Scale(Control.Red / 255.0f, Control.Green / 255.0f, Control.Blue / 255.0f);
             RenderElementUntransformed(drawingContext, multiplier, isTop);
@@ -55,13 +60,8 @@ namespace ImasArchiveApp
         protected virtual void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
             => base.RenderElement(drawingContext, multiplier, isTop);
 
-        //public TranslateTransform TranslateTransform { get; set; }
-        //public ScaleTransform ScaleTransform { get; set; }
+        public TranslateTransform PositionTransform { get; }
         public AnimationClock OpacityClock { get; set; }
-        public void SetTransforms()
-        {
-            //TranslateTransform = new TranslateTransform(Control.Xpos, Control.Ypos);
-            //ScaleTransform = new ScaleTransform(Control.ScaleX == 0 ? 1 : Control.ScaleX, Control.ScaleY);
-        }
+        public ScaleTransform ScaleTransform { get; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Imas.UI
 {
     [SerialisationDerivedType(6)]
-    public class SizeAnimation : Animation
+    public class ScaleAnimation : Animation
     {
         [SerialiseField(100)]
         public float startTime;
