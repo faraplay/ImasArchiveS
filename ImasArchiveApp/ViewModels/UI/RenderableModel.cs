@@ -34,10 +34,10 @@ namespace ImasArchiveApp
         public void RenderElement(DrawingContext drawingContext) => RenderElement(drawingContext, ColorMultiplier.One(), true);
         internal abstract void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop);
 
-        public event Action RenderForced;
+        public event EventHandler RenderForced;
         public void ForceRender()
         {
-            RenderForced.Invoke();
+            RenderForced.Invoke(this, EventArgs.Empty);
         }
 
         private void SaveImage()

@@ -17,6 +17,11 @@ namespace ImasArchiveApp
             set { SetValue(ModelProperty, value); }
         }
 
+        public UIModelRenderer()
+        {
+            ForceRender = (sender, e) => InvalidateVisual();
+        }
+
         private Matrix matrix = new Matrix(1, 0, 0, 1, 0, 0);
 
         private static TileBrush _checkerBrush;
@@ -46,18 +51,11 @@ namespace ImasArchiveApp
             _checkerBrush.TileMode = TileMode.Tile;
             CheckerBrush.Viewport = new Rect(new Point(0, 0), new Size(32, 32));
         }
-
-        //private bool firstRender = true;
         private int ModelWidth => Model?.BoundingPixelWidth ?? 1280;
         private int ModelHeight => Model?.BoundingPixelHeight ?? 720;
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-            //if (firstRender)
-            //{
-            //    firstRender = false;
-            //    SetMatrix();
-            //}
             Rect appRect = new Rect(new Size(ActualWidth, ActualHeight));
             Rect gameScreenRect = new Rect(0, 0, ModelWidth, ModelHeight);
             drawingContext.PushClip(new RectangleGeometry(appRect));
@@ -69,17 +67,18 @@ namespace ImasArchiveApp
             drawingContext.Pop();
         }
 
+        private readonly EventHandler ForceRender;
         private static void OnModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (!(d is UIModelRenderer renderer))
                 return;
             if (e.OldValue is RenderableModel oldModel)
             {
-                oldModel.RenderForced -= renderer.InvalidateVisual;
+                oldModel.RenderForced -= renderer.ForceRender;
             }
             if (e.NewValue is RenderableModel newModel)
             {
-                newModel.RenderForced += renderer.InvalidateVisual;
+                newModel.RenderForced += renderer.ForceRender;
             }
 
             if (!(e.OldValue is UIElementModel) || !(e.NewValue is UIElementModel))
