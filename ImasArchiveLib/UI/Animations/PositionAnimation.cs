@@ -12,22 +12,25 @@
         public int a1;
         [SerialiseField(103)]
         public int a2;
+        public bool A1IsTwo => a1 == 2;
+        [SerialiseField(104, ConditionProperty = nameof(A1IsTwo))]
+        public float b1;
 
-        [SerialiseField(104, IsCountOf = nameof(otherF))]
+        [SerialiseField(105, IsCountOf = nameof(otherF))]
         public int fCount;
-        [SerialiseField(105, IsCountOf = nameof(points))]
+        [SerialiseField(106, IsCountOf = nameof(points))]
         public int pointCount;
-        [SerialiseField(106)]
-        public float c1;
         [SerialiseField(107)]
+        public float c1;
+        [SerialiseField(108)]
         public int d1;
 
-        [SerialiseField(108)]
+        [SerialiseField(109)]
         public int e1;
-        [SerialiseField(109, CountField = nameof(fCount))]
+        [SerialiseField(110, CountField = nameof(fCount))]
         public int[] otherF;
 
-        [SerialiseField(110, CountField = nameof(pointCount))]
+        [SerialiseField(111, CountField = nameof(pointCount))]
         public Point[] points;
     }
 
