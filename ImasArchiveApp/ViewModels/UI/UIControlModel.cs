@@ -47,6 +47,7 @@ namespace ImasArchiveApp
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
+            drawingContext.PushOpacity(Control.DefaultVisibility ? 1 : 0, VisibilityClock);
             drawingContext.PushTransform(PositionTransform);
             drawingContext.PushTransform(ScaleTransform);
             drawingContext.PushOpacity(Control.Alpha / 255.0, OpacityClock);
@@ -55,11 +56,20 @@ namespace ImasArchiveApp
             drawingContext.Pop();
             drawingContext.Pop();
             drawingContext.Pop();
+            drawingContext.Pop();
         }
 
         protected virtual void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
-            => base.RenderElement(drawingContext, multiplier, isTop);
+        {
+            if (!CurrentVisibility && !isTop && VisibilityClock == null)
+                return;
+            foreach (UIElementModel child in Children)
+            {
+                child.RenderElement(drawingContext, multiplier, false);
+            }
+        }
 
+        public AnimationClock VisibilityClock { get; set; }
         public TranslateTransform PositionTransform { get; }
         public AnimationClock OpacityClock { get; set; }
         public ScaleTransform ScaleTransform { get; }

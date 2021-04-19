@@ -33,6 +33,9 @@ namespace ImasArchiveApp
             {
                 switch (animation)
                 {
+                    case VisibilityAnimation visibilityAnimation:
+                        AddVisibilityAnimation(visibilityAnimation);
+                        break;
                     case PositionAnimation positionAnimation:
                         AddPositionAnimation(positionAnimation);
                         break;
@@ -45,6 +48,20 @@ namespace ImasArchiveApp
                 }
             }
 
+            if (VisibilityTimeline.KeyFrames.Count > 0)
+            {
+                var firstFrame = VisibilityTimeline.KeyFrames[0];
+                if (firstFrame.KeyTime.TimeSpan.TotalSeconds > 1 / 120.0f)
+                {
+                    VisibilityTimeline.KeyFrames.Add(
+                        new DiscreteDoubleKeyFrame(
+                            1 - firstFrame.Value,
+                            KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)))
+                        );
+                }
+            }
+
+            Timeline.Children.Add(VisibilityTimeline);
             Timeline.Children.Add(PositionXTimeline);
             Timeline.Children.Add(PositionYTimeline);
             Timeline.Children.Add(OpacityTimeline);
@@ -52,12 +69,21 @@ namespace ImasArchiveApp
             Timeline.Children.Add(ScaleYTimeline);
         }
 
+        private readonly DoubleAnimationUsingKeyFrames VisibilityTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames PositionXTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames PositionYTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames OpacityTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames ScaleXTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames ScaleYTimeline = new DoubleAnimationUsingKeyFrames();
 
+        private void AddVisibilityAnimation(VisibilityAnimation animation)
+        {
+            VisibilityTimeline.KeyFrames.Add(
+                new DiscreteDoubleKeyFrame(
+                    animation.visibility == 3 ? 1 : 0,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.time)))
+                );
+        }
         private void AddPositionAnimation(PositionAnimation animation)
         {
             for (int i = 0; i < animation.pointCount; i++)
@@ -115,15 +141,17 @@ namespace ImasArchiveApp
 
         public void ApplyAnimations(ClockGroup clockGroup)
         {
-            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, (AnimationClock)clockGroup.Children[0]);
-            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, (AnimationClock)clockGroup.Children[1]);
-            Control.OpacityClock = (AnimationClock)clockGroup.Children[2];
-            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, (AnimationClock)clockGroup.Children[3]);
-            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, (AnimationClock)clockGroup.Children[4]);
+            Control.VisibilityClock = (AnimationClock)clockGroup.Children[0];
+            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, (AnimationClock)clockGroup.Children[1]);
+            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, (AnimationClock)clockGroup.Children[2]);
+            Control.OpacityClock = (AnimationClock)clockGroup.Children[3];
+            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, (AnimationClock)clockGroup.Children[4]);
+            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, (AnimationClock)clockGroup.Children[5]);
         }
 
         public void RemoveAnimations()
         {
+            Control.VisibilityClock = null;
             Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, null);
             Control.PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, null);
             Control.OpacityClock = null;
