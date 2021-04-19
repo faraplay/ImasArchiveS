@@ -53,7 +53,7 @@ namespace ImasArchiveApp
             }
             ControlModel = new ObservableCollection<UIControlModel>
             {
-                UIControlModel.CreateModel(this, null, uiComponent.control)
+                UIControlModel.CreateModel(this, null, uiComponent.rootControl)
             };
             UIProperties = new ObservableCollection<UIElementPropertyModel>();
             foreach (var spritesheet in SpriteSheets)

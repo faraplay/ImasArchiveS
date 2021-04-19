@@ -1,5 +1,6 @@
 ﻿using Imas.Archive;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -9,8 +10,11 @@ namespace Imas.UI
     {
         private Stream pauStream;
         private ParFile ptaFile;
-        public Control control;
+        private ParFile animationsPar;
+
+        public Control rootControl;
         public SpriteSheetSource imageSource;
+        public List<AnimationGroup> animationGroups;
 
         public byte version;
 
@@ -25,7 +29,19 @@ namespace Imas.UI
                 pauStream.ReadByte() != 0x55)
                 throw new InvalidDataException("Unrecognised PAU header");
             version = (byte)pauStream.ReadByte();
-            control = (Control)Deserialiser.Deserialise(new Binary(pauStream, true), typeof(Control));
+            rootControl = (Control)Deserialiser.Deserialise(new Binary(pauStream, true), typeof(Control));
+        }
+
+        private async Task ReadAnimations()
+        {
+            animationGroups = new List<AnimationGroup>();
+            foreach (var entry in animationsPar.Entries)
+            {
+                AnimationGroup animationGroup = (AnimationGroup)Deserialiser.Deserialise(
+                                        new Binary(await entry.GetData(), true), typeof(AnimationGroup));
+                animationGroup.FileName = entry.FileName;
+                animationGroups.Add(animationGroup);
+            }
         }
 
         private async Task LoadImageSource()
@@ -42,13 +58,19 @@ namespace Imas.UI
             component.ReadPauStream();
             component.ptaFile = new ParFile(await componentPar.GetEntry(name + ".pta").GetData());
             await component.LoadImageSource();
+            var animationsEntry = componentPar.GetEntry(name + ".par");
+            if (animationsEntry != null)
+            {
+                component.animationsPar = new ParFile(await animationsEntry.GetData());
+                await component.ReadAnimations();
+            }
             return component;
         }
 
         public void WritePauStream(Stream stream)
         {
             Binary.WriteUInt32(stream, true, 0x50415505);
-            Serialiser.Serialise(new Binary(stream, true), control);
+            Serialiser.Serialise(new Binary(stream, true), rootControl);
         }
 
         public async Task WritePtaStream(Stream stream)
