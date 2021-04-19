@@ -18,6 +18,18 @@ namespace ImasArchiveApp
         public ObservableCollection<UIControlModel> ControlModel { get; }
         public ObservableCollection<UISpriteSheetModel> SpriteSheets { get; }
         public ObservableCollection<UIElementPropertyModel> UIProperties { get; }
+        public ObservableCollection<UIAnimationGroupModel> AnimationGroups { get; }
+
+        private UIAnimationGroupModel _selectedAnimationGroupModel;
+        public UIAnimationGroupModel SelectedAnimationGroupModel
+        {
+            get => _selectedAnimationGroupModel;
+            set
+            {
+                _selectedAnimationGroupModel = value;
+                OnPropertyChanged();
+            }
+        }
         private UIModel _displayedModel;
         public UIModel DisplayedModel
         {
@@ -59,6 +71,11 @@ namespace ImasArchiveApp
             foreach (var spritesheet in SpriteSheets)
             {
                 spritesheet.UpdateRectangles();
+            }
+            AnimationGroups = new ObservableCollection<UIAnimationGroupModel>();
+            foreach (var animationGroup in subcomponent.animationGroups)
+            {
+                AnimationGroups.Add(new UIAnimationGroupModel(parent, animationGroup));
             }
             DisplayedModel = ControlModel[0];
         }

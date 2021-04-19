@@ -129,6 +129,21 @@
                         </TreeView.Resources>
                     </TreeView>
                 </TabItem>
+                <TabItem Header="Animations">
+                    <DockPanel>
+                        <ComboBox
+                            DockPanel.Dock="Top"
+                            ItemsSource="{Binding Path=AnimationGroups}"
+                            SelectedValue="{Binding Path=SelectedAnimationGroupModel}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Padding="0" Content="{Binding Path=FileName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <local:UIAnimationGroupView DataContext="{Binding Path=SelectedAnimationGroupModel}" />
+                    </DockPanel>
+                </TabItem>
             </TabControl>
         </DockPanel>
         <GridSplitter
@@ -171,13 +186,13 @@
                 VerticalAlignment="Center" />
             <ScrollViewer Grid.Row="2">
                 <StackPanel Orientation="Vertical">
-                <ItemsControl ItemsSource="{Binding Path=UIProperties}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <local:UIPropertyView />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding Path=UIProperties}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <local:UIPropertyView />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                     <ContentControl Content="{Binding Path=SelectedModel}">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type local:UISpriteModel}">
