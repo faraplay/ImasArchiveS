@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
@@ -20,6 +21,7 @@ namespace ImasArchiveApp
         public ObservableCollection<UISpriteSheetModel> SpriteSheets { get; }
         public ObservableCollection<UIElementPropertyModel> UIProperties { get; }
         public ObservableCollection<UIAnimationGroupModel> AnimationGroups { get; }
+        public Dictionary<string, UIControlModel> ControlDictionary { get; }
 
         private UIAnimationGroupModel _selectedAnimationGroupModel;
         public UIAnimationGroupModel SelectedAnimationGroupModel
@@ -27,7 +29,10 @@ namespace ImasArchiveApp
             get => _selectedAnimationGroupModel;
             set
             {
+                _selectedAnimationGroupModel?.RemoveAnimations();
                 _selectedAnimationGroupModel = value;
+                _selectedAnimationGroupModel?.ApplyAnimations();
+                ForceRender();
                 OnPropertyChanged();
             }
         }
@@ -68,6 +73,14 @@ namespace ImasArchiveApp
             {
                 UIControlModel.CreateModel(this, null, uiComponent.rootControl)
             };
+            ControlDictionary = new Dictionary<string, UIControlModel>();
+            ControlModel[0].ForAll(control =>
+            {
+                if (!string.IsNullOrWhiteSpace(control.FileName))
+                {
+                    ControlDictionary.Add(control.FileName, control);
+                }
+            });
             UIProperties = new ObservableCollection<UIElementPropertyModel>();
             PropertyChangedEventHandler = (sender, e) => ForceRender();
             foreach (var spritesheet in SpriteSheets)
@@ -79,7 +92,7 @@ namespace ImasArchiveApp
                 AnimationGroups = new ObservableCollection<UIAnimationGroupModel>();
                 foreach (var animationGroup in subcomponent.animationGroups)
                 {
-                    AnimationGroups.Add(new UIAnimationGroupModel(parent, animationGroup));
+                    AnimationGroups.Add(new UIAnimationGroupModel(this, animationGroup));
                 }
             }
             DisplayedModel = ControlModel[0];
