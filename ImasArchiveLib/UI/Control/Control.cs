@@ -3,9 +3,6 @@
     [SerialisationBaseType]
     public abstract class Control : UIElement
     {
-
-        public int type;
-
         [SerialiseField(0, FixedCount = 16)]
         public byte[] nameBuffer;
         [Listed(0)]
