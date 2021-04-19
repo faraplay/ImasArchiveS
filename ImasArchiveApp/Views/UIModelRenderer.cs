@@ -10,7 +10,7 @@ namespace ImasArchiveApp
 
         public static readonly DependencyProperty ModelProperty =
             DependencyProperty.Register("Model", typeof(RenderableModel), typeof(UIModelRenderer), 
-                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, OnModelChanged));
         public RenderableModel Model
         {
             get { return (RenderableModel)GetValue(ModelProperty); }
@@ -47,17 +47,17 @@ namespace ImasArchiveApp
             CheckerBrush.Viewport = new Rect(new Point(0, 0), new Size(32, 32));
         }
 
-        private bool firstRender = true;
+        //private bool firstRender = true;
         private int ModelWidth => Model?.BoundingPixelWidth ?? 1280;
         private int ModelHeight => Model?.BoundingPixelHeight ?? 720;
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-            if (firstRender)
-            {
-                firstRender = false;
-                SetMatrix();
-            }
+            //if (firstRender)
+            //{
+            //    firstRender = false;
+            //    SetMatrix();
+            //}
             Rect appRect = new Rect(new Size(ActualWidth, ActualHeight));
             Rect gameScreenRect = new Rect(0, 0, ModelWidth, ModelHeight);
             drawingContext.PushClip(new RectangleGeometry(appRect));
@@ -67,6 +67,23 @@ namespace ImasArchiveApp
             Model?.RenderElement(drawingContext);
             drawingContext.Pop();
             drawingContext.Pop();
+        }
+
+        private static void OnModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(d is UIModelRenderer renderer))
+                return;
+            if (e.OldValue is RenderableModel oldModel)
+            {
+                oldModel.RenderForced -= renderer.InvalidateVisual;
+            }
+            if (e.NewValue is RenderableModel newModel)
+            {
+                newModel.RenderForced += renderer.InvalidateVisual;
+            }
+
+            if (!(e.OldValue is UIElementModel) || !(e.NewValue is UIElementModel))
+                renderer.SetMatrix();
         }
 
         private void SetMatrix()

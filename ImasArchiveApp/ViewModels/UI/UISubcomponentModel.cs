@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -68,14 +69,18 @@ namespace ImasArchiveApp
                 UIControlModel.CreateModel(this, null, uiComponent.rootControl)
             };
             UIProperties = new ObservableCollection<UIElementPropertyModel>();
+            PropertyChangedEventHandler = (sender, e) => ForceRender();
             foreach (var spritesheet in SpriteSheets)
             {
                 spritesheet.UpdateRectangles();
             }
-            AnimationGroups = new ObservableCollection<UIAnimationGroupModel>();
-            foreach (var animationGroup in subcomponent.animationGroups)
+            if (subcomponent.animationGroups != null)
             {
-                AnimationGroups.Add(new UIAnimationGroupModel(parent, animationGroup));
+                AnimationGroups = new ObservableCollection<UIAnimationGroupModel>();
+                foreach (var animationGroup in subcomponent.animationGroups)
+                {
+                    AnimationGroups.Add(new UIAnimationGroupModel(parent, animationGroup));
+                }
             }
             DisplayedModel = ControlModel[0];
         }
@@ -84,6 +89,10 @@ namespace ImasArchiveApp
 
         private void RefreshPropertiesList()
         {
+            foreach (UIElementPropertyModel propertyModel in UIProperties)
+            {
+                propertyModel.PropertyChanged -= PropertyChangedEventHandler;
+            }
             UIProperties.Clear();
             if (SelectedModel is UIElementModel uiElementModel)
             {
@@ -95,9 +104,18 @@ namespace ImasArchiveApp
                     .Select(tuple => (tuple.p, (ListedAttribute)tuple.Item2[0]))
                     .OrderBy(tuple => tuple.Item2.Order))
                 {
-                    UIProperties.Add(new UIElementPropertyModel(property, element));
+                    UIElementPropertyModel propertyModel = new UIElementPropertyModel(property, element);
+                    propertyModel.PropertyChanged += PropertyChangedEventHandler;
+                    UIProperties.Add(propertyModel);
                 }
             }
+        }
+
+        private readonly PropertyChangedEventHandler PropertyChangedEventHandler;
+        public void ForceRender()
+        {
+            DisplayedModel?.ForceRender();
+            SelectedModel?.ForceRender();
         }
 
         public async Task ReplaceImage(int index)
