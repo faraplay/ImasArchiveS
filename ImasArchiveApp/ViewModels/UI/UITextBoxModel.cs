@@ -23,6 +23,7 @@ namespace ImasArchiveApp
                 font.Gtf.BitmapDataPtr,
                 4 * 2048 * 2048,
                 4 * 2048);
+            fontSource.Freeze();
         }
         public UITextBoxModel(TextBox control, UISubcomponentModel subcomponent, UIElementModel parent) : base(control, subcomponent, parent) { }
 

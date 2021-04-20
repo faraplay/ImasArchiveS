@@ -28,7 +28,7 @@ namespace ImasArchiveApp
                 ListModels.Add(animationsListModel);
                 Timeline.Children.Add(animationsListModel.Timeline);
             }
-            //ApplyAnimations();
+            Timeline.Freeze();
         }
 
         public void ApplyAnimations()

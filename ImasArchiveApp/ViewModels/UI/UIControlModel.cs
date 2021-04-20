@@ -35,7 +35,14 @@ namespace ImasArchiveApp
             {
                 foreach (Control child in groupControl.childControls)
                 {
-                    Children.Add(new UIControlModel(child, subcomponent, this));
+                    if (child is TextBox textBox)
+                    {
+                        Children.Add(new UITextBoxModel(textBox, subcomponent, this));
+                    }
+                    else
+                    {
+                        Children.Add(new UIControlModel(child, subcomponent, this));
+                    }
                 }
             }
             if (control is SpriteCollection spriteCollection)
@@ -55,6 +62,9 @@ namespace ImasArchiveApp
             {
                 AngleTransform = new RotateTransform(-icon.angle * 180 / Math.PI);
             }
+            PositionTransform.Freeze();
+            ScaleTransform.Freeze();
+            AngleTransform?.Freeze();
         }
 
         public void ForAll(Action<UIControlModel> action)
@@ -104,9 +114,28 @@ namespace ImasArchiveApp
         }
 
         public AnimationClock VisibilityClock { get; set; }
-        public TranslateTransform PositionTransform { get; }
+        public TranslateTransform PositionTransform { get; set; }
+        public void ApplyPositionAnimation(AnimationClock x, AnimationClock y)
+        {
+            PositionTransform = new TranslateTransform(Control.Xpos, Control.Ypos);
+            PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, x);
+            PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, y);
+        }
         public AnimationClock OpacityClock { get; set; }
-        public ScaleTransform ScaleTransform { get; }
-        public RotateTransform AngleTransform { get; }
+        public ScaleTransform ScaleTransform { get; set; }
+        public void ApplyScaleAnimation(AnimationClock scaleX, AnimationClock scaleY)
+        {
+            ScaleTransform = new ScaleTransform(Control.scaleX, Control.scaleY);
+            ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, scaleX);
+            ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, scaleY);
+        }
+        public RotateTransform AngleTransform { get; set; }
+        public void ApplyAngleAnimation(AnimationClock angle)
+        {
+            if (!(Control is RotatableGroupControl rotatable))
+                return;
+            AngleTransform = new RotateTransform(-rotatable.angle * 180 / Math.PI);
+            AngleTransform.ApplyAnimationClock(RotateTransform.AngleProperty, angle);
+        }
     }
 }

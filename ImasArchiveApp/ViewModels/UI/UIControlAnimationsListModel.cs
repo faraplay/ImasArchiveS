@@ -169,12 +169,10 @@ namespace ImasArchiveApp
                 return;
             Control.VisibilityClock = (AnimationClock)clockGroup.Children[0];
             Control.VisibilityClock.Completed += SetEndVisibility;
-            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, (AnimationClock)clockGroup.Children[1]);
-            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, (AnimationClock)clockGroup.Children[2]);
+            Control.ApplyPositionAnimation((AnimationClock)clockGroup.Children[1], (AnimationClock)clockGroup.Children[2]);
             Control.OpacityClock = (AnimationClock)clockGroup.Children[3];
-            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, (AnimationClock)clockGroup.Children[4]);
-            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, (AnimationClock)clockGroup.Children[5]);
-            Control.AngleTransform?.ApplyAnimationClock(RotateTransform.AngleProperty, (AnimationClock)clockGroup.Children[6]);
+            Control.ApplyScaleAnimation((AnimationClock)clockGroup.Children[4], (AnimationClock)clockGroup.Children[5]);
+            Control.ApplyAngleAnimation((AnimationClock)clockGroup.Children[6]);
         }
 
         public void RemoveAnimations()
@@ -182,12 +180,10 @@ namespace ImasArchiveApp
             if (Control == null)
                 return;
             Control.VisibilityClock = null;
-            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, null);
-            Control.PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, null);
+            Control.ApplyPositionAnimation(null, null);
             Control.OpacityClock = null;
-            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, null);
-            Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, null);
-            Control.AngleTransform?.ApplyAnimationClock(RotateTransform.AngleProperty, null);
+            Control.ApplyScaleAnimation(null, null);
+            Control.ApplyAngleAnimation(null);
         }
 
         private void SetEndVisibility(object sender, EventArgs e)
