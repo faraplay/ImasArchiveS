@@ -22,5 +22,6 @@ namespace Imas.UI
 
         // This is a named argument
         public bool StringMultiline { get; set; }
+        public string ConditionProperty { get; set; }
     }
 }

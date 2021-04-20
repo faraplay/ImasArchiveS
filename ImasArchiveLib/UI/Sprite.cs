@@ -4,25 +4,25 @@
     {
         [SerialiseField(0, FixedCount = 9)]
         // (9*4 bytes of 0s)
-        public int[] start = new int[9];
+        public uint[] start = new uint[9];
         [Listed(0)]
-        public int Start0 { get => start[0]; set => start[0] = value; }
+        public uint Start0 { get => start[0]; set => start[0] = value; }
         [Listed(1)]
-        public int Start1 { get => start[1]; set => start[1] = value; }
+        public uint Start1 { get => start[1]; set => start[1] = value; }
         [Listed(2)]
-        public int Start2 { get => start[2]; set => start[2] = value; }
+        public uint Start2 { get => start[2]; set => start[2] = value; }
         [Listed(3)]
-        public int Start3 { get => start[3]; set => start[3] = value; }
+        public uint Start3 { get => start[3]; set => start[3] = value; }
         [Listed(4)]
-        public int Start4 { get => start[4]; set => start[4] = value; }
+        public uint Start4 { get => start[4]; set => start[4] = value; }
         [Listed(5)]
-        public int Start5 { get => start[5]; set => start[5] = value; }
+        public uint Start5 { get => start[5]; set => start[5] = value; }
         [Listed(6)]
-        public int Start6 { get => start[6]; set => start[6] = value; }
+        public uint Start6 { get => start[6]; set => start[6] = value; }
         [Listed(7)]
-        public int Start7 { get => start[7]; set => start[7] = value; }
+        public uint Start7 { get => start[7]; set => start[7] = value; }
         [Listed(8)]
-        public int Start8 { get => start[8]; set => start[8] = value; }
+        public uint Start8 { get => start[8]; set => start[8] = value; }
 
         [SerialiseField(9)]
         public float xpos;

@@ -30,6 +30,20 @@ namespace ImasArchiveApp
             }
         }
         public bool PropertyStringMultiline => Attribute.StringMultiline;
+        public bool PropertyCondition
+        {
+            get
+            {
+                if (Attribute.ConditionProperty == null)
+                    return true;
+                PropertyInfo conditionPropertyInfo = PropertyInfo.DeclaringType.GetProperty(Attribute.ConditionProperty);
+                if (conditionPropertyInfo == null)
+                    return false;
+                if (!(conditionPropertyInfo.GetValue(Element) is bool value))
+                    return false;
+                return value;
+            }
+        }
 
 
         public UIElementPropertyModel(PropertyInfo propertyInfo, Imas.UI.UIElement element)

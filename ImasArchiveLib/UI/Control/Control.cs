@@ -120,7 +120,16 @@
         [SerialiseField(26)]
         public SpriteGroup specialSprite;
         [SerialiseField(27, FixedCount = 4, ConditionProperty = nameof(HasExtData))]
-        public int[] extData;
+        public uint[] extData = new uint[4];
+
+        [Listed(28, ConditionProperty = nameof(HasExtData))]
+        public uint ExtData0 { get => extData[0]; set => extData[0] = value; }
+        [Listed(29, ConditionProperty = nameof(HasExtData))]
+        public uint ExtData1 { get => extData[1]; set => extData[1] = value; }
+        [Listed(30, ConditionProperty = nameof(HasExtData))]
+        public uint ExtData2 { get => extData[2]; set => extData[2] = value; }
+        [Listed(31, ConditionProperty = nameof(HasExtData))]
+        public uint ExtData3 { get => extData[3]; set => extData[3] = value; }
 
 
         public bool HasExtData => (d1 & 0x04000000) != 0;

@@ -16,6 +16,16 @@
             <ColumnDefinition Width="90" />
             <ColumnDefinition MinWidth="120" />
         </Grid.ColumnDefinitions>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=PropertyCondition}" Value="False">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Label Grid.Column="0" Content="{Binding Path=PropertyName}" />
         <ContentControl Grid.Column="1">
             <ContentControl.Resources>
