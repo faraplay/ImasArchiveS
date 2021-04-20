@@ -204,7 +204,7 @@ namespace ImasArchiveApp
             if (Control == null)
                 return;
             Control.VisibilityClock = (AnimationClock)clockGroup.Children[0];
-            Control.VisibilityClock.Completed += SetEndVisibility;
+            SetEndVisibility();
             Control.ApplyPositionAnimation((AnimationClock)clockGroup.Children[1], (AnimationClock)clockGroup.Children[2]);
             Control.OpacityClock = (AnimationClock)clockGroup.Children[3];
             Control.ApplyScaleAnimation((AnimationClock)clockGroup.Children[4], (AnimationClock)clockGroup.Children[5]);
@@ -230,7 +230,7 @@ namespace ImasArchiveApp
             }
         }
 
-        private void SetEndVisibility(object sender, EventArgs e)
+        private void SetEndVisibility()
         {
             if (Control != null && VisibilityEndValue.HasValue) 
                 Control.CurrentVisibility = VisibilityEndValue != 0;
