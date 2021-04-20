@@ -1,7 +1,7 @@
 ﻿namespace Imas.UI
 {
     [SerialisationDerivedType(6)]
-    class ScrollControl : GroupControl
+    public class ScrollControl : GroupControl
     {
         [SerialiseField(200)]
         public float e1;

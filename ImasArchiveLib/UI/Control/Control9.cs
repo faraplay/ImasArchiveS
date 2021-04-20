@@ -1,7 +1,7 @@
 ﻿namespace Imas.UI
 {
     [SerialisationDerivedType(9)]
-    class Control9 : GroupControl
+    public class Control9 : GroupControl
     {
         [SerialiseField(200)]
         public int e1;

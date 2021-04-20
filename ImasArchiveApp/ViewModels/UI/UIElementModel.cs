@@ -8,7 +8,7 @@ namespace ImasArchiveApp
     {
         protected readonly UIElementModel parent;
 
-        protected bool currentVisibility = true;
+        private bool currentVisibility = true;
         public bool CurrentVisibility
         {
             get => currentVisibility;
@@ -20,15 +20,13 @@ namespace ImasArchiveApp
         }
 
         public ObservableCollection<UIElementModel> Children { get; set; }
-        protected abstract UIElement UIElement { get; }
-        public UIElement MyUIElement => UIElement;
+        public abstract UIElement UIElement { get; }
         public abstract string ModelName { get; }
 
         public string GetUniqueString() => parent == null ? "0" : $"{parent.GetUniqueString()},{parent.Children.IndexOf(this)}";
         public string ParentUniqueID => parent.GetUniqueString();
-        public bool IsInCollection => parent is UISpriteCollectionModel;
 
-        protected UIElementModel(UISubcomponentModel subcomponent, UIElementModel parent, string name, bool visible) : base(subcomponent, name)
+        protected UIElementModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, name)
         {
             this.parent = parent;
             Children = new ObservableCollection<UIElementModel>();

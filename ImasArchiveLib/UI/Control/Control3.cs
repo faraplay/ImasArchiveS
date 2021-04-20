@@ -1,7 +1,7 @@
 ﻿namespace Imas.UI
 {
     [SerialisationDerivedType(3)]
-    class Control3 : Control
+    public class Control3 : Control
     {
         [SerialiseField(200)]
         public float e1;

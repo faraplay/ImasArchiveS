@@ -7,7 +7,7 @@ namespace ImasArchiveApp
     public class UISpriteModel : UIElementModel
     {
         private readonly Sprite _sprite;
-        protected override UIElement UIElement => _sprite;
+        public override UIElement UIElement => _sprite;
 
         public UISpriteSheetModel ParentSheet => (_sprite.srcImageID == -1) ? null : subcomponent.SpriteSheets[_sprite.srcImageID];
         private UISpriteSheetRectangleModel spriteSheetRectangleModel;
@@ -23,8 +23,6 @@ namespace ImasArchiveApp
         public override string ModelName => $"({_sprite.width}x{_sprite.height})";
         private int SrcImgWidth => ParentSheet?.BoundingPixelWidth ?? 1;
         private int SrcImgHeight => ParentSheet?.BoundingPixelHeight ?? 1;
-        private float SrcFracWidth => _sprite.srcFracRight - _sprite.srcFracLeft;
-        private float SrcFracHeight => _sprite.srcFracBottom - _sprite.srcFracTop;
         internal float SourceXQuiet
         {
             get => _sprite.srcFracLeft * SrcImgWidth;
@@ -107,7 +105,7 @@ namespace ImasArchiveApp
             }
         }
 
-        public UISpriteModel(UISubcomponentModel subcomponent, UIElementModel parent, Sprite sprite) : base(subcomponent, parent, "sprite", sprite.myVisible)
+        public UISpriteModel(UISubcomponentModel subcomponent, UIElementModel parent, Sprite sprite) : base(subcomponent, parent, "sprite")
         {
             _sprite = sprite;
             if (_sprite.srcImageID >= 0)

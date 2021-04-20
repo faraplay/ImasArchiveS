@@ -71,7 +71,7 @@ namespace ImasArchiveApp
             }
             ControlModel = new ObservableCollection<UIControlModel>
             {
-                UIControlModel.CreateModel(this, null, uiComponent.rootControl)
+                new UIControlModel(uiComponent.rootControl, this, null)
             };
             ControlDictionary = new Dictionary<string, UIControlModel>();
             ControlModel[0].ForAll(control =>
@@ -111,7 +111,7 @@ namespace ImasArchiveApp
             UIProperties.Clear();
             if (SelectedModel is UIElementModel uiElementModel)
             {
-                UIElement element = uiElementModel.MyUIElement;
+                UIElement element = uiElementModel.UIElement;
                 foreach ((var property, var attr) in element.GetType()
                     .GetProperties()
                     .Select(p => (p, p.GetCustomAttributes(typeof(ListedAttribute), false)))

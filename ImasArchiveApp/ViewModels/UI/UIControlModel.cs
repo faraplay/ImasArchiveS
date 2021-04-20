@@ -5,32 +5,48 @@ using System.Windows.Media.Animation;
 
 namespace ImasArchiveApp
 {
-    public abstract class UIControlModel : UIElementModel
+    public class UIControlModel : UIElementModel
     {
-        protected abstract Control Control { get; }
-        protected override UIElement UIElement => Control;
+        protected virtual Control Control { get; }
+        public override UIElement UIElement => Control;
 
         public override string ModelName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
-
-
-        protected UIControlModel(Control control, UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, parent, name, true)
+        public int ControlTypeID => Control switch
         {
-            PositionTransform = new TranslateTransform(control.Xpos, control.Ypos);
-            //ScaleTransform = new ScaleTransform(Control.ScaleX == 0 ? 1 : Control.ScaleX, Control.ScaleY);
-            ScaleTransform = new ScaleTransform(control.ScaleX, control.ScaleY);
-        }
+            SpriteCollection _ => 10,
+            Control9 _ => 9,
+            ScrollControl _ => 6,
+            Icon _ => 5,
+            GroupControl _ => 4,
+            Control3 _ => 3,
+            TextBox _ => 2,
+            _ => 0,
+        };
 
-        public static UIControlModel CreateModel(UISubcomponentModel subcomponent, UIElementModel parent, Control control)
+        public UIControlModel(Control control, UISubcomponentModel subcomponent, UIElementModel parent) : base(subcomponent, parent, control.Name)
         {
-            UIControlModel newControlModel = control switch
+            Control = control;
+            if (control.specialSprite.sprites.Count != 0)
             {
-                GroupControl gc => new UIGroupControlModel(subcomponent, parent, gc),
-                SpriteCollection sc => new UISpriteCollectionModel(subcomponent, parent, sc),
-                TextBox tb => new UITextBoxModel(subcomponent, parent, tb),
-                _ => new UITypedControlModel<Control>(subcomponent, parent, control),
-            };
-            newControlModel.currentVisibility = control.DefaultVisibility;
-            return newControlModel;
+                Children.Add(new UISpriteGroupModel(subcomponent, this, control.specialSprite, false));
+            }
+            if (control is GroupControl groupControl)
+            {
+                foreach (Control child in groupControl.childControls)
+                {
+                    Children.Add(new UIControlModel(child, subcomponent, this));
+                }
+            }
+            if (control is SpriteCollection spriteCollection)
+            {
+                foreach (SpriteGroup child in spriteCollection.childSpriteGroups)
+                {
+                    Children.Add(new UISpriteGroupModel(subcomponent, this, child, true) { CurrentVisibility = false });
+                }
+            }
+            CurrentVisibility = control.DefaultVisibility;
+            PositionTransform = new TranslateTransform(control.Xpos, control.Ypos);
+            ScaleTransform = new ScaleTransform(control.ScaleX, control.ScaleY);
         }
 
         public void ForAll(Action<UIControlModel> action)

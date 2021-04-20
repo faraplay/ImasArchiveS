@@ -1,7 +1,7 @@
 ﻿namespace Imas.UI
 {
     [SerialisationDerivedType(5)]
-    class Icon : GroupControl
+    public class Icon : GroupControl
     {
         [SerialiseField(200)]
         public float angle;
