@@ -78,6 +78,8 @@ namespace ImasArchiveApp
             {
                 if (!string.IsNullOrWhiteSpace(control.FileName))
                 {
+                    if (ControlDictionary.ContainsKey(control.FileName))
+                        return;
                     ControlDictionary.Add(control.FileName, control);
                 }
             });

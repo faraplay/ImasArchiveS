@@ -19,7 +19,7 @@ namespace ImasArchiveApp
             this.animationsList = animationsList;
             Animations = new ObservableCollection<UIAnimationModel>();
             Timeline = new ParallelTimeline();
-            Control = parent.ControlDictionary[animationsList.ControlName];
+            Control = parent.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
             foreach (Animation animation in animationsList.animations)
             {
                 Animations.Add(new UIAnimationModel(parent, animation));
@@ -147,6 +147,8 @@ namespace ImasArchiveApp
 
         public void ApplyAnimations(ClockGroup clockGroup)
         {
+            if (Control == null)
+                return;
             Control.VisibilityClock = (AnimationClock)clockGroup.Children[0];
             Control.VisibilityClock.Completed += SetEndVisibility;
             Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, (AnimationClock)clockGroup.Children[1]);
@@ -158,6 +160,8 @@ namespace ImasArchiveApp
 
         public void RemoveAnimations()
         {
+            if (Control == null)
+                return;
             Control.VisibilityClock = null;
             Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, null);
             Control.PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, null);
