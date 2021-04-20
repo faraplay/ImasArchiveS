@@ -45,6 +45,9 @@ namespace ImasArchiveApp
                     case ScaleAnimation scaleAnimation:
                         AddScaleAnimation(scaleAnimation);
                         break;
+                    case AngleAnimation angleAnimation:
+                        AddAngleAnimation(angleAnimation);
+                        break;
                 }
             }
 
@@ -71,6 +74,7 @@ namespace ImasArchiveApp
             Timeline.Children.Add(OpacityTimeline);
             Timeline.Children.Add(ScaleXTimeline);
             Timeline.Children.Add(ScaleYTimeline);
+            Timeline.Children.Add(AngleTimeline);
         }
 
         private double? VisibilityEndValue { get; set; }
@@ -81,6 +85,7 @@ namespace ImasArchiveApp
         private readonly DoubleAnimationUsingKeyFrames OpacityTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames ScaleXTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames ScaleYTimeline = new DoubleAnimationUsingKeyFrames();
+        private readonly DoubleAnimationUsingKeyFrames AngleTimeline = new DoubleAnimationUsingKeyFrames();
 
         private void AddVisibilityAnimation(VisibilityAnimation animation)
         {
@@ -144,6 +149,19 @@ namespace ImasArchiveApp
                     KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)))
                 );
         }
+        private void AddAngleAnimation(AngleAnimation animation)
+        {
+            AngleTimeline.KeyFrames.Add(
+                new LinearDoubleKeyFrame(
+                    -animation.startAngle * 180 / Math.PI,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.startTime)))
+                );
+            AngleTimeline.KeyFrames.Add(
+                new LinearDoubleKeyFrame(
+                    -animation.endAngle * 180 / Math.PI,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)))
+                );
+        }
 
         public void ApplyAnimations(ClockGroup clockGroup)
         {
@@ -156,6 +174,7 @@ namespace ImasArchiveApp
             Control.OpacityClock = (AnimationClock)clockGroup.Children[3];
             Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, (AnimationClock)clockGroup.Children[4]);
             Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, (AnimationClock)clockGroup.Children[5]);
+            Control.AngleTransform?.ApplyAnimationClock(RotateTransform.AngleProperty, (AnimationClock)clockGroup.Children[6]);
         }
 
         public void RemoveAnimations()
@@ -168,6 +187,7 @@ namespace ImasArchiveApp
             Control.OpacityClock = null;
             Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, null);
             Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, null);
+            Control.AngleTransform?.ApplyAnimationClock(RotateTransform.AngleProperty, null);
         }
 
         private void SetEndVisibility(object sender, EventArgs e)

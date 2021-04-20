@@ -16,7 +16,7 @@ namespace ImasArchiveApp
             SpriteCollection _ => 10,
             Control9 _ => 9,
             ScrollControl _ => 6,
-            Icon _ => 5,
+            RotatableGroupControl _ => 5,
             GroupControl _ => 4,
             Control3 _ => 3,
             TextBox _ => 2,
@@ -51,6 +51,10 @@ namespace ImasArchiveApp
             CurrentVisibility = control.DefaultVisibility;
             PositionTransform = new TranslateTransform(control.Xpos, control.Ypos);
             ScaleTransform = new ScaleTransform(control.ScaleX, control.ScaleY);
+            if (Control is RotatableGroupControl icon)
+            {
+                AngleTransform = new RotateTransform(-icon.angle * 180 / Math.PI);
+            }
         }
 
         public void ForAll(Action<UIControlModel> action)
@@ -69,12 +73,22 @@ namespace ImasArchiveApp
         {
             drawingContext.PushOpacity(CurrentVisibility ? 1 : 0, VisibilityClock);
             drawingContext.PushTransform(PositionTransform);
+            if (Control is RotatableGroupControl)
+            {
+                drawingContext.PushTransform(AngleTransform);
+            }
             drawingContext.PushTransform(ScaleTransform);
             drawingContext.PushOpacity(Control.Alpha / 255.0, OpacityClock);
             multiplier.Scale(Control.Red / 255.0f, Control.Green / 255.0f, Control.Blue / 255.0f);
+
             RenderElementUntransformed(drawingContext, multiplier, isTop);
+
             drawingContext.Pop();
             drawingContext.Pop();
+            if (Control is RotatableGroupControl)
+            {
+                drawingContext.Pop();
+            }
             drawingContext.Pop();
             drawingContext.Pop();
         }
@@ -93,5 +107,6 @@ namespace ImasArchiveApp
         public TranslateTransform PositionTransform { get; }
         public AnimationClock OpacityClock { get; set; }
         public ScaleTransform ScaleTransform { get; }
+        public RotateTransform AngleTransform { get; }
     }
 }
