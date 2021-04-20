@@ -20,6 +20,14 @@ namespace ImasArchiveApp
             Animations = new ObservableCollection<UIAnimationModel>();
             Timeline = new ParallelTimeline();
             Control = parent.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
+            if (Control?.UIElement is SpriteCollection spriteCollection)
+            {
+                SpriteTimelinesCollection = new DoubleAnimationUsingKeyFrames[spriteCollection.childSpriteGroups.Count];
+                for (int i = 0; i < spriteCollection.childSpriteGroups.Count; i++)
+                {
+                    SpriteTimelinesCollection[i] = new DoubleAnimationUsingKeyFrames();
+                }
+            }
             foreach (Animation animation in animationsList.animations)
             {
                 Animations.Add(new UIAnimationModel(parent, animation));
@@ -48,6 +56,9 @@ namespace ImasArchiveApp
                     case AngleAnimation angleAnimation:
                         AddAngleAnimation(angleAnimation);
                         break;
+                    case SpriteAnimation spriteAnimation:
+                        AddSpriteAnimation(spriteAnimation);
+                        break;
                 }
             }
 
@@ -75,6 +86,14 @@ namespace ImasArchiveApp
             Timeline.Children.Add(ScaleXTimeline);
             Timeline.Children.Add(ScaleYTimeline);
             Timeline.Children.Add(AngleTimeline);
+            if (Control is UISpriteCollectionModel)
+            {
+                for (int i = 0; i < SpriteTimelinesCollection.Length; i++)
+                {
+                    SpriteTimeline.Children.Add(SpriteTimelinesCollection[i]);
+                }
+            }
+            Timeline.Children.Add(SpriteTimeline);
         }
 
         private double? VisibilityEndValue { get; set; }
@@ -86,6 +105,8 @@ namespace ImasArchiveApp
         private readonly DoubleAnimationUsingKeyFrames ScaleXTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames ScaleYTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames AngleTimeline = new DoubleAnimationUsingKeyFrames();
+        private readonly DoubleAnimationUsingKeyFrames[] SpriteTimelinesCollection;
+        private readonly ParallelTimeline SpriteTimeline = new ParallelTimeline();
 
         private void AddVisibilityAnimation(VisibilityAnimation animation)
         {
@@ -162,6 +183,20 @@ namespace ImasArchiveApp
                     KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)))
                 );
         }
+        private void AddSpriteAnimation(SpriteAnimation animation)
+        {
+            if (Control is UISpriteCollectionModel)
+            {
+                for (int i = 0; i < SpriteTimelinesCollection.Length; i++)
+                {
+                    DoubleAnimationUsingKeyFrames spriteTimeline = SpriteTimelinesCollection[i];
+                    spriteTimeline.KeyFrames.Add(new DiscreteDoubleKeyFrame(
+                        animation.spriteIndex == i ? 1 : 0,
+                        KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.time)))
+                        );
+                }
+            }
+        }
 
         public void ApplyAnimations(ClockGroup clockGroup)
         {
@@ -173,6 +208,10 @@ namespace ImasArchiveApp
             Control.OpacityClock = (AnimationClock)clockGroup.Children[3];
             Control.ApplyScaleAnimation((AnimationClock)clockGroup.Children[4], (AnimationClock)clockGroup.Children[5]);
             Control.ApplyAngleAnimation((AnimationClock)clockGroup.Children[6]);
+            if (Control is UISpriteCollectionModel spriteCollectionModel)
+            {
+                spriteCollectionModel.ApplySpriteClocks((ClockGroup)clockGroup.Children[7]);
+            }
         }
 
         public void RemoveAnimations()
@@ -184,6 +223,10 @@ namespace ImasArchiveApp
             Control.OpacityClock = null;
             Control.ApplyScaleAnimation(null, null);
             Control.ApplyAngleAnimation(null);
+            if (Control is UISpriteCollectionModel spriteCollectionModel)
+            {
+                spriteCollectionModel.ApplySpriteClocks(null);
+            }
         }
 
         private void SetEndVisibility(object sender, EventArgs e)

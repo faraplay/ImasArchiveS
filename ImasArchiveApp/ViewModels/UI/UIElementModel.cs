@@ -32,9 +32,9 @@ namespace ImasArchiveApp
             Children = new ObservableCollection<UIElementModel>();
         }
 
-        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
+        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
         {
-            if (!CurrentVisibility && !isTop)
+            if (!CurrentVisibility && !forceVisible)
                 return;
             foreach (UIElementModel child in Children)
             {

@@ -35,13 +35,17 @@ namespace ImasArchiveApp
             {
                 foreach (Control child in groupControl.childControls)
                 {
-                    if (child is TextBox textBox)
+                    switch (child)
                     {
-                        Children.Add(new UITextBoxModel(textBox, subcomponent, this));
-                    }
-                    else
-                    {
-                        Children.Add(new UIControlModel(child, subcomponent, this));
+                        case TextBox textBox:
+                            Children.Add(new UITextBoxModel(textBox, subcomponent, this));
+                            break;
+                        case SpriteCollection spriteChild:
+                            Children.Add(new UISpriteCollectionModel(spriteChild, subcomponent, this));
+                            break;
+                        default:
+                            Children.Add(new UIControlModel(child, subcomponent, this));
+                            break;
                     }
                 }
             }
@@ -79,7 +83,7 @@ namespace ImasArchiveApp
             }
         }
 
-        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
+        internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
         {
             drawingContext.PushOpacity(CurrentVisibility ? 1 : 0, VisibilityClock);
             drawingContext.PushTransform(PositionTransform);
@@ -91,7 +95,7 @@ namespace ImasArchiveApp
             drawingContext.PushOpacity(Control.Alpha / 255.0, OpacityClock);
             multiplier.Scale(Control.Red / 255.0f, Control.Green / 255.0f, Control.Blue / 255.0f);
 
-            RenderElementUntransformed(drawingContext, multiplier, isTop);
+            RenderElementUntransformed(drawingContext, multiplier, forceVisible);
 
             drawingContext.Pop();
             drawingContext.Pop();
@@ -103,9 +107,9 @@ namespace ImasArchiveApp
             drawingContext.Pop();
         }
 
-        protected virtual void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
+        protected virtual void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
         {
-            if (!CurrentVisibility && !isTop && VisibilityClock == null)
+            if (!CurrentVisibility && !forceVisible && VisibilityClock == null)
                 return;
             foreach (UIElementModel child in Children)
             {
