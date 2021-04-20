@@ -8,6 +8,7 @@
     Title="im@s Archive App"
     Width="1280"
     Height="800"
+    d:DataContext="{d:DesignInstance Type=local:MainWindowModel}"
     mc:Ignorable="d">
     <Window.Resources>
         <local:ObjectToTypeConverter x:Key="ObjectToType" />
@@ -32,27 +33,27 @@
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="Open">
-                    <MenuItem Command="{Binding Path=OpenArcCommand}" Header="Open Arc" />
-                    <MenuItem Command="{Binding Path=OpenPatchZipCommand}" Header="Open Patch Zip" />
-                    <MenuItem Command="{Binding Path=OpenParCommand}" Header="Open Par" />
-                    <MenuItem Command="{Binding Path=OpenGtfCommand}" Header="Open GTF" />
-                    <MenuItem Command="{Binding Path=OpenHexCommand}" Header="Open in Hex Viewer" />
-                    <MenuItem Command="{Binding Path=OpenComponentCommand}" Header="Open Component Par" />
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open">
+                    <MenuItem Command="{Binding Path=OpenArcCommand}" Header="Open _Arc" />
+                    <MenuItem Command="{Binding Path=OpenPatchZipCommand}" Header="Open Patch _Zip" />
+                    <MenuItem Command="{Binding Path=OpenParCommand}" Header="Open _Par" />
+                    <MenuItem Command="{Binding Path=OpenGtfCommand}" Header="Open _GTF" />
+                    <MenuItem Command="{Binding Path=OpenHexCommand}" Header="Open in He_x Viewer" />
+                    <MenuItem Command="{Binding Path=OpenComponentCommand}" Header="Open _Component Par" />
                 </MenuItem>
-                <MenuItem Command="{Binding Path=CloseCommand}" Header="Close" />
+                <MenuItem Command="{Binding Path=CloseCommand}" Header="_Close" />
                 <Separator />
-                <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New Arc" />
-                <MenuItem Command="{Binding Path=NewPatchCommand}" Header="New Patch" />
+                <MenuItem Command="{Binding Path=NewFromFolderCommand}" Header="New _Arc" />
+                <MenuItem Command="{Binding Path=NewPatchCommand}" Header="New _Patch" />
                 <Separator />
-                <MenuItem Command="{Binding Path=ConvertToGtfCommand}" Header="Convert Image to GTF" />
+                <MenuItem Command="{Binding Path=ConvertToGtfCommand}" Header="Convert Image to _GTF" />
             </MenuItem>
-            <MenuItem Header="Patch">
-                <MenuItem Command="{Binding Path=ReplaceSaveFolderCommand}" Header="Patch Arc From Folder" />
-                <MenuItem Command="{Binding Path=ReplaceSaveZipCommand}" Header="Patch Arc From Zip" />
+            <MenuItem Header="_Patch">
+                <MenuItem Command="{Binding Path=ReplaceSaveFolderCommand}" Header="Patch Arc From _Folder" />
+                <MenuItem Command="{Binding Path=ReplaceSaveZipCommand}" Header="Patch Arc From _Zip" />
             </MenuItem>
-            <MenuItem DataContext="{Binding Path=FileModel}" Header="Arc">
+            <MenuItem DataContext="{Binding Path=FileModel}" Header="_Arc">
                 <MenuItem.Style>
                     <Style TargetType="MenuItem">
                         <Setter Property="IsEnabled" Value="False" />
@@ -65,19 +66,19 @@
                         </Style.Triggers>
                     </Style>
                 </MenuItem.Style>
-                <MenuItem Command="{Binding Path=SaveAsCommand}" Header="Save Arc" />
+                <MenuItem Command="{Binding Path=SaveAsCommand}" Header="_Save Arc" />
                 <Separator />
-                <MenuItem Command="{Binding Path=ExtractAllCommand}" Header="Extract All" />
-                <MenuItem Header="Extract...">
-                    <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract Commus" />
-                    <MenuItem Command="{Binding Path=ExtractParameterCommand}" Header="Extract Parameter Data" />
-                    <MenuItem Command="{Binding Path=ExtractImagesCommand}" Header="Extract Images" />
-                    <MenuItem Command="{Binding Path=ExtractLyricsCommand}" Header="Extract Lyrics" />
+                <MenuItem Command="{Binding Path=ExtractAllCommand}" Header="Extract _All" />
+                <MenuItem Header="_Extract...">
+                    <MenuItem Command="{Binding Path=ExtractCommusCommand}" Header="Extract _Commus" />
+                    <MenuItem Command="{Binding Path=ExtractParameterCommand}" Header="Extract _Parameter Data" />
+                    <MenuItem Command="{Binding Path=ExtractImagesCommand}" Header="Extract _Images" />
+                    <MenuItem Command="{Binding Path=ExtractLyricsCommand}" Header="Extract _Lyrics" />
                 </MenuItem>
                 <Separator />
-                <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch Font" />
+                <MenuItem Command="{Binding Path=PatchFontCommand}" Header="Patch _Font" />
             </MenuItem>
-            <MenuItem DataContext="{Binding Path=FileModel}" Header="Patch Zip">
+            <MenuItem DataContext="{Binding Path=FileModel}" Header="Patch _Zip">
                 <MenuItem.Style>
                     <Style TargetType="MenuItem">
                         <Setter Property="IsEnabled" Value="False" />
@@ -90,12 +91,12 @@
                         </Style.Triggers>
                     </Style>
                 </MenuItem.Style>
-                <MenuItem Header="Add...">
-                    <MenuItem Command="{Binding Path=AddFileCommand}" Header="Add File" />
-                    <MenuItem Command="{Binding Path=AddCommusCommand}" Header="Add Commus" />
-                    <MenuItem Command="{Binding Path=AddParameterCommand}" Header="Add Parameter Files" />
-                    <MenuItem Command="{Binding Path=AddImagesCommand}" Header="Add Images" />
-                    <MenuItem Command="{Binding Path=AddLyricsCommand}" Header="Add Lyrics" />
+                <MenuItem Header="_Add...">
+                    <MenuItem Command="{Binding Path=AddFileCommand}" Header="Add _File" />
+                    <MenuItem Command="{Binding Path=AddCommusCommand}" Header="Add _Commus" />
+                    <MenuItem Command="{Binding Path=AddParameterCommand}" Header="Add _Parameter Files" />
+                    <MenuItem Command="{Binding Path=AddImagesCommand}" Header="Add _Images" />
+                    <MenuItem Command="{Binding Path=AddLyricsCommand}" Header="Add _Lyrics" />
                 </MenuItem>
             </MenuItem>
         </Menu>
