@@ -141,5 +141,10 @@ namespace ImasArchiveApp
             AngleTransform = new RotateTransform(-rotatable.angle * 180 / Math.PI);
             AngleTransform.ApplyAnimationClock(RotateTransform.AngleProperty, angle);
         }
+
+        public void ResetAnimatedValues()
+        {
+            CurrentVisibility = Control.DefaultVisibility;
+        }
     }
 }

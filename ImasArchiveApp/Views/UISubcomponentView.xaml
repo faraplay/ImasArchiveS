@@ -159,18 +159,21 @@
                 <TabItem Header="Animations">
                     <TabControl>
                         <TabItem Header="Play">
-                            <ScrollViewer>
-                                <ItemsControl ItemsSource="{Binding Path=AnimationGroups}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Button
+                            <DockPanel>
+                                <Button DockPanel.Dock="Top" Margin="0,0,0,5" Content="Reset" Command="{Binding ResetCommand}"/>
+                                <ScrollViewer>
+                                    <ItemsControl ItemsSource="{Binding Path=AnimationGroups}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button
                                                 Padding="3"
                                                 Command="{Binding Path=SelectPlayCommand}"
                                                 Content="{Binding Path=FileName}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </DockPanel>
                         </TabItem>
                         <TabItem Header="Details">
                             <DockPanel>

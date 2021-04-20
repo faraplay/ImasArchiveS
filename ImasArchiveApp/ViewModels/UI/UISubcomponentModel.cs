@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Imas;
 using Imas.Gtf;
 using Imas.UI;
@@ -43,7 +44,6 @@ namespace ImasArchiveApp
             set
             {
                 _displayedModel = value;
-                //_displayedModel?.LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -55,7 +55,6 @@ namespace ImasArchiveApp
             {
                 _selectedModel = value;
                 RefreshPropertiesList();
-                //_selectedModel?.LoadImage();
                 OnPropertyChanged();
             }
         }
@@ -132,6 +131,11 @@ namespace ImasArchiveApp
             DisplayedModel?.ForceRender();
             SelectedModel?.ForceRender();
         }
+        public void ResetDefaultValues()
+        {
+            SelectedAnimationGroupModel = null;
+            ControlModel[0].ForAll(model => model.ResetAnimatedValues());
+        }
 
         public async Task ReplaceImage(int index)
         {
@@ -158,6 +162,18 @@ namespace ImasArchiveApp
         {
             using FileStream outStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
             uiComponent.WritePauStream(outStream);
+        }
+
+        private RelayCommand _resetCommand;
+        public ICommand ResetCommand
+        {
+            get
+            {
+                if (_resetCommand == null)
+                    _resetCommand = new RelayCommand(
+                        _ => ResetDefaultValues());
+                return _resetCommand;
+            }
         }
     }
 }
