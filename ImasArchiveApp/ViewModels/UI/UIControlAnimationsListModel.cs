@@ -50,15 +50,19 @@ namespace ImasArchiveApp
 
             if (VisibilityTimeline.KeyFrames.Count > 0)
             {
-                var firstFrame = VisibilityTimeline.KeyFrames[0];
-                if (firstFrame.KeyTime.TimeSpan.TotalSeconds > 1 / 120.0f)
+                double lastFrameTime = -1;
+                double lastFrameValue = 0;
+                foreach (var frame in VisibilityTimeline.KeyFrames)
                 {
-                    VisibilityTimeline.KeyFrames.Add(
-                        new DiscreteDoubleKeyFrame(
-                            1 - firstFrame.Value,
-                            KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)))
-                        );
+                    if (!(frame is DoubleKeyFrame doubleKeyFrame))
+                        continue;
+                    if (doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds > lastFrameTime)
+                    {
+                        lastFrameTime = doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds;
+                        lastFrameValue = doubleKeyFrame.Value;
+                    }
                 }
+                VisibilityEndValue = lastFrameValue;
             }
 
             Timeline.Children.Add(VisibilityTimeline);
@@ -68,6 +72,8 @@ namespace ImasArchiveApp
             Timeline.Children.Add(ScaleXTimeline);
             Timeline.Children.Add(ScaleYTimeline);
         }
+
+        private double? VisibilityEndValue { get; set; }
 
         private readonly DoubleAnimationUsingKeyFrames VisibilityTimeline = new DoubleAnimationUsingKeyFrames();
         private readonly DoubleAnimationUsingKeyFrames PositionXTimeline = new DoubleAnimationUsingKeyFrames();
@@ -142,6 +148,7 @@ namespace ImasArchiveApp
         public void ApplyAnimations(ClockGroup clockGroup)
         {
             Control.VisibilityClock = (AnimationClock)clockGroup.Children[0];
+            Control.VisibilityClock.Completed += SetEndVisibility;
             Control.PositionTransform.ApplyAnimationClock(TranslateTransform.XProperty, (AnimationClock)clockGroup.Children[1]);
             Control.PositionTransform.ApplyAnimationClock(TranslateTransform.YProperty, (AnimationClock)clockGroup.Children[2]);
             Control.OpacityClock = (AnimationClock)clockGroup.Children[3];
@@ -157,6 +164,12 @@ namespace ImasArchiveApp
             Control.OpacityClock = null;
             Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, null);
             Control.ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, null);
+        }
+
+        private void SetEndVisibility(object sender, EventArgs e)
+        {
+            if (Control != null && VisibilityEndValue.HasValue) 
+                Control.CurrentVisibility = VisibilityEndValue != 0;
         }
     }
 }

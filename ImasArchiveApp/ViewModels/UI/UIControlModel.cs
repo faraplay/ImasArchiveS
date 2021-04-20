@@ -47,7 +47,7 @@ namespace ImasArchiveApp
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            drawingContext.PushOpacity(Control.DefaultVisibility ? 1 : 0, VisibilityClock);
+            drawingContext.PushOpacity(CurrentVisibility ? 1 : 0, VisibilityClock);
             drawingContext.PushTransform(PositionTransform);
             drawingContext.PushTransform(ScaleTransform);
             drawingContext.PushOpacity(Control.Alpha / 255.0, OpacityClock);
