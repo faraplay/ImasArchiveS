@@ -19,10 +19,10 @@
             <TreeView.Resources>
                 <local:ObjectToTypeConverter x:Key="ObjectToType" />
                 <HierarchicalDataTemplate DataType="{x:Type local:UIControlAnimationsListModel}" ItemsSource="{Binding Path=Animations}">
-                    <Label Padding="2" Content="{Binding Path=FileName}" />
+                    <Label Padding="2" Content="{Binding Path=ShortDesc}" />
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type local:UIAnimationModel}">
-                    <Label Padding="2" Content="{Binding Path=FileName}" />
+                    <Label Padding="2" Content="{Binding Path=ShortDesc}" />
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>

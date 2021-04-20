@@ -14,6 +14,7 @@ namespace ImasArchiveApp
         public ObservableCollection<UIAnimationModel> Animations { get; }
         public ParallelTimeline Timeline { get; }
         public UIControlModel Control { get; }
+        public string ShortDesc => $"{animationsList.ControlName}: {animationsList.animations.Count} animations";
         public UIControlAnimationsListModel(UISubcomponentModel parent, ControlAnimationsList animationsList) : base(parent, animationsList.ControlName)
         {
             this.animationsList = animationsList;

@@ -15,7 +15,7 @@ namespace ImasArchiveApp
         public ObservableCollection<UIControlAnimationsListModel> ListModels { get; }
         public ParallelTimeline Timeline { get; }
         private ClockController controller;
-        public UIAnimationGroupModel(UISubcomponentModel parent, AnimationGroup animationGroup) : base(parent, animationGroup.FileName)
+        public UIAnimationGroupModel(UISubcomponentModel parent, AnimationGroup animationGroup) : base(parent, animationGroup.FileName[..^4])
         {
             parentSubcomponent = parent;
             this.animationGroup = animationGroup;
