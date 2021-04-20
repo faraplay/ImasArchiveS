@@ -28,7 +28,8 @@ namespace ImasArchiveApp
             Control = control;
             if (control.specialSprite.sprites.Count != 0)
             {
-                Children.Add(new UISpriteGroupModel(subcomponent, this, control.specialSprite, false));
+                Children.Add(new UISpriteGroupModel(subcomponent, this, control.specialSprite, false) 
+                    { CurrentVisibility = !(control is SpriteCollection) });
             }
             if (control is GroupControl groupControl)
             {
@@ -39,9 +40,12 @@ namespace ImasArchiveApp
             }
             if (control is SpriteCollection spriteCollection)
             {
+                int index = 0;
                 foreach (SpriteGroup child in spriteCollection.childSpriteGroups)
                 {
-                    Children.Add(new UISpriteGroupModel(subcomponent, this, child, true) { CurrentVisibility = false });
+                    Children.Add(new UISpriteGroupModel(subcomponent, this, child, true) 
+                        { CurrentVisibility = index == spriteCollection.defaultSpriteIndex });
+                    index++;
                 }
             }
             CurrentVisibility = control.DefaultVisibility;

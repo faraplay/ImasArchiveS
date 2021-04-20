@@ -9,9 +9,9 @@ namespace Imas.UI
         public int childSpriteGroupCount;
 
         [SerialiseField(101)]
-        public int e1;
+        public int defaultSpriteIndex;
         [Listed(101)]
-        public int E1 { get => e1; set => e1 = value; }
+        public int DefaultSpriteIndex { get => defaultSpriteIndex; set => defaultSpriteIndex = value; }
         [SerialiseField(102)]
         public uint e2;
         [Listed(102)]
