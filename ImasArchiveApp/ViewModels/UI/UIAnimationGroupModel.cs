@@ -10,12 +10,14 @@ namespace ImasArchiveApp
 {
     public class UIAnimationGroupModel : FileModel
     {
+        private UISubcomponentModel parentSubcomponent;
         private AnimationGroup animationGroup;
         public ObservableCollection<UIControlAnimationsListModel> ListModels { get; }
         public ParallelTimeline Timeline { get; }
         private ClockController controller;
         public UIAnimationGroupModel(UISubcomponentModel parent, AnimationGroup animationGroup) : base(parent, animationGroup.FileName)
         {
+            parentSubcomponent = parent;
             this.animationGroup = animationGroup;
             ListModels = new ObservableCollection<UIControlAnimationsListModel>();
             Timeline = new ParallelTimeline();
@@ -55,7 +57,6 @@ namespace ImasArchiveApp
         {
             controller?.Begin();
         }
-
         private RelayCommand _playCommand;
         public ICommand PlayCommand
         {
@@ -66,6 +67,24 @@ namespace ImasArchiveApp
                     _playCommand = new RelayCommand(_ => PlayAnimations());
                 }
                 return _playCommand;
+            }
+        }
+
+        private void SelectAndPlay()
+        {
+            parentSubcomponent.SelectedAnimationGroupModel = this;
+            PlayAnimations();
+        }
+        private RelayCommand _selectPlayCommand;
+        public ICommand SelectPlayCommand
+        {
+            get
+            {
+                if (_selectPlayCommand == null)
+                {
+                    _selectPlayCommand = new RelayCommand(_ => SelectAndPlay());
+                }
+                return _selectPlayCommand;
             }
         }
     }

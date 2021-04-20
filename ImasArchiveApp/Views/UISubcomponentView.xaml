@@ -130,19 +130,37 @@
                     </TreeView>
                 </TabItem>
                 <TabItem Header="Animations">
-                    <DockPanel>
-                        <ComboBox
-                            DockPanel.Dock="Top"
-                            ItemsSource="{Binding Path=AnimationGroups}"
-                            SelectedValue="{Binding Path=SelectedAnimationGroupModel}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Label Padding="0" Content="{Binding Path=FileName}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        <local:UIAnimationGroupView DataContext="{Binding Path=SelectedAnimationGroupModel}" />
-                    </DockPanel>
+                    <TabControl>
+                        <TabItem Header="Play">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding Path=AnimationGroups}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button
+                                                Padding="3"
+                                                Command="{Binding Path=SelectPlayCommand}"
+                                                Content="{Binding Path=FileName}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem Header="Details">
+                            <DockPanel>
+                                <ComboBox
+                                    DockPanel.Dock="Top"
+                                    ItemsSource="{Binding Path=AnimationGroups}"
+                                    SelectedValue="{Binding Path=SelectedAnimationGroupModel}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Label Padding="0" Content="{Binding Path=FileName}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <local:UIAnimationGroupView DataContext="{Binding Path=SelectedAnimationGroupModel}" />
+                            </DockPanel>
+                        </TabItem>
+                    </TabControl>
                 </TabItem>
             </TabControl>
         </DockPanel>
