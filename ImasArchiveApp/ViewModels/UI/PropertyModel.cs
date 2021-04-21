@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace ImasArchiveApp
 {
-    public class UIElementPropertyModel : INotifyPropertyChanged
+    public class PropertyModel : INotifyPropertyChanged
     {
         private PropertyInfo PropertyInfo { get; }
         private ListedAttribute Attribute { get; }
@@ -18,7 +18,7 @@ namespace ImasArchiveApp
             return $"{ PropertyName }: { PropertyValue }";
         }
         public string PropertyName => PropertyInfo.Name;
-        public Imas.UI.UIElement Element { get; }
+        public object Element { get; }
         public Type PropertyType => PropertyInfo.PropertyType;
         public object PropertyValue
         {
@@ -46,7 +46,7 @@ namespace ImasArchiveApp
         }
 
 
-        public UIElementPropertyModel(PropertyInfo propertyInfo, Imas.UI.UIElement element)
+        public PropertyModel(PropertyInfo propertyInfo, object element)
         {
             PropertyInfo = propertyInfo;
             Attribute = (ListedAttribute)propertyInfo.GetCustomAttributes(typeof(ListedAttribute), false)[0];

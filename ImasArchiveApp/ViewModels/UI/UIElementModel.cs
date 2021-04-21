@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace ImasArchiveApp
@@ -44,5 +45,22 @@ namespace ImasArchiveApp
 
         public override int BoundingPixelWidth => 1280;
         public override int BoundingPixelHeight => 720;
+
+        private RelayCommand _displayCommand;
+
+        public ICommand DisplayCommand
+        {
+            get
+            {
+                if (_displayCommand == null)
+                {
+                    _displayCommand = new RelayCommand(
+                        _ => {
+                            subcomponent.DisplayedModel = this;
+                        });
+                }
+                return _displayCommand;
+            }
+        }
     }
 }

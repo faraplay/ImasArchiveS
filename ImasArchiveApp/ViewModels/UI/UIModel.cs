@@ -17,23 +17,6 @@ namespace ImasArchiveApp
             //ms = new MemoryStream();
         }
 
-        private RelayCommand _displayCommand;
-
-        public ICommand DisplayCommand
-        {
-            get
-            {
-                if (_displayCommand == null)
-                {
-                    _displayCommand = new RelayCommand(
-                        _ => {
-                            subcomponent.DisplayedModel = this;
-                        });
-                }
-                return _displayCommand;
-            }
-        }
-
         private RelayCommand _selectCommand;
 
         public ICommand SelectCommand

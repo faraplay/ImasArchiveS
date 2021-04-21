@@ -20,7 +20,7 @@ namespace ImasArchiveApp
         public IGetFileName GetFileName { get; }
         public ObservableCollection<UIControlModel> ControlModel { get; }
         public ObservableCollection<UISpriteSheetModel> SpriteSheets { get; }
-        public ObservableCollection<UIElementPropertyModel> UIProperties { get; }
+        public ObservableCollection<PropertyModel> UIProperties { get; }
         public ObservableCollection<UIAnimationGroupModel> AnimationGroups { get; }
         public Dictionary<string, UIControlModel> ControlDictionary { get; }
 
@@ -37,8 +37,8 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        private UIModel _displayedModel;
-        public UIModel DisplayedModel
+        private UIElementModel _displayedModel;
+        public UIElementModel DisplayedModel
         {
             get => _displayedModel;
             set
@@ -54,7 +54,7 @@ namespace ImasArchiveApp
             set
             {
                 _selectedModel = value;
-                RefreshPropertiesList();
+                RefreshPropertiesList(SelectedModel);
                 OnPropertyChanged();
             }
         }
@@ -82,7 +82,7 @@ namespace ImasArchiveApp
                     ControlDictionary.Add(control.FileName, control);
                 }
             });
-            UIProperties = new ObservableCollection<UIElementPropertyModel>();
+            UIProperties = new ObservableCollection<PropertyModel>();
             PropertyChangedEventHandler = (sender, e) => ForceRender();
             foreach (var spritesheet in SpriteSheets)
             {
@@ -101,14 +101,14 @@ namespace ImasArchiveApp
 
         public GTF GetSpritesheet(int index) => uiComponent.imageSource[index];
 
-        private void RefreshPropertiesList()
+        private void RefreshPropertiesList(UIModel model)
         {
-            foreach (UIElementPropertyModel propertyModel in UIProperties)
+            foreach (PropertyModel propertyModel in UIProperties)
             {
                 propertyModel.PropertyChanged -= PropertyChangedEventHandler;
             }
             UIProperties.Clear();
-            if (SelectedModel is UIElementModel uiElementModel)
+            if (model is UIElementModel uiElementModel)
             {
                 UIElement element = uiElementModel.UIElement;
                 foreach ((var property, var attr) in element.GetType()
@@ -118,7 +118,7 @@ namespace ImasArchiveApp
                     .Select(tuple => (tuple.p, (ListedAttribute)tuple.Item2[0]))
                     .OrderBy(tuple => tuple.Item2.Order))
                 {
-                    UIElementPropertyModel propertyModel = new UIElementPropertyModel(property, element);
+                    PropertyModel propertyModel = new PropertyModel(property, element);
                     propertyModel.PropertyChanged += PropertyChangedEventHandler;
                     UIProperties.Add(propertyModel);
                 }

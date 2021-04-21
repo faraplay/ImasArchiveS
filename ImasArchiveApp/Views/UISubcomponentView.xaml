@@ -127,9 +127,6 @@
                                         <i:EventTrigger EventName="MouseLeftButtonDown">
                                             <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                                         </i:EventTrigger>
-                                        <i:EventTrigger EventName="MouseDoubleClick">
-                                            <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
-                                        </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                     <TextBlock Margin="2" Text="{Binding Path=FileName}">
                                         <TextBlock.ContextMenu>
@@ -145,9 +142,6 @@
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="MouseLeftButtonDown">
                                             <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
-                                        </i:EventTrigger>
-                                        <i:EventTrigger EventName="MouseDoubleClick">
-                                            <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                     <TextBlock Margin="2" Text="{Binding Path=Description}" />
