@@ -14,11 +14,11 @@ using System.Windows.Shapes;
 namespace ImasArchiveApp
 {
     /// <summary>
-    /// Interaction logic for UISpriteCollectionPropertyView.xaml
+    /// Interaction logic for PtaPropertyView.xaml
     /// </summary>
-    public partial class UISpriteCollectionPropertyView : UserControl
+    public partial class PtaPropertyView : UserControl
     {
-        public UISpriteCollectionPropertyView()
+        public PtaPropertyView()
         {
             InitializeComponent();
         }

@@ -9,7 +9,7 @@ namespace ImasArchiveApp
         private readonly Sprite _sprite;
         public override UIElement UIElement => _sprite;
 
-        public UISpriteSheetModel ParentSheet => (_sprite.srcImageID == -1) ? null : subcomponent.SpriteSheets[_sprite.srcImageID];
+        public UISpriteSheetModel ParentSheet => (_sprite.srcImageID == -1) ? null : subcomponent.PtaModel.SpriteSheets[_sprite.srcImageID];
         private UISpriteSheetRectangleModel spriteSheetRectangleModel;
         public UISpriteSheetRectangleModel SpriteSheetRectangleModel 
         { 

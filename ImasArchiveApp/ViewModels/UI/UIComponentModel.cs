@@ -188,7 +188,7 @@ namespace ImasArchiveApp
                 {
                     ClearStatus();
                     ReportMessage("Saving PAU file...");
-                    _subcompModel.SavePau(fileName);
+                    _subcompModel.PauModel.SavePau(fileName);
                     ReportMessage("Done.");
                 }
             }

@@ -4,11 +4,11 @@ using System.Windows.Media;
 
 namespace ImasArchiveApp
 {
-    public class UISpriteSheetRectangleModel : UIModel
+    public class UISpriteSheetRectangleModel : PtaElementModel
     {
         private readonly UISpriteSheetModel parent;
         private Rect rectangle;
-        public Rect Rectangle => rectangle;
+        public override object Element => rectangle;
         public ObservableCollection<UISpriteModel> Sprites { get; }
 
         public string Description

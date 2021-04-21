@@ -1,0 +1,50 @@
+﻿<UserControl
+    x:Class="ImasArchiveApp.PaaView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ImasArchiveApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:PaaModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <TabControl>
+        <TabItem Header="Play">
+            <DockPanel>
+                <Button
+                    Margin="0,0,0,5"
+                    Command="{Binding ResetCommand}"
+                    Content="Reset"
+                    DockPanel.Dock="Top" />
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Path=AnimationGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Padding="3"
+                                    Command="{Binding Path=SelectPlayCommand}"
+                                    Content="{Binding Path=Name}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Details">
+            <DockPanel>
+                <ComboBox
+                    DockPanel.Dock="Top"
+                    ItemsSource="{Binding Path=AnimationGroups}"
+                    SelectedValue="{Binding Path=SelectedAnimationGroupModel}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <Label Padding="0" Content="{Binding Path=Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <local:UIAnimationGroupView DataContext="{Binding Path=SelectedAnimationGroupModel}" />
+            </DockPanel>
+        </TabItem>
+    </TabControl>
+</UserControl>

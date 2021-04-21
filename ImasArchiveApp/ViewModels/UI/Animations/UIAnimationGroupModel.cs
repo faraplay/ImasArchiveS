@@ -8,23 +8,24 @@ using System.Windows.Media.Animation;
 
 namespace ImasArchiveApp
 {
-    public class UIAnimationGroupModel : FileModel
+    public class UIAnimationGroupModel
     {
-        private UISubcomponentModel parentSubcomponent;
+        private PaaModel paaModel;
         private AnimationGroup animationGroup;
+        public string Name => animationGroup.FileName[..^4];
         public ObservableCollection<UIControlAnimationsListModel> ListModels { get; }
         public ParallelTimeline Timeline { get; }
         private ClockController controller;
-        public UIAnimationGroupModel(UISubcomponentModel parent, AnimationGroup animationGroup) : base(parent, animationGroup.FileName[..^4])
+        public UIAnimationGroupModel(PaaModel paaModel, AnimationGroup animationGroup)
         {
-            parentSubcomponent = parent;
+            this.paaModel = paaModel;
             this.animationGroup = animationGroup;
             ListModels = new ObservableCollection<UIControlAnimationsListModel>();
             Timeline = new ParallelTimeline();
             //Timeline.RepeatBehavior = RepeatBehavior.Forever;
             foreach (ControlAnimationsList animationsList in animationGroup.controlAnimations)
             {
-                UIControlAnimationsListModel animationsListModel = new UIControlAnimationsListModel(parent, animationsList);
+                UIControlAnimationsListModel animationsListModel = new UIControlAnimationsListModel(paaModel, animationsList);
                 ListModels.Add(animationsListModel);
                 Timeline.Children.Add(animationsListModel.Timeline);
             }
@@ -72,7 +73,7 @@ namespace ImasArchiveApp
 
         private void SelectAndPlay()
         {
-            parentSubcomponent.SelectedAnimationGroupModel = this;
+            paaModel.SelectedAnimationGroupModel = this;
             PlayAnimations();
         }
         private RelayCommand _selectPlayCommand;

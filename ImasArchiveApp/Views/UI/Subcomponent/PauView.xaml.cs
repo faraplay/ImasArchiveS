@@ -14,11 +14,11 @@ using System.Windows.Shapes;
 namespace ImasArchiveApp
 {
     /// <summary>
-    /// Interaction logic for UIElementImageView.xaml
+    /// Interaction logic for PauView.xaml
     /// </summary>
-    public partial class UIElementImageView : UserControl
+    public partial class PauView : UserControl
     {
-        public UIElementImageView()
+        public PauView()
         {
             InitializeComponent();
         }

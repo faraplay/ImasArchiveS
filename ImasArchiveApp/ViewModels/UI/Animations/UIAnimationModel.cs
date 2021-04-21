@@ -5,9 +5,10 @@ using System.Text;
 
 namespace ImasArchiveApp
 {
-    public class UIAnimationModel : FileModel
+    public class UIAnimationModel : PaaElementModel
     {
         private Animation animation;
+        public override object Element => animation;
         public string ShortDesc => animation switch
         {
             Animation0 a => $"Animation0 Time: {FormatTime(a.time)}",
@@ -22,7 +23,7 @@ namespace ImasArchiveApp
             _ => "Unknown Animation"
         };
 
-        public UIAnimationModel(IReport parent, Animation animation) : base(parent, animation.ToString())
+        public UIAnimationModel(PaaModel paaModel, Animation animation) : base(paaModel)
         {
             this.animation = animation;
         }

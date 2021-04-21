@@ -14,11 +14,11 @@ using System.Windows.Shapes;
 namespace ImasArchiveApp
 {
     /// <summary>
-    /// Interaction logic for UITextBoxPropertyView.xaml
+    /// Interaction logic for PauPropertyView.xaml
     /// </summary>
-    public partial class UITextBoxPropertyView : UserControl
+    public partial class PauPropertyView : UserControl
     {
-        public UITextBoxPropertyView()
+        public PauPropertyView()
         {
             InitializeComponent();
         }

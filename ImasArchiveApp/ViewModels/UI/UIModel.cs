@@ -14,24 +14,6 @@ namespace ImasArchiveApp
         protected UIModel(UISubcomponentModel subcomponent, string name) : base(subcomponent, name, subcomponent.GetFileName)
         {
             this.subcomponent = subcomponent;
-            //ms = new MemoryStream();
-        }
-
-        private RelayCommand _selectCommand;
-
-        public ICommand SelectCommand
-        {
-            get
-            {
-                if (_selectCommand == null)
-                {
-                    _selectCommand = new RelayCommand(
-                        _ => {
-                            subcomponent.SelectedModel = this;
-                        });
-                }
-                return _selectCommand;
-            }
         }
     }
 }

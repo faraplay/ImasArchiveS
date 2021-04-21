@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace ImasArchiveApp
 {
-    public abstract class UIElementModel : UIModel
+    public abstract class UIElementModel : UIModel, IElementModel
     {
         protected readonly UIElementModel parent;
 
@@ -22,6 +22,7 @@ namespace ImasArchiveApp
 
         public ObservableCollection<UIElementModel> Children { get; set; }
         public abstract UIElement UIElement { get; }
+        public object Element => UIElement;
         public abstract string ModelName { get; }
 
         public string GetUniqueString() => parent == null ? "0" : $"{parent.GetUniqueString()},{parent.Children.IndexOf(this)}";
@@ -56,10 +57,28 @@ namespace ImasArchiveApp
                 {
                     _displayCommand = new RelayCommand(
                         _ => {
-                            subcomponent.DisplayedModel = this;
+                            subcomponent.PauModel.DisplayedModel = this;
                         });
                 }
                 return _displayCommand;
+            }
+        }
+
+        private RelayCommand _selectCommand;
+
+        public ICommand SelectCommand
+        {
+            get
+            {
+                if (_selectCommand == null)
+                {
+                    _selectCommand = new RelayCommand(
+                        _ =>
+                        {
+                            subcomponent.PauModel.SelectedModel = this;
+                        });
+                }
+                return _selectCommand;
             }
         }
     }

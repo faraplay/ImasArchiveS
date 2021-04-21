@@ -12,11 +12,11 @@ using System.Windows.Media.Imaging;
 
 namespace ImasArchiveApp
 {
-    public class UISpriteSheetModel : UIModel
+    public class UISpriteSheetModel : PtaElementModel
     {
+        public override object Element => null;
         private readonly int index;
         private readonly IGetFileName _getfileName;
-        //public Bitmap bitmap;
 
         public List<UISpriteModel> Sprites { get; }
 

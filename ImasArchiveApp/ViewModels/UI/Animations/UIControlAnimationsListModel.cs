@@ -2,25 +2,24 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace ImasArchiveApp
 {
-    public class UIControlAnimationsListModel : FileModel
+    public class UIControlAnimationsListModel : PaaElementModel
     {
         private ControlAnimationsList animationsList;
+        public override object Element => animationsList;
         public ObservableCollection<UIAnimationModel> Animations { get; }
         public ParallelTimeline Timeline { get; }
         public UIControlModel Control { get; }
         public string ShortDesc => $"{animationsList.ControlName}: {animationsList.animations.Count} animations";
-        public UIControlAnimationsListModel(UISubcomponentModel parent, ControlAnimationsList animationsList) : base(parent, animationsList.ControlName)
+        public UIControlAnimationsListModel(PaaModel parent, ControlAnimationsList animationsList) : base(parent)
         {
             this.animationsList = animationsList;
             Animations = new ObservableCollection<UIAnimationModel>();
             Timeline = new ParallelTimeline();
-            Control = parent.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
+            Control = parent.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
             if (Control?.UIElement is SpriteCollection spriteCollection)
             {
                 SpriteTimelinesCollection = new DoubleAnimationUsingKeyFrames[spriteCollection.childSpriteGroups.Count];
