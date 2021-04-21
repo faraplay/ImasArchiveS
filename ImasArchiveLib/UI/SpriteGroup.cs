@@ -4,9 +4,9 @@ namespace Imas.UI
 {
     public class SpriteGroup : UIElement
     {
-        [SerialiseField(0, IsCountOf = nameof(sprites))]
-        public int spriteCount;
-        [SerialiseField(1, CountField = nameof(spriteCount))]
-        public List<Sprite> sprites = new List<Sprite>();
+        [SerialiseProperty(0, IsCountOf = nameof(Sprites))]
+        public int SpriteCount { get; set; }
+        [SerialiseProperty(1, CountProperty = nameof(SpriteCount))]
+        public List<Sprite> Sprites { get; set; } = new List<Sprite>();
     }
 }

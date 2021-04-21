@@ -3,17 +3,15 @@
     [SerialisationDerivedType(3)]
     public class Control3 : Control
     {
-        [SerialiseField(200)]
-        public float e1;
+        [SerialiseProperty(200)]
         [Listed(201)]
-        public float E1 { get => e1; set => e1 = value; }
+        public float E1 { get; set; }
 
-        [SerialiseField(101)]
-        public SpriteGroup otherSprite;
+        [SerialiseProperty(101)]
+        public SpriteGroup OtherSprite { get; set; }
 
-        [SerialiseField(202)]
-        public float e2;
+        [SerialiseProperty(202)]
         [Listed(202)]
-        public float E2 { get => e2; set => e2 = value; }
+        public float E2 { get; set; }
     }
 }

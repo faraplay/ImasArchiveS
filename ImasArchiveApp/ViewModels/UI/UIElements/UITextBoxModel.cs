@@ -36,9 +36,9 @@ namespace ImasArchiveApp
                 return;
             multiplier.Scale(textBox.TextRed / 255.0f, textBox.TextGreen / 255.0f, textBox.TextBlue / 255.0f);
             font.DrawByteArray(
-                textBox.textBuffer,
-                textBox.width,
-                textBox.height,
+                textBox.TextBuffer,
+                textBox.Width,
+                textBox.Height,
                 new TextBoxAttributes() { 
                     xAlign = textBox.XAlignment, 
                     yAlign = textBox.YAlignment, 

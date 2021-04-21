@@ -3,19 +3,16 @@
     [SerialisationDerivedType(5)]
     public class RotatableGroupControl : GroupControl
     {
-        [SerialiseField(200)]
-        public float angle;
+        [SerialiseProperty(200)]
         [Listed(200)]
-        public float Angle { get => angle; set => angle = value; }
+        public float Angle { get; set; }
 
-        [SerialiseField(201)]
-        public float e2;
+        [SerialiseProperty(201)]
         [Listed(201)]
-        public float E2 { get => e2; set => e2 = value; }
-        [SerialiseField(201)]
-        public float e3;
+        public float E2 { get; set; }
+        [SerialiseProperty(201)]
         [Listed(202)]
-        public float E3 { get => e3; set => e3 = value; }
+        public float E3 { get; set; }
 
     }
 }

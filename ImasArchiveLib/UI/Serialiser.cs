@@ -10,7 +10,7 @@ namespace Imas.UI
 {
     class Serialiser
     {
-        private static Dictionary<Type, Action<Binary, object>> serialiseMethods = new Dictionary<Type, Action<Binary, object>>
+        private static readonly Dictionary<Type, Action<Binary, object>> serialiseMethods = new Dictionary<Type, Action<Binary, object>>
         {
             { typeof(byte), (binary, obj) => binary.WriteByte((byte)obj) },
             { typeof(uint), (binary, obj) => binary.WriteUInt32((uint)obj) },
@@ -41,31 +41,31 @@ namespace Imas.UI
             {
                 binary.WriteInt32(((SerialisationDerivedTypeAttribute)attrs[0]).DerivedTypeID);
             }
-            SerialiseFields(binary, type, obj);
+            SerialiseProperties(binary, type, obj);
         }
 
-        private static void SerialiseFields(Binary binary, Type objType, object obj)
+        private static void SerialiseProperties(Binary binary, Type objType, object obj)
         {
-            var fields = objType.GetFields();
-            foreach ((var field, var attr) in fields
-                .Select(field => (field, field.GetCustomAttributes(typeof(SerialiseFieldAttribute), true)))
-                .Where(tuple => tuple.Item2.Length == 1)
-                .Select(tuple => (tuple.field, (SerialiseFieldAttribute)tuple.Item2[0]))
-                .OrderBy(tuple => tuple.Item2.Order))
+            var props = objType.GetProperties();
+            foreach ((var prop, var attr) in props
+                .Select(prop => (prop, attrs: prop.GetCustomAttributes(typeof(SerialisePropertyAttribute), true)))
+                .Where(tuple => tuple.attrs.Length == 1)
+                .Select(tuple => (tuple.prop, attr: (SerialisePropertyAttribute)tuple.attrs[0]))
+                .OrderBy(tuple => tuple.attr.Order))
             {
-                SerialiseField(binary, objType, obj, field, attr);
+                SerialiseProperty(binary, objType, obj, prop, attr);
             }
         }
 
-        private static void SerialiseField(Binary binary, Type objType, object obj, FieldInfo field, SerialiseFieldAttribute attribute)
+        private static void SerialiseProperty(Binary binary, Type objType, object obj, PropertyInfo prop, SerialisePropertyAttribute attribute)
         {
             if (attribute.ConditionProperty != null)
             {
                 var conditionProperty = objType.GetProperty(attribute.ConditionProperty);
                 if (conditionProperty == null)
-                    throw new Exception($"Field {attribute.ConditionProperty} was not found.");
+                    throw new Exception($"Property {attribute.ConditionProperty} was not found.");
                 if (conditionProperty.PropertyType != typeof(bool))
-                    throw new Exception($"Field {attribute.ConditionProperty} is not of type bool.");
+                    throw new Exception($"Property {attribute.ConditionProperty} is not of type bool.");
                 if (!(bool)conditionProperty.GetValue(obj))
                 {
                     return;
@@ -75,17 +75,17 @@ namespace Imas.UI
             {
                 var collectionField = objType.GetField(attribute.IsCountOf);
                 if (collectionField == null)
-                    throw new Exception($"Field {attribute.IsCountOf} was not found.");
-                if (field.FieldType != typeof(int))
-                    throw new Exception($"Field {field} is not of type int.");
+                    throw new Exception($"Property {attribute.IsCountOf} was not found.");
+                if (prop.PropertyType != typeof(int))
+                    throw new Exception($"Property {prop} is not of type int.");
                 // get count of array / list
                 if (!collectionField.FieldType.IsArray
                     && !IsList(collectionField.FieldType))
-                    throw new Exception($"Field {attribute.IsCountOf} is not an array or list.");
+                    throw new Exception($"Property {attribute.IsCountOf} is not an array or list.");
                 binary.WriteInt32(((IList)collectionField.GetValue(obj)).Count);
                 return;
             }
-            Serialise(binary, field.GetValue(obj));
+            Serialise(binary, prop.GetValue(obj));
         }
 
         private static bool IsList(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);

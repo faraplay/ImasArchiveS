@@ -13,7 +13,7 @@ namespace ImasArchiveApp
         public ObservableCollection<UIAnimationModel> Animations { get; }
         public ParallelTimeline Timeline { get; }
         public UIControlModel Control { get; }
-        public string ShortDesc => $"{animationsList.ControlName}: {animationsList.animations.Count} animations";
+        public string ShortDesc => $"{animationsList.ControlName}: {animationsList.Animations.Count} animations";
         public UIControlAnimationsListModel(PaaModel parent, ControlAnimationsList animationsList) : base(parent)
         {
             this.animationsList = animationsList;
@@ -22,13 +22,13 @@ namespace ImasArchiveApp
             Control = parent.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
             if (Control?.UIElement is SpriteCollection spriteCollection)
             {
-                SpriteTimelinesCollection = new DoubleAnimationUsingKeyFrames[spriteCollection.childSpriteGroups.Count];
-                for (int i = 0; i < spriteCollection.childSpriteGroups.Count; i++)
+                SpriteTimelinesCollection = new DoubleAnimationUsingKeyFrames[spriteCollection.ChildSpriteGroups.Count];
+                for (int i = 0; i < spriteCollection.ChildSpriteGroups.Count; i++)
                 {
                     SpriteTimelinesCollection[i] = new DoubleAnimationUsingKeyFrames();
                 }
             }
-            foreach (Animation animation in animationsList.animations)
+            foreach (Animation animation in animationsList.Animations)
             {
                 Animations.Add(new UIAnimationModel(parent, animation));
             }
@@ -37,7 +37,7 @@ namespace ImasArchiveApp
 
         private void BuildTimeline()
         {
-            foreach (Animation animation in animationsList.animations)
+            foreach (Animation animation in animationsList.Animations)
             {
                 switch (animation)
                 {
@@ -112,25 +112,25 @@ namespace ImasArchiveApp
         {
             VisibilityTimeline.KeyFrames.Add(
                 new DiscreteDoubleKeyFrame(
-                    animation.visibility == 3 ? 1 : 0,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.time)))
+                    animation.Visibility == 3 ? 1 : 0,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.Time)))
                 );
         }
         private void AddPositionAnimation(PositionAnimation animation)
         {
-            for (int i = 0; i < animation.pointCount; i++)
+            for (int i = 0; i < animation.PointCount; i++)
             {
                 PositionXTimeline.KeyFrames.Add(
                     new LinearDoubleKeyFrame(
-                        animation.points[i].x,
-                        i == 0 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.startTime)) :
-                        i == animation.pointCount - 1 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)) :
+                        animation.Points[i].X,
+                        i == 0 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.StartTime)) :
+                        i == animation.PointCount - 1 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.EndTime)) :
                         KeyTime.Uniform));
                 PositionYTimeline.KeyFrames.Add(
                     new LinearDoubleKeyFrame(
-                        animation.points[i].y,
-                        i == 0 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.startTime)) :
-                        i == animation.pointCount - 1 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)) :
+                        animation.Points[i].Y,
+                        i == 0 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.StartTime)) :
+                        i == animation.PointCount - 1 ? KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.EndTime)) :
                         KeyTime.Uniform));
             }
         }
@@ -138,49 +138,49 @@ namespace ImasArchiveApp
         {
             OpacityTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    animation.startTransparency,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.startTime)))
+                    animation.StartTransparency,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.StartTime)))
                 );
             OpacityTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    animation.endTransparency,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)))
+                    animation.EndTransparency,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.EndTime)))
                 );
         }
         private void AddScaleAnimation(ScaleAnimation animation)
         {
             ScaleXTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    animation.startXScale,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.startTime)))
+                    animation.StartXScale,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.StartTime)))
                 );
             ScaleYTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    animation.startYScale,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.startTime)))
+                    animation.StartYScale,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.StartTime)))
                 );
             ScaleXTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    animation.endXScale,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)))
+                    animation.EndXScale,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.EndTime)))
                 );
             ScaleYTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    animation.endYScale,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)))
+                    animation.EndYScale,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.EndTime)))
                 );
         }
         private void AddAngleAnimation(AngleAnimation animation)
         {
             AngleTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    -animation.startAngle * 180 / Math.PI,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.startTime)))
+                    -animation.StartAngle * 180 / Math.PI,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.StartTime)))
                 );
             AngleTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    -animation.endAngle * 180 / Math.PI,
-                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.endTime)))
+                    -animation.EndAngle * 180 / Math.PI,
+                    KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.EndTime)))
                 );
         }
         private void AddSpriteAnimation(SpriteAnimation animation)
@@ -191,8 +191,8 @@ namespace ImasArchiveApp
                 {
                     DoubleAnimationUsingKeyFrames spriteTimeline = SpriteTimelinesCollection[i];
                     spriteTimeline.KeyFrames.Add(new DiscreteDoubleKeyFrame(
-                        animation.spriteIndex == i ? 1 : 0,
-                        KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.time)))
+                        animation.SpriteIndex == i ? 1 : 0,
+                        KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.Time)))
                         );
                 }
             }

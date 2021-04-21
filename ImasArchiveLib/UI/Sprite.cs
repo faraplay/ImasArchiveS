@@ -2,98 +2,83 @@
 {
     public class Sprite : UIElement
     {
-        [SerialiseField(0, FixedCount = 9)]
+        [SerialiseProperty(0, FixedCount = 9)]
         // (9*4 bytes of 0s)
-        public uint[] start = new uint[9];
+        public uint[] Start { get; set; } = new uint[9];
         [Listed(0)]
-        public uint Start0 { get => start[0]; set => start[0] = value; }
+        public uint Start0 { get => Start[0]; set => Start[0] = value; }
         [Listed(1)]
-        public uint Start1 { get => start[1]; set => start[1] = value; }
+        public uint Start1 { get => Start[1]; set => Start[1] = value; }
         [Listed(2)]
-        public uint Start2 { get => start[2]; set => start[2] = value; }
+        public uint Start2 { get => Start[2]; set => Start[2] = value; }
         [Listed(3)]
-        public uint Start3 { get => start[3]; set => start[3] = value; }
+        public uint Start3 { get => Start[3]; set => Start[3] = value; }
         [Listed(4)]
-        public uint Start4 { get => start[4]; set => start[4] = value; }
+        public uint Start4 { get => Start[4]; set => Start[4] = value; }
         [Listed(5)]
-        public uint Start5 { get => start[5]; set => start[5] = value; }
+        public uint Start5 { get => Start[5]; set => Start[5] = value; }
         [Listed(6)]
-        public uint Start6 { get => start[6]; set => start[6] = value; }
+        public uint Start6 { get => Start[6]; set => Start[6] = value; }
         [Listed(7)]
-        public uint Start7 { get => start[7]; set => start[7] = value; }
+        public uint Start7 { get => Start[7]; set => Start[7] = value; }
         [Listed(8)]
-        public uint Start8 { get => start[8]; set => start[8] = value; }
+        public uint Start8 { get => Start[8]; set => Start[8] = value; }
 
-        [SerialiseField(9)]
-        public float xpos;
+        [SerialiseProperty(9)]
         [Listed(9)]
-        public float Xpos { get => xpos; set => xpos = value; }
-        [SerialiseField(10)]
-        public float ypos;
+        public float Xpos { get; set; }
+        [SerialiseProperty(10)]
         [Listed(10)]
-        public float Ypos { get => ypos; set => ypos = value; }
-        [SerialiseField(11)]
-        public float width;
+        public float Ypos { get; set; }
+        [SerialiseProperty(11)]
         [Listed(11)]
-        public float Width { get => width; set => width = value; }
-        [SerialiseField(12)]
-        public float height;
+        public float Width { get; set; }
+        [SerialiseProperty(12)]
         [Listed(12)]
-        public float Height { get => height; set => height = value; }
+        public float Height { get; set; }
 
-        [SerialiseField(13)]
-        public int a1;
+        [SerialiseProperty(13)]
         [Listed(13)]
-        public int A1 { get => a1; set => a1 = value; }
-        [SerialiseField(14)]
-        public int a2;
+        public int A1 { get; set; }
+        [SerialiseProperty(14)]
         [Listed(14)]
-        public int A2 { get => a2; set => a2 = value; }
-        [SerialiseField(15)]
-        public float b1;
+        public int A2 { get; set; }
+        [SerialiseProperty(15)]
         [Listed(15)]
-        public float B1 { get => b1; set => b1 = value; }
-        [SerialiseField(16)]
-        public float b2;
+        public float B1 { get; set; }
+        [SerialiseProperty(16)]
         [Listed(16)]
-        public float B2 { get => b2; set => b2 = value; }
-        [SerialiseField(17)]
-        public float b3;
+        public float B2 { get; set; }
+        [SerialiseProperty(17)]
         [Listed(17)]
-        public float B3 { get => b3; set => b3 = value; }
-        [SerialiseField(18)]
-        public float b4;
+        public float B3 { get; set; }
+        [SerialiseProperty(18)]
         [Listed(18)]
-        public float B4 { get => b4; set => b4 = value; }
-        [SerialiseField(19)]
-        public int srcImageID;
+        public float B4 { get; set; }
+        [SerialiseProperty(19)]
         [Listed(19)]
-        public int SrcImageID { get => srcImageID; set => srcImageID = value; }
+        public int SrcImageID { get; set; }
 
-        [SerialiseField(20)]
-        public byte alpha;
+        [SerialiseProperty(20)]
         [Listed(20)]
-        public byte Alpha { get => alpha; set => alpha = value; }
-        [SerialiseField(21)]
-        public byte red;
+        public byte Alpha { get; set; }
+        [SerialiseProperty(21)]
         [Listed(21)]
-        public byte Red { get => red; set => red = value; }
-        [SerialiseField(22)]
-        public byte green;
+        public byte Red { get; set; }
+        [SerialiseProperty(22)]
         [Listed(22)]
-        public byte Green { get => green; set => green = value; }
-        [SerialiseField(23)]
-        public byte blue;
+        public byte Green { get; set; }
+        [SerialiseProperty(23)]
         [Listed(23)]
-        public byte Blue { get => blue; set => blue = value; }
+        public byte Blue { get; set; }
 
-        [SerialiseField(24)]
-        public float srcFracLeft;
-        [SerialiseField(25)]
-        public float srcFracTop;
-        [SerialiseField(26)]
-        public float srcFracRight;
-        [SerialiseField(27)]
-        public float srcFracBottom;
+        [SerialiseProperty(24)]
+        public float SrcFracLeft { get; set; }
+        [SerialiseProperty(25)]
+        public float SrcFracTop { get; set; }
+        [SerialiseProperty(26)]
+        public float SrcFracRight { get; set; }
+        [SerialiseProperty(27)]
+        public float SrcFracBottom { get; set; }
     }
 }

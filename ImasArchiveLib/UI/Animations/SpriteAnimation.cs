@@ -3,10 +3,12 @@
     [SerialisationDerivedType(8)]
     public class SpriteAnimation : Animation
     {
-        [SerialiseField(100)]
-        public float time;
+        [SerialiseProperty(100)]
+		[Listed(100)]
+        public float Time { get; set; }
 
-        [SerialiseField(101)]
-        public int spriteIndex;
+        [SerialiseProperty(101)]
+		[Listed(101)]
+        public int SpriteIndex { get; set; }
     }
 }

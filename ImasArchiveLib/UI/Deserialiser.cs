@@ -9,7 +9,7 @@ namespace Imas.UI
 {
     class Deserialiser
     {
-        private static Dictionary<Type, Func<Binary, object>> deserialiseMethods = new Dictionary<Type, Func<Binary, object>>
+        private static readonly Dictionary<Type, Func<Binary, object>> deserialiseMethods = new Dictionary<Type, Func<Binary, object>>
         {
             { typeof(byte), binary => binary.ReadByte() },
             { typeof(uint), binary => binary.ReadUInt32() },
@@ -34,7 +34,7 @@ namespace Imas.UI
                 return DeserialiseBaseClass(binary, type);
             }
             object newObject = Activator.CreateInstance(type);
-            SetFields(binary, type, newObject);
+            SetProperties(binary, type, newObject);
             return newObject;
         }
 
@@ -63,59 +63,50 @@ namespace Imas.UI
             return attributes.Length > 0 && ((SerialisationDerivedTypeAttribute)attributes[0]).DerivedTypeID == derivedTypeID;
         }
 
-        private static void SetFields(Binary binary, Type objType, object newObject)
+        private static void SetProperties(Binary binary, Type objType, object newObject)
         {
-            var fields = objType.GetFields();
-            foreach (var tuple in fields
-                .Select(field => (field, field.GetCustomAttributes(typeof(SerialiseFieldAttribute), true)))
-                .Where(tuple => tuple.Item2.Length == 1)
-                .Select(tuple => (tuple.field, (SerialiseFieldAttribute)tuple.Item2[0]))
-                .OrderBy(tuple => tuple.Item2.Order))
+            var props = objType.GetProperties();
+            foreach ((var prop, var attr) in props
+                .Select(prop => (prop, attrs: prop.GetCustomAttributes(typeof(SerialisePropertyAttribute), true)))
+                .Where(tuple => tuple.attrs.Length == 1)
+                .Select(tuple => (tuple.prop, attr: (SerialisePropertyAttribute)tuple.attrs[0]))
+                .OrderBy(tuple => tuple.attr.Order))
             {
-                SetField(binary, objType, newObject, tuple.field, tuple.Item2);
+                SetProperty(binary, objType, newObject, prop, attr);
             }
         }
 
-        private static void SetField(Binary binary, Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
+        private static void SetProperty(Binary binary, Type objType, object newObject, PropertyInfo prop, SerialisePropertyAttribute attribute)
         {
             if (attribute.ConditionProperty != null)
             {
                 var conditionProperty = objType.GetProperty(attribute.ConditionProperty);
                 if (conditionProperty == null)
-                    throw new Exception($"Field {attribute.ConditionProperty} was not found.");
+                    throw new Exception($"Property {attribute.ConditionProperty} was not found.");
                 if (conditionProperty.PropertyType != typeof(bool))
-                    throw new Exception($"Field {attribute.ConditionProperty} is not of type bool.");
+                    throw new Exception($"Property {attribute.ConditionProperty} is not of type bool.");
                 if (!(bool)conditionProperty.GetValue(newObject))
                 {
                     return;
                 }
             }
-            if (field.FieldType.IsArray)
+            if (prop.PropertyType.IsArray)
             {
-                int count = GetCount(objType, newObject, field, attribute);
-                field.SetValue(newObject, DeserialiseArray(binary, field.FieldType, count));
+                int count = GetCount(objType, newObject, attribute);
+                prop.SetValue(newObject, DeserialiseArray(binary, prop.PropertyType, count));
                 return;
             }
-            if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(List<>))
+            if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
             {
-                int count = GetCount(objType, newObject, field, attribute);
-                field.SetValue(newObject, DeserialiseList(binary, field.FieldType, count));
+                int count = GetCount(objType, newObject, attribute);
+                prop.SetValue(newObject, DeserialiseList(binary, prop.PropertyType, count));
                 return;
             }
-            field.SetValue(newObject, Deserialise(binary, field.FieldType));
+            prop.SetValue(newObject, Deserialise(binary, prop.PropertyType));
         }
 
-        private static int GetCount(Type objType, object newObject, FieldInfo field, SerialiseFieldAttribute attribute)
+        private static int GetCount(Type objType, object newObject, SerialisePropertyAttribute attribute)
         {
-            if (attribute.CountField != null)
-            {
-                var countField = objType.GetField(attribute.CountField);
-                if (countField == null)
-                    throw new Exception($"Field {attribute.CountField} was not found.");
-                if (countField.FieldType != typeof(int))
-                    throw new Exception($"Field {attribute.CountField} is not of type int.");
-                return (int)countField.GetValue(newObject);
-            }
             if (attribute.CountProperty != null)
             {
                 var countProperty = objType.GetProperty(attribute.CountProperty);

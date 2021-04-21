@@ -9,7 +9,7 @@ namespace ImasArchiveApp
         private readonly Sprite _sprite;
         public override UIElement UIElement => _sprite;
 
-        public UISpriteSheetModel ParentSheet => (_sprite.srcImageID == -1) ? null : subcomponent.PtaModel.SpriteSheets[_sprite.srcImageID];
+        public UISpriteSheetModel ParentSheet => (_sprite.SrcImageID == -1) ? null : subcomponent.PtaModel.SpriteSheets[_sprite.SrcImageID];
         private UISpriteSheetRectangleModel spriteSheetRectangleModel;
         public UISpriteSheetRectangleModel SpriteSheetRectangleModel 
         { 
@@ -20,43 +20,43 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public override string ModelName => $"({_sprite.width}x{_sprite.height})";
+        public override string ModelName => $"({_sprite.Width}x{_sprite.Height})";
         private int SrcImgWidth => ParentSheet?.BoundingPixelWidth ?? 1;
         private int SrcImgHeight => ParentSheet?.BoundingPixelHeight ?? 1;
         internal float SourceXQuiet
         {
-            get => _sprite.srcFracLeft * SrcImgWidth;
+            get => _sprite.SrcFracLeft * SrcImgWidth;
             set
             {
-                float srcFracWidth = _sprite.srcFracRight - _sprite.srcFracLeft;
-                _sprite.srcFracLeft = value / SrcImgWidth;
-                _sprite.srcFracRight = _sprite.srcFracLeft + srcFracWidth;
+                float srcFracWidth = _sprite.SrcFracRight - _sprite.SrcFracLeft;
+                _sprite.SrcFracLeft = value / SrcImgWidth;
+                _sprite.SrcFracRight = _sprite.SrcFracLeft + srcFracWidth;
             }
         }
         internal float SourceYQuiet
         {
-            get => _sprite.srcFracTop * SrcImgHeight;
+            get => _sprite.SrcFracTop * SrcImgHeight;
             set
             {
-                float srcFracHeight = _sprite.srcFracBottom - _sprite.srcFracTop;
-                _sprite.srcFracTop = value / SrcImgHeight;
-                _sprite.srcFracBottom = _sprite.srcFracTop + srcFracHeight;
+                float srcFracHeight = _sprite.SrcFracBottom - _sprite.SrcFracTop;
+                _sprite.SrcFracTop = value / SrcImgHeight;
+                _sprite.SrcFracBottom = _sprite.SrcFracTop + srcFracHeight;
             }
         }
         internal float SourceWidthQuiet
         {
-            get => (_sprite.srcFracRight - _sprite.srcFracLeft) * SrcImgWidth;
+            get => (_sprite.SrcFracRight - _sprite.SrcFracLeft) * SrcImgWidth;
             set
             {
-                _sprite.srcFracRight = _sprite.srcFracLeft + (value / SrcImgWidth);
+                _sprite.SrcFracRight = _sprite.SrcFracLeft + (value / SrcImgWidth);
             }
         }
         internal float SourceHeightQuiet
         {
-            get => (_sprite.srcFracBottom - _sprite.srcFracTop) * SrcImgHeight;
+            get => (_sprite.SrcFracBottom - _sprite.SrcFracTop) * SrcImgHeight;
             set
             {
-                _sprite.srcFracBottom = _sprite.srcFracTop + (value / SrcImgHeight);
+                _sprite.SrcFracBottom = _sprite.SrcFracTop + (value / SrcImgHeight);
             }
         }
         //#endregion Quiet
@@ -108,7 +108,7 @@ namespace ImasArchiveApp
         public UISpriteModel(UISubcomponentModel subcomponent, UIElementModel parent, Sprite sprite) : base(subcomponent, parent, "sprite")
         {
             _sprite = sprite;
-            if (_sprite.srcImageID >= 0)
+            if (_sprite.SrcImageID >= 0)
                 ParentSheet.Sprites.Add(this);
         }
 
@@ -197,18 +197,18 @@ namespace ImasArchiveApp
         private bool ImageYIsFlipped => SourceHeightQuiet < 0;
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            double red = _sprite.red / 255.0 * multiplier.r;
-            double green = _sprite.green / 255.0 * multiplier.g;
-            double blue = _sprite.blue / 255.0 * multiplier.b;
-            drawingContext.PushTransform(new TranslateTransform(_sprite.xpos, _sprite.ypos));
+            double red = _sprite.Red / 255.0 * multiplier.r;
+            double green = _sprite.Green / 255.0 * multiplier.g;
+            double blue = _sprite.Blue / 255.0 * multiplier.b;
+            drawingContext.PushTransform(new TranslateTransform(_sprite.Xpos, _sprite.Ypos));
             drawingContext.PushTransform(new ScaleTransform(
                 ImageXIsFlipped ? -1 : 1,
                 ImageYIsFlipped ? -1 : 1,
-                0.5 * _sprite.width,
-                0.5 * _sprite.height
+                0.5 * _sprite.Width,
+                0.5 * _sprite.Height
                 ));
-            drawingContext.PushOpacity(_sprite.alpha / 255.0);
-            if (_sprite.srcImageID == -1)
+            drawingContext.PushOpacity(_sprite.Alpha / 255.0);
+            if (_sprite.SrcImageID == -1)
             {
                 DrawRectangle(drawingContext, CreateColorBrush(red, green, blue));
             }
@@ -286,7 +286,7 @@ namespace ImasArchiveApp
                             brush,
                             null,
                             new System.Windows.Rect(
-                                new System.Windows.Size(_sprite.width, _sprite.height))
+                                new System.Windows.Size(_sprite.Width, _sprite.Height))
                             );
         }
 
@@ -304,10 +304,10 @@ namespace ImasArchiveApp
         {
             ImageBrush imageBrush = new ImageBrush(imageSource);
             imageBrush.Viewbox = new System.Windows.Rect(
-                new System.Windows.Point(_sprite.srcFracLeft, _sprite.srcFracTop),
-                new System.Windows.Point(_sprite.srcFracRight, _sprite.srcFracBottom)
+                new System.Windows.Point(_sprite.SrcFracLeft, _sprite.SrcFracTop),
+                new System.Windows.Point(_sprite.SrcFracRight, _sprite.SrcFracBottom)
                 );
-            if (_sprite.start[0] == 1)
+            if (_sprite.Start[0] == 1)
             {
                 imageBrush.TileMode = TileMode.Tile;
                 imageBrush.Viewport = new System.Windows.Rect(

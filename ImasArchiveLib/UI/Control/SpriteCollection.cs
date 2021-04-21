@@ -5,19 +5,17 @@ namespace Imas.UI
     [SerialisationDerivedType(10)]
     public class SpriteCollection : Control
     {
-        [SerialiseField(100, IsCountOf = nameof(childSpriteGroups))]
-        public int childSpriteGroupCount;
+        [SerialiseProperty(100, IsCountOf = nameof(ChildSpriteGroups))]
+        public int ChildSpriteGroupCount { get; set; }
 
-        [SerialiseField(101)]
-        public int defaultSpriteIndex;
+        [SerialiseProperty(101)]
         [Listed(101)]
-        public int DefaultSpriteIndex { get => defaultSpriteIndex; set => defaultSpriteIndex = value; }
-        [SerialiseField(102)]
-        public uint e2;
+        public int DefaultSpriteIndex { get; set; }
+        [SerialiseProperty(102)]
         [Listed(102)]
-        public uint E2 { get => e2; set => e2 = value; }
+        public uint E2 { get; set; }
 
-        [SerialiseField(103, CountField = nameof(childSpriteGroupCount))]
-        public List<SpriteGroup> childSpriteGroups;
+        [SerialiseProperty(103, CountProperty = nameof(ChildSpriteGroupCount))]
+        public List<SpriteGroup> ChildSpriteGroups { get; set; }
     }
 }

@@ -1,25 +1,23 @@
 ﻿using Imas.UI;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ImasArchiveApp
 {
     public class UIAnimationModel : PaaElementModel
     {
-        private Animation animation;
+        private readonly Animation animation;
         public override object Element => animation;
         public string ShortDesc => animation switch
         {
-            Animation0 a => $"Animation0 Time: {FormatTime(a.time)}",
-            VisibilityAnimation a => $"Visibility Time: {FormatTime(a.time)}",
-            Animation3 a => $"Animation3 Time: {FormatTime(a.startTime)}-{FormatTime(a.endTime)}",
-            PositionAnimation a => $"Position Time: {FormatTime(a.startTime)}-{FormatTime(a.endTime)}",
-            OpacityAnimation a => $"Position Time: {FormatTime(a.startTime)}-{FormatTime(a.endTime)}",
-            ScaleAnimation a => $"Position Time: {FormatTime(a.startTime)}-{FormatTime(a.endTime)}",
-            AngleAnimation a => $"Position Time: {FormatTime(a.startTime)}-{FormatTime(a.endTime)}",
-            SpriteAnimation a => $"Visibility Time: {FormatTime(a.time)}",
-            ColorAnimation a => $"Position Time: {FormatTime(a.startTime)}-{FormatTime(a.endTime)}",
+            Animation0 a => $"Animation0 Time: {FormatTime(a.Time)}",
+            VisibilityAnimation a => $"Visibility Time: {FormatTime(a.Time)}",
+            Animation3 a => $"Animation3 Time: {FormatTime(a.StartTime)}-{FormatTime(a.EndTime)}",
+            PositionAnimation a => $"Position Time: {FormatTime(a.StartTime)}-{FormatTime(a.EndTime)}",
+            OpacityAnimation a => $"Opacity Time: {FormatTime(a.StartTime)}-{FormatTime(a.EndTime)}",
+            ScaleAnimation a => $"Scale Time: {FormatTime(a.StartTime)}-{FormatTime(a.EndTime)}",
+            AngleAnimation a => $"Angle Time: {FormatTime(a.StartTime)}-{FormatTime(a.EndTime)}",
+            SpriteAnimation a => $"Sprite Time: {FormatTime(a.Time)}",
+            ColorAnimation a => $"Color Time: {FormatTime(a.StartTime)}-{FormatTime(a.EndTime)}",
             _ => "Unknown Animation"
         };
 

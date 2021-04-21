@@ -3,10 +3,12 @@
     [SerialisationDerivedType(1)]
     public class VisibilityAnimation : Animation
     {
-        [SerialiseField(100)]
-        public float time;
+        [SerialiseProperty(100)]
+		[Listed(100)]
+        public float Time { get; set; }
 
-        [SerialiseField(101)]
-        public int visibility;
+        [SerialiseProperty(101)]
+		[Listed(101)]
+        public int Visibility { get; set; }
     }
 }

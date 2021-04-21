@@ -26,14 +26,14 @@ namespace ImasArchiveApp
         public UIControlModel(Control control, UISubcomponentModel subcomponent, UIElementModel parent) : base(subcomponent, parent, control.Name)
         {
             Control = control;
-            if (control.specialSprite.sprites.Count != 0)
+            if (control.SpecialSprite.Sprites.Count != 0)
             {
-                Children.Add(new UISpriteGroupModel(subcomponent, this, control.specialSprite, false) 
+                Children.Add(new UISpriteGroupModel(subcomponent, this, control.SpecialSprite, false) 
                     { CurrentVisibility = !(control is SpriteCollection) });
             }
             if (control is GroupControl groupControl)
             {
-                foreach (Control child in groupControl.childControls)
+                foreach (Control child in groupControl.ChildControls)
                 {
                     switch (child)
                     {
@@ -52,10 +52,10 @@ namespace ImasArchiveApp
             if (control is SpriteCollection spriteCollection)
             {
                 int index = 0;
-                foreach (SpriteGroup child in spriteCollection.childSpriteGroups)
+                foreach (SpriteGroup child in spriteCollection.ChildSpriteGroups)
                 {
                     Children.Add(new UISpriteGroupModel(subcomponent, this, child, true) 
-                        { CurrentVisibility = index == spriteCollection.defaultSpriteIndex });
+                        { CurrentVisibility = index == spriteCollection.DefaultSpriteIndex });
                     index++;
                 }
             }
@@ -64,7 +64,7 @@ namespace ImasArchiveApp
             ScaleTransform = new ScaleTransform(control.ScaleX, control.ScaleY);
             if (Control is RotatableGroupControl icon)
             {
-                AngleTransform = new RotateTransform(-icon.angle * 180 / Math.PI);
+                AngleTransform = new RotateTransform(-icon.Angle * 180 / Math.PI);
             }
             PositionTransform.Freeze();
             ScaleTransform.Freeze();
@@ -129,7 +129,7 @@ namespace ImasArchiveApp
         public ScaleTransform ScaleTransform { get; set; }
         public void ApplyScaleAnimation(AnimationClock scaleX, AnimationClock scaleY)
         {
-            ScaleTransform = new ScaleTransform(Control.scaleX, Control.scaleY);
+            ScaleTransform = new ScaleTransform(Control.ScaleX, Control.ScaleY);
             ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleXProperty, scaleX);
             ScaleTransform.ApplyAnimationClock(ScaleTransform.ScaleYProperty, scaleY);
         }
@@ -138,7 +138,7 @@ namespace ImasArchiveApp
         {
             if (!(Control is RotatableGroupControl rotatable))
                 return;
-            AngleTransform = new RotateTransform(-rotatable.angle * 180 / Math.PI);
+            AngleTransform = new RotateTransform(-rotatable.Angle * 180 / Math.PI);
             AngleTransform.ApplyAnimationClock(RotateTransform.AngleProperty, angle);
         }
 

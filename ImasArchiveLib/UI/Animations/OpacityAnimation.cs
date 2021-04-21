@@ -3,22 +3,29 @@
     [SerialisationDerivedType(5)]
     public class OpacityAnimation : Animation
     {
-        [SerialiseField(100)]
-        public float startTime;
-        [SerialiseField(101)]
-        public float endTime;
+        [SerialiseProperty(100)]
+		[Listed(100)]
+        public float StartTime { get; set; }
+        [SerialiseProperty(101)]
+		[Listed(101)]
+        public float EndTime { get; set; }
 
-        [SerialiseField(102)]
-        public int a1;
-        [SerialiseField(103)]
-        public int a2;
-        public bool A1IsTwo => a1 == 2;
-        [SerialiseField(104, ConditionProperty = nameof(A1IsTwo))]
-        public float b1;
+        [SerialiseProperty(102)]
+		[Listed(102)]
+        public int A1 { get; set; }
+        [SerialiseProperty(103)]
+		[Listed(103)]
+        public int A2 { get; set; }
+        public bool A1IsTwo => A1 == 2;
+        [SerialiseProperty(104, ConditionProperty = nameof(A1IsTwo))]
+		[Listed(104, ConditionProperty = nameof(A1IsTwo))]
+        public float B1 { get; set; }
 
-        [SerialiseField(105)]
-        public float startTransparency;
-        [SerialiseField(106)]
-        public float endTransparency;
+        [SerialiseProperty(105)]
+		[Listed(105)]
+        public float StartTransparency { get; set; }
+        [SerialiseProperty(106)]
+		[Listed(106)]
+        public float EndTransparency { get; set; }
     }
 }

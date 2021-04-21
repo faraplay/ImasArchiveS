@@ -23,7 +23,7 @@ namespace ImasArchiveApp
             ListModels = new ObservableCollection<UIControlAnimationsListModel>();
             Timeline = new ParallelTimeline();
             //Timeline.RepeatBehavior = RepeatBehavior.Forever;
-            foreach (ControlAnimationsList animationsList in animationGroup.controlAnimations)
+            foreach (ControlAnimationsList animationsList in animationGroup.ControlAnimations)
             {
                 UIControlAnimationsListModel animationsListModel = new UIControlAnimationsListModel(paaModel, animationsList);
                 ListModels.Add(animationsListModel);
