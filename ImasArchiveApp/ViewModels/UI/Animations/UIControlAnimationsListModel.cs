@@ -174,12 +174,12 @@ namespace ImasArchiveApp
         {
             AngleTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    -animation.StartAngle * 180 / Math.PI,
+                    -animation.StartAngle,
                     KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.StartTime)))
                 );
             AngleTimeline.KeyFrames.Add(
                 new LinearDoubleKeyFrame(
-                    -animation.EndAngle * 180 / Math.PI,
+                    -animation.EndAngle,
                     KeyTime.FromTimeSpan(TimeSpan.FromSeconds(animation.EndTime)))
                 );
         }

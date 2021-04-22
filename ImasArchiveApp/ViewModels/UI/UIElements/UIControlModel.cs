@@ -138,7 +138,7 @@ namespace ImasArchiveApp
         {
             if (!(Control is RotatableGroupControl rotatable))
                 return;
-            AngleTransform = new RotateTransform(-rotatable.Angle * 180 / Math.PI);
+            AngleTransform = new RotateTransform(-rotatable.Angle);
             AngleTransform.ApplyAnimationClock(RotateTransform.AngleProperty, angle);
         }
 

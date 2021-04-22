@@ -1,48 +1,30 @@
 ﻿namespace Imas.UI
 {
     [SerialisationDerivedType(4)]
-    public class PositionAnimation : Animation
+    public class PositionAnimation : StartEndAnimation
     {
-        [SerialiseProperty(100)]
-		[Listed(100)]
-        public float StartTime { get; set; }
-        [SerialiseProperty(101)]
-		[Listed(101)]
-        public float EndTime { get; set; }
-
-        [SerialiseProperty(102)]
-		[Listed(102)]
-        public int A1 { get; set; }
-        [SerialiseProperty(103)]
-		[Listed(103)]
-        public int A2 { get; set; }
-        public bool A1IsTwo => A1 == 2;
-        [SerialiseProperty(104, ConditionProperty = nameof(A1IsTwo))]
-		[Listed(104, ConditionProperty = nameof(A1IsTwo))]
-        public float B1 { get; set; }
-
-        [SerialiseProperty(105, IsCountOf = nameof(OtherF))]
-		[Listed(105)]
+        [SerialiseProperty(200, IsCountOf = nameof(OtherF))]
+		[Listed(200)]
         public int FCount { get; set; }
-        [SerialiseProperty(106, IsCountOf = nameof(Points))]
-		[Listed(106)]
+        [SerialiseProperty(201, IsCountOf = nameof(Points))]
+		[Listed(201)]
         public int PointCount { get; set; }
-        [SerialiseProperty(107)]
-		[Listed(107)]
+        [SerialiseProperty(202)]
+		[Listed(202)]
         public float C1 { get; set; }
-        [SerialiseProperty(108)]
-		[Listed(108)]
+        [SerialiseProperty(203)]
+		[Listed(203)]
         public int D1 { get; set; }
 
-        [SerialiseProperty(109)]
-		[Listed(109)]
+        [SerialiseProperty(204)]
+		[Listed(204)]
         public int E1 { get; set; }
-        [SerialiseProperty(110, CountProperty = nameof(FCount))]
-		[Listed(110)]
+        [SerialiseProperty(205, CountProperty = nameof(FCount))]
+		[Listed(205)]
         public int[] OtherF { get; set; }
 
-        [SerialiseProperty(111, CountProperty = nameof(PointCount))]
-		[Listed(111)]
+        [SerialiseProperty(206, CountProperty = nameof(PointCount))]
+		[Listed(206)]
         public Point[] Points { get; set; }
     }
 
