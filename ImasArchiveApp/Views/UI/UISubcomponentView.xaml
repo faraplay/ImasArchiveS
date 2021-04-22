@@ -35,15 +35,8 @@
             Width="5"
             HorizontalAlignment="Center"
             VerticalAlignment="Stretch" />
-        <ContentControl
-            Grid.Column="2"
-            Content="{Binding Path=DisplayedModel}"
-            DataContext="{Binding Path=PauModel}">
-            <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type local:UIModel}">
-                    <local:UIModelDisplay />
-                </DataTemplate>
-            </ContentControl.Resources>
+        <ContentControl Grid.Column="2" DataContext="{Binding Path=PauModel}">
+            <local:UIModelDisplay DataContext="{Binding Path=DisplayedModel}" />
         </ContentControl>
         <GridSplitter
             Grid.Column="3"

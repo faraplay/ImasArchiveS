@@ -7,15 +7,15 @@
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type=local:UIAnimationGroupModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="500"
+    d:DesignWidth="300"
     mc:Ignorable="d">
     <DockPanel>
         <Button
             Padding="5"
             Command="{Binding Path=PlayCommand}"
             Content="Play"
-            DockPanel.Dock="Bottom" />
+            DockPanel.Dock="Top" />
         <TreeView MinWidth="150" ItemsSource="{Binding Path=ListModels}">
             <TreeView.Resources>
                 <local:ObjectToTypeConverter x:Key="ObjectToType" />
