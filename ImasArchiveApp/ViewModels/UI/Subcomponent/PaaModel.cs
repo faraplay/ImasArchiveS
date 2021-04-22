@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
@@ -29,6 +30,7 @@ namespace ImasArchiveApp
             {
                 AnimationGroups.Add(new UIAnimationGroupModel(this, animationGroup));
             }
+            PropertyChangedEventHandler = UpdateTimelines;
         }
 
         public void Reset()
@@ -49,5 +51,10 @@ namespace ImasArchiveApp
             }
         }
 
+        public void UpdateTimelines(object sender, PropertyChangedEventArgs e)
+        {
+            SelectedModel?.Update();
+            subcomponentModel.PauModel.ForceRender();
+        }
     }
 }

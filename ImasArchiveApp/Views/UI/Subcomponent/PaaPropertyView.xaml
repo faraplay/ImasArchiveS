@@ -11,11 +11,17 @@
     mc:Ignorable="d">
     <ScrollViewer>
         <TreeView ItemsSource="{Binding Path=UIProperties}">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate>
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type local:PropertyListModel}" ItemsSource="{Binding ListItemModels}">
+                    <Label Content="{Binding PropertyName}" />
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type local:PropertyListItemModel}">
                     <local:UIPropertyView />
                 </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type local:PropertyModel}">
+                    <local:UIPropertyView />
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
         </TreeView>
     </ScrollViewer>
 </UserControl>

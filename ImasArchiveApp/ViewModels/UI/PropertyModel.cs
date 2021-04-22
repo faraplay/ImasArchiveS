@@ -1,17 +1,15 @@
 ﻿using Imas.UI;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Windows;
 
 namespace ImasArchiveApp
 {
     public class PropertyModel : INotifyPropertyChanged
     {
-        private PropertyInfo PropertyInfo { get; }
+        public PropertyInfo PropertyInfo { get; }
         private ListedAttribute Attribute { get; }
         public override string ToString()
         {
@@ -57,6 +55,15 @@ namespace ImasArchiveApp
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public static PropertyModel CreatePropertyModel(PropertyInfo propertyInfo, object element)
+        {
+            if (typeof(IList).IsAssignableFrom(propertyInfo.PropertyType))
+            {
+                return new PropertyListModel(propertyInfo, element);
+            }
+            return new PropertyModel(propertyInfo, element);
         }
     }
 }

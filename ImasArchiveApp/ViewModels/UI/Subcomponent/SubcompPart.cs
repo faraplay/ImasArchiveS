@@ -53,8 +53,15 @@ namespace ImasArchiveApp
                 .Select(tuple => (tuple.p, (ListedAttribute)tuple.Item2[0]))
                 .OrderBy(tuple => tuple.Item2.Order))
             {
-                PropertyModel propertyModel = new PropertyModel(property, element);
-                propertyModel.PropertyChanged += PropertyChangedEventHandler;
+                PropertyModel propertyModel = PropertyModel.CreatePropertyModel(property, element);
+                if (propertyModel is PropertyListModel listModel)
+                {
+                    listModel.ListPropertyChanged += PropertyChangedEventHandler;
+                }
+                else
+                {
+                    propertyModel.PropertyChanged += PropertyChangedEventHandler;
+                }
                 UIProperties.Add(propertyModel);
             }
         }

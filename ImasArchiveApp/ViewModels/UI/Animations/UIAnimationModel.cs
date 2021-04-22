@@ -6,6 +6,7 @@ namespace ImasArchiveApp
     public class UIAnimationModel : PaaElementModel
     {
         private readonly Animation animation;
+        private UIControlAnimationsListModel ParentList { get; }
         public override object Element => animation;
         public string ShortDesc => animation switch
         {
@@ -21,14 +22,21 @@ namespace ImasArchiveApp
             _ => "Unknown Animation"
         };
 
-        public UIAnimationModel(PaaModel paaModel, Animation animation) : base(paaModel)
+        public UIAnimationModel(PaaModel paaModel, UIControlAnimationsListModel parentList, Animation animation) : base(paaModel)
         {
             this.animation = animation;
+            ParentList = parentList;
         }
 
         private string FormatTime(float time)
         {
             return $"{Math.Floor(time)};{(int)Math.Round((time - Math.Floor(time)) * 60):D2}";
+        }
+
+        public override void Update()
+        {
+            ParentList.Update();
+            OnPropertyChanged(nameof(ShortDesc));
         }
     }
 }

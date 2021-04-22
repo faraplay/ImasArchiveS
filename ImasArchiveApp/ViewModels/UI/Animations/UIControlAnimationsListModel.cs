@@ -8,35 +8,29 @@ namespace ImasArchiveApp
 {
     public class UIControlAnimationsListModel : PaaElementModel
     {
+        private UIAnimationGroupModel ParentGroup { get; }
         private ControlAnimationsList animationsList;
         public override object Element => animationsList;
         public ObservableCollection<UIAnimationModel> Animations { get; }
-        public ParallelTimeline Timeline { get; }
         public UIControlModel Control { get; }
         public string ShortDesc => $"{animationsList.ControlName}: {animationsList.Animations.Count} animations";
-        public UIControlAnimationsListModel(PaaModel parent, ControlAnimationsList animationsList) : base(parent)
+        public UIControlAnimationsListModel(PaaModel paaModel, UIAnimationGroupModel parent, ControlAnimationsList animationsList) : base(paaModel)
         {
+            ParentGroup = parent;
             this.animationsList = animationsList;
             Animations = new ObservableCollection<UIAnimationModel>();
-            Timeline = new ParallelTimeline();
-            Control = parent.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
-            if (Control?.UIElement is SpriteCollection spriteCollection)
-            {
-                SpriteTimelinesCollection = new DoubleAnimationUsingKeyFrames[spriteCollection.ChildSpriteGroups.Count];
-                for (int i = 0; i < spriteCollection.ChildSpriteGroups.Count; i++)
-                {
-                    SpriteTimelinesCollection[i] = new DoubleAnimationUsingKeyFrames();
-                }
-            }
+            Control = paaModel.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
             foreach (Animation animation in animationsList.Animations)
             {
-                Animations.Add(new UIAnimationModel(parent, animation));
+                Animations.Add(new UIAnimationModel(paaModel, this, animation));
             }
-            BuildTimeline();
         }
 
-        private void BuildTimeline()
+        public override void Update() => ParentGroup.Update();
+        public Timeline GetTimeline()
         {
+            ResetTimelines();
+            ParallelTimeline timeline = new ParallelTimeline();
             foreach (Animation animation in animationsList.Animations)
             {
                 switch (animation)
@@ -79,13 +73,13 @@ namespace ImasArchiveApp
                 VisibilityEndValue = lastFrameValue;
             }
 
-            Timeline.Children.Add(VisibilityTimeline);
-            Timeline.Children.Add(PositionXTimeline);
-            Timeline.Children.Add(PositionYTimeline);
-            Timeline.Children.Add(OpacityTimeline);
-            Timeline.Children.Add(ScaleXTimeline);
-            Timeline.Children.Add(ScaleYTimeline);
-            Timeline.Children.Add(AngleTimeline);
+            timeline.Children.Add(VisibilityTimeline);
+            timeline.Children.Add(PositionXTimeline);
+            timeline.Children.Add(PositionYTimeline);
+            timeline.Children.Add(OpacityTimeline);
+            timeline.Children.Add(ScaleXTimeline);
+            timeline.Children.Add(ScaleYTimeline);
+            timeline.Children.Add(AngleTimeline);
             if (Control is UISpriteCollectionModel)
             {
                 for (int i = 0; i < SpriteTimelinesCollection.Length; i++)
@@ -93,20 +87,42 @@ namespace ImasArchiveApp
                     SpriteTimeline.Children.Add(SpriteTimelinesCollection[i]);
                 }
             }
-            Timeline.Children.Add(SpriteTimeline);
+            timeline.Children.Add(SpriteTimeline);
+
+            return timeline;
         }
 
         private double? VisibilityEndValue { get; set; }
 
-        private readonly DoubleAnimationUsingKeyFrames VisibilityTimeline = new DoubleAnimationUsingKeyFrames();
-        private readonly DoubleAnimationUsingKeyFrames PositionXTimeline = new DoubleAnimationUsingKeyFrames();
-        private readonly DoubleAnimationUsingKeyFrames PositionYTimeline = new DoubleAnimationUsingKeyFrames();
-        private readonly DoubleAnimationUsingKeyFrames OpacityTimeline = new DoubleAnimationUsingKeyFrames();
-        private readonly DoubleAnimationUsingKeyFrames ScaleXTimeline = new DoubleAnimationUsingKeyFrames();
-        private readonly DoubleAnimationUsingKeyFrames ScaleYTimeline = new DoubleAnimationUsingKeyFrames();
-        private readonly DoubleAnimationUsingKeyFrames AngleTimeline = new DoubleAnimationUsingKeyFrames();
-        private readonly DoubleAnimationUsingKeyFrames[] SpriteTimelinesCollection;
-        private readonly ParallelTimeline SpriteTimeline = new ParallelTimeline();
+        private DoubleAnimationUsingKeyFrames VisibilityTimeline = new DoubleAnimationUsingKeyFrames();
+        private DoubleAnimationUsingKeyFrames PositionXTimeline = new DoubleAnimationUsingKeyFrames();
+        private DoubleAnimationUsingKeyFrames PositionYTimeline = new DoubleAnimationUsingKeyFrames();
+        private DoubleAnimationUsingKeyFrames OpacityTimeline = new DoubleAnimationUsingKeyFrames();
+        private DoubleAnimationUsingKeyFrames ScaleXTimeline = new DoubleAnimationUsingKeyFrames();
+        private DoubleAnimationUsingKeyFrames ScaleYTimeline = new DoubleAnimationUsingKeyFrames();
+        private DoubleAnimationUsingKeyFrames AngleTimeline = new DoubleAnimationUsingKeyFrames();
+        private DoubleAnimationUsingKeyFrames[] SpriteTimelinesCollection;
+        private ParallelTimeline SpriteTimeline = new ParallelTimeline();
+
+        private void ResetTimelines()
+        {
+            VisibilityTimeline = new DoubleAnimationUsingKeyFrames();
+            PositionXTimeline = new DoubleAnimationUsingKeyFrames();
+            PositionYTimeline = new DoubleAnimationUsingKeyFrames();
+            OpacityTimeline = new DoubleAnimationUsingKeyFrames();
+            ScaleXTimeline = new DoubleAnimationUsingKeyFrames();
+            ScaleYTimeline = new DoubleAnimationUsingKeyFrames();
+            AngleTimeline = new DoubleAnimationUsingKeyFrames();
+            if (Control?.UIElement is SpriteCollection spriteCollection)
+            {
+                SpriteTimelinesCollection = new DoubleAnimationUsingKeyFrames[spriteCollection.ChildSpriteGroups.Count];
+                for (int i = 0; i < spriteCollection.ChildSpriteGroups.Count; i++)
+                {
+                    SpriteTimelinesCollection[i] = new DoubleAnimationUsingKeyFrames();
+                }
+            }
+            SpriteTimeline = new ParallelTimeline();
+        }
 
         private void AddVisibilityAnimation(VisibilityAnimation animation)
         {

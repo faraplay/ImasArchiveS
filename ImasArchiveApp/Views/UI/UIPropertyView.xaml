@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:libgtf="clr-namespace:Imas.Gtf;assembly=ImasArchiveLib"
+    xmlns:libui="clr-namespace:Imas.UI;assembly=ImasArchiveLib"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -33,6 +34,7 @@
                 <local:ByteToStringConverter x:Key="ByteToString" />
                 <local:FloatToStringConverter x:Key="FloatToString" />
                 <local:UIntToStringConverter x:Key="UIntToString" />
+                <local:PointToStringConverter x:Key="PointToString" />
                 <local:HorizontalAlignmentToInt x:Key="HorizontalToInt" />
                 <local:VerticalAlignmentToInt x:Key="VerticalToInt" />
             </ContentControl.Resources>
@@ -69,6 +71,13 @@
                             <Setter Property="Content">
                                 <Setter.Value>
                                     <TextBox Padding="4" Text="{Binding Path=PropertyValue, Converter={StaticResource UIntToString}}" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=PropertyType}" Value="{x:Type libui:Point}">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <TextBox Padding="4" Text="{Binding Path=PropertyValue, Converter={StaticResource PointToString}}" />
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>

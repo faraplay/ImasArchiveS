@@ -27,5 +27,7 @@ namespace ImasArchiveApp
                 return _selectCommand;
             }
         }
+
+        public abstract void Update();
     }
 }

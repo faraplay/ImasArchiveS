@@ -14,20 +14,41 @@ namespace ImasArchiveApp
         private AnimationGroup animationGroup;
         public string Name => animationGroup.FileName[..^4];
         public ObservableCollection<UIControlAnimationsListModel> ListModels { get; }
-        public ParallelTimeline Timeline { get; }
+        public ParallelTimeline Timeline { get; private set; }
         private ClockController controller;
         public UIAnimationGroupModel(PaaModel paaModel, AnimationGroup animationGroup)
         {
             this.paaModel = paaModel;
             this.animationGroup = animationGroup;
             ListModels = new ObservableCollection<UIControlAnimationsListModel>();
-            Timeline = new ParallelTimeline();
-            //Timeline.RepeatBehavior = RepeatBehavior.Forever;
             foreach (ControlAnimationsList animationsList in animationGroup.ControlAnimations)
             {
-                UIControlAnimationsListModel animationsListModel = new UIControlAnimationsListModel(paaModel, animationsList);
-                ListModels.Add(animationsListModel);
-                Timeline.Children.Add(animationsListModel.Timeline);
+                ListModels.Add(new UIControlAnimationsListModel(paaModel, this, animationsList));
+            }
+            BuildTimeline();
+        }
+
+        public void Update()
+        {
+            if (paaModel.SelectedAnimationGroupModel == this)
+            {
+                RemoveAnimations();
+                BuildTimeline();
+                ApplyAnimations();
+            }
+            else
+            {
+                BuildTimeline();
+            }
+        }
+
+        private void BuildTimeline()
+        {
+            Timeline = new ParallelTimeline();
+            //Timeline.RepeatBehavior = RepeatBehavior.Forever;
+            foreach (var animationsListModel in ListModels)
+            {
+                Timeline.Children.Add(animationsListModel.GetTimeline());
             }
             Timeline.Freeze();
         }
