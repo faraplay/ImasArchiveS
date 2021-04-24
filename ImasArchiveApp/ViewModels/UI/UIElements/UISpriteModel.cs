@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace ImasArchiveApp
@@ -328,6 +329,55 @@ namespace ImasArchiveApp
             redImageBrush = null;
             greenImageBrush = null;
             blueImageBrush = null;
+        }
+
+        public void InsertSprite(bool below)
+        {
+            if (!(parent is UISpriteGroupModel groupModel))
+                return;
+            groupModel.AddSprite(groupModel.Children.IndexOf(this) + (below ? 1 : 0), new Sprite());
+        }
+
+        private RelayCommand _insertAboveCommand;
+        public ICommand InsertAboveCommand
+        {
+            get
+            {
+                if (_insertAboveCommand == null)
+                    _insertAboveCommand = new RelayCommand(
+                        _ => InsertSprite(false));
+                return _insertAboveCommand;
+            }
+        }
+
+        private RelayCommand _insertBelowCommand;
+        public ICommand InsertBelowCommand
+        {
+            get
+            {
+                if (_insertBelowCommand == null)
+                    _insertBelowCommand = new RelayCommand(
+                        _ => InsertSprite(true));
+                return _insertBelowCommand;
+            }
+        }
+
+        public void DeleteSprite()
+        {
+            if (!(parent is UISpriteGroupModel groupModel))
+                return;
+            groupModel.RemoveSprite(this);
+        }
+        private RelayCommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (_deleteCommand == null)
+                    _deleteCommand = new RelayCommand(
+                        _ => DeleteSprite());
+                return _deleteCommand;
+            }
         }
     }
 }

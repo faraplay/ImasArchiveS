@@ -26,59 +26,59 @@
 
         [SerialiseProperty(9)]
         [Listed(9)]
-        public float Xpos { get; set; }
+        public float Xpos { get; set; } = 0;
         [SerialiseProperty(10)]
         [Listed(10)]
-        public float Ypos { get; set; }
+        public float Ypos { get; set; } = 0;
         [SerialiseProperty(11)]
         [Listed(11)]
-        public float Width { get; set; }
+        public float Width { get; set; } = 64;
         [SerialiseProperty(12)]
         [Listed(12)]
-        public float Height { get; set; }
+        public float Height { get; set; } = 64;
 
         [SerialiseProperty(13)]
         [Listed(13)]
-        public int A1 { get; set; }
+        public int A1 { get; set; } = 0;
         [SerialiseProperty(14)]
         [Listed(14)]
-        public int A2 { get; set; }
+        public int A2 { get; set; } = 0;
         [SerialiseProperty(15)]
         [Listed(15)]
-        public float B1 { get; set; }
+        public float B1 { get; set; } = 10000;
         [SerialiseProperty(16)]
         [Listed(16)]
-        public float B2 { get; set; }
+        public float B2 { get; set; } = 10000;
         [SerialiseProperty(17)]
         [Listed(17)]
-        public float B3 { get; set; }
+        public float B3 { get; set; } = 1;
         [SerialiseProperty(18)]
         [Listed(18)]
-        public float B4 { get; set; }
+        public float B4 { get; set; } = 0;
         [SerialiseProperty(19)]
         [Listed(19)]
         public int SrcImageID { get; set; }
 
         [SerialiseProperty(20)]
         [Listed(20)]
-        public byte Alpha { get; set; }
+        public byte Alpha { get; set; } = 0xFF;
         [SerialiseProperty(21)]
         [Listed(21)]
-        public byte Red { get; set; }
+        public byte Red { get; set; } = 0xFF;
         [SerialiseProperty(22)]
         [Listed(22)]
-        public byte Green { get; set; }
+        public byte Green { get; set; } = 0xFF;
         [SerialiseProperty(23)]
         [Listed(23)]
-        public byte Blue { get; set; }
+        public byte Blue { get; set; } = 0xFF;
 
         [SerialiseProperty(24)]
-        public float SrcFracLeft { get; set; }
+        public float SrcFracLeft { get; set; } = 0;
         [SerialiseProperty(25)]
-        public float SrcFracTop { get; set; }
+        public float SrcFracTop { get; set; } = 0;
         [SerialiseProperty(26)]
-        public float SrcFracRight { get; set; }
+        public float SrcFracRight { get; set; } = 1;
         [SerialiseProperty(27)]
-        public float SrcFracBottom { get; set; }
+        public float SrcFracBottom { get; set; } = 1;
     }
 }

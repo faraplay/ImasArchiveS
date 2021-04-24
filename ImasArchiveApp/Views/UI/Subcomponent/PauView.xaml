@@ -57,6 +57,11 @@
                             <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding AddSpriteCommand}" Header="Add Sprite" />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
                     <WrapPanel>
                         <ContentControl Content="{Binding}">
                             <ContentControl.Style>
@@ -97,6 +102,13 @@
                             <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding InsertAboveCommand}" Header="Insert Sprite Above" />
+                            <MenuItem Command="{Binding InsertBelowCommand}" Header="Insert Sprite Below" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
                     <WrapPanel>
                         <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
                         <Image Source="/Icons/ImageChisel_16x.png" />
