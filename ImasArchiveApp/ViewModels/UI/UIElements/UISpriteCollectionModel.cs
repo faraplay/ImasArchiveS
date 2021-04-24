@@ -1,8 +1,4 @@
 ﻿using Imas.UI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -11,8 +7,11 @@ namespace ImasArchiveApp
 {
     class UISpriteCollectionModel : UIControlModel
     {
-        public UISpriteCollectionModel(SpriteCollection control, UISubcomponentModel subcomponent, UIElementModel parent) : base(control, subcomponent, parent)
+        private readonly SpriteCollection spriteCollection;
+        protected override Control Control => spriteCollection;
+        public UISpriteCollectionModel(SpriteCollection control, UISubcomponentModel subcomponent, UIControlModel parent) : base(control, subcomponent, parent)
         {
+            spriteCollection = control;
         }
 
         protected override void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
@@ -65,7 +64,7 @@ namespace ImasArchiveApp
             int index = Children.IndexOf(groupModel);
             if (index == -1)
                 return -1;
-            if (Control.SpecialSprite.Sprites.Count != 0)
+            if (HasSpecialSprite)
             {
                 index--;
             }
@@ -74,11 +73,9 @@ namespace ImasArchiveApp
 
         public void InsertSpriteGroup(int index, SpriteGroup spriteGroup)
         {
-            if (!(Control is SpriteCollection spriteCollection))
-                return;
             spriteCollection.ChildSpriteGroups.Insert(index, spriteGroup);
             spriteCollection.ChildSpriteGroupCount++;
-            if (Control.SpecialSprite.Sprites.Count != 0)
+            if (HasSpecialSprite)
             {
                 index++;
             }
@@ -88,14 +85,12 @@ namespace ImasArchiveApp
         }
         public void RemoveSpriteGroup(UISpriteGroupModel groupModel)
         {
-            if (!(Control is SpriteCollection spriteCollection))
-                return;
             int index = GetSpriteGroupIndex(groupModel);
             if (index == -1)
                 return;
             spriteCollection.ChildSpriteGroups.RemoveAt(index);
             spriteCollection.ChildSpriteGroupCount--;
-            if (Control.SpecialSprite.Sprites.Count != 0)
+            if (HasSpecialSprite)
             {
                 index++;
             }
@@ -107,7 +102,7 @@ namespace ImasArchiveApp
         public void AddSpriteGroup(SpriteGroup spriteGroup)
         {
             int groupCount = Children.Count;
-            if (Control.SpecialSprite.Sprites.Count != 0)
+            if (HasSpecialSprite)
             {
                 groupCount--;
             }

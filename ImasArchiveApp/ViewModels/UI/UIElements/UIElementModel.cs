@@ -7,7 +7,7 @@ namespace ImasArchiveApp
 {
     public abstract class UIElementModel : UIModel, IElementModel
     {
-        protected readonly UIElementModel parent;
+        protected abstract UIElementModel Parent { get; }
 
         private bool currentVisibility = true;
         public bool CurrentVisibility
@@ -25,12 +25,11 @@ namespace ImasArchiveApp
         public object Element => UIElement;
         public abstract string ModelName { get; }
 
-        public string GetUniqueString() => parent == null ? "0" : $"{parent.GetUniqueString()},{parent.Children.IndexOf(this)}";
-        public string ParentUniqueID => parent.GetUniqueString();
+        public string GetUniqueString() => Parent == null ? "0" : $"{Parent.GetUniqueString()},{Parent.Children.IndexOf(this)}";
+        public string ParentUniqueID => Parent.GetUniqueString();
 
-        protected UIElementModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, name)
+        protected UIElementModel(UISubcomponentModel subcomponent, string name) : base(subcomponent, name)
         {
-            this.parent = parent;
             Children = new ObservableCollection<UIElementModel>();
         }
 

@@ -25,12 +25,16 @@ namespace ImasArchiveApp
                 4 * 2048);
             fontSource.Freeze();
         }
-        public UITextBoxModel(TextBox control, UISubcomponentModel subcomponent, UIElementModel parent) : base(control, subcomponent, parent) { }
+
+        private readonly TextBox textBox;
+        protected override Control Control => textBox;
+        public UITextBoxModel(TextBox control, UISubcomponentModel subcomponent, UIControlModel parent) : base(control, subcomponent, parent)
+        {
+            textBox = control;
+        }
 
         protected override void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            if (!(Control is TextBox textBox))
-                return;
             base.RenderElementUntransformed(drawingContext, multiplier, isTop);
             if (!CurrentVisibility && !isTop)
                 return;

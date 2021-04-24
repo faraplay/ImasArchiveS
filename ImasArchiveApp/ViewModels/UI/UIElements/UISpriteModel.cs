@@ -7,10 +7,12 @@ namespace ImasArchiveApp
 {
     public class UISpriteModel : UIElementModel
     {
-        private readonly Sprite _sprite;
-        public override UIElement UIElement => _sprite;
+        private readonly Sprite sprite;
+        public override UIElement UIElement => sprite;
+        private readonly UISpriteGroupModel parentGroupModel;
+        protected override UIElementModel Parent => parentGroupModel;
 
-        public UISpriteSheetModel ParentSheet => (_sprite.SrcImageID == -1) ? null : subcomponent.PtaModel.SpriteSheets[_sprite.SrcImageID];
+        public UISpriteSheetModel ParentSheet => (sprite.SrcImageID == -1) ? null : subcomponent.PtaModel.SpriteSheets[sprite.SrcImageID];
         private UISpriteSheetRectangleModel spriteSheetRectangleModel;
         public UISpriteSheetRectangleModel SpriteSheetRectangleModel 
         { 
@@ -21,43 +23,43 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public override string ModelName => $"({_sprite.Width}x{_sprite.Height})";
+        public override string ModelName => $"({sprite.Width}x{sprite.Height})";
         private int SrcImgWidth => ParentSheet?.BoundingPixelWidth ?? 1;
         private int SrcImgHeight => ParentSheet?.BoundingPixelHeight ?? 1;
         internal float SourceXQuiet
         {
-            get => _sprite.SrcFracLeft * SrcImgWidth;
+            get => sprite.SrcFracLeft * SrcImgWidth;
             set
             {
-                float srcFracWidth = _sprite.SrcFracRight - _sprite.SrcFracLeft;
-                _sprite.SrcFracLeft = value / SrcImgWidth;
-                _sprite.SrcFracRight = _sprite.SrcFracLeft + srcFracWidth;
+                float srcFracWidth = sprite.SrcFracRight - sprite.SrcFracLeft;
+                sprite.SrcFracLeft = value / SrcImgWidth;
+                sprite.SrcFracRight = sprite.SrcFracLeft + srcFracWidth;
             }
         }
         internal float SourceYQuiet
         {
-            get => _sprite.SrcFracTop * SrcImgHeight;
+            get => sprite.SrcFracTop * SrcImgHeight;
             set
             {
-                float srcFracHeight = _sprite.SrcFracBottom - _sprite.SrcFracTop;
-                _sprite.SrcFracTop = value / SrcImgHeight;
-                _sprite.SrcFracBottom = _sprite.SrcFracTop + srcFracHeight;
+                float srcFracHeight = sprite.SrcFracBottom - sprite.SrcFracTop;
+                sprite.SrcFracTop = value / SrcImgHeight;
+                sprite.SrcFracBottom = sprite.SrcFracTop + srcFracHeight;
             }
         }
         internal float SourceWidthQuiet
         {
-            get => (_sprite.SrcFracRight - _sprite.SrcFracLeft) * SrcImgWidth;
+            get => (sprite.SrcFracRight - sprite.SrcFracLeft) * SrcImgWidth;
             set
             {
-                _sprite.SrcFracRight = _sprite.SrcFracLeft + (value / SrcImgWidth);
+                sprite.SrcFracRight = sprite.SrcFracLeft + (value / SrcImgWidth);
             }
         }
         internal float SourceHeightQuiet
         {
-            get => (_sprite.SrcFracBottom - _sprite.SrcFracTop) * SrcImgHeight;
+            get => (sprite.SrcFracBottom - sprite.SrcFracTop) * SrcImgHeight;
             set
             {
-                _sprite.SrcFracBottom = _sprite.SrcFracTop + (value / SrcImgHeight);
+                sprite.SrcFracBottom = sprite.SrcFracTop + (value / SrcImgHeight);
             }
         }
         //#endregion Quiet
@@ -106,10 +108,11 @@ namespace ImasArchiveApp
             }
         }
 
-        public UISpriteModel(UISubcomponentModel subcomponent, UIElementModel parent, Sprite sprite) : base(subcomponent, parent, "sprite")
+        public UISpriteModel(UISubcomponentModel subcomponent, UISpriteGroupModel parent, Sprite sprite) : base(subcomponent, null)
         {
-            _sprite = sprite;
-            if (_sprite.SrcImageID >= 0)
+            this.sprite = sprite;
+            parentGroupModel = parent;
+            if (this.sprite.SrcImageID >= 0)
                 ParentSheet.Sprites.Add(this);
         }
 
@@ -198,18 +201,18 @@ namespace ImasArchiveApp
         private bool ImageYIsFlipped => SourceHeightQuiet < 0;
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            double red = _sprite.Red / 255.0 * multiplier.r;
-            double green = _sprite.Green / 255.0 * multiplier.g;
-            double blue = _sprite.Blue / 255.0 * multiplier.b;
-            drawingContext.PushTransform(new TranslateTransform(_sprite.Xpos, _sprite.Ypos));
+            double red = sprite.Red / 255.0 * multiplier.r;
+            double green = sprite.Green / 255.0 * multiplier.g;
+            double blue = sprite.Blue / 255.0 * multiplier.b;
+            drawingContext.PushTransform(new TranslateTransform(sprite.Xpos, sprite.Ypos));
             drawingContext.PushTransform(new ScaleTransform(
                 ImageXIsFlipped ? -1 : 1,
                 ImageYIsFlipped ? -1 : 1,
-                0.5 * _sprite.Width,
-                0.5 * _sprite.Height
+                0.5 * sprite.Width,
+                0.5 * sprite.Height
                 ));
-            drawingContext.PushOpacity(_sprite.Alpha / 255.0);
-            if (_sprite.SrcImageID == -1)
+            drawingContext.PushOpacity(sprite.Alpha / 255.0);
+            if (sprite.SrcImageID == -1)
             {
                 DrawRectangle(drawingContext, CreateColorBrush(red, green, blue));
             }
@@ -287,7 +290,7 @@ namespace ImasArchiveApp
                             brush,
                             null,
                             new System.Windows.Rect(
-                                new System.Windows.Size(_sprite.Width, _sprite.Height))
+                                new System.Windows.Size(sprite.Width, sprite.Height))
                             );
         }
 
@@ -305,10 +308,10 @@ namespace ImasArchiveApp
         {
             ImageBrush imageBrush = new ImageBrush(imageSource);
             imageBrush.Viewbox = new System.Windows.Rect(
-                new System.Windows.Point(_sprite.SrcFracLeft, _sprite.SrcFracTop),
-                new System.Windows.Point(_sprite.SrcFracRight, _sprite.SrcFracBottom)
+                new System.Windows.Point(sprite.SrcFracLeft, sprite.SrcFracTop),
+                new System.Windows.Point(sprite.SrcFracRight, sprite.SrcFracBottom)
                 );
-            if (_sprite.Start[0] == 1)
+            if (sprite.Start[0] == 1)
             {
                 imageBrush.TileMode = TileMode.Tile;
                 imageBrush.Viewport = new System.Windows.Rect(
@@ -333,9 +336,7 @@ namespace ImasArchiveApp
 
         public void InsertSprite(bool below)
         {
-            if (!(parent is UISpriteGroupModel groupModel))
-                return;
-            groupModel.InsertSprite(groupModel.Children.IndexOf(this) + (below ? 1 : 0), new Sprite());
+            parentGroupModel.InsertSprite(parentGroupModel.Children.IndexOf(this) + (below ? 1 : 0), new Sprite());
         }
 
         private RelayCommand _insertAboveCommand;
@@ -364,9 +365,7 @@ namespace ImasArchiveApp
 
         public void DeleteSprite()
         {
-            if (!(parent is UISpriteGroupModel groupModel))
-                return;
-            groupModel.RemoveSprite(this);
+            parentGroupModel.RemoveSprite(this);
         }
         private RelayCommand _deleteCommand;
         public ICommand DeleteCommand

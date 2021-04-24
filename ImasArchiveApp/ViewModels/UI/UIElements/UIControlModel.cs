@@ -8,8 +8,11 @@ namespace ImasArchiveApp
 {
     public class UIControlModel : UIElementModel
     {
-        protected virtual Control Control { get; }
+        private readonly Control _control;
+        protected virtual Control Control { get => _control; }
         public override UIElement UIElement => Control;
+        protected readonly UIControlModel parentControlModel;
+        protected override UIElementModel Parent => parentControlModel;
 
         public override string ModelName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
         public int ControlTypeID => Control switch
@@ -24,9 +27,10 @@ namespace ImasArchiveApp
             _ => 0,
         };
 
-        public UIControlModel(Control control, UISubcomponentModel subcomponent, UIElementModel parent) : base(subcomponent, parent, control.Name)
+        public UIControlModel(Control control, UISubcomponentModel subcomponent, UIControlModel parent) : base(subcomponent, control.Name)
         {
-            Control = control;
+            _control = control;
+            parentControlModel = parent;
             if (control.SpecialSprite.Sprites.Count != 0)
             {
                 Children.Add(new UISpriteGroupModel(subcomponent, this, control.SpecialSprite, false) 

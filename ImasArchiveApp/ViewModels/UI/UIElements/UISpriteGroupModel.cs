@@ -3,20 +3,23 @@ using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
-    class UISpriteGroupModel : UIElementModel
+    public class UISpriteGroupModel : UIElementModel
     {
         private readonly SpriteGroup spriteGroup;
         public override UIElement UIElement => spriteGroup;
+        private readonly UIControlModel parentControlModel;
+        protected override UIElementModel Parent => parentControlModel;
         public override string ModelName => $"({spriteGroup.Sprites.Count} sprites)";
         public bool IsSpriteCollectionChild { get; }
 
         public UISpriteGroupModel(
             UISubcomponentModel subcomponent,
-            UIElementModel parent,
+            UIControlModel parent,
             SpriteGroup spriteGroup,
-            bool isSpriteCollectionChild) : base(subcomponent, parent, "spriteGroup")
+            bool isSpriteCollectionChild) : base(subcomponent, null)
         {
             this.spriteGroup = spriteGroup;
+            parentControlModel = parent;
             IsSpriteCollectionChild = isSpriteCollectionChild;
             foreach (Sprite sprite in spriteGroup.Sprites)
             {
@@ -63,15 +66,13 @@ namespace ImasArchiveApp
         {
             if (IsSpriteCollectionChild)
             {
-                if (!(parent is UISpriteCollectionModel spriteCollection))
+                if (!(parentControlModel is UISpriteCollectionModel spriteCollection))
                     return;
                 spriteCollection.RemoveSpriteGroup(this);
             }
             else
             {
-                if (!(parent is UIControlModel controlModel))
-                    return;
-                controlModel.RemoveSpecialSprite();
+                parentControlModel.RemoveSpecialSprite();
             }
         }
 
