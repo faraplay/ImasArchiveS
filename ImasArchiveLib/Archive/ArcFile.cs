@@ -1,4 +1,5 @@
-﻿using Imas.Records;
+﻿using Imas.Gtf;
+using Imas.Records;
 using Imas.Spreadsheet;
 using System;
 using System.Collections.Generic;
@@ -713,11 +714,11 @@ namespace Imas.Archive
                 if (filename.EndsWith(".gtf") || filename.EndsWith(".dds") || filename.EndsWith(".tex"))
                 {
                     using Stream inStream = await entry.GetData();
-                    using GTF gtf = GTF.ReadGTF(inStream);
+                    using GTF gtf = GTF.CreateFromGtfStream(inStream);
                     string name = filename.Substring(filename.LastIndexOf('/') + 1);
                     string outNameNoExtend = name[0..^4];
                     using MemoryStream memStream = new MemoryStream();
-                    gtf.Bitmap.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+                    gtf.SavePngTo(memStream);
                     memStream.Position = 0;
 
                     string hashString;

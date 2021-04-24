@@ -1,41 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Imas.UI
 {
     public class SpriteGroup : UIElement
     {
-        public List<Sprite> sprites = new List<Sprite>();
-
-        protected override void Deserialise(Stream stream)
-        {
-            int spriteCount = Binary.ReadInt32(stream, true);
-            for (int i = 0; i < spriteCount; i++)
-            {
-                sprites.Add(CreateFromStream<Sprite>(subcomponent, this, stream));
-            }
-        }
-        public override void Serialise(Stream stream)
-        {
-            Binary.WriteInt32(stream, true, sprites.Count);
-            foreach (Sprite sprite in sprites)
-            {
-                sprite.Serialise(stream);
-            }
-        }
-
-        public override void Draw(Graphics g, Matrix transform, ColorMatrix color)
-        {
-            foreach (Sprite sprite in sprites)
-            {
-                using Matrix childTransform = transform.Clone();
-                sprite.DrawIfVisible(g, childTransform, color);
-            }
-        }
+        [SerialiseProperty(0, IsCountOf = nameof(Sprites))]
+        public int SpriteCount { get; set; }
+        [SerialiseProperty(1, CountProperty = nameof(SpriteCount))]
+        public List<Sprite> Sprites { get; set; } = new List<Sprite>();
     }
 }

@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Resources;
 
 namespace ImasArchiveApp
@@ -100,13 +102,12 @@ namespace ImasArchiveApp
             {
                 try
                 {
-                    if (TextBox.font == null)
+                    if (UITextBoxModel.font == null)
                     {
                         ReportMessage("Loading font");
-                        TextBox.font = new Imas.Font();
                         using (MemoryStream stream = new MemoryStream(FontResource.im2nx_font))
                         {
-                            await TextBox.font.ReadFontPar(stream);
+                            await UITextBoxModel.LoadFontFromStreamAsync(stream);
                         }
                         ReportMessage("Loaded font.");
 
@@ -187,7 +188,7 @@ namespace ImasArchiveApp
                 {
                     ClearStatus();
                     ReportMessage("Saving PAU file...");
-                    _subcompModel.SavePau(fileName);
+                    _subcompModel.PauModel.SavePau(fileName);
                     ReportMessage("Done.");
                 }
             }
