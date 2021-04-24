@@ -281,12 +281,32 @@ namespace ImasArchiveApp
             }
         }
 
+        private bool _renderRectangles;
+        public bool RenderRectangles
+        {
+            get => _renderRectangles;
+            set
+            {
+                _renderRectangles = value;
+                ForceRender();
+                OnPropertyChanged();
+            }
+        }
+
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
             drawingContext.DrawImage(
                 BitmapSource,
                 new Rect(new System.Windows.Size(BitmapSource.Width, BitmapSource.Height))
                 );
+            if (RenderRectangles)
+            {
+                foreach (var rect in Rectangles)
+                {
+                    drawingContext.DrawRectangle(
+                        null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Yellow, 1), rect.Rectangle);
+                }
+            }
         }
 
         public override int BoundingPixelWidth => BitmapSource.PixelWidth;

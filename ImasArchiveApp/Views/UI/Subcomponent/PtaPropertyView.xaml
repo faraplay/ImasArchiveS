@@ -27,6 +27,12 @@
                     <DataTemplate DataType="{x:Type local:UISpriteSheetRectangleModel}">
                         <local:UISpriteSheetRectanglePropertyView />
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type local:UISpriteSheetModel}">
+                        <WrapPanel>
+                            <Label>Show Rectangles</Label>
+                            <CheckBox Margin="5" IsChecked="{Binding Path=RenderRectangles}" />
+                        </WrapPanel>
+                    </DataTemplate>
                     <DataTemplate DataType="{x:Type local:UIModel}" />
                 </ContentControl.Resources>
             </ContentControl>

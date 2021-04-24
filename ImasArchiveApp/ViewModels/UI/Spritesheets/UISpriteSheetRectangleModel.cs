@@ -8,6 +8,7 @@ namespace ImasArchiveApp
     {
         private readonly UISpriteSheetModel parent;
         private Rect rectangle;
+        public Rect Rectangle => rectangle;
         public override object Element => rectangle;
         public ObservableCollection<UISpriteModel> Sprites { get; }
 
