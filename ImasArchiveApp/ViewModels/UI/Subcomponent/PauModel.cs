@@ -24,7 +24,7 @@ namespace ImasArchiveApp
         {
             ControlModel = new ObservableCollection<UIControlModel>
             {
-                new UIControlModel(subcomponentModel.Subcomponent.rootControl, subcomponentModel, null)
+                UIControlModel.CreateControlModel(subcomponentModel.Subcomponent.rootControl, subcomponentModel, null)
             };
             ControlDictionary = new Dictionary<string, UIControlModel>();
             ControlModel[0].ForAll(control =>

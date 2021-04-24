@@ -27,53 +27,33 @@ namespace ImasArchiveApp
             _ => 0,
         };
 
-        public UIControlModel(Control control, UISubcomponentModel subcomponent, UIControlModel parent) : base(subcomponent, control.Name)
+        protected UIControlModel(Control control, UISubcomponentModel subcomponent, UIControlModel parent) : base(subcomponent, control.Name)
         {
             _control = control;
             parentControlModel = parent;
-            if (control.SpecialSprite.Sprites.Count != 0)
+        }
+
+        private void Initialise()
+        {
+            if (HasSpecialSprite)
             {
-                Children.Add(new UISpriteGroupModel(subcomponent, this, control.SpecialSprite, false) 
-                    { CurrentVisibility = !(control is SpriteCollection) });
+                Children.Add(new UISpriteGroupModel(subcomponent, this, Control.SpecialSprite, false)
+                { CurrentVisibility = !(Control is SpriteCollection) });
             }
-            if (control is GroupControl groupControl)
+            InitialiseRenderVars();
+        }
+
+        public static UIControlModel CreateControlModel(Control control, UISubcomponentModel subcomponent, UIControlModel parent)
+        {
+            UIControlModel controlModel = control switch
             {
-                foreach (Control child in groupControl.ChildControls)
-                {
-                    switch (child)
-                    {
-                        case TextBox textBox:
-                            Children.Add(new UITextBoxModel(textBox, subcomponent, this));
-                            break;
-                        case SpriteCollection spriteChild:
-                            Children.Add(new UISpriteCollectionModel(spriteChild, subcomponent, this));
-                            break;
-                        default:
-                            Children.Add(new UIControlModel(child, subcomponent, this));
-                            break;
-                    }
-                }
-            }
-            if (control is SpriteCollection spriteCollection)
-            {
-                int index = 0;
-                foreach (SpriteGroup child in spriteCollection.ChildSpriteGroups)
-                {
-                    Children.Add(new UISpriteGroupModel(subcomponent, this, child, true) 
-                        { CurrentVisibility = index == spriteCollection.DefaultSpriteIndex });
-                    index++;
-                }
-            }
-            CurrentVisibility = control.DefaultVisibility;
-            PositionTransform = new TranslateTransform(control.Xpos, control.Ypos);
-            ScaleTransform = new ScaleTransform(control.ScaleX, control.ScaleY);
-            if (Control is RotatableGroupControl icon)
-            {
-                AngleTransform = new RotateTransform(-icon.Angle * 180 / Math.PI);
-            }
-            PositionTransform.Freeze();
-            ScaleTransform.Freeze();
-            AngleTransform?.Freeze();
+                TextBox textBox => new UITextBoxModel(textBox, subcomponent, parent),
+                SpriteCollection spriteChild => new UISpriteCollectionModel(spriteChild, subcomponent, parent),
+                GroupControl groupControl => new UIGroupControlModel(groupControl, subcomponent, parent),
+                _ => new UIControlModel(control, subcomponent, parent),
+            };
+            controlModel.Initialise();
+            return controlModel;
         }
 
         public void ForAll(Action<UIControlModel> action)
@@ -86,6 +66,20 @@ namespace ImasArchiveApp
                     childControl.ForAll(action);
                 }
             }
+        }
+
+        private void InitialiseRenderVars()
+        {
+            CurrentVisibility = Control.DefaultVisibility;
+            PositionTransform = new TranslateTransform(Control.Xpos, Control.Ypos);
+            ScaleTransform = new ScaleTransform(Control.ScaleX, Control.ScaleY);
+            if (Control is RotatableGroupControl icon)
+            {
+                AngleTransform = new RotateTransform(-icon.Angle * 180 / Math.PI);
+            }
+            PositionTransform.Freeze();
+            ScaleTransform.Freeze();
+            AngleTransform?.Freeze();
         }
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)

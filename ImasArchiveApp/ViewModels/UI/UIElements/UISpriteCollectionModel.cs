@@ -12,6 +12,13 @@ namespace ImasArchiveApp
         public UISpriteCollectionModel(SpriteCollection control, UISubcomponentModel subcomponent, UIControlModel parent) : base(control, subcomponent, parent)
         {
             spriteCollection = control;
+            int index = 0;
+            foreach (SpriteGroup child in spriteCollection.ChildSpriteGroups)
+            {
+                Children.Add(new UISpriteGroupModel(subcomponent, this, child, true)
+                { CurrentVisibility = index == spriteCollection.DefaultSpriteIndex });
+                index++;
+            }
         }
 
         protected override void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
