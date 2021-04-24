@@ -24,12 +24,27 @@ namespace ImasArchiveApp
             }
         }
 
-        public void AddSprite(int index, Sprite sprite)
+        public void InsertSprite(int index, Sprite sprite)
         {
             spriteGroup.Sprites.Insert(index, sprite);
             spriteGroup.SpriteCount++;
             Children.Insert(index, new UISpriteModel(subcomponent, this, sprite));
 
+        }
+
+        public void RemoveSprite(UISpriteModel spriteModel)
+        {
+            int index = Children.IndexOf(spriteModel);
+            if (index == -1)
+                return;
+            if (!IsSpriteCollectionChild && Children.Count == 1)
+            {
+                Delete();
+                return;
+            }
+            spriteGroup.Sprites.RemoveAt(index);
+            spriteGroup.SpriteCount--;
+            Children.RemoveAt(index);
         }
 
         private RelayCommand _addSpriteCommand;
@@ -39,19 +54,37 @@ namespace ImasArchiveApp
             {
                 if (_addSpriteCommand == null)
                     _addSpriteCommand = new RelayCommand(
-                        _ => AddSprite(Children.Count, new Sprite()));
+                        _ => InsertSprite(Children.Count, new Sprite()));
                 return _addSpriteCommand;
             }
         }
 
-        public void RemoveSprite(UISpriteModel spriteModel)
+        public void Delete()
         {
-            int index = Children.IndexOf(spriteModel);
-            if (index == -1)
-                return;
-            Children.RemoveAt(index);
-            spriteGroup.Sprites.RemoveAt(index);
-            spriteGroup.SpriteCount--;
+            if (IsSpriteCollectionChild)
+            {
+                if (!(parent is UISpriteCollectionModel spriteCollection))
+                    return;
+                spriteCollection.RemoveSpriteGroup(this);
+            }
+            else
+            {
+                if (!(parent is UIControlModel controlModel))
+                    return;
+                controlModel.RemoveSpecialSprite();
+            }
+        }
+
+        private RelayCommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (_deleteCommand == null)
+                    _deleteCommand = new RelayCommand(
+                        _ => Delete());
+                return _deleteCommand;
+            }
         }
     }
 }

@@ -335,7 +335,7 @@ namespace ImasArchiveApp
         {
             if (!(parent is UISpriteGroupModel groupModel))
                 return;
-            groupModel.AddSprite(groupModel.Children.IndexOf(this) + (below ? 1 : 0), new Sprite());
+            groupModel.InsertSprite(groupModel.Children.IndexOf(this) + (below ? 1 : 0), new Sprite());
         }
 
         private RelayCommand _insertAboveCommand;

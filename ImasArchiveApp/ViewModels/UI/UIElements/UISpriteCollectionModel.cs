@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -56,6 +57,72 @@ namespace ImasArchiveApp
             {
                 SpriteClocks[index] = (AnimationClock)clock;
                 index++;
+            }
+        }
+
+        public int GetSpriteGroupIndex(UISpriteGroupModel groupModel)
+        {
+            int index = Children.IndexOf(groupModel);
+            if (index == -1)
+                return -1;
+            if (Control.SpecialSprite.Sprites.Count != 0)
+            {
+                index--;
+            }
+            return index;
+        }
+
+        public void InsertSpriteGroup(int index, SpriteGroup spriteGroup)
+        {
+            if (!(Control is SpriteCollection spriteCollection))
+                return;
+            spriteCollection.ChildSpriteGroups.Insert(index, spriteGroup);
+            spriteCollection.ChildSpriteGroupCount++;
+            if (Control.SpecialSprite.Sprites.Count != 0)
+            {
+                index++;
+            }
+            Children.Insert(index, new UISpriteGroupModel(subcomponent, this, spriteGroup, true) { CurrentVisibility = false });
+            if (index <= spriteCollection.DefaultSpriteIndex)
+                spriteCollection.DefaultSpriteIndex++;
+        }
+        public void RemoveSpriteGroup(UISpriteGroupModel groupModel)
+        {
+            if (!(Control is SpriteCollection spriteCollection))
+                return;
+            int index = GetSpriteGroupIndex(groupModel);
+            if (index == -1)
+                return;
+            spriteCollection.ChildSpriteGroups.RemoveAt(index);
+            spriteCollection.ChildSpriteGroupCount--;
+            if (Control.SpecialSprite.Sprites.Count != 0)
+            {
+                index++;
+            }
+            Children.RemoveAt(index);
+            if (index <= spriteCollection.DefaultSpriteIndex)
+                spriteCollection.DefaultSpriteIndex--;
+        }
+
+        public void AddSpriteGroup(SpriteGroup spriteGroup)
+        {
+            int groupCount = Children.Count;
+            if (Control.SpecialSprite.Sprites.Count != 0)
+            {
+                groupCount--;
+            }
+            InsertSpriteGroup(groupCount, spriteGroup);
+        }
+
+        private RelayCommand _addSpriteGroupCommand;
+        public ICommand AddSpriteGroupCommand
+        {
+            get
+            {
+                if (_addSpriteGroupCommand == null)
+                    _addSpriteGroupCommand = new RelayCommand(
+                        _ => AddSpriteGroup(new SpriteGroup()));
+                return _addSpriteGroupCommand;
             }
         }
     }

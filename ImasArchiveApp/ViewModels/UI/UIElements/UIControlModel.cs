@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -145,6 +146,38 @@ namespace ImasArchiveApp
         public void ResetAnimatedValues()
         {
             CurrentVisibility = Control.DefaultVisibility;
+        }
+
+
+        public void AddSpecialSprite()
+        {
+            if (HasSpecialSprite)
+                return;
+            SpriteGroup spriteGroup = new SpriteGroup();
+            var groupModel = new UISpriteGroupModel(subcomponent, this, spriteGroup, false);
+            groupModel.InsertSprite(0, new Sprite());
+            Control.SpecialSprite = spriteGroup;
+            Children.Insert(0, groupModel);
+        }
+        public void RemoveSpecialSprite()
+        {
+            if (!HasSpecialSprite)
+                return;
+            Control.SpecialSprite = new SpriteGroup();
+            Children.RemoveAt(0);
+        }
+
+        public bool HasSpecialSprite => Control.SpecialSprite.Sprites.Count != 0;
+        private RelayCommand _addSpecialSpriteCommand;
+        public ICommand AddSpecialSpriteCommand
+        {
+            get
+            {
+                if (_addSpecialSpriteCommand == null)
+                    _addSpecialSpriteCommand = new RelayCommand(
+                        _ => AddSpecialSprite(), _ => !HasSpecialSprite);
+                return _addSpecialSpriteCommand;
+            }
         }
     }
 }
