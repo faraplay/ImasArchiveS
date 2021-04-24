@@ -7,7 +7,7 @@
         [Listed(201)]
         public float E1 { get; set; }
 
-        [SerialiseProperty(101)]
+        [SerialiseProperty(201)]
         public SpriteGroup OtherSprite { get; set; }
 
         [SerialiseProperty(202)]
