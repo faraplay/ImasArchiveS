@@ -71,20 +71,6 @@ namespace Imas.UI
                     return;
                 }
             }
-            if (attribute.IsCountOf != null)
-            {
-                var collectionProperty = objType.GetProperty(attribute.IsCountOf);
-                if (collectionProperty == null)
-                    throw new Exception($"Property {attribute.IsCountOf} was not found.");
-                if (prop.PropertyType != typeof(int))
-                    throw new Exception($"Property {prop} is not of type int.");
-                // get count of array / list
-                if (!collectionProperty.PropertyType.IsArray
-                    && !IsList(collectionProperty.PropertyType))
-                    throw new Exception($"Property {attribute.IsCountOf} is not an array or list.");
-                binary.WriteInt32(((IList)collectionProperty.GetValue(obj)).Count);
-                return;
-            }
             Serialise(binary, prop.GetValue(obj));
         }
 

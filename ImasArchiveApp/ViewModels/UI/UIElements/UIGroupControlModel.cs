@@ -22,7 +22,6 @@ namespace ImasArchiveApp
         public void InsertControl(int index, Control control)
         {
             groupControl.ChildControls.Insert(index, control);
-            groupControl.ChildCount++;
             if (HasSpecialSprite)
                 index++;
             Children.Insert(index, CreateControlModel(control, subcomponent, this));

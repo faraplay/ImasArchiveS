@@ -22,8 +22,8 @@ namespace Imas.UI
         [SerialiseProperty(104)]
         public uint TextAttributes { get; set; }
 
-        [SerialiseProperty(105, FixedCount = 16)]
-        public byte[] FontNameBuffer { get; set; }
+        [SerialiseProperty(105)]
+        public byte[] FontNameBuffer { get; set; } = new byte[16];
         [Listed(105)]
         public string FontName
         {
@@ -34,12 +34,30 @@ namespace Imas.UI
         [SerialiseProperty(106)]
         [Listed(106)]
         public int CharLimit { get; set; }
+
+        private int _textLength;
         [SerialiseProperty(107)]
         [Listed(107)]
-        public int TextLength { get; set; }
+        public int TextLength
+        {
+            get => _textLength;
+            set
+            {
+                _textLength = value;
+                if (TextBufferLength == TextBuffer.Length)
+                    return;
+                byte[] newTextBuffer = new byte[TextBufferLength];
+                Array.Copy(TextBuffer, newTextBuffer, Math.Min(TextBuffer.Length, newTextBuffer.Length));
+                TextBuffer = newTextBuffer;
+            }
+        }
+        public int TextBufferLength
+        {
+            get => (2 * TextLength + 15) & ~0xF;
+        }
 
-        [SerialiseProperty(108, CountProperty = nameof(TextBufferLength))]
-        public byte[] TextBuffer { get; set; }
+        [SerialiseProperty(108)]
+        public byte[] TextBuffer { get; set; } = new byte[16];
         [Listed(108, StringMultiline = true)]
         public string Text
         {
@@ -52,8 +70,7 @@ namespace Imas.UI
                 {
                     CharLimit = TextLength;
                 }
-                int lengthWithPad = (2 * TextLength + 15) & ~0xF;
-                TextBuffer = new byte[lengthWithPad];
+                TextBuffer = new byte[TextBufferLength];
                 Array.Copy(newBytes, TextBuffer, 2 * TextLength);
             }
         }
@@ -99,10 +116,6 @@ namespace Imas.UI
                 else
                     TextAttributes &= ~0x20u;
             }
-        }
-        public int TextBufferLength
-        {
-            get => (2 * TextLength + 15) & ~0xF;
         }
     }
 }

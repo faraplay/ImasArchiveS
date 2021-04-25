@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Imas.UI
 {
@@ -28,10 +29,28 @@ namespace Imas.UI
 		[Listed(5)]
         public int A5 { get; set; }
 
-        [SerialiseProperty(6, IsCountOf = nameof(ControlAnimations))]
-        public int ControlAnimationCount { get; set; }
-        [SerialiseProperty(7, CountProperty = nameof(ControlAnimationCount))]
-        public List<ControlAnimationsList> ControlAnimations { get; set; }
+        [SerialiseProperty(6)]
+        public int ControlAnimationCount
+        {
+            get => ControlAnimations.Count;
+            set
+            {
+                if (value == ControlAnimations.Count)
+                    return;
+                if (value < ControlAnimations.Count && value >= 0)
+                {
+                    ControlAnimations.RemoveRange(value, ControlAnimations.Count - value);
+                    return;
+                }
+                if (value > ControlAnimations.Count)
+                {
+                    ControlAnimations.AddRange(Enumerable.Repeat<ControlAnimationsList>(null, value - ControlAnimations.Count));
+                    return;
+                }
+            }
+        }
+        [SerialiseProperty(7)]
+        public List<ControlAnimationsList> ControlAnimations { get; set; } = new List<ControlAnimationsList>();
 
         private string GetDebuggerDisplay()
         {

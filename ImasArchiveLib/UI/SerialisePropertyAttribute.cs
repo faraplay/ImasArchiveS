@@ -21,9 +21,6 @@ namespace Imas.UI
         }
 
         // This is a named argument
-        public int FixedCount { get; set; }
         public string ConditionProperty { get; set; }
-        public string CountProperty { get; set; }
-        public string IsCountOf { get; set; }
     }
 }

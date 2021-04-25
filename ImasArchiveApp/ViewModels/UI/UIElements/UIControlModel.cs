@@ -37,7 +37,7 @@ namespace ImasArchiveApp
         {
             if (HasSpecialSprite)
             {
-                Children.Add(new UISpriteGroupModel(subcomponent, this, Control.SpecialSprite, false)
+                Children.Insert(0, new UISpriteGroupModel(subcomponent, this, Control.SpecialSprite, false)
                 { CurrentVisibility = !(Control is SpriteCollection) });
             }
             InitialiseRenderVars();

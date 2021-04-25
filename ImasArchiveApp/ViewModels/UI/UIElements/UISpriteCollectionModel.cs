@@ -81,7 +81,6 @@ namespace ImasArchiveApp
         public void InsertSpriteGroup(int index, SpriteGroup spriteGroup)
         {
             spriteCollection.ChildSpriteGroups.Insert(index, spriteGroup);
-            spriteCollection.ChildSpriteGroupCount++;
             if (HasSpecialSprite)
             {
                 index++;
@@ -96,7 +95,6 @@ namespace ImasArchiveApp
             if (index == -1)
                 return;
             spriteCollection.ChildSpriteGroups.RemoveAt(index);
-            spriteCollection.ChildSpriteGroupCount--;
             if (HasSpecialSprite)
             {
                 index++;

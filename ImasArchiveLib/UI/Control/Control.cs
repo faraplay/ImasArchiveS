@@ -3,7 +3,7 @@
     [SerialisationBaseType]
     public abstract class Control : UIElement
     {
-        [SerialiseProperty(0, FixedCount = 16)]
+        [SerialiseProperty(0)]
         public byte[] NameBuffer { get; set; } = new byte[16];
         [Listed(0)]
         public string Name
@@ -94,7 +94,7 @@
 
         [SerialiseProperty(26)]
         public SpriteGroup SpecialSprite { get; set; } = new SpriteGroup();
-        [SerialiseProperty(27, FixedCount = 4, ConditionProperty = nameof(HasExtData))]
+        [SerialiseProperty(27, ConditionProperty = nameof(HasExtData))]
         public uint[] ExtData { get; set; } = new uint[4];
 
         [Listed(28, ConditionProperty = nameof(HasExtData))]

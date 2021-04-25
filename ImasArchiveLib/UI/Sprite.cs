@@ -2,7 +2,7 @@
 {
     public class Sprite : UIElement
     {
-        [SerialiseProperty(0, FixedCount = 9)]
+        [SerialiseProperty(0)]
         // (9*4 bytes of 0s)
         public uint[] Start { get; set; } = new uint[9];
         [Listed(0)]

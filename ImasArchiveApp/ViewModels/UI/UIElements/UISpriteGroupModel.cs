@@ -30,7 +30,6 @@ namespace ImasArchiveApp
         public void InsertSprite(int index, Sprite sprite)
         {
             spriteGroup.Sprites.Insert(index, sprite);
-            spriteGroup.SpriteCount++;
             Children.Insert(index, new UISpriteModel(subcomponent, this, sprite));
 
         }
@@ -46,7 +45,6 @@ namespace ImasArchiveApp
                 return;
             }
             spriteGroup.Sprites.RemoveAt(index);
-            spriteGroup.SpriteCount--;
             Children.RemoveAt(index);
         }
 
