@@ -15,8 +15,8 @@ namespace ImasArchiveApp
             int index = 0;
             foreach (SpriteGroup child in spriteCollection.ChildSpriteGroups)
             {
-                Children.Add(new UISpriteGroupModel(subcomponent, this, child, true)
-                { CurrentVisibility = index == spriteCollection.DefaultSpriteIndex });
+                Children.Add(new UISpriteGroupModel(subcomponent, this, child, true,
+                    index == spriteCollection.DefaultSpriteIndex));
                 index++;
             }
         }
@@ -85,7 +85,7 @@ namespace ImasArchiveApp
             {
                 index++;
             }
-            Children.Insert(index, new UISpriteGroupModel(subcomponent, this, spriteGroup, true) { CurrentVisibility = false });
+            Children.Insert(index, new UISpriteGroupModel(subcomponent, this, spriteGroup, true, false));
             if (index <= spriteCollection.DefaultSpriteIndex)
                 spriteCollection.DefaultSpriteIndex++;
         }

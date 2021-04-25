@@ -16,8 +16,9 @@ namespace ImasArchiveApp
             get => _selectedModel;
             set
             {
+                UnsubscribePropertyEvents();
                 _selectedModel = value;
-                RefreshPropertiesList(SelectedModel);
+                RefreshPropertiesList();
                 OnPropertyChanged();
             }
         }
@@ -36,14 +37,10 @@ namespace ImasArchiveApp
             subcomponentModel.PropertyChanged += ChangeVisibility;
         }
 
-        private void RefreshPropertiesList(IElementModel model)
+        private void RefreshPropertiesList()
         {
-            foreach (PropertyModel propertyModel in UIProperties)
-            {
-                propertyModel.PropertyChanged -= PropertyChangedEventHandler;
-            }
             UIProperties.Clear();
-            object element = model.Element;
+            object element = SelectedModel.Element;
             if (element == null)
                 return;
             foreach ((var property, var attr) in element.GetType()
@@ -57,14 +54,34 @@ namespace ImasArchiveApp
                 if (propertyModel is PropertyListModel listModel)
                 {
                     listModel.ListPropertyChanged += PropertyChangedEventHandler;
+                    listModel.ListPropertyChanged += SelectedModel.PropertyChangedHandler;
                 }
                 else
                 {
                     propertyModel.PropertyChanged += PropertyChangedEventHandler;
+                    propertyModel.PropertyChanged += SelectedModel.PropertyChangedHandler;
                 }
                 UIProperties.Add(propertyModel);
             }
         }
+
+        private void UnsubscribePropertyEvents()
+        {
+            foreach (PropertyModel propertyModel in UIProperties)
+            {
+                if (propertyModel is PropertyListModel listModel)
+                {
+                    listModel.ListPropertyChanged -= PropertyChangedEventHandler;
+                    listModel.ListPropertyChanged -= SelectedModel.PropertyChangedHandler;
+                }
+                else
+                {
+                    propertyModel.PropertyChanged -= PropertyChangedEventHandler;
+                    propertyModel.PropertyChanged -= SelectedModel.PropertyChangedHandler;
+                }
+            }
+        }
+
         protected PropertyChangedEventHandler PropertyChangedEventHandler;
     }
 }

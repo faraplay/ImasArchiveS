@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System;
+using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -37,10 +38,11 @@ namespace ImasArchiveApp
         {
             if (HasSpecialSprite)
             {
-                Children.Insert(0, new UISpriteGroupModel(subcomponent, this, Control.SpecialSprite, false)
-                { CurrentVisibility = !(Control is SpriteCollection) });
+                Children.Insert(0, new UISpriteGroupModel(subcomponent, this, Control.SpecialSprite, false,
+                    !(Control is SpriteCollection)));
             }
-            InitialiseRenderVars();
+            currentVisibility = Control.DefaultVisibility;
+            SetRenderTransforms();
         }
 
         public static UIControlModel CreateControlModel(Control control, UISubcomponentModel subcomponent, UIGroupControlModel parent)
@@ -68,18 +70,23 @@ namespace ImasArchiveApp
             }
         }
 
-        private void InitialiseRenderVars()
+        private void SetRenderTransforms()
         {
-            CurrentVisibility = Control.DefaultVisibility;
             PositionTransform = new TranslateTransform(Control.Xpos, Control.Ypos);
             ScaleTransform = new ScaleTransform(Control.ScaleX, Control.ScaleY);
             if (Control is RotatableGroupControl icon)
             {
-                AngleTransform = new RotateTransform(-icon.Angle * 180 / Math.PI);
+                AngleTransform = new RotateTransform(-icon.Angle);
             }
             PositionTransform.Freeze();
             ScaleTransform.Freeze();
             AngleTransform?.Freeze();
+        }
+
+        public override void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            SetRenderTransforms();
+            base.PropertyChangedHandler(sender, e);
         }
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
@@ -152,7 +159,7 @@ namespace ImasArchiveApp
             if (HasSpecialSprite)
                 return;
             SpriteGroup spriteGroup = new SpriteGroup();
-            var groupModel = new UISpriteGroupModel(subcomponent, this, spriteGroup, false);
+            var groupModel = new UISpriteGroupModel(subcomponent, this, spriteGroup, false, true);
             groupModel.InsertSprite(0, new Sprite());
             Control.SpecialSprite = spriteGroup;
             Children.Insert(0, groupModel);

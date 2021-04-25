@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.ComponentModel;
+using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
@@ -29,5 +30,10 @@ namespace ImasArchiveApp
         }
 
         public abstract void Update();
+
+        public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            Update();
+        }
     }
 }

@@ -16,11 +16,13 @@ namespace ImasArchiveApp
             UISubcomponentModel subcomponent,
             UIControlModel parent,
             SpriteGroup spriteGroup,
-            bool isSpriteCollectionChild) : base(subcomponent, null)
+            bool isSpriteCollectionChild,
+            bool visibility) : base(subcomponent, null)
         {
             this.spriteGroup = spriteGroup;
             parentControlModel = parent;
             IsSpriteCollectionChild = isSpriteCollectionChild;
+            currentVisibility = visibility;
             foreach (Sprite sprite in spriteGroup.Sprites)
             {
                 Children.Add(new UISpriteModel(subcomponent, this, sprite));

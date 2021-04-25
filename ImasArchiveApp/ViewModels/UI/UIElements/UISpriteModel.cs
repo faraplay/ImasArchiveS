@@ -72,6 +72,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
+                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceX)));
             }
         }
         public float SourceY
@@ -83,6 +84,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
+                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceY)));
             }
         }
         public float SourceWidth
@@ -94,6 +96,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
+                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceWidth)));
             }
         }
         public float SourceHeight
@@ -105,6 +108,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
+                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceHeight)));
             }
         }
 

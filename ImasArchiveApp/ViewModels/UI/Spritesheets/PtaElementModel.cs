@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.ComponentModel;
+using System.Windows.Input;
 
 namespace ImasArchiveApp
 {
@@ -25,6 +26,11 @@ namespace ImasArchiveApp
                 }
                 return _selectCommand;
             }
+        }
+
+        public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+
         }
     }
 }

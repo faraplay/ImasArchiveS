@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -9,7 +10,7 @@ namespace ImasArchiveApp
     {
         protected abstract UIElementModel Parent { get; }
 
-        private bool currentVisibility = true;
+        protected bool currentVisibility = true;
         public bool CurrentVisibility
         {
             get => currentVisibility;
@@ -17,6 +18,7 @@ namespace ImasArchiveApp
             {
                 currentVisibility = value;
                 OnPropertyChanged();
+                subcomponent.PauModel.ForceRender();
             }
         }
 
@@ -41,6 +43,12 @@ namespace ImasArchiveApp
             {
                 child.RenderElement(drawingContext, multiplier, false);
             }
+        }
+
+        public virtual void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(ModelName));
+            subcomponent.PauModel.ForceRender();
         }
 
         public override int BoundingPixelWidth => 1280;
