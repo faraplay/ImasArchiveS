@@ -8,7 +8,7 @@ namespace ImasArchiveApp
         private readonly Animation animation;
         private UIControlAnimationsListModel ParentList { get; }
         public override object Element => animation;
-        public string ShortDesc => animation switch
+        public override string ElementName => animation switch
         {
             Animation0 a => $"Animation0 Time: {FormatTime(a.Time)}",
             VisibilityAnimation a => $"Visibility Time: {FormatTime(a.Time)}",
@@ -36,7 +36,6 @@ namespace ImasArchiveApp
         public override void Update()
         {
             ParentList.Update();
-            OnPropertyChanged(nameof(ShortDesc));
         }
     }
 }

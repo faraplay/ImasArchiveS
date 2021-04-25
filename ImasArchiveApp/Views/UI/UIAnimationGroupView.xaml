@@ -26,7 +26,7 @@
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <Label Padding="2" Content="{Binding Path=ShortDesc}" />
+                        <Label Padding="2" Content="{Binding Path=ElementName}" />
                     </ContentControl>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type local:UIAnimationModel}">
@@ -36,7 +36,7 @@
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <Label Padding="2" Content="{Binding Path=ShortDesc}" />
+                        <Label Padding="2" Content="{Binding Path=ElementName}" />
                     </ContentControl>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>

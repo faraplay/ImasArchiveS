@@ -1,8 +1,5 @@
 ﻿using Imas.UI;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 
@@ -10,9 +7,9 @@ namespace ImasArchiveApp
 {
     public class UIAnimationGroupModel
     {
-        private PaaModel paaModel;
-        private AnimationGroup animationGroup;
-        public string Name => animationGroup.FileName[..^4];
+        private readonly PaaModel paaModel;
+        private readonly AnimationGroup animationGroup;
+        public string ElementName => animationGroup.FileName[..^4];
         public ObservableCollection<UIControlAnimationsListModel> ListModels { get; }
         public ParallelTimeline Timeline { get; private set; }
         private ClockController controller;

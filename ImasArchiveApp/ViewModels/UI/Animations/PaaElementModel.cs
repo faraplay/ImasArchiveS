@@ -6,6 +6,7 @@ namespace ImasArchiveApp
     public abstract class PaaElementModel : NotifyPropertyChanged, IElementModel
     {
         public abstract object Element { get; }
+        public abstract string ElementName { get; }
         public PaaModel PaaModel { get; }
         protected PaaElementModel(PaaModel paaModel)
         {
@@ -33,6 +34,7 @@ namespace ImasArchiveApp
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
+            OnPropertyChanged(nameof(ElementName));
             Update();
         }
     }

@@ -24,7 +24,7 @@ namespace ImasArchiveApp
                 OnPropertyChanged();
             }
         }
-        public override string ModelName => $"({sprite.Width}x{sprite.Height})";
+        public override string ElementName => $"({sprite.Width}x{sprite.Height})";
         private int SrcImgWidth => ParentSheet?.BoundingPixelWidth ?? 1;
         private int SrcImgHeight => ParentSheet?.BoundingPixelHeight ?? 1;
         internal float SourceXQuiet

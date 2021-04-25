@@ -15,7 +15,7 @@ namespace ImasArchiveApp
         protected readonly UIGroupControlModel parentGroupModel;
         protected override UIElementModel Parent => parentGroupModel;
 
-        public override string ModelName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
+        public override string ElementName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
         public int ControlTypeID => Control switch
         {
             SpriteCollection _ => 10,

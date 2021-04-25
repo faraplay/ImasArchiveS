@@ -15,6 +15,7 @@ namespace ImasArchiveApp
     public class UISpriteSheetModel : PtaElementModel
     {
         public override object Element => null;
+        public override string ElementName => FileName;
         private readonly int index;
         private readonly IGetFileName _getfileName;
 

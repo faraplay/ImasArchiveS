@@ -44,7 +44,7 @@
                     <WrapPanel>
                         <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
                         <Image Source="/Icons/FolderClosed_16x.png" />
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>
@@ -74,7 +74,7 @@
                     <WrapPanel>
                         <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
                         <Image Source="/Icons/ImageGroup_16x.png" />
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>
@@ -117,7 +117,7 @@
                                 </Style>
                             </Image.Style>
                         </Image>
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>
@@ -163,7 +163,7 @@
                             </ContentControl.Style>
                         </ContentControl>
                         <Image Source="/Icons/Image_16x.png" />
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>
@@ -186,7 +186,7 @@
                     <WrapPanel>
                         <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
                         <Image Source="/Icons/ImageChisel_16x.png" />
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>

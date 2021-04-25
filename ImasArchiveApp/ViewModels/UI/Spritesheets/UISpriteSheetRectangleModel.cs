@@ -12,10 +12,7 @@ namespace ImasArchiveApp
         public override object Element => rectangle;
         public ObservableCollection<UISpriteModel> Sprites { get; }
 
-        public string Description
-        {
-            get => rectangle.ToString();
-        }
+        public override string ElementName => rectangle.ToString();
 
         #region Properties
 
@@ -31,7 +28,7 @@ namespace ImasArchiveApp
                 }
                 //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
             }
         }
         public float Y
@@ -46,7 +43,7 @@ namespace ImasArchiveApp
                 }
                 //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
             }
         }
         public float Width
@@ -61,7 +58,7 @@ namespace ImasArchiveApp
                 }
                 //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
             }
         }
         public float Height
@@ -76,7 +73,7 @@ namespace ImasArchiveApp
                 }
                 //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
             }
         }
 

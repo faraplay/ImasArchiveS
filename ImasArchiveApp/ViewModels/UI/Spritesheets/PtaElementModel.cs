@@ -6,6 +6,7 @@ namespace ImasArchiveApp
     public abstract class PtaElementModel : UIModel, IElementModel
     {
         public abstract object Element { get; }
+        public abstract string ElementName { get; }
         public PtaElementModel(UISubcomponentModel subcomponent, string name) : base(subcomponent, name)
         {
         }
@@ -30,7 +31,7 @@ namespace ImasArchiveApp
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
-
+            OnPropertyChanged(nameof(ElementName));
         }
     }
 }

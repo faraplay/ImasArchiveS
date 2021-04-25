@@ -9,7 +9,7 @@ namespace ImasArchiveApp
         public override UIElement UIElement => spriteGroup;
         private readonly UIControlModel parentControlModel;
         protected override UIElementModel Parent => parentControlModel;
-        public override string ModelName => $"({spriteGroup.Sprites.Count} sprites)";
+        public override string ElementName => $"({spriteGroup.Sprites.Count} sprites)";
         public bool IsSpriteCollectionChild { get; }
 
         public UISpriteGroupModel(

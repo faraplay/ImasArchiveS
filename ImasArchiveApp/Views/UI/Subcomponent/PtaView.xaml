@@ -20,13 +20,12 @@
                             <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
-                    <TextBlock Margin="2" Text="{Binding Path=FileName}">
-                        <TextBlock.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Command="{Binding Path=ReplaceImageCommand}" Header="Replace..." />
-                            </ContextMenu>
-                        </TextBlock.ContextMenu>
-                    </TextBlock>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding Path=ReplaceImageCommand}" Header="Replace..." />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
+                    <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                 </ContentControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type local:UISpriteSheetRectangleModel}" ItemsSource="{Binding Path=Sprites}">
@@ -36,7 +35,7 @@
                             <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
-                    <TextBlock Margin="2" Text="{Binding Path=Description}" />
+                    <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                 </ContentControl>
             </HierarchicalDataTemplate>
         </TreeView.Resources>

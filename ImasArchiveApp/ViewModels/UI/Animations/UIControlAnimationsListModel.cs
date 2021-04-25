@@ -9,11 +9,11 @@ namespace ImasArchiveApp
     public class UIControlAnimationsListModel : PaaElementModel
     {
         private UIAnimationGroupModel ParentGroup { get; }
-        private ControlAnimationsList animationsList;
+        private readonly ControlAnimationsList animationsList;
         public override object Element => animationsList;
         public ObservableCollection<UIAnimationModel> Animations { get; }
         public UIControlModel Control { get; }
-        public string ShortDesc => $"{animationsList.ControlName}: {animationsList.Animations.Count} animations";
+        public override string ElementName => $"{animationsList.ControlName}: {animationsList.Animations.Count} animations";
         public UIControlAnimationsListModel(PaaModel paaModel, UIAnimationGroupModel parent, ControlAnimationsList animationsList) : base(paaModel)
         {
             ParentGroup = parent;

@@ -25,7 +25,7 @@ namespace ImasArchiveApp
         public ObservableCollection<UIElementModel> Children { get; set; }
         public abstract UIElement UIElement { get; }
         public object Element => UIElement;
-        public abstract string ModelName { get; }
+        public abstract string ElementName { get; }
 
         public string GetUniqueString() => Parent == null ? "0" : $"{Parent.GetUniqueString()},{Parent.Children.IndexOf(this)}";
         public string ParentUniqueID => Parent.GetUniqueString();
@@ -47,7 +47,7 @@ namespace ImasArchiveApp
 
         public virtual void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
-            OnPropertyChanged(nameof(ModelName));
+            OnPropertyChanged(nameof(ElementName));
             subcomponent.PauModel.ForceRender();
         }
 
