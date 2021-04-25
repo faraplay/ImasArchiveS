@@ -167,8 +167,7 @@
                     </i:Interaction.Triggers>
                     <ContentControl.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Command="{Binding InsertAboveCommand}" Header="Insert Sprite Above" />
-                            <MenuItem Command="{Binding InsertBelowCommand}" Header="Insert Sprite Below" />
+                            <MenuItem Command="{Binding InsertCommand}" Header="Insert Sprite Above" />
                             <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
                         </ContextMenu>
                     </ContentControl.ContextMenu>

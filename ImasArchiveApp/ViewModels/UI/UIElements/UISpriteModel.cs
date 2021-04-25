@@ -334,32 +334,20 @@ namespace ImasArchiveApp
             blueImageBrush = null;
         }
 
-        public void InsertSprite(bool below)
+        public void InsertSprite()
         {
-            parentGroupModel.InsertSprite(parentGroupModel.Children.IndexOf(this) + (below ? 1 : 0), new Sprite());
+            parentGroupModel.InsertSprite(parentGroupModel.Children.IndexOf(this), new Sprite());
         }
 
-        private RelayCommand _insertAboveCommand;
-        public ICommand InsertAboveCommand
+        private RelayCommand _insertCommand;
+        public ICommand InsertCommand
         {
             get
             {
-                if (_insertAboveCommand == null)
-                    _insertAboveCommand = new RelayCommand(
-                        _ => InsertSprite(false));
-                return _insertAboveCommand;
-            }
-        }
-
-        private RelayCommand _insertBelowCommand;
-        public ICommand InsertBelowCommand
-        {
-            get
-            {
-                if (_insertBelowCommand == null)
-                    _insertBelowCommand = new RelayCommand(
-                        _ => InsertSprite(true));
-                return _insertBelowCommand;
+                if (_insertCommand == null)
+                    _insertCommand = new RelayCommand(
+                        _ => InsertSprite());
+                return _insertCommand;
             }
         }
 
