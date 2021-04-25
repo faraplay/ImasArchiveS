@@ -8,6 +8,6 @@ namespace Imas.UI
         [SerialiseProperty(100, IsCountOf = nameof(ChildControls))]
         public int ChildCount { get; set; }
         [SerialiseProperty(101, CountProperty = nameof(ChildCount))]
-        public List<Control> ChildControls { get; set; }
+        public List<Control> ChildControls { get; set; } = new List<Control>();
     }
 }
