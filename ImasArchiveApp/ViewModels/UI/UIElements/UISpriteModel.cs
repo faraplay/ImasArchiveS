@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System;
+using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -72,7 +73,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
-                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceX)));
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceX)));
             }
         }
         public float SourceY
@@ -84,7 +85,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
-                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceY)));
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceY)));
             }
         }
         public float SourceWidth
@@ -96,7 +97,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
-                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceWidth)));
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceWidth)));
             }
         }
         public float SourceHeight
@@ -108,7 +109,7 @@ namespace ImasArchiveApp
                 ParentSheet.UpdateRectangles();
                 InvalidateBrushes();
                 OnPropertyChanged();
-                PropertyChangedHandler(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(SourceHeight)));
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceHeight)));
             }
         }
 
@@ -118,6 +119,15 @@ namespace ImasArchiveApp
             parentGroupModel = parent;
             if (this.sprite.SrcImageID >= 0)
                 ParentSheet.Sprites.Add(this);
+        }
+
+        public override void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Sprite.SrcImageID))
+            {
+                InvalidateBrushes();
+            }
+            base.PropertyChangedHandler(sender, e);
         }
 
         private ImageBrush alphaImageBrush;

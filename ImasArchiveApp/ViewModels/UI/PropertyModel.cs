@@ -24,7 +24,7 @@ namespace ImasArchiveApp
             set
             {
                 PropertyInfo.SetValue(Element, value);
-                OnPropertyChanged();
+                PropertyChanged?.Invoke(Element, new PropertyChangedEventArgs(PropertyName));
             }
         }
         public bool PropertyStringMultiline => Attribute.StringMultiline;
