@@ -30,12 +30,12 @@ namespace ImasArchiveApp
             }
         }
 
-        public abstract void Update();
+        public abstract void Invalidate();
 
         public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             OnPropertyChanged(nameof(ElementName));
-            Update();
+            Invalidate();
         }
     }
 }

@@ -36,7 +36,7 @@ namespace ImasArchiveApp
                     ControlDictionary.Add(control.FileName, control);
                 }
             });
-            PropertyChangedEventHandler = (sender, e) => ForceRender();
+            //PropertyChangedEventHandler = (sender, e) => ForceRender();
         }
 
         public void ForceRender()

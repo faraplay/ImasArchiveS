@@ -15,10 +15,10 @@ namespace ImasArchiveApp
             get => _selectedAnimationGroupModel;
             set
             {
-                _selectedAnimationGroupModel?.RemoveAnimations();
+                if (_selectedAnimationGroupModel == value)
+                    return;
+                _selectedAnimationGroupModel?.Invalidate();
                 _selectedAnimationGroupModel = value;
-                _selectedAnimationGroupModel?.ApplyAnimations();
-                subcomponentModel.PauModel.ForceRender();
                 OnPropertyChanged();
             }
         }
@@ -30,7 +30,6 @@ namespace ImasArchiveApp
             {
                 AnimationGroups.Add(new UIAnimationGroupModel(this, animationGroup));
             }
-            PropertyChangedEventHandler = UpdateTimelines;
         }
 
         public void Reset()
@@ -49,12 +48,6 @@ namespace ImasArchiveApp
                         _ => Reset());
                 return _resetCommand;
             }
-        }
-
-        public void UpdateTimelines(object sender, PropertyChangedEventArgs e)
-        {
-            SelectedModel?.Update();
-            subcomponentModel.PauModel.ForceRender();
         }
     }
 }

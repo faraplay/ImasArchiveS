@@ -22,21 +22,15 @@ namespace ImasArchiveApp
             {
                 ListModels.Add(new UIControlAnimationsListModel(paaModel, this, animationsList));
             }
-            BuildTimeline();
         }
 
-        public void Update()
+        public void Invalidate()
         {
-            if (paaModel.SelectedAnimationGroupModel == this)
-            {
-                RemoveAnimations();
-                BuildTimeline();
-                ApplyAnimations();
-            }
-            else
-            {
-                BuildTimeline();
-            }
+            if (Timeline == null && controller == null)
+                return;
+            RemoveAnimations();
+            Timeline = null;
+            controller = null;
         }
 
         private void BuildTimeline()
@@ -74,19 +68,13 @@ namespace ImasArchiveApp
 
         private void PlayAnimations()
         {
-            controller?.Begin();
-        }
-        private RelayCommand _playCommand;
-        public ICommand PlayCommand
-        {
-            get
+            if (Timeline == null)
             {
-                if (_playCommand == null)
-                {
-                    _playCommand = new RelayCommand(_ => PlayAnimations());
-                }
-                return _playCommand;
+                BuildTimeline();
+                ApplyAnimations();
+                paaModel.subcomponentModel.PauModel.ForceRender();
             }
+            controller?.Begin();
         }
 
         private void SelectAndPlay()

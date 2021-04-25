@@ -26,7 +26,7 @@ namespace ImasArchiveApp
             }
         }
 
-        public override void Update() => ParentGroup.Update();
+        public override void Invalidate() => ParentGroup.Invalidate();
         public Timeline GetTimeline()
         {
             ResetTimelines();

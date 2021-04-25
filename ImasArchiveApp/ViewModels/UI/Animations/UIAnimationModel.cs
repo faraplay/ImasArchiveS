@@ -33,9 +33,6 @@ namespace ImasArchiveApp
             return $"{Math.Floor(time)};{(int)Math.Round((time - Math.Floor(time)) * 60):D2}";
         }
 
-        public override void Update()
-        {
-            ParentList.Update();
-        }
+        public override void Invalidate() => ParentList.Invalidate();
     }
 }

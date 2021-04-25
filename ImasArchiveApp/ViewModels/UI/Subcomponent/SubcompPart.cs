@@ -53,12 +53,10 @@ namespace ImasArchiveApp
                 PropertyModel propertyModel = PropertyModel.CreatePropertyModel(property, element);
                 if (propertyModel is PropertyListModel listModel)
                 {
-                    listModel.ListPropertyChanged += PropertyChangedEventHandler;
                     listModel.ListPropertyChanged += SelectedModel.PropertyChangedHandler;
                 }
                 else
                 {
-                    propertyModel.PropertyChanged += PropertyChangedEventHandler;
                     propertyModel.PropertyChanged += SelectedModel.PropertyChangedHandler;
                 }
                 UIProperties.Add(propertyModel);
@@ -71,17 +69,13 @@ namespace ImasArchiveApp
             {
                 if (propertyModel is PropertyListModel listModel)
                 {
-                    listModel.ListPropertyChanged -= PropertyChangedEventHandler;
                     listModel.ListPropertyChanged -= SelectedModel.PropertyChangedHandler;
                 }
                 else
                 {
-                    propertyModel.PropertyChanged -= PropertyChangedEventHandler;
                     propertyModel.PropertyChanged -= SelectedModel.PropertyChangedHandler;
                 }
             }
         }
-
-        protected PropertyChangedEventHandler PropertyChangedEventHandler;
     }
 }

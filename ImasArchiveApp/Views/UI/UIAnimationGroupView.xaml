@@ -13,7 +13,7 @@
     <DockPanel>
         <Button
             Padding="5"
-            Command="{Binding Path=PlayCommand}"
+            Command="{Binding Path=SelectPlayCommand}"
             Content="Play"
             DockPanel.Dock="Top" />
         <TreeView MinWidth="150" ItemsSource="{Binding Path=ListModels}">
