@@ -28,7 +28,7 @@ namespace ImasArchiveApp
 
         private readonly TextBox textBox;
         protected override Control Control => textBox;
-        public UITextBoxModel(TextBox control, UISubcomponentModel subcomponent, UIControlModel parent) : base(control, subcomponent, parent)
+        public UITextBoxModel(TextBox control, UISubcomponentModel subcomponent, UIGroupControlModel parent) : base(control, subcomponent, parent)
         {
             textBox = control;
         }

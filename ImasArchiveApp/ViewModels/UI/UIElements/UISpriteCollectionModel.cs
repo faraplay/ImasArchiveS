@@ -9,7 +9,7 @@ namespace ImasArchiveApp
     {
         private readonly SpriteCollection spriteCollection;
         protected override Control Control => spriteCollection;
-        public UISpriteCollectionModel(SpriteCollection control, UISubcomponentModel subcomponent, UIControlModel parent) : base(control, subcomponent, parent)
+        public UISpriteCollectionModel(SpriteCollection control, UISubcomponentModel subcomponent, UIGroupControlModel parent) : base(control, subcomponent, parent)
         {
             spriteCollection = control;
             int index = 0;

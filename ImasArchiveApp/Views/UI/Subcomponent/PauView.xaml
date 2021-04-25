@@ -25,8 +25,14 @@
                     </i:Interaction.Triggers>
                     <ContentControl.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                            </MenuItem>
                             <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
-                            <MenuItem Command="{Binding AddGroupControlCommand}" Header="Add Group Control" />
+                            <MenuItem Header="Add Child...">
+                                <MenuItem Command="{Binding AddGroupControlCommand}" Header="Add Group Control" />
+                            </MenuItem>
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
                         </ContextMenu>
                     </ContentControl.ContextMenu>
                     <WrapPanel>
@@ -48,8 +54,12 @@
                     </i:Interaction.Triggers>
                     <ContentControl.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                            </MenuItem>
                             <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
                             <MenuItem Command="{Binding AddSpriteGroupCommand}" Header="Add Sprite Group" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
                         </ContextMenu>
                     </ContentControl.ContextMenu>
                     <WrapPanel>
@@ -71,7 +81,11 @@
                     </i:Interaction.Triggers>
                     <ContentControl.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                            </MenuItem>
                             <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
                         </ContextMenu>
                     </ContentControl.ContextMenu>
                     <WrapPanel>

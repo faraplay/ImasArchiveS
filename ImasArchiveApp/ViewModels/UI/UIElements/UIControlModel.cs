@@ -11,8 +11,8 @@ namespace ImasArchiveApp
         private readonly Control _control;
         protected virtual Control Control { get => _control; }
         public override UIElement UIElement => Control;
-        protected readonly UIControlModel parentControlModel;
-        protected override UIElementModel Parent => parentControlModel;
+        protected readonly UIGroupControlModel parentGroupModel;
+        protected override UIElementModel Parent => parentGroupModel;
 
         public override string ModelName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
         public int ControlTypeID => Control switch
@@ -27,10 +27,10 @@ namespace ImasArchiveApp
             _ => 0,
         };
 
-        protected UIControlModel(Control control, UISubcomponentModel subcomponent, UIControlModel parent) : base(subcomponent, control.Name)
+        protected UIControlModel(Control control, UISubcomponentModel subcomponent, UIGroupControlModel parent) : base(subcomponent, control.Name)
         {
             _control = control;
-            parentControlModel = parent;
+            parentGroupModel = parent;
         }
 
         private void Initialise()
@@ -43,7 +43,7 @@ namespace ImasArchiveApp
             InitialiseRenderVars();
         }
 
-        public static UIControlModel CreateControlModel(Control control, UISubcomponentModel subcomponent, UIControlModel parent)
+        public static UIControlModel CreateControlModel(Control control, UISubcomponentModel subcomponent, UIGroupControlModel parent)
         {
             UIControlModel controlModel = control switch
             {
@@ -175,6 +175,41 @@ namespace ImasArchiveApp
                     _addSpecialSpriteCommand = new RelayCommand(
                         _ => AddSpecialSprite(), _ => !HasSpecialSprite);
                 return _addSpecialSpriteCommand;
+            }
+        }
+
+        public bool HasParent => parentGroupModel != null;
+
+        public void InsertControl<T>() where T : Control, new()
+        {
+            parentGroupModel.InsertNewControl<T>(parentGroupModel.IndexOf(this));
+        }
+
+        private RelayCommand _insertGroupControlCommand;
+        public ICommand InsertGroupControlCommand
+        {
+            get
+            {
+                if (_insertGroupControlCommand == null)
+                    _insertGroupControlCommand = new RelayCommand(
+                        _ => InsertControl<GroupControl>(), _ => HasParent);
+                return _insertGroupControlCommand;
+            }
+        }
+
+        public void Delete()
+        {
+            parentGroupModel.RemoveControl(this);
+        }
+        private RelayCommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (_deleteCommand == null)
+                    _deleteCommand = new RelayCommand(
+                        _ => Delete(), _ => HasParent);
+                return _deleteCommand;
             }
         }
     }
