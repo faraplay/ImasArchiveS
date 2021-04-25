@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Media.Animation;
 
 namespace ImasArchiveApp
@@ -12,21 +13,36 @@ namespace ImasArchiveApp
         private readonly ControlAnimationsList animationsList;
         public override object Element => animationsList;
         public ObservableCollection<UIAnimationModel> Animations { get; }
-        public UIControlModel Control { get; }
+        public UIControlModel Control { get; private set; }
         public override string ElementName => $"{animationsList.ControlName}: {animationsList.Animations.Count} animations";
         public UIControlAnimationsListModel(PaaModel paaModel, UIAnimationGroupModel parent, ControlAnimationsList animationsList) : base(paaModel)
         {
             ParentGroup = parent;
             this.animationsList = animationsList;
             Animations = new ObservableCollection<UIAnimationModel>();
-            Control = paaModel.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
             foreach (Animation animation in animationsList.Animations)
             {
                 Animations.Add(new UIAnimationModel(paaModel, this, animation));
             }
+            SetControl();
+        }
+
+        public void SetControl()
+        {
+            RemoveAnimations();
+            Control = PaaModel.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
         }
 
         public override void Invalidate() => ParentGroup.Invalidate();
+        public override void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ControlAnimationsList.ControlName))
+            {
+                SetControl();
+            }
+            OnPropertyChanged(nameof(ElementName));
+            Invalidate();
+        }
         public Timeline GetTimeline()
         {
             ResetTimelines();

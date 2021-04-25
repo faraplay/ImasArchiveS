@@ -32,7 +32,7 @@ namespace ImasArchiveApp
 
         public abstract void Invalidate();
 
-        public void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        public virtual void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             OnPropertyChanged(nameof(ElementName));
             Invalidate();

@@ -5,15 +5,16 @@ using System.Windows.Media.Animation;
 
 namespace ImasArchiveApp
 {
-    public class UIAnimationGroupModel
+    public class UIAnimationGroupModel : PaaElementModel
     {
         private readonly PaaModel paaModel;
         private readonly AnimationGroup animationGroup;
-        public string ElementName => animationGroup.FileName[..^4];
+        public override object Element => animationGroup;
+        public override string ElementName => animationGroup.FileName[..^4];
         public ObservableCollection<UIControlAnimationsListModel> ListModels { get; }
         public ParallelTimeline Timeline { get; private set; }
         private ClockController controller;
-        public UIAnimationGroupModel(PaaModel paaModel, AnimationGroup animationGroup)
+        public UIAnimationGroupModel(PaaModel paaModel, AnimationGroup animationGroup) : base(paaModel)
         {
             this.paaModel = paaModel;
             this.animationGroup = animationGroup;
@@ -24,7 +25,7 @@ namespace ImasArchiveApp
             }
         }
 
-        public void Invalidate()
+        public override void Invalidate()
         {
             if (Timeline == null && controller == null)
                 return;

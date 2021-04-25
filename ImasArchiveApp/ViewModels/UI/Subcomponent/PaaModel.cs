@@ -15,6 +15,7 @@ namespace ImasArchiveApp
             get => _selectedAnimationGroupModel;
             set
             {
+                SelectedModel = value;
                 if (_selectedAnimationGroupModel == value)
                     return;
                 _selectedAnimationGroupModel?.Invalidate();

@@ -8,7 +8,7 @@ namespace ImasArchiveApp
     {
         protected override int VisibilityIndex => 0;
         public ObservableCollection<UIControlModel> ControlModel { get; }
-        public Dictionary<string, UIControlModel> ControlDictionary { get; }
+        public Dictionary<string, UIControlModel> ControlDictionary { get; private set; }
         private UIElementModel _displayedModel;
         public UIElementModel DisplayedModel
         {
@@ -26,17 +26,21 @@ namespace ImasArchiveApp
             {
                 UIControlModel.CreateControlModel(subcomponentModel.Subcomponent.rootControl, subcomponentModel, null)
             };
+            BuildDictionary();
+        }
+
+        public void BuildDictionary()
+        {
             ControlDictionary = new Dictionary<string, UIControlModel>();
             ControlModel[0].ForAll(control =>
             {
-                if (!string.IsNullOrWhiteSpace(control.FileName))
+                if (!string.IsNullOrWhiteSpace(control.ActualName))
                 {
-                    if (ControlDictionary.ContainsKey(control.FileName))
+                    if (ControlDictionary.ContainsKey(control.ActualName))
                         return;
-                    ControlDictionary.Add(control.FileName, control);
+                    ControlDictionary.Add(control.ActualName, control);
                 }
             });
-            //PropertyChangedEventHandler = (sender, e) => ForceRender();
         }
 
         public void ForceRender()

@@ -16,6 +16,7 @@ namespace ImasArchiveApp
         protected override UIElementModel Parent => parentGroupModel;
 
         public override string ElementName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
+        public string ActualName => Control.Name;
         public int ControlTypeID => Control switch
         {
             SpriteCollection _ => 10,
@@ -85,6 +86,18 @@ namespace ImasArchiveApp
 
         public override void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(Control.Name))
+            {
+                subcomponent.PauModel.BuildDictionary();
+                foreach (var group in subcomponent.PaaModel.AnimationGroups)
+                {
+                    group.Invalidate();
+                    foreach (var list in group.ListModels)
+                    {
+                        list.SetControl();
+                    }
+                }
+            }
             SetRenderTransforms();
             base.PropertyChangedHandler(sender, e);
         }

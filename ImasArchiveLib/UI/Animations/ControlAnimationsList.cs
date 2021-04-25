@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -13,7 +14,11 @@ namespace Imas.UI
         public string ControlName
         {
             get => ImasEncoding.Ascii.GetString(ControlNameBuffer);
-            set => ImasEncoding.Ascii.GetBytes(value, ControlNameBuffer);
+            set
+            {
+                Array.Clear(ControlNameBuffer, 0, ControlNameBuffer.Length);
+                ImasEncoding.Ascii.GetBytes(value, ControlNameBuffer);
+            }
         }
 
         [SerialiseProperty(1)]

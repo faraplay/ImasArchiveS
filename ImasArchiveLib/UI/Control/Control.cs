@@ -1,4 +1,6 @@
-﻿namespace Imas.UI
+﻿using System;
+
+namespace Imas.UI
 {
     [SerialisationBaseType]
     public abstract class Control : UIElement
@@ -9,7 +11,11 @@
         public string Name
         {
             get => ImasEncoding.Ascii.GetString(NameBuffer);
-            set => ImasEncoding.Ascii.GetBytes(value, NameBuffer);
+            set
+            {
+                Array.Clear(NameBuffer, 0, NameBuffer.Length);
+                ImasEncoding.Ascii.GetBytes(value, NameBuffer);
+            }
         }
 
         [SerialiseProperty(1)]

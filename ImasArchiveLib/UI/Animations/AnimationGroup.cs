@@ -27,7 +27,7 @@ namespace Imas.UI
         public int A4 { get; set; }
         [SerialiseProperty(5)]
 		[Listed(5)]
-        public int A5 { get; set; }
+        public uint B1 { get; set; }
 
         [SerialiseProperty(6)]
         public int ControlAnimationCount

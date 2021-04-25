@@ -30,7 +30,10 @@ namespace Imas.UI
         public string FontName
         {
             get => ImasEncoding.Ascii.GetString(FontNameBuffer);
-            set => ImasEncoding.Ascii.GetBytes(value, FontNameBuffer);
+            set {
+                Array.Clear(FontNameBuffer, 0, FontNameBuffer.Length);
+                ImasEncoding.Ascii.GetBytes(value, FontNameBuffer);
+            }
         }
 
         [SerialiseProperty(106)]
