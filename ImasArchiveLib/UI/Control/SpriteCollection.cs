@@ -29,12 +29,12 @@ namespace Imas.UI
 
         [SerialiseProperty(101)]
         [Listed(101)]
-        public int DefaultSpriteIndex { get; set; }
+        public int DefaultSpriteIndex { get; set; } = 0;
         [SerialiseProperty(102)]
         [Listed(102)]
-        public uint E2 { get; set; }
+        public uint E2 { get; set; } = 0xD9000000;
 
         [SerialiseProperty(103)]
-        public List<SpriteGroup> ChildSpriteGroups { get; set; } = new List<SpriteGroup>();
+        public List<SpriteGroup> ChildSpriteGroups { get; set; } = new List<SpriteGroup>() { new SpriteGroup() };
     }
 }

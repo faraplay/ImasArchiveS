@@ -6,7 +6,7 @@ namespace Imas.UI
     public class RotatableGroupControl : GroupControl
     {
         [SerialiseProperty(200)]
-        public float AngleRad { get; set; }
+        public float AngleRad { get; set; } = 0;
         [Listed(200)]
         public float Angle
         {
@@ -19,10 +19,10 @@ namespace Imas.UI
 
         [SerialiseProperty(201)]
         [Listed(201)]
-        public float E2 { get; set; }
+        public float E2 { get; set; } = 0;
         [SerialiseProperty(201)]
         [Listed(202)]
-        public float E3 { get; set; }
+        public float E3 { get; set; } = 0;
 
     }
 }

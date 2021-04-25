@@ -185,6 +185,17 @@ namespace ImasArchiveApp
             parentGroupModel.InsertNewControl<T>(parentGroupModel.IndexOf(this));
         }
 
+        private RelayCommand _insertTextBoxCommand;
+        public ICommand InsertTextBoxCommand
+        {
+            get
+            {
+                if (_insertTextBoxCommand == null)
+                    _insertTextBoxCommand = new RelayCommand(
+                        _ => InsertControl<TextBox>(), _ => HasParent);
+                return _insertTextBoxCommand;
+            }
+        }
         private RelayCommand _insertGroupControlCommand;
         public ICommand InsertGroupControlCommand
         {
@@ -194,6 +205,28 @@ namespace ImasArchiveApp
                     _insertGroupControlCommand = new RelayCommand(
                         _ => InsertControl<GroupControl>(), _ => HasParent);
                 return _insertGroupControlCommand;
+            }
+        }
+        private RelayCommand _insertRotatableGroupControlCommand;
+        public ICommand InsertRotatableGroupControlCommand
+        {
+            get
+            {
+                if (_insertRotatableGroupControlCommand == null)
+                    _insertRotatableGroupControlCommand = new RelayCommand(
+                        _ => InsertControl<RotatableGroupControl>(), _ => HasParent);
+                return _insertRotatableGroupControlCommand;
+            }
+        }
+        private RelayCommand _insertSpriteCollectionCommand;
+        public ICommand InsertSpriteCollectionCommand
+        {
+            get
+            {
+                if (_insertSpriteCollectionCommand == null)
+                    _insertSpriteCollectionCommand = new RelayCommand(
+                        _ => InsertControl<SpriteCollection>(), _ => HasParent);
+                return _insertSpriteCollectionCommand;
             }
         }
 

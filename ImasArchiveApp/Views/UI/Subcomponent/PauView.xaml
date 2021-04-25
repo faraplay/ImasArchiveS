@@ -26,11 +26,17 @@
                     <ContentControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertTextBoxCommand}" Header="Insert Text Box" />
                                 <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                                <MenuItem Command="{Binding InsertRotatableGroupControlCommand}" Header="Insert Rotatable Group Control" />
+                                <MenuItem Command="{Binding InsertSpriteCollectionCommand}" Header="Insert Sprite Collection" />
                             </MenuItem>
                             <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
                             <MenuItem Header="Add Child...">
+                                <MenuItem Command="{Binding AddTextBoxCommand}" Header="Add Text Box" />
                                 <MenuItem Command="{Binding AddGroupControlCommand}" Header="Add Group Control" />
+                                <MenuItem Command="{Binding AddRotatableGroupControlCommand}" Header="Add Rotatable Group Control" />
+                                <MenuItem Command="{Binding AddSpriteCollectionCommand}" Header="Add Sprite Collection" />
                             </MenuItem>
                             <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
                         </ContextMenu>
@@ -55,7 +61,10 @@
                     <ContentControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertTextBoxCommand}" Header="Insert Text Box" />
                                 <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                                <MenuItem Command="{Binding InsertRotatableGroupControlCommand}" Header="Insert Rotatable Group Control" />
+                                <MenuItem Command="{Binding InsertSpriteCollectionCommand}" Header="Insert Sprite Collection" />
                             </MenuItem>
                             <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
                             <MenuItem Command="{Binding AddSpriteGroupCommand}" Header="Add Sprite Group" />
@@ -82,7 +91,10 @@
                     <ContentControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertTextBoxCommand}" Header="Insert Text Box" />
                                 <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                                <MenuItem Command="{Binding InsertRotatableGroupControlCommand}" Header="Insert Rotatable Group Control" />
+                                <MenuItem Command="{Binding InsertSpriteCollectionCommand}" Header="Insert Sprite Collection" />
                             </MenuItem>
                             <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
                             <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />

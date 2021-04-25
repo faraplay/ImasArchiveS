@@ -8,22 +8,24 @@ namespace Imas.UI
     {
         [SerialiseProperty(100)]
         [Listed(100)]
-        public byte TextAlpha { get; set; }
+        public byte TextAlpha { get; set; } = 0xFF;
         [SerialiseProperty(101)]
         [Listed(101)]
-        public byte TextRed { get; set; }
+        public byte TextRed { get; set; } = 0x4D;
         [SerialiseProperty(102)]
         [Listed(102)]
-        public byte TextGreen { get; set; }
+        public byte TextGreen { get; set; } = 0x4D;
         [SerialiseProperty(103)]
         [Listed(103)]
-        public byte TextBlue { get; set; }
+        public byte TextBlue { get; set; } = 0x4D;
 
         [SerialiseProperty(104)]
-        public uint TextAttributes { get; set; }
+        public uint TextAttributes { get; set; } = 0;
 
         [SerialiseProperty(105)]
-        public byte[] FontNameBuffer { get; set; } = new byte[16];
+        public byte[] FontNameBuffer { get; set; } = new byte[16]
+            { 0x69, 0x6d, 0x32, 0x6e, 0x78, 0x70, 0x00, 0x00,
+             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         [Listed(105)]
         public string FontName
         {
@@ -33,9 +35,9 @@ namespace Imas.UI
 
         [SerialiseProperty(106)]
         [Listed(106)]
-        public int CharLimit { get; set; }
+        public int CharLimit { get; set; } = 0;
 
-        private int _textLength;
+        private int _textLength = 0;
         [SerialiseProperty(107)]
         [Listed(107)]
         public int TextLength
@@ -57,7 +59,7 @@ namespace Imas.UI
         }
 
         [SerialiseProperty(108)]
-        public byte[] TextBuffer { get; set; } = new byte[16];
+        public byte[] TextBuffer { get; set; } = new byte[0];
         [Listed(108, StringMultiline = true)]
         public string Text
         {

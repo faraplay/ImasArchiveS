@@ -51,6 +51,17 @@ namespace ImasArchiveApp
         public void InsertNewControl<T>(int index) where T : Control, new() => InsertControl(index, new T());
         public void AddNewControl<T>() where T : Control, new() => InsertNewControl<T>(groupControl.ChildControls.Count);
 
+        private RelayCommand _addTextBoxCommand;
+        public ICommand AddTextBoxCommand
+        {
+            get
+            {
+                if (_addTextBoxCommand == null)
+                    _addTextBoxCommand = new RelayCommand(
+                        _ => AddNewControl<TextBox>());
+                return _addTextBoxCommand;
+            }
+        }
         private RelayCommand _addGroupControlCommand;
         public ICommand AddGroupControlCommand
         {
@@ -60,6 +71,28 @@ namespace ImasArchiveApp
                     _addGroupControlCommand = new RelayCommand(
                         _ => AddNewControl<GroupControl>());
                 return _addGroupControlCommand;
+            }
+        }
+        private RelayCommand _addRotatableGroupControlCommand;
+        public ICommand AddRotatableGroupControlCommand
+        {
+            get
+            {
+                if (_addRotatableGroupControlCommand == null)
+                    _addRotatableGroupControlCommand = new RelayCommand(
+                        _ => AddNewControl<RotatableGroupControl>());
+                return _addRotatableGroupControlCommand;
+            }
+        }
+        private RelayCommand _addSpriteCollectionCommand;
+        public ICommand AddSpriteCollectionCommand
+        {
+            get
+            {
+                if (_addSpriteCollectionCommand == null)
+                    _addSpriteCollectionCommand = new RelayCommand(
+                        _ => AddNewControl<SpriteCollection>());
+                return _addSpriteCollectionCommand;
             }
         }
     }
