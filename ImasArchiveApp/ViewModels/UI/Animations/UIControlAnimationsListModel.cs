@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
 
 namespace ImasArchiveApp
@@ -29,7 +30,7 @@ namespace ImasArchiveApp
 
         public void SetControl()
         {
-            RemoveAnimations();
+            UnapplyAnimations();
             Control = PaaModel.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
         }
 
@@ -246,7 +247,7 @@ namespace ImasArchiveApp
             }
         }
 
-        public void RemoveAnimations()
+        public void UnapplyAnimations()
         {
             if (Control == null)
                 return;
@@ -265,6 +266,95 @@ namespace ImasArchiveApp
         {
             if (Control != null && VisibilityEndValue.HasValue) 
                 Control.CurrentVisibility = VisibilityEndValue != 0;
+        }
+
+
+        public int IndexOf(UIAnimationModel animationModel) => Animations.IndexOf(animationModel);
+        public void InsertAnimation(int index, Animation animation)
+        {
+            animationsList.Animations.Insert(index, animation);
+            Animations.Insert(index, new UIAnimationModel(PaaModel, this, animation));
+            Invalidate();
+        }
+
+        public void RemoveAnimation(UIAnimationModel animationModel)
+        {
+            int index = IndexOf(animationModel);
+            if (index == -1)
+                return;
+            animationsList.Animations.RemoveAt(index);
+            Animations.RemoveAt(index);
+            Invalidate();
+        }
+
+        public void InsertNewAnimation<T>(int index) where T : Animation, new() => InsertAnimation(index, new T());
+        public void AddNewAnimation<T>() where T : Animation, new() => InsertNewAnimation<T>(Animations.Count);
+
+        private RelayCommand _addVisibilityAnimationCommand;
+        public ICommand AddVisibilityAnimationCommand
+        {
+            get
+            {
+                if (_addVisibilityAnimationCommand == null)
+                    _addVisibilityAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<VisibilityAnimation>());
+                return _addVisibilityAnimationCommand;
+            }
+        }
+        private RelayCommand _addPositionAnimationCommand;
+        public ICommand AddPositionAnimationCommand
+        {
+            get
+            {
+                if (_addPositionAnimationCommand == null)
+                    _addPositionAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<PositionAnimation>());
+                return _addPositionAnimationCommand;
+            }
+        }
+        private RelayCommand _addOpacityAnimationCommand;
+        public ICommand AddOpacityAnimationCommand
+        {
+            get
+            {
+                if (_addOpacityAnimationCommand == null)
+                    _addOpacityAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<OpacityAnimation>());
+                return _addOpacityAnimationCommand;
+            }
+        }
+        private RelayCommand _addScaleAnimationCommand;
+        public ICommand AddScaleAnimationCommand
+        {
+            get
+            {
+                if (_addScaleAnimationCommand == null)
+                    _addScaleAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<ScaleAnimation>());
+                return _addScaleAnimationCommand;
+            }
+        }
+        private RelayCommand _addAngleAnimationCommand;
+        public ICommand AddAngleAnimationCommand
+        {
+            get
+            {
+                if (_addAngleAnimationCommand == null)
+                    _addAngleAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<AngleAnimation>());
+                return _addAngleAnimationCommand;
+            }
+        }
+        private RelayCommand _addSpriteAnimationCommand;
+        public ICommand AddSpriteAnimationCommand
+        {
+            get
+            {
+                if (_addSpriteAnimationCommand == null)
+                    _addSpriteAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<SpriteAnimation>());
+                return _addSpriteAnimationCommand;
+            }
         }
     }
 }

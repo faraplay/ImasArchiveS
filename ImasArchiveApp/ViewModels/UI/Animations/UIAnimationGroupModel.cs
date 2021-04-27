@@ -63,7 +63,7 @@ namespace ImasArchiveApp
             controller?.Stop();
             foreach (var listModel in ListModels)
             {
-                listModel.RemoveAnimations();
+                listModel.UnapplyAnimations();
             }
         }
 

@@ -26,6 +26,18 @@
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
+                        <ContentControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add...">
+                                    <MenuItem Command="{Binding AddVisibilityAnimationCommand}" Header="Add Visibility Animation" />
+                                    <MenuItem Command="{Binding AddPositionAnimationCommand}" Header="Add Position Animation" />
+                                    <MenuItem Command="{Binding AddOpacityAnimationCommand}" Header="Add Opacity Animation" />
+                                    <MenuItem Command="{Binding AddScaleAnimationCommand}" Header="Add Scale Animation" />
+                                    <MenuItem Command="{Binding AddAngleAnimationCommand}" Header="Add Angle Animation" />
+                                    <MenuItem Command="{Binding AddSpriteAnimationCommand}" Header="Add Sprite Animation" />
+                                </MenuItem>
+                            </ContextMenu>
+                        </ContentControl.ContextMenu>
                         <Label Padding="2" Content="{Binding Path=ElementName}" />
                     </ContentControl>
                 </HierarchicalDataTemplate>
@@ -36,6 +48,19 @@
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
+                        <ContentControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Insert...">
+                                    <MenuItem Command="{Binding InsertVisibilityAnimationCommand}" Header="Insert Visibility Animation" />
+                                    <MenuItem Command="{Binding InsertPositionAnimationCommand}" Header="Insert Position Animation" />
+                                    <MenuItem Command="{Binding InsertOpacityAnimationCommand}" Header="Insert Opacity Animation" />
+                                    <MenuItem Command="{Binding InsertScaleAnimationCommand}" Header="Insert Scale Animation" />
+                                    <MenuItem Command="{Binding InsertAngleAnimationCommand}" Header="Insert Angle Animation" />
+                                    <MenuItem Command="{Binding InsertSpriteAnimationCommand}" Header="Insert Sprite Animation" />
+                                </MenuItem>
+                                <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                            </ContextMenu>
+                        </ContentControl.ContextMenu>
                         <Label Padding="2" Content="{Binding Path=ElementName}" />
                     </ContentControl>
                 </HierarchicalDataTemplate>
