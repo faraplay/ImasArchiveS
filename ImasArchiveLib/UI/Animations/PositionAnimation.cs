@@ -7,7 +7,6 @@ namespace Imas.UI
     public class PositionAnimation : StartEndAnimation
     {
         [SerialiseProperty(200)]
-		[Listed(200)]
         public int FCount
         {
             get => OtherF.Count;
@@ -28,7 +27,6 @@ namespace Imas.UI
             }
         }
         [SerialiseProperty(201)]
-		[Listed(201)]
         public int PointCount
         {
             get => Points.Count;
@@ -49,22 +47,22 @@ namespace Imas.UI
             }
         }
         [SerialiseProperty(202)]
-		[Listed(202)]
-        public float C1 { get; set; }
+        [Listed(202)]
+        public float C1 { get; set; } = 1;
         [SerialiseProperty(203)]
-		[Listed(203)]
-        public int D1 { get; set; }
+        [Listed(203)]
+        public int D1 { get; set; } = 5;
 
         [SerialiseProperty(204)]
-		[Listed(204)]
-        public int E1 { get; set; }
+        [Listed(204)]
+        public int E1 { get; set; } = 0;
         [SerialiseProperty(205)]
         [Listed(205)]
-        public List<int> OtherF { get; set; } = new List<int>();
+        public List<int> OtherF { get; set; } = new List<int>() { 1 };
 
         [SerialiseProperty(206)]
         [Listed(206)]
-        public List<Point> Points { get; set; } = new List<Point>();
+        public List<Point> Points { get; set; } = new List<Point>() { new Point(), new Point() };
     }
 
     public class Point
