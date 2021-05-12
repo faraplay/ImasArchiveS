@@ -336,7 +336,7 @@ namespace ImasArchiveApp
             return imageBrush;
         }
 
-        private void InvalidateBrushes()
+        internal void InvalidateBrushes()
         {
             alphaImageBrush = null;
             whiteImageBrush = null;

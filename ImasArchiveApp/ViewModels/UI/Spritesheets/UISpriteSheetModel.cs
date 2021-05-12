@@ -120,6 +120,24 @@ namespace ImasArchiveApp
                 gtf.BitmapDataPtr,
                 4 * gtf.Stride * gtf.Height,
                 4 * gtf.Stride);
+            ClearColorBitmaps();
+            foreach (UISpriteModel spriteModel in Sprites)
+            {
+                spriteModel.InvalidateBrushes();
+            }
+            ForceRender();
+            subcomponent.PauModel.ForceRender();
+        }
+
+        private void ClearColorBitmaps()
+        {
+            whiteBitmap = null;
+            yellowBitmap = null;
+            magentaBitmap = null;
+            cyanBitmap = null;
+            redBitmap = null;
+            greenBitmap = null;
+            blueBitmap = null;
         }
 
         internal ColorChannelGTF colorGtfs;
