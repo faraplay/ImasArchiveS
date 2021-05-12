@@ -40,7 +40,7 @@ namespace ImasArchiveApp
         private void RefreshPropertiesList()
         {
             UIProperties.Clear();
-            object element = SelectedModel.Element;
+            object element = SelectedModel?.Element;
             if (element == null)
                 return;
             foreach ((var property, var attr) in element.GetType()
