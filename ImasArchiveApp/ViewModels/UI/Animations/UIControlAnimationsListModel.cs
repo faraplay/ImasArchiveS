@@ -73,23 +73,6 @@ namespace ImasArchiveApp
                 }
             }
 
-            if (VisibilityTimeline.KeyFrames.Count > 0)
-            {
-                double lastFrameTime = -1;
-                double lastFrameValue = 0;
-                foreach (var frame in VisibilityTimeline.KeyFrames)
-                {
-                    if (!(frame is DoubleKeyFrame doubleKeyFrame))
-                        continue;
-                    if (doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds > lastFrameTime)
-                    {
-                        lastFrameTime = doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds;
-                        lastFrameValue = doubleKeyFrame.Value;
-                    }
-                }
-                VisibilityEndValue = lastFrameValue;
-            }
-
             timeline.Children.Add(VisibilityTimeline);
             timeline.Children.Add(PositionXTimeline);
             timeline.Children.Add(PositionYTimeline);
@@ -109,7 +92,28 @@ namespace ImasArchiveApp
             return timeline;
         }
 
-        private double? VisibilityEndValue { get; set; }
+        private double? GetEndValue(DoubleAnimationUsingKeyFrames VisibilityTimeline)
+        {
+            if (VisibilityTimeline == null)
+                return null;
+            if (VisibilityTimeline.KeyFrames.Count == 0)
+            {
+                return null;
+            }
+            double lastFrameTime = -1;
+            double lastFrameValue = 0;
+            foreach (var frame in VisibilityTimeline.KeyFrames)
+            {
+                if (!(frame is DoubleKeyFrame doubleKeyFrame))
+                    continue;
+                if (doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds > lastFrameTime)
+                {
+                    lastFrameTime = doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds;
+                    lastFrameValue = doubleKeyFrame.Value;
+                }
+            }
+            return lastFrameValue;
+        }
 
         private DoubleAnimationUsingKeyFrames VisibilityTimeline = new DoubleAnimationUsingKeyFrames();
         private DoubleAnimationUsingKeyFrames PositionXTimeline = new DoubleAnimationUsingKeyFrames();
@@ -264,8 +268,26 @@ namespace ImasArchiveApp
 
         private void SetEndVisibility()
         {
-            if (Control != null && VisibilityEndValue.HasValue) 
-                Control.CurrentVisibility = VisibilityEndValue != 0;
+            if (Control == null)
+                return;
+            double? visibilityEnd = GetEndValue(VisibilityTimeline);
+            double? opacityEnd = GetEndValue(OpacityTimeline);
+            if (visibilityEnd == 0)
+            {
+                Control.CurrentVisibility = false;
+                return;
+            }
+            if (opacityEnd == 0)
+            {
+                Control.CurrentVisibility = false;
+                return;
+            }
+
+            if (visibilityEnd.HasValue)
+            {
+                Control.CurrentVisibility = true;
+                return;
+            }
         }
 
 
