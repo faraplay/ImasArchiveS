@@ -17,6 +17,11 @@
             Content="Play"
             DockPanel.Dock="Top" />
         <TreeView MinWidth="150" ItemsSource="{Binding Path=ListModels}">
+            <TreeView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding AddAnimationListCommand}" Header="Add Animation List" />
+                </ContextMenu>
+            </TreeView.ContextMenu>
             <TreeView.Resources>
                 <local:ObjectToTypeConverter x:Key="ObjectToType" />
                 <HierarchicalDataTemplate DataType="{x:Type local:UIControlAnimationsListModel}" ItemsSource="{Binding Path=Animations}">
@@ -28,6 +33,8 @@
                         </i:Interaction.Triggers>
                         <ContentControl.ContextMenu>
                             <ContextMenu>
+                                <MenuItem Command="{Binding InsertCommand}" Header="Insert Above" />
+                                <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
                                 <MenuItem Header="Add...">
                                     <MenuItem Command="{Binding AddVisibilityAnimationCommand}" Header="Add Visibility Animation" />
                                     <MenuItem Command="{Binding AddPositionAnimationCommand}" Header="Add Position Animation" />

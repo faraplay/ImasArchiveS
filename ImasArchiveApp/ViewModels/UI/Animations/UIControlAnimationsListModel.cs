@@ -34,7 +34,12 @@ namespace ImasArchiveApp
             Control = PaaModel.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
         }
 
-        public override void Invalidate() => ParentGroup.Invalidate();
+        public override void Invalidate()
+        {
+            ParentGroup.Invalidate();
+            OnPropertyChanged(nameof(ElementName));
+        }
+
         public override void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ControlAnimationsList.ControlName))
@@ -376,6 +381,40 @@ namespace ImasArchiveApp
                     _addSpriteAnimationCommand = new RelayCommand(
                         _ => AddNewAnimation<SpriteAnimation>());
                 return _addSpriteAnimationCommand;
+            }
+        }
+
+
+        public void InsertNewAnimationList()
+        {
+            ParentGroup.InsertNewAnimationList(ParentGroup.IndexOf(this));
+        }
+        public void Delete()
+        {
+            ParentGroup.RemoveAnimation(this);
+        }
+
+        private RelayCommand _insertCommand;
+        public ICommand InsertCommand
+        {
+            get
+            {
+                if (_insertCommand == null)
+                    _insertCommand = new RelayCommand(
+                        _ => InsertNewAnimationList());
+                return _insertCommand;
+            }
+        }
+
+        private RelayCommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (_deleteCommand == null)
+                    _deleteCommand = new RelayCommand(
+                        _ => Delete());
+                return _deleteCommand;
             }
         }
     }

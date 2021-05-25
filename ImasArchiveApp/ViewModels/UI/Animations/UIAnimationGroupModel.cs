@@ -95,5 +95,37 @@ namespace ImasArchiveApp
                 return _selectPlayCommand;
             }
         }
+
+
+        public int IndexOf(UIControlAnimationsListModel listModel) => ListModels.IndexOf(listModel);
+        public void InsertAnimationList(int index, ControlAnimationsList animationList)
+        {
+            ListModels.Insert(index, new UIControlAnimationsListModel(PaaModel, this, animationList));
+            Invalidate();
+        }
+
+        public void RemoveAnimation(UIControlAnimationsListModel listModel)
+        {
+            int index = IndexOf(listModel);
+            if (index == -1)
+                return;
+            ListModels.RemoveAt(index);
+            Invalidate();
+        }
+
+        public void InsertNewAnimationList(int index) => InsertAnimationList(index, new ControlAnimationsList());
+        public void AddNewAnimationList() => InsertNewAnimationList(ListModels.Count);
+
+        private RelayCommand _addAnimationListCommand;
+        public ICommand AddAnimationListCommand
+        {
+            get
+            {
+                if (_addAnimationListCommand == null)
+                    _addAnimationListCommand = new RelayCommand(
+                        _ => AddNewAnimationList());
+                return _addAnimationListCommand;
+            }
+        }
     }
 }
