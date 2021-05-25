@@ -272,6 +272,10 @@ namespace ImasArchiveApp
                 return;
             double? visibilityEnd = GetEndValue(VisibilityTimeline);
             double? opacityEnd = GetEndValue(OpacityTimeline);
+            if (!visibilityEnd.HasValue)
+            {
+                return;
+            }
             if (visibilityEnd == 0)
             {
                 Control.CurrentVisibility = false;
@@ -282,12 +286,8 @@ namespace ImasArchiveApp
                 Control.CurrentVisibility = false;
                 return;
             }
-
-            if (visibilityEnd.HasValue)
-            {
-                Control.CurrentVisibility = true;
-                return;
-            }
+            Control.CurrentVisibility = true;
+            return;
         }
 
 
