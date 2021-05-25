@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 
@@ -117,6 +118,20 @@ namespace ImasArchiveApp
         public void InsertNewAnimationList(int index) => InsertAnimationList(index, new ControlAnimationsList());
         public void AddNewAnimationList() => InsertNewAnimationList(ListModels.Count);
 
+        public void Paste()
+        {
+            try
+            {
+                ControlAnimationsList animationsList = (ControlAnimationsList)Base64.FromBase64(Clipboard.GetText(), typeof(ControlAnimationsList));
+                InsertAnimationList(ListModels.Count, animationsList);
+            }
+            catch (System.FormatException)
+            {
+            }
+            catch (System.IO.EndOfStreamException)
+            { }
+        }
+
         private RelayCommand _addAnimationListCommand;
         public ICommand AddAnimationListCommand
         {
@@ -126,6 +141,17 @@ namespace ImasArchiveApp
                     _addAnimationListCommand = new RelayCommand(
                         _ => AddNewAnimationList());
                 return _addAnimationListCommand;
+            }
+        }
+        private RelayCommand _pasteCommand;
+        public ICommand PasteCommand
+        {
+            get
+            {
+                if (_pasteCommand == null)
+                    _pasteCommand = new RelayCommand(
+                        _ => Paste());
+                return _pasteCommand;
             }
         }
     }

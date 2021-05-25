@@ -20,6 +20,7 @@
             <TreeView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="{Binding AddAnimationListCommand}" Header="Add Animation List" />
+                    <MenuItem Command="{Binding PasteCommand}" Header="Paste" />
                 </ContextMenu>
             </TreeView.ContextMenu>
             <TreeView.Resources>
@@ -34,6 +35,7 @@
                         <ContentControl.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Command="{Binding InsertCommand}" Header="Insert Above" />
+                                <MenuItem Command="{Binding CopyCommand}" Header="Copy" />
                                 <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
                                 <MenuItem Header="Add...">
                                     <MenuItem Command="{Binding AddVisibilityAnimationCommand}" Header="Add Visibility Animation" />

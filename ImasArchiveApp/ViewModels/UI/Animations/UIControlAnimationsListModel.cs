@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 
@@ -384,7 +385,10 @@ namespace ImasArchiveApp
             }
         }
 
-
+        public void Copy()
+        {
+            Clipboard.SetText(Base64.ToBase64(animationsList));
+        }
         public void InsertNewAnimationList()
         {
             ParentGroup.InsertNewAnimationList(ParentGroup.IndexOf(this));
@@ -392,6 +396,17 @@ namespace ImasArchiveApp
         public void Delete()
         {
             ParentGroup.RemoveAnimation(this);
+        }
+        private RelayCommand _copyCommand;
+        public ICommand CopyCommand
+        {
+            get
+            {
+                if (_copyCommand == null)
+                    _copyCommand = new RelayCommand(
+                        _ => Copy());
+                return _copyCommand;
+            }
         }
 
         private RelayCommand _insertCommand;
