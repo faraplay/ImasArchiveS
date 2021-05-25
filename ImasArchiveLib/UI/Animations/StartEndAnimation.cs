@@ -3,11 +3,21 @@
     public class StartEndAnimation : Animation
     {
         [SerialiseProperty(100)]
-        [Listed(100)]
         public float StartTime { get; set; } = 0;
         [SerialiseProperty(101)]
-        [Listed(101)]
         public float EndTime { get; set; } = 1;
+        [Listed(100)]
+        public float StartFrame
+        {
+            get => StartTime * 60f;
+            set => StartTime = value / 60f;
+        }
+        [Listed(101)]
+        public float EndFrame
+        {
+            get => EndTime * 60f;
+            set => EndTime = value / 60f;
+        }
 
         [SerialiseProperty(102)]
         [Listed(102)]
