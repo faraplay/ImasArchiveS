@@ -250,6 +250,21 @@ namespace ImasArchiveApp
             }
         }
 
+        public void Copy()
+        {
+            System.Windows.Clipboard.SetText(Base64.ToBase64(Control));
+        }
+        private RelayCommand _copyCommand;
+        public ICommand CopyCommand
+        {
+            get
+            {
+                if (_copyCommand == null)
+                    _copyCommand = new RelayCommand(
+                        _ => Copy());
+                return _copyCommand;
+            }
+        }
         public void Delete()
         {
             parentGroupModel.RemoveControl(this);

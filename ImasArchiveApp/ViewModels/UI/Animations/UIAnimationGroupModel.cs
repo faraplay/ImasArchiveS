@@ -118,6 +118,18 @@ namespace ImasArchiveApp
         public void InsertNewAnimationList(int index) => InsertAnimationList(index, new ControlAnimationsList());
         public void AddNewAnimationList() => InsertNewAnimationList(ListModels.Count);
 
+
+        private RelayCommand _addAnimationListCommand;
+        public ICommand AddAnimationListCommand
+        {
+            get
+            {
+                if (_addAnimationListCommand == null)
+                    _addAnimationListCommand = new RelayCommand(
+                        _ => AddNewAnimationList());
+                return _addAnimationListCommand;
+            }
+        }
         public void Paste()
         {
             try
@@ -130,18 +142,6 @@ namespace ImasArchiveApp
             }
             catch (System.IO.EndOfStreamException)
             { }
-        }
-
-        private RelayCommand _addAnimationListCommand;
-        public ICommand AddAnimationListCommand
-        {
-            get
-            {
-                if (_addAnimationListCommand == null)
-                    _addAnimationListCommand = new RelayCommand(
-                        _ => AddNewAnimationList());
-                return _addAnimationListCommand;
-            }
         }
         private RelayCommand _pasteCommand;
         public ICommand PasteCommand

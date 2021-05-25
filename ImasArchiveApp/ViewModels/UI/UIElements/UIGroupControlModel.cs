@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows;
 using System.Windows.Input;
 
 namespace ImasArchiveApp
@@ -93,6 +94,31 @@ namespace ImasArchiveApp
                     _addSpriteCollectionCommand = new RelayCommand(
                         _ => AddNewControl<SpriteCollection>());
                 return _addSpriteCollectionCommand;
+            }
+        }
+
+        public void Paste()
+        {
+            try
+            {
+                Control control = (Control)Base64.FromBase64(Clipboard.GetText(), typeof(Control));
+                InsertControl(groupControl.ChildControls.Count, control);
+            }
+            catch (System.FormatException)
+            {
+            }
+            catch (System.IO.EndOfStreamException)
+            { }
+        }
+        private RelayCommand _pasteCommand;
+        public ICommand PasteCommand
+        {
+            get
+            {
+                if (_pasteCommand == null)
+                    _pasteCommand = new RelayCommand(
+                        _ => Paste());
+                return _pasteCommand;
             }
         }
     }
