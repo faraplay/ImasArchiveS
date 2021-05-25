@@ -78,6 +78,20 @@ namespace Imas.UI
             await ptaFile.SaveTo(stream);
         }
 
+        public async Task WritePaaStream(Stream stream)
+        {
+            using MemoryStream memStream = new MemoryStream();
+            foreach (var entry in animationsPar.Entries)
+            {
+                AnimationGroup animationGroup = animationGroups.Find(group => group.FileName == entry.FileName);
+                memStream.SetLength(0);
+                Serialiser.Serialise(new Binary(memStream, true), animationGroup);
+                memStream.Seek(0, SeekOrigin.Begin);
+                await entry.SetData(memStream);
+            }
+            await animationsPar.SaveTo(stream);
+        }
+
         #region IDisposable
 
         private bool disposed = false;

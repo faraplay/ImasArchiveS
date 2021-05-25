@@ -100,6 +100,7 @@ namespace ImasArchiveApp
         public int IndexOf(UIControlAnimationsListModel listModel) => ListModels.IndexOf(listModel);
         public void InsertAnimationList(int index, ControlAnimationsList animationList)
         {
+            animationGroup.ControlAnimations.Insert(index, animationList);
             ListModels.Insert(index, new UIControlAnimationsListModel(PaaModel, this, animationList));
             Invalidate();
         }
