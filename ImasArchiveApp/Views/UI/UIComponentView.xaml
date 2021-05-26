@@ -6,14 +6,16 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:UIComponentModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <DockPanel Margin="10">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Save">
-                <MenuItem Command="{Binding Path=SaveAsCommand}" Header="Save As" />
-                <MenuItem Command="{Binding Path=SavePauCommand}" Header="Save PAU" />
+                <MenuItem Command="{Binding SaveAsCommand}" Header="Save As" />
+                <MenuItem Command="{Binding SavePauCommand}" Header="Save PAU" />
+                <MenuItem Command="{Binding SavePaaCommand}" Header="Save Animation" />
             </MenuItem>
         </Menu>
         <ComboBox

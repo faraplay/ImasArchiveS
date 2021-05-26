@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace Imas.UI
@@ -55,6 +56,11 @@ namespace Imas.UI
         private string GetDebuggerDisplay()
         {
             return FileName;
+        }
+
+        public void SaveToStream(Stream stream)
+        {
+            Serialiser.Serialise(new Binary(stream, true), this);
         }
     }
 }

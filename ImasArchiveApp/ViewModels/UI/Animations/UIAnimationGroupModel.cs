@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
@@ -153,6 +154,12 @@ namespace ImasArchiveApp
                         _ => Paste());
                 return _pasteCommand;
             }
+        }
+
+        public void SavePaa(string fileName)
+        {
+            using FileStream outStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            animationGroup.SaveToStream(outStream);
         }
     }
 }

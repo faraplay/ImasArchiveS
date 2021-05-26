@@ -199,6 +199,43 @@ namespace ImasArchiveApp
             }
         }
 
+        private RelayCommand _savePaaCommand;
+        public ICommand SavePaaCommand
+        {
+            get
+            {
+                if (_savePaaCommand == null)
+                    _savePaaCommand = new RelayCommand(
+                        _ => SavePaa(), _ => CanSavePaa());
+                return _savePaaCommand;
+            }
+        }
+        public bool CanSavePaa() => _subcompModel?.PaaModel?.SelectedAnimationGroupModel != null;
+
+        public void SavePaa()
+        {
+            try
+            {
+                if (_subcompModel?.PaaModel?.SelectedAnimationGroupModel == null)
+                    return;
+                string fileName = _getFileName.SaveGetFileName("Save As...", null, 
+                    _subcompModel.PaaModel.SelectedAnimationGroupModel.ElementName, 
+                    "Paa files (*.paa)|*.paa");
+                if (fileName != null)
+                {
+                    ClearStatus();
+                    ReportMessage("Saving PAA file...");
+                    _subcompModel.PaaModel.SelectedAnimationGroupModel.SavePaa(fileName);
+                    ReportMessage("Done.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportException(ex);
+                FileModel = null;
+            }
+        }
+
         #region IDisposable
 
         private bool disposed = false;
