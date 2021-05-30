@@ -318,7 +318,7 @@ namespace ImasArchiveApp
                 BitmapSource,
                 new Rect(new System.Windows.Size(BitmapSource.Width, BitmapSource.Height))
                 );
-            if (RenderRectangles)
+            if (RenderRectangles && isTop)
             {
                 foreach (var rect in Rectangles)
                 {

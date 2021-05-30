@@ -89,7 +89,7 @@ namespace ImasArchiveApp
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            parent.RenderElement(drawingContext, multiplier, isTop);
+            parent.RenderElement(drawingContext, multiplier, false);
             drawingContext.DrawRectangle(null, new Pen(Brushes.Yellow, 1), rectangle);
         }
 
