@@ -13,11 +13,15 @@ namespace ImasArchiveApp
         private readonly UISpriteGroupModel parentGroupModel;
         protected override UIElementModel Parent => parentGroupModel;
 
-        public UISpriteSheetModel ParentSheet => (sprite.SrcImageID == -1) ? null : subcomponent.PtaModel.SpriteSheets[sprite.SrcImageID];
+        public UISpriteSheetModel ParentSheet => !HasValidSheetID ?
+            null : subcomponent.PtaModel.SpriteSheets[sprite.SrcImageID];
+
+        private bool HasValidSheetID => sprite.SrcImageID >= 0 && sprite.SrcImageID < subcomponent.PtaModel.SpriteSheets.Count;
+
         private UISpriteSheetRectangleModel spriteSheetRectangleModel;
-        public UISpriteSheetRectangleModel SpriteSheetRectangleModel 
-        { 
-            get => spriteSheetRectangleModel; 
+        public UISpriteSheetRectangleModel SpriteSheetRectangleModel
+        {
+            get => spriteSheetRectangleModel;
             set
             {
                 spriteSheetRectangleModel = value;
@@ -117,7 +121,7 @@ namespace ImasArchiveApp
         {
             this.sprite = sprite;
             parentGroupModel = parent;
-            if (this.sprite.SrcImageID >= 0)
+            if (HasValidSheetID)
                 ParentSheet.Sprites.Add(this);
         }
 
@@ -226,7 +230,7 @@ namespace ImasArchiveApp
                 0.5 * sprite.Height
                 ));
             drawingContext.PushOpacity(sprite.Alpha / 255.0);
-            if (sprite.SrcImageID == -1)
+            if (ParentSheet == null)
             {
                 DrawRectangle(drawingContext, CreateColorBrush(red, green, blue));
             }
