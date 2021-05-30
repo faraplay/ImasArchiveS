@@ -88,6 +88,7 @@ namespace ImasArchiveApp
             Children.Insert(index, new UISpriteGroupModel(subcomponent, this, spriteGroup, true, false));
             if (index <= spriteCollection.DefaultSpriteIndex)
                 spriteCollection.DefaultSpriteIndex++;
+            subcomponent.PauModel.ForceRender();
         }
         public void RemoveSpriteGroup(UISpriteGroupModel groupModel)
         {
@@ -102,6 +103,7 @@ namespace ImasArchiveApp
             Children.RemoveAt(index);
             if (index <= spriteCollection.DefaultSpriteIndex)
                 spriteCollection.DefaultSpriteIndex--;
+            subcomponent.PauModel.ForceRender();
         }
 
         public void AddSpriteGroup(SpriteGroup spriteGroup)

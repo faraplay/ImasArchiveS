@@ -33,7 +33,7 @@ namespace ImasArchiveApp
         {
             spriteGroup.Sprites.Insert(index, sprite);
             Children.Insert(index, new UISpriteModel(subcomponent, this, sprite));
-
+            subcomponent.PauModel.ForceRender();
         }
 
         public void RemoveSprite(UISpriteModel spriteModel)
@@ -48,6 +48,7 @@ namespace ImasArchiveApp
             }
             spriteGroup.Sprites.RemoveAt(index);
             Children.RemoveAt(index);
+            subcomponent.PauModel.ForceRender();
         }
 
         private RelayCommand _addSpriteCommand;

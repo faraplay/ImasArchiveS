@@ -36,6 +36,7 @@ namespace ImasArchiveApp
             if (HasSpecialSprite)
                 index++;
             Children.Insert(index, CreateControlModel(control, subcomponent, this));
+            subcomponent.PauModel.ForceRender();
         }
 
         public void RemoveControl(UIControlModel controlModel)
@@ -47,6 +48,7 @@ namespace ImasArchiveApp
             if (HasSpecialSprite)
                 index--;
             groupControl.ChildControls.RemoveAt(index);
+            subcomponent.PauModel.ForceRender();
         }
 
         public void InsertNewControl<T>(int index) where T : Control, new() => InsertControl(index, new T());

@@ -176,6 +176,7 @@ namespace ImasArchiveApp
             groupModel.InsertSprite(0, new Sprite());
             Control.SpecialSprite = spriteGroup;
             Children.Insert(0, groupModel);
+            subcomponent.PauModel.ForceRender();
         }
         public void RemoveSpecialSprite()
         {
@@ -183,6 +184,7 @@ namespace ImasArchiveApp
                 return;
             Control.SpecialSprite = new SpriteGroup();
             Children.RemoveAt(0);
+            subcomponent.PauModel.ForceRender();
         }
 
         public bool HasSpecialSprite => Control.SpecialSprite.Sprites.Count != 0;
