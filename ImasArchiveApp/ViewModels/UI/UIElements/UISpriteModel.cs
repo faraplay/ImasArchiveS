@@ -39,6 +39,9 @@ namespace ImasArchiveApp
                 float srcFracWidth = sprite.SrcFracRight - sprite.SrcFracLeft;
                 sprite.SrcFracLeft = value / SrcImgWidth;
                 sprite.SrcFracRight = sprite.SrcFracLeft + srcFracWidth;
+                InvalidateBrushes();
+                OnPropertyChanged();
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceXQuiet)));
             }
         }
         internal float SourceYQuiet
@@ -49,6 +52,9 @@ namespace ImasArchiveApp
                 float srcFracHeight = sprite.SrcFracBottom - sprite.SrcFracTop;
                 sprite.SrcFracTop = value / SrcImgHeight;
                 sprite.SrcFracBottom = sprite.SrcFracTop + srcFracHeight;
+                InvalidateBrushes();
+                OnPropertyChanged();
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceYQuiet)));
             }
         }
         internal float SourceWidthQuiet
@@ -57,6 +63,9 @@ namespace ImasArchiveApp
             set
             {
                 sprite.SrcFracRight = sprite.SrcFracLeft + (value / SrcImgWidth);
+                InvalidateBrushes();
+                OnPropertyChanged();
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceWidthQuiet)));
             }
         }
         internal float SourceHeightQuiet
@@ -65,6 +74,9 @@ namespace ImasArchiveApp
             set
             {
                 sprite.SrcFracBottom = sprite.SrcFracTop + (value / SrcImgHeight);
+                InvalidateBrushes();
+                OnPropertyChanged();
+                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceHeightQuiet)));
             }
         }
         //#endregion Quiet
@@ -75,9 +87,6 @@ namespace ImasArchiveApp
             {
                 SourceXQuiet = value;
                 ParentSheet.UpdateRectangles();
-                InvalidateBrushes();
-                OnPropertyChanged();
-                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceX)));
             }
         }
         public float SourceY
@@ -87,9 +96,6 @@ namespace ImasArchiveApp
             {
                 SourceYQuiet = value;
                 ParentSheet.UpdateRectangles();
-                InvalidateBrushes();
-                OnPropertyChanged();
-                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceY)));
             }
         }
         public float SourceWidth
@@ -99,9 +105,6 @@ namespace ImasArchiveApp
             {
                 SourceWidthQuiet = value;
                 ParentSheet.UpdateRectangles();
-                InvalidateBrushes();
-                OnPropertyChanged();
-                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceWidth)));
             }
         }
         public float SourceHeight
@@ -111,9 +114,6 @@ namespace ImasArchiveApp
             {
                 SourceHeightQuiet = value;
                 ParentSheet.UpdateRectangles();
-                InvalidateBrushes();
-                OnPropertyChanged();
-                PropertyChangedHandler(this, new PropertyChangedEventArgs(nameof(SourceHeight)));
             }
         }
 

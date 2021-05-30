@@ -26,9 +26,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceXQuiet = X;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
         public float Y
@@ -41,9 +41,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceYQuiet = Y;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
         public float Width
@@ -56,9 +56,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceWidthQuiet = Width;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
         public float Height
@@ -71,9 +71,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceHeightQuiet = Height;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
 
