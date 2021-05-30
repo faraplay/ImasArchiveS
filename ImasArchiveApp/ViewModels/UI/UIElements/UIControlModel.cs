@@ -104,7 +104,7 @@ namespace ImasArchiveApp
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
         {
-            drawingContext.PushOpacity(CurrentVisibility ? 1 : 0, VisibilityClock);
+            drawingContext.PushOpacity(CurrentVisibility || forceVisible ? 1 : 0, VisibilityClock);
             drawingContext.PushTransform(PositionTransform);
             if (Control is RotatableGroupControl)
             {
