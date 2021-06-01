@@ -27,13 +27,46 @@
     <DockPanel Margin="10">
         <WrapPanel Background="White" DockPanel.Dock="Top">
             <Button x:Name="btnBack" Command="{Binding Path=BrowseBackCommand}">
-                <Image Height="16" Source="/Icons/Backwards_16x.png" />
+                <Image Height="16">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Source" Value="/Icons/Backwards_16x.png" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=btnBack}" Value="False">
+                                    <Setter Property="Source" Value="/Icons/Backwards_disabled_16x.png" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
             </Button>
-            <Button x:Name="Forward" Command="{Binding Path=BrowseForwardCommand}">
-                <Image Height="16" Source="/Icons/Forwards_16x.png" />
+            <Button x:Name="btnForward" Command="{Binding Path=BrowseForwardCommand}">
+                <Image Height="16">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Source" Value="/Icons/Forwards_16x.png" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=btnForward}" Value="False">
+                                    <Setter Property="Source" Value="/Icons/Forwards_disabled_16x.png" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
             </Button>
-            <Button x:Name="Up" Command="{Binding Path=GoUpCommand}">
-                <Image Height="16" Source="/Icons/Upload_16x.png" />
+            <Button x:Name="btnUp" Command="{Binding Path=GoUpCommand}">
+                <Image Height="16">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Source" Value="/Icons/Upload_16x.png" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=btnUp}" Value="False">
+                                    <Setter Property="Source" Value="/Icons/Upload_gray_16x.png" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
             </Button>
         </WrapPanel>
         <ListView
