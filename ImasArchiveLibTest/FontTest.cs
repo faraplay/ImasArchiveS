@@ -181,5 +181,14 @@ namespace ImasArchiveLibTest
             using FileStream outStream = new FileStream(outFile, FileMode.Create, FileAccess.Write);
             await font.WriteFontPar(outStream, false);
         }
+
+        [DataTestMethod]
+        [DataRow("font/im2nx_font.par", "font/FOT-RodinNTLGPro-DB.otf", "font/glyphs/glyph")]
+        public async Task GenerateGlyphsTest(string parFile, string inFont, string outPath)
+        {
+            using Font font = await Font.CreateFromPar(File.OpenRead(parFile));
+            FileInfo fileInfo = new FileInfo(inFont);
+            font.GenerateGlyphs(fileInfo.FullName, "ABCDEFGHIJKLMNOP涙".ToCharArray(), outPath);
+        }
     }
 }
