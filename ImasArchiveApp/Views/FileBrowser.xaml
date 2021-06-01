@@ -6,6 +6,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:BrowserModel}"
     d:DesignHeight="450"
     d:DesignWidth="220"
     mc:Ignorable="d">
@@ -42,40 +43,41 @@
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.Resources>
                 <DataTemplate DataType="{x:Type local:BrowserFileItemModel}">
-                    <Button HorizontalContentAlignment="Left">
-                        <Button.ContextMenu>
+                    <ContentControl>
+                        <ContentControl.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Command="{Binding Path=ImportCommand}" Header="Import" />
                                 <MenuItem Command="{Binding Path=ExportCommand}" Header="Export" />
                             </ContextMenu>
-                        </Button.ContextMenu>
+                        </ContentControl.ContextMenu>
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <WrapPanel>
-                            <Image Source="/Icons/TextFile_16x.png" />
-                            <TextBlock Text="{Binding Path=Name}" />
+                        <WrapPanel Background="Transparent">
+                            <Image Margin="2" Source="/Icons/TextFile_16x.png" />
+                            <TextBlock Margin="2" Text="{Binding Path=Name}" />
                         </WrapPanel>
-                    </Button>
+                    </ContentControl>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type local:BrowserFolderItemModel}">
-                    <Button HorizontalContentAlignment="Left">
+                    <ContentControl>
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <WrapPanel>
-                            <Image Source="/Icons/FolderClosed_16x.png" />
-                            <TextBlock Text="{Binding Path=Name}" />
+                        <WrapPanel Background="Transparent">
+                            <Image Margin="2" Source="/Icons/FolderClosed_16x.png" />
+                            <TextBlock Margin="2" Text="{Binding Path=Name}" />
                         </WrapPanel>
-                    </Button>
+                    </ContentControl>
                 </DataTemplate>
             </ListView.Resources>
         </ListView>
