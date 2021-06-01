@@ -107,7 +107,7 @@ namespace ImasArchiveApp
             }
         }
 
-        bool CanBrowseBack => _history_index - 1 >= 0 && _history_index - 1 < _history.Count;
+        public bool CanBrowseBack => _history_index - 1 >= 0 && _history_index - 1 < _history.Count;
         private RelayCommand _browseForwardCommand;
 
         public ICommand BrowseForwardCommand
@@ -124,7 +124,7 @@ namespace ImasArchiveApp
             }
         }
 
-        bool CanBrowseForward => _history_index + 1 >= 0 && _history_index + 1 < _history.Count;
+        public bool CanBrowseForward => _history_index + 1 >= 0 && _history_index + 1 < _history.Count;
         private RelayCommand _goUpCommand;
 
         public ICommand GoUpCommand
@@ -141,7 +141,7 @@ namespace ImasArchiveApp
             }
         }
 
-        bool CanGoUp => _currentDir?.Parent != null;
+        public bool CanGoUp => _currentDir?.Parent != null;
 
         #endregion Commands
 

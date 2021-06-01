@@ -13,10 +13,16 @@
     <DockPanel>
         <Button
             Padding="5"
-            Command="{Binding Path=PlayCommand}"
+            Command="{Binding Path=SelectPlayCommand}"
             Content="Play"
             DockPanel.Dock="Top" />
         <TreeView MinWidth="150" ItemsSource="{Binding Path=ListModels}">
+            <TreeView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding AddAnimationListCommand}" Header="Add Animation List" />
+                    <MenuItem Command="{Binding PasteCommand}" Header="Paste" />
+                </ContextMenu>
+            </TreeView.ContextMenu>
             <TreeView.Resources>
                 <local:ObjectToTypeConverter x:Key="ObjectToType" />
                 <HierarchicalDataTemplate DataType="{x:Type local:UIControlAnimationsListModel}" ItemsSource="{Binding Path=Animations}">
@@ -26,7 +32,22 @@
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <Label Padding="2" Content="{Binding Path=ShortDesc}" />
+                        <ContentControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding InsertCommand}" Header="Insert Above" />
+                                <MenuItem Command="{Binding CopyCommand}" Header="Copy" />
+                                <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                                <MenuItem Header="Add...">
+                                    <MenuItem Command="{Binding AddVisibilityAnimationCommand}" Header="Add Visibility Animation" />
+                                    <MenuItem Command="{Binding AddPositionAnimationCommand}" Header="Add Position Animation" />
+                                    <MenuItem Command="{Binding AddOpacityAnimationCommand}" Header="Add Opacity Animation" />
+                                    <MenuItem Command="{Binding AddScaleAnimationCommand}" Header="Add Scale Animation" />
+                                    <MenuItem Command="{Binding AddAngleAnimationCommand}" Header="Add Angle Animation" />
+                                    <MenuItem Command="{Binding AddSpriteAnimationCommand}" Header="Add Sprite Animation" />
+                                </MenuItem>
+                            </ContextMenu>
+                        </ContentControl.ContextMenu>
+                        <Label Padding="2" Content="{Binding Path=ElementName}" />
                     </ContentControl>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type local:UIAnimationModel}">
@@ -36,7 +57,20 @@
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <Label Padding="2" Content="{Binding Path=ShortDesc}" />
+                        <ContentControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Insert...">
+                                    <MenuItem Command="{Binding InsertVisibilityAnimationCommand}" Header="Insert Visibility Animation" />
+                                    <MenuItem Command="{Binding InsertPositionAnimationCommand}" Header="Insert Position Animation" />
+                                    <MenuItem Command="{Binding InsertOpacityAnimationCommand}" Header="Insert Opacity Animation" />
+                                    <MenuItem Command="{Binding InsertScaleAnimationCommand}" Header="Insert Scale Animation" />
+                                    <MenuItem Command="{Binding InsertAngleAnimationCommand}" Header="Insert Angle Animation" />
+                                    <MenuItem Command="{Binding InsertSpriteAnimationCommand}" Header="Insert Sprite Animation" />
+                                </MenuItem>
+                                <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                            </ContextMenu>
+                        </ContentControl.ContextMenu>
+                        <Label Padding="2" Content="{Binding Path=ElementName}" />
                     </ContentControl>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>

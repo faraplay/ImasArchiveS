@@ -13,6 +13,74 @@
 
     <TreeView MinWidth="150" ItemsSource="{Binding Path=ControlModel}">
         <TreeView.Resources>
+            <HierarchicalDataTemplate DataType="{x:Type local:UIGroupControlModel}" ItemsSource="{Binding Children}">
+                <ContentControl>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonDown">
+                            <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertTextBoxCommand}" Header="Insert Text Box" />
+                                <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                                <MenuItem Command="{Binding InsertRotatableGroupControlCommand}" Header="Insert Rotatable Group Control" />
+                                <MenuItem Command="{Binding InsertSpriteCollectionCommand}" Header="Insert Sprite Collection" />
+                            </MenuItem>
+                            <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
+                            <MenuItem Header="Add Child...">
+                                <MenuItem Command="{Binding AddTextBoxCommand}" Header="Add Text Box" />
+                                <MenuItem Command="{Binding AddGroupControlCommand}" Header="Add Group Control" />
+                                <MenuItem Command="{Binding AddRotatableGroupControlCommand}" Header="Add Rotatable Group Control" />
+                                <MenuItem Command="{Binding AddSpriteCollectionCommand}" Header="Add Sprite Collection" />
+                            </MenuItem>
+                            <MenuItem Command="{Binding PasteCommand}" Header="Paste As Child" />
+                            <MenuItem Command="{Binding CopyCommand}" Header="Copy" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
+                    <WrapPanel>
+                        <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
+                        <Image Source="/Icons/FolderClosed_16x.png" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
+                    </WrapPanel>
+                </ContentControl>
+            </HierarchicalDataTemplate>
+            <HierarchicalDataTemplate DataType="{x:Type local:UISpriteCollectionModel}" ItemsSource="{Binding Children}">
+                <ContentControl>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonDown">
+                            <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertTextBoxCommand}" Header="Insert Text Box" />
+                                <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                                <MenuItem Command="{Binding InsertRotatableGroupControlCommand}" Header="Insert Rotatable Group Control" />
+                                <MenuItem Command="{Binding InsertSpriteCollectionCommand}" Header="Insert Sprite Collection" />
+                            </MenuItem>
+                            <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
+                            <MenuItem Command="{Binding AddSpriteGroupCommand}" Header="Add Sprite Group" />
+                            <MenuItem Command="{Binding CopyCommand}" Header="Copy" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
+                    <WrapPanel>
+                        <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
+                        <Image Source="/Icons/ImageGroup_16x.png" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
+                    </WrapPanel>
+                </ContentControl>
+            </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type local:UIControlModel}" ItemsSource="{Binding Children}">
                 <ContentControl>
                     <i:Interaction.Triggers>
@@ -23,6 +91,19 @@
                             <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Insert Above..." IsEnabled="{Binding HasParent}">
+                                <MenuItem Command="{Binding InsertTextBoxCommand}" Header="Insert Text Box" />
+                                <MenuItem Command="{Binding InsertGroupControlCommand}" Header="Insert Group Control" />
+                                <MenuItem Command="{Binding InsertRotatableGroupControlCommand}" Header="Insert Rotatable Group Control" />
+                                <MenuItem Command="{Binding InsertSpriteCollectionCommand}" Header="Insert Sprite Collection" />
+                            </MenuItem>
+                            <MenuItem Command="{Binding AddSpecialSpriteCommand}" Header="Add Special Sprite" />
+                            <MenuItem Command="{Binding CopyCommand}" Header="Copy" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
                     <WrapPanel>
                         <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
                         <Image>
@@ -36,14 +117,11 @@
                                         <DataTrigger Binding="{Binding Path=ControlTypeID}" Value="4">
                                             <Setter Property="Source" Value="/Icons/FolderClosed_16x.png" />
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=ControlTypeID}" Value="10">
-                                            <Setter Property="Source" Value="/Icons/ImageGroup_16x.png" />
-                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Image.Style>
                         </Image>
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>
@@ -57,6 +135,12 @@
                             <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding AddSpriteCommand}" Header="Add Sprite" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
                     <WrapPanel>
                         <ContentControl Content="{Binding}">
                             <ContentControl.Style>
@@ -83,7 +167,7 @@
                             </ContentControl.Style>
                         </ContentControl>
                         <Image Source="/Icons/Image_16x.png" />
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>
@@ -97,10 +181,16 @@
                             <i:InvokeCommandAction Command="{Binding Path=DisplayCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
+                    <ContentControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding InsertCommand}" Header="Insert Sprite Above" />
+                            <MenuItem Command="{Binding DeleteCommand}" Header="Delete" />
+                        </ContextMenu>
+                    </ContentControl.ContextMenu>
                     <WrapPanel>
                         <CheckBox IsChecked="{Binding Path=CurrentVisibility}" />
                         <Image Source="/Icons/ImageChisel_16x.png" />
-                        <TextBlock Margin="2" Text="{Binding Path=ModelName}" />
+                        <TextBlock Margin="2" Text="{Binding Path=ElementName}" />
                     </WrapPanel>
                 </ContentControl>
             </HierarchicalDataTemplate>

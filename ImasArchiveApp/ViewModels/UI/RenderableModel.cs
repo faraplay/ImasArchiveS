@@ -37,7 +37,7 @@ namespace ImasArchiveApp
         public event EventHandler RenderForced;
         public void ForceRender()
         {
-            RenderForced.Invoke(this, EventArgs.Empty);
+            RenderForced?.Invoke(this, EventArgs.Empty);
         }
 
         private void SaveImage()

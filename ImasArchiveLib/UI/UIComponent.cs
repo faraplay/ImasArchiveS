@@ -87,6 +87,15 @@ namespace Imas.UI
                 await subcomponent.WritePtaStream(memStream);
                 memStream.Seek(0, SeekOrigin.Begin);
                 await ptaEntry.SetData(memStream);
+
+                var paaEntry = parFile.GetEntry(subcomponent.Name + ".par");
+                if (paaEntry != null)
+                {
+                    memStream.SetLength(0);
+                    await subcomponent.WritePaaStream(memStream);
+                    memStream.Seek(0, SeekOrigin.Begin);
+                    await paaEntry.SetData(memStream);
+                }
             }
             await parFile.SaveTo(stream);
         }

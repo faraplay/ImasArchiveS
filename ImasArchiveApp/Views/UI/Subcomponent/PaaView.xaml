@@ -24,7 +24,7 @@
                                 <Button
                                     Padding="3"
                                     Command="{Binding Path=SelectPlayCommand}"
-                                    Content="{Binding Path=Name}" />
+                                    Content="{Binding Path=ElementName}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -39,7 +39,7 @@
                     SelectedValue="{Binding Path=SelectedAnimationGroupModel}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <Label Padding="0" Content="{Binding Path=Name}" />
+                            <Label Padding="0" Content="{Binding Path=ElementName}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>

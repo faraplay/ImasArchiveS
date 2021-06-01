@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
 
 namespace ImasArchiveApp
@@ -9,24 +12,44 @@ namespace ImasArchiveApp
     public class UIControlAnimationsListModel : PaaElementModel
     {
         private UIAnimationGroupModel ParentGroup { get; }
-        private ControlAnimationsList animationsList;
+        private readonly ControlAnimationsList animationsList;
         public override object Element => animationsList;
         public ObservableCollection<UIAnimationModel> Animations { get; }
-        public UIControlModel Control { get; }
-        public string ShortDesc => $"{animationsList.ControlName}: {animationsList.Animations.Count} animations";
+        public UIControlModel Control { get; private set; }
+        public override string ElementName => $"{animationsList.ControlName}: {animationsList.Animations.Count} animations";
         public UIControlAnimationsListModel(PaaModel paaModel, UIAnimationGroupModel parent, ControlAnimationsList animationsList) : base(paaModel)
         {
             ParentGroup = parent;
             this.animationsList = animationsList;
             Animations = new ObservableCollection<UIAnimationModel>();
-            Control = paaModel.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
             foreach (Animation animation in animationsList.Animations)
             {
                 Animations.Add(new UIAnimationModel(paaModel, this, animation));
             }
+            SetControl();
         }
 
-        public override void Update() => ParentGroup.Update();
+        public void SetControl()
+        {
+            UnapplyAnimations();
+            Control = PaaModel.subcomponentModel.PauModel.ControlDictionary.GetValueOrDefault(animationsList.ControlName);
+        }
+
+        public override void Invalidate()
+        {
+            ParentGroup.Invalidate();
+            OnPropertyChanged(nameof(ElementName));
+        }
+
+        public override void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ControlAnimationsList.ControlName))
+            {
+                SetControl();
+            }
+            OnPropertyChanged(nameof(ElementName));
+            Invalidate();
+        }
         public Timeline GetTimeline()
         {
             ResetTimelines();
@@ -56,23 +79,6 @@ namespace ImasArchiveApp
                 }
             }
 
-            if (VisibilityTimeline.KeyFrames.Count > 0)
-            {
-                double lastFrameTime = -1;
-                double lastFrameValue = 0;
-                foreach (var frame in VisibilityTimeline.KeyFrames)
-                {
-                    if (!(frame is DoubleKeyFrame doubleKeyFrame))
-                        continue;
-                    if (doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds > lastFrameTime)
-                    {
-                        lastFrameTime = doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds;
-                        lastFrameValue = doubleKeyFrame.Value;
-                    }
-                }
-                VisibilityEndValue = lastFrameValue;
-            }
-
             timeline.Children.Add(VisibilityTimeline);
             timeline.Children.Add(PositionXTimeline);
             timeline.Children.Add(PositionYTimeline);
@@ -92,7 +98,28 @@ namespace ImasArchiveApp
             return timeline;
         }
 
-        private double? VisibilityEndValue { get; set; }
+        private double? GetEndValue(DoubleAnimationUsingKeyFrames VisibilityTimeline)
+        {
+            if (VisibilityTimeline == null)
+                return null;
+            if (VisibilityTimeline.KeyFrames.Count == 0)
+            {
+                return null;
+            }
+            double lastFrameTime = -1;
+            double lastFrameValue = 0;
+            foreach (var frame in VisibilityTimeline.KeyFrames)
+            {
+                if (!(frame is DoubleKeyFrame doubleKeyFrame))
+                    continue;
+                if (doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds > lastFrameTime)
+                {
+                    lastFrameTime = doubleKeyFrame.KeyTime.TimeSpan.TotalSeconds;
+                    lastFrameValue = doubleKeyFrame.Value;
+                }
+            }
+            return lastFrameValue;
+        }
 
         private DoubleAnimationUsingKeyFrames VisibilityTimeline = new DoubleAnimationUsingKeyFrames();
         private DoubleAnimationUsingKeyFrames PositionXTimeline = new DoubleAnimationUsingKeyFrames();
@@ -230,7 +257,7 @@ namespace ImasArchiveApp
             }
         }
 
-        public void RemoveAnimations()
+        public void UnapplyAnimations()
         {
             if (Control == null)
                 return;
@@ -247,8 +274,163 @@ namespace ImasArchiveApp
 
         private void SetEndVisibility()
         {
-            if (Control != null && VisibilityEndValue.HasValue) 
-                Control.CurrentVisibility = VisibilityEndValue != 0;
+            if (Control == null)
+                return;
+            double? visibilityEnd = GetEndValue(VisibilityTimeline);
+            double? opacityEnd = GetEndValue(OpacityTimeline);
+            if (!visibilityEnd.HasValue)
+            {
+                return;
+            }
+            if (visibilityEnd == 0)
+            {
+                Control.CurrentVisibility = false;
+                return;
+            }
+            if (opacityEnd == 0)
+            {
+                Control.CurrentVisibility = false;
+                return;
+            }
+            Control.CurrentVisibility = true;
+            return;
+        }
+
+
+        public int IndexOf(UIAnimationModel animationModel) => Animations.IndexOf(animationModel);
+        public void InsertAnimation(int index, Animation animation)
+        {
+            animationsList.Animations.Insert(index, animation);
+            Animations.Insert(index, new UIAnimationModel(PaaModel, this, animation));
+            Invalidate();
+        }
+
+        public void RemoveAnimation(UIAnimationModel animationModel)
+        {
+            int index = IndexOf(animationModel);
+            if (index == -1)
+                return;
+            animationsList.Animations.RemoveAt(index);
+            Animations.RemoveAt(index);
+            Invalidate();
+        }
+
+        public void InsertNewAnimation<T>(int index) where T : Animation, new() => InsertAnimation(index, new T());
+        public void AddNewAnimation<T>() where T : Animation, new() => InsertNewAnimation<T>(Animations.Count);
+
+        private RelayCommand _addVisibilityAnimationCommand;
+        public ICommand AddVisibilityAnimationCommand
+        {
+            get
+            {
+                if (_addVisibilityAnimationCommand == null)
+                    _addVisibilityAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<VisibilityAnimation>());
+                return _addVisibilityAnimationCommand;
+            }
+        }
+        private RelayCommand _addPositionAnimationCommand;
+        public ICommand AddPositionAnimationCommand
+        {
+            get
+            {
+                if (_addPositionAnimationCommand == null)
+                    _addPositionAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<PositionAnimation>());
+                return _addPositionAnimationCommand;
+            }
+        }
+        private RelayCommand _addOpacityAnimationCommand;
+        public ICommand AddOpacityAnimationCommand
+        {
+            get
+            {
+                if (_addOpacityAnimationCommand == null)
+                    _addOpacityAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<OpacityAnimation>());
+                return _addOpacityAnimationCommand;
+            }
+        }
+        private RelayCommand _addScaleAnimationCommand;
+        public ICommand AddScaleAnimationCommand
+        {
+            get
+            {
+                if (_addScaleAnimationCommand == null)
+                    _addScaleAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<ScaleAnimation>());
+                return _addScaleAnimationCommand;
+            }
+        }
+        private RelayCommand _addAngleAnimationCommand;
+        public ICommand AddAngleAnimationCommand
+        {
+            get
+            {
+                if (_addAngleAnimationCommand == null)
+                    _addAngleAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<AngleAnimation>());
+                return _addAngleAnimationCommand;
+            }
+        }
+        private RelayCommand _addSpriteAnimationCommand;
+        public ICommand AddSpriteAnimationCommand
+        {
+            get
+            {
+                if (_addSpriteAnimationCommand == null)
+                    _addSpriteAnimationCommand = new RelayCommand(
+                        _ => AddNewAnimation<SpriteAnimation>());
+                return _addSpriteAnimationCommand;
+            }
+        }
+
+        public void Copy()
+        {
+            Clipboard.SetText(Base64.ToBase64(animationsList));
+        }
+        public void InsertNewAnimationList()
+        {
+            ParentGroup.InsertNewAnimationList(ParentGroup.IndexOf(this));
+        }
+        public void Delete()
+        {
+            ParentGroup.RemoveAnimation(this);
+        }
+        private RelayCommand _copyCommand;
+        public ICommand CopyCommand
+        {
+            get
+            {
+                if (_copyCommand == null)
+                    _copyCommand = new RelayCommand(
+                        _ => Copy());
+                return _copyCommand;
+            }
+        }
+
+        private RelayCommand _insertCommand;
+        public ICommand InsertCommand
+        {
+            get
+            {
+                if (_insertCommand == null)
+                    _insertCommand = new RelayCommand(
+                        _ => InsertNewAnimationList());
+                return _insertCommand;
+            }
+        }
+
+        private RelayCommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (_deleteCommand == null)
+                    _deleteCommand = new RelayCommand(
+                        _ => Delete());
+                return _deleteCommand;
+            }
         }
     }
 }

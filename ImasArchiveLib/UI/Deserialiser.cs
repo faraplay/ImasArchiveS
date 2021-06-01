@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -92,55 +93,37 @@ namespace Imas.UI
             }
             if (prop.PropertyType.IsArray)
             {
-                int count = GetCount(objType, newObject, attribute);
-                prop.SetValue(newObject, DeserialiseArray(binary, prop.PropertyType, count));
+                DeserialiseArray(binary, prop.GetValue(newObject));
                 return;
             }
             if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
             {
-                int count = GetCount(objType, newObject, attribute);
-                prop.SetValue(newObject, DeserialiseList(binary, prop.PropertyType, count));
+                DeserialiseList(binary, prop.GetValue(newObject));
                 return;
             }
             prop.SetValue(newObject, Deserialise(binary, prop.PropertyType));
         }
 
-        private static int GetCount(Type objType, object newObject, SerialisePropertyAttribute attribute)
+        public static void DeserialiseArray(Binary binary, object destArray)
         {
-            if (attribute.CountProperty != null)
+            if (!(destArray is Array array))
+                throw new Exception("destArray is not an array.");
+            Type elementType = array.GetType().GetElementType();
+            for (int i = 0; i < array.Length; i++)
             {
-                var countProperty = objType.GetProperty(attribute.CountProperty);
-                if (countProperty == null)
-                    throw new Exception($"Property {attribute.CountProperty} was not found.");
-                if (countProperty.PropertyType != typeof(int))
-                    throw new Exception($"Property {attribute.CountProperty} is not of type int.");
-                return (int)countProperty.GetValue(newObject);
+                array.SetValue(Deserialise(binary, elementType), i);
             }
-            return attribute.FixedCount;
         }
 
-        public static Array DeserialiseArray(Binary binary, Type arrayType, int count)
+        public static void DeserialiseList(Binary binary, object destList)
         {
-            Type elementType = arrayType.GetElementType();
-            Array newArray = Array.CreateInstance(elementType, count);
-            for (int i = 0; i < count; i++)
+            if (!(destList is IList list))
+                throw new Exception("destList is not an IList.");
+            Type elementType = list.GetType().GenericTypeArguments[0];
+            for (int i = 0; i < list.Count; i++)
             {
-                newArray.SetValue(Deserialise(binary, elementType), i);
+                list[i] = Deserialise(binary, elementType);
             }
-            return newArray;
-
-        }
-
-        public static object DeserialiseList(Binary binary, Type listType, int count)
-        {
-            //Type listType = typeof(List<>).MakeGenericType(genericParameter);
-            Type genericParameter = listType.GenericTypeArguments[0];
-            object newList = Activator.CreateInstance(listType, count);
-            for (int i = 0; i < count; i++)
-            {
-                listType.GetMethod("Add").Invoke(newList, new object[] { Deserialise(binary, genericParameter) });
-            }
-            return newList;
         }
     }
 }

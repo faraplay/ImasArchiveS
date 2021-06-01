@@ -12,10 +12,7 @@ namespace ImasArchiveApp
         public override object Element => rectangle;
         public ObservableCollection<UISpriteModel> Sprites { get; }
 
-        public string Description
-        {
-            get => rectangle.ToString();
-        }
+        public override string ElementName => rectangle.ToString();
 
         #region Properties
 
@@ -29,9 +26,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceXQuiet = X;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
         public float Y
@@ -44,9 +41,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceYQuiet = Y;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
         public float Width
@@ -59,9 +56,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceWidthQuiet = Width;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
         public float Height
@@ -74,9 +71,9 @@ namespace ImasArchiveApp
                 {
                     sprite.SourceHeightQuiet = Height;
                 }
-                //LoadActiveImages();
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(ElementName));
+                ForceRender();
             }
         }
 
@@ -92,7 +89,7 @@ namespace ImasArchiveApp
 
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool isTop)
         {
-            parent.RenderElement(drawingContext, multiplier, isTop);
+            parent.RenderElement(drawingContext, multiplier, false);
             drawingContext.DrawRectangle(null, new Pen(Brushes.Yellow, 1), rectangle);
         }
 

@@ -6,6 +6,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:ImasArchiveApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:BrowserModel}"
     d:DesignHeight="450"
     d:DesignWidth="220"
     mc:Ignorable="d">
@@ -26,13 +27,46 @@
     <DockPanel Margin="10">
         <WrapPanel Background="White" DockPanel.Dock="Top">
             <Button x:Name="btnBack" Command="{Binding Path=BrowseBackCommand}">
-                <Image Height="16" Source="/Icons/Backwards_16x.png" />
+                <Image Height="16">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Source" Value="/Icons/Backwards_16x.png" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=btnBack}" Value="False">
+                                    <Setter Property="Source" Value="/Icons/Backwards_disabled_16x.png" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
             </Button>
-            <Button x:Name="Forward" Command="{Binding Path=BrowseForwardCommand}">
-                <Image Height="16" Source="/Icons/Forwards_16x.png" />
+            <Button x:Name="btnForward" Command="{Binding Path=BrowseForwardCommand}">
+                <Image Height="16">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Source" Value="/Icons/Forwards_16x.png" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=btnForward}" Value="False">
+                                    <Setter Property="Source" Value="/Icons/Forwards_disabled_16x.png" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
             </Button>
-            <Button x:Name="Up" Command="{Binding Path=GoUpCommand}">
-                <Image Height="16" Source="/Icons/Upload_16x.png" />
+            <Button x:Name="btnUp" Command="{Binding Path=GoUpCommand}">
+                <Image Height="16">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Source" Value="/Icons/Upload_16x.png" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsEnabled, ElementName=btnUp}" Value="False">
+                                    <Setter Property="Source" Value="/Icons/Upload_gray_16x.png" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
             </Button>
         </WrapPanel>
         <ListView
@@ -42,40 +76,41 @@
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.Resources>
                 <DataTemplate DataType="{x:Type local:BrowserFileItemModel}">
-                    <Button HorizontalContentAlignment="Left">
-                        <Button.ContextMenu>
+                    <ContentControl>
+                        <ContentControl.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Command="{Binding Path=ImportCommand}" Header="Import" />
                                 <MenuItem Command="{Binding Path=ExportCommand}" Header="Export" />
                             </ContextMenu>
-                        </Button.ContextMenu>
+                        </ContentControl.ContextMenu>
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <WrapPanel>
-                            <Image Source="/Icons/TextFile_16x.png" />
-                            <TextBlock Text="{Binding Path=Name}" />
+                        <WrapPanel Background="Transparent">
+                            <Image Margin="2" Source="/Icons/TextFile_16x.png" />
+                            <TextBlock Margin="2" Text="{Binding Path=Name}" />
                         </WrapPanel>
-                    </Button>
+                    </ContentControl>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type local:BrowserFolderItemModel}">
-                    <Button HorizontalContentAlignment="Left">
+                    <ContentControl>
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
                                 <i:InvokeCommandAction Command="{Binding Path=SelectCommand}" />
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        <WrapPanel>
-                            <Image Source="/Icons/FolderClosed_16x.png" />
-                            <TextBlock Text="{Binding Path=Name}" />
+                        <WrapPanel Background="Transparent">
+                            <Image Margin="2" Source="/Icons/FolderClosed_16x.png" />
+                            <TextBlock Margin="2" Text="{Binding Path=Name}" />
                         </WrapPanel>
-                    </Button>
+                    </ContentControl>
                 </DataTemplate>
             </ListView.Resources>
         </ListView>

@@ -1,5 +1,7 @@
 ﻿using Imas.UI;
 using System;
+using System.ComponentModel;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -7,10 +9,14 @@ namespace ImasArchiveApp
 {
     public class UIControlModel : UIElementModel
     {
-        protected virtual Control Control { get; }
+        private readonly Control _control;
+        protected virtual Control Control { get => _control; }
         public override UIElement UIElement => Control;
+        protected readonly UIGroupControlModel parentGroupModel;
+        protected override UIElementModel Parent => parentGroupModel;
 
-        public override string ModelName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
+        public override string ElementName => string.IsNullOrWhiteSpace(Control.Name) ? "(no name)" : Control.Name;
+        public string ActualName => Control.Name;
         public int ControlTypeID => Control switch
         {
             SpriteCollection _ => 10,
@@ -23,52 +29,34 @@ namespace ImasArchiveApp
             _ => 0,
         };
 
-        public UIControlModel(Control control, UISubcomponentModel subcomponent, UIElementModel parent) : base(subcomponent, parent, control.Name)
+        protected UIControlModel(Control control, UISubcomponentModel subcomponent, UIGroupControlModel parent) : base(subcomponent, control.Name)
         {
-            Control = control;
-            if (control.SpecialSprite.Sprites.Count != 0)
+            _control = control;
+            parentGroupModel = parent;
+        }
+
+        private void Initialise()
+        {
+            if (HasSpecialSprite)
             {
-                Children.Add(new UISpriteGroupModel(subcomponent, this, control.SpecialSprite, false) 
-                    { CurrentVisibility = !(control is SpriteCollection) });
+                Children.Insert(0, new UISpriteGroupModel(subcomponent, this, Control.SpecialSprite, false,
+                    !(Control is SpriteCollection)));
             }
-            if (control is GroupControl groupControl)
+            currentVisibility = Control.DefaultVisibility;
+            SetRenderTransforms();
+        }
+
+        public static UIControlModel CreateControlModel(Control control, UISubcomponentModel subcomponent, UIGroupControlModel parent)
+        {
+            UIControlModel controlModel = control switch
             {
-                foreach (Control child in groupControl.ChildControls)
-                {
-                    switch (child)
-                    {
-                        case TextBox textBox:
-                            Children.Add(new UITextBoxModel(textBox, subcomponent, this));
-                            break;
-                        case SpriteCollection spriteChild:
-                            Children.Add(new UISpriteCollectionModel(spriteChild, subcomponent, this));
-                            break;
-                        default:
-                            Children.Add(new UIControlModel(child, subcomponent, this));
-                            break;
-                    }
-                }
-            }
-            if (control is SpriteCollection spriteCollection)
-            {
-                int index = 0;
-                foreach (SpriteGroup child in spriteCollection.ChildSpriteGroups)
-                {
-                    Children.Add(new UISpriteGroupModel(subcomponent, this, child, true) 
-                        { CurrentVisibility = index == spriteCollection.DefaultSpriteIndex });
-                    index++;
-                }
-            }
-            CurrentVisibility = control.DefaultVisibility;
-            PositionTransform = new TranslateTransform(control.Xpos, control.Ypos);
-            ScaleTransform = new ScaleTransform(control.ScaleX, control.ScaleY);
-            if (Control is RotatableGroupControl icon)
-            {
-                AngleTransform = new RotateTransform(-icon.Angle * 180 / Math.PI);
-            }
-            PositionTransform.Freeze();
-            ScaleTransform.Freeze();
-            AngleTransform?.Freeze();
+                TextBox textBox => new UITextBoxModel(textBox, subcomponent, parent),
+                SpriteCollection spriteChild => new UISpriteCollectionModel(spriteChild, subcomponent, parent),
+                GroupControl groupControl => new UIGroupControlModel(groupControl, subcomponent, parent),
+                _ => new UIControlModel(control, subcomponent, parent),
+            };
+            controlModel.Initialise();
+            return controlModel;
         }
 
         public void ForAll(Action<UIControlModel> action)
@@ -83,9 +71,40 @@ namespace ImasArchiveApp
             }
         }
 
+        private void SetRenderTransforms()
+        {
+            PositionTransform = new TranslateTransform(Control.Xpos, Control.Ypos);
+            ScaleTransform = new ScaleTransform(Control.ScaleX, Control.ScaleY);
+            if (Control is RotatableGroupControl icon)
+            {
+                AngleTransform = new RotateTransform(-icon.Angle);
+            }
+            PositionTransform.Freeze();
+            ScaleTransform.Freeze();
+            AngleTransform?.Freeze();
+        }
+
+        public override void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Control.Name))
+            {
+                subcomponent.PauModel.BuildDictionary();
+                foreach (var group in subcomponent.PaaModel.AnimationGroups)
+                {
+                    group.Invalidate();
+                    foreach (var list in group.ListModels)
+                    {
+                        list.SetControl();
+                    }
+                }
+            }
+            SetRenderTransforms();
+            base.PropertyChangedHandler(sender, e);
+        }
+
         internal override void RenderElement(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
         {
-            drawingContext.PushOpacity(CurrentVisibility ? 1 : 0, VisibilityClock);
+            drawingContext.PushOpacity(CurrentVisibility || forceVisible ? 1 : 0, VisibilityClock);
             drawingContext.PushTransform(PositionTransform);
             if (Control is RotatableGroupControl)
             {
@@ -145,6 +164,123 @@ namespace ImasArchiveApp
         public void ResetAnimatedValues()
         {
             CurrentVisibility = Control.DefaultVisibility;
+        }
+
+
+        public void AddSpecialSprite()
+        {
+            if (HasSpecialSprite)
+                return;
+            SpriteGroup spriteGroup = new SpriteGroup();
+            var groupModel = new UISpriteGroupModel(subcomponent, this, spriteGroup, false, true);
+            groupModel.InsertSprite(0, new Sprite());
+            Control.SpecialSprite = spriteGroup;
+            Children.Insert(0, groupModel);
+            subcomponent.PauModel.ForceRender();
+        }
+        public void RemoveSpecialSprite()
+        {
+            if (!HasSpecialSprite)
+                return;
+            Control.SpecialSprite = new SpriteGroup();
+            Children.RemoveAt(0);
+            subcomponent.PauModel.ForceRender();
+        }
+
+        public bool HasSpecialSprite => Control.SpecialSprite.Sprites.Count != 0;
+        private RelayCommand _addSpecialSpriteCommand;
+        public ICommand AddSpecialSpriteCommand
+        {
+            get
+            {
+                if (_addSpecialSpriteCommand == null)
+                    _addSpecialSpriteCommand = new RelayCommand(
+                        _ => AddSpecialSprite(), _ => !HasSpecialSprite);
+                return _addSpecialSpriteCommand;
+            }
+        }
+
+        public bool HasParent => parentGroupModel != null;
+
+        public void InsertControl<T>() where T : Control, new()
+        {
+            parentGroupModel.InsertNewControl<T>(parentGroupModel.IndexOf(this));
+        }
+
+        private RelayCommand _insertTextBoxCommand;
+        public ICommand InsertTextBoxCommand
+        {
+            get
+            {
+                if (_insertTextBoxCommand == null)
+                    _insertTextBoxCommand = new RelayCommand(
+                        _ => InsertControl<TextBox>(), _ => HasParent);
+                return _insertTextBoxCommand;
+            }
+        }
+        private RelayCommand _insertGroupControlCommand;
+        public ICommand InsertGroupControlCommand
+        {
+            get
+            {
+                if (_insertGroupControlCommand == null)
+                    _insertGroupControlCommand = new RelayCommand(
+                        _ => InsertControl<GroupControl>(), _ => HasParent);
+                return _insertGroupControlCommand;
+            }
+        }
+        private RelayCommand _insertRotatableGroupControlCommand;
+        public ICommand InsertRotatableGroupControlCommand
+        {
+            get
+            {
+                if (_insertRotatableGroupControlCommand == null)
+                    _insertRotatableGroupControlCommand = new RelayCommand(
+                        _ => InsertControl<RotatableGroupControl>(), _ => HasParent);
+                return _insertRotatableGroupControlCommand;
+            }
+        }
+        private RelayCommand _insertSpriteCollectionCommand;
+        public ICommand InsertSpriteCollectionCommand
+        {
+            get
+            {
+                if (_insertSpriteCollectionCommand == null)
+                    _insertSpriteCollectionCommand = new RelayCommand(
+                        _ => InsertControl<SpriteCollection>(), _ => HasParent);
+                return _insertSpriteCollectionCommand;
+            }
+        }
+
+        public void Copy()
+        {
+            System.Windows.Clipboard.SetText(Base64.ToBase64(Control));
+        }
+        private RelayCommand _copyCommand;
+        public ICommand CopyCommand
+        {
+            get
+            {
+                if (_copyCommand == null)
+                    _copyCommand = new RelayCommand(
+                        _ => Copy());
+                return _copyCommand;
+            }
+        }
+        public void Delete()
+        {
+            parentGroupModel.RemoveControl(this);
+        }
+        private RelayCommand _deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (_deleteCommand == null)
+                    _deleteCommand = new RelayCommand(
+                        _ => Delete(), _ => HasParent);
+                return _deleteCommand;
+            }
         }
     }
 }

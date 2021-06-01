@@ -1,8 +1,5 @@
 ﻿using Imas.UI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -10,8 +7,18 @@ namespace ImasArchiveApp
 {
     class UISpriteCollectionModel : UIControlModel
     {
-        public UISpriteCollectionModel(SpriteCollection control, UISubcomponentModel subcomponent, UIElementModel parent) : base(control, subcomponent, parent)
+        private readonly SpriteCollection spriteCollection;
+        protected override Control Control => spriteCollection;
+        public UISpriteCollectionModel(SpriteCollection control, UISubcomponentModel subcomponent, UIGroupControlModel parent) : base(control, subcomponent, parent)
         {
+            spriteCollection = control;
+            int index = 0;
+            foreach (SpriteGroup child in spriteCollection.ChildSpriteGroups)
+            {
+                Children.Add(new UISpriteGroupModel(subcomponent, this, child, true,
+                    index == spriteCollection.DefaultSpriteIndex));
+                index++;
+            }
         }
 
         protected override void RenderElementUntransformed(DrawingContext drawingContext, ColorMultiplier multiplier, bool forceVisible)
@@ -56,6 +63,68 @@ namespace ImasArchiveApp
             {
                 SpriteClocks[index] = (AnimationClock)clock;
                 index++;
+            }
+        }
+
+        public int GetSpriteGroupIndex(UISpriteGroupModel groupModel)
+        {
+            int index = Children.IndexOf(groupModel);
+            if (index == -1)
+                return -1;
+            if (HasSpecialSprite)
+            {
+                index--;
+            }
+            return index;
+        }
+
+        public void InsertSpriteGroup(int index, SpriteGroup spriteGroup)
+        {
+            spriteCollection.ChildSpriteGroups.Insert(index, spriteGroup);
+            if (HasSpecialSprite)
+            {
+                index++;
+            }
+            Children.Insert(index, new UISpriteGroupModel(subcomponent, this, spriteGroup, true, false));
+            if (index <= spriteCollection.DefaultSpriteIndex)
+                spriteCollection.DefaultSpriteIndex++;
+            subcomponent.PauModel.ForceRender();
+        }
+        public void RemoveSpriteGroup(UISpriteGroupModel groupModel)
+        {
+            int index = GetSpriteGroupIndex(groupModel);
+            if (index == -1)
+                return;
+            spriteCollection.ChildSpriteGroups.RemoveAt(index);
+            if (HasSpecialSprite)
+            {
+                index++;
+            }
+            Children.RemoveAt(index);
+            if (index <= spriteCollection.DefaultSpriteIndex)
+                spriteCollection.DefaultSpriteIndex--;
+            subcomponent.PauModel.ForceRender();
+        }
+
+        public void AddSpriteGroup(SpriteGroup spriteGroup)
+        {
+            int groupCount = Children.Count;
+            if (HasSpecialSprite)
+            {
+                groupCount--;
+            }
+            InsertSpriteGroup(groupCount, spriteGroup);
+        }
+
+        private RelayCommand _addSpriteGroupCommand;
+        public ICommand AddSpriteGroupCommand
+        {
+            get
+            {
+                if (_addSpriteGroupCommand == null)
+                    _addSpriteGroupCommand = new RelayCommand(
+                        _ => AddSpriteGroup(new SpriteGroup()));
+                return _addSpriteGroupCommand;
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Imas.UI;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -7,9 +8,9 @@ namespace ImasArchiveApp
 {
     public abstract class UIElementModel : UIModel, IElementModel
     {
-        protected readonly UIElementModel parent;
+        protected abstract UIElementModel Parent { get; }
 
-        private bool currentVisibility = true;
+        protected bool currentVisibility = true;
         public bool CurrentVisibility
         {
             get => currentVisibility;
@@ -17,20 +18,20 @@ namespace ImasArchiveApp
             {
                 currentVisibility = value;
                 OnPropertyChanged();
+                subcomponent.PauModel.ForceRender();
             }
         }
 
         public ObservableCollection<UIElementModel> Children { get; set; }
         public abstract UIElement UIElement { get; }
         public object Element => UIElement;
-        public abstract string ModelName { get; }
+        public abstract string ElementName { get; }
 
-        public string GetUniqueString() => parent == null ? "0" : $"{parent.GetUniqueString()},{parent.Children.IndexOf(this)}";
-        public string ParentUniqueID => parent.GetUniqueString();
+        public string GetUniqueString() => Parent == null ? "0" : $"{Parent.GetUniqueString()},{Parent.Children.IndexOf(this)}";
+        public string ParentUniqueID => Parent.GetUniqueString();
 
-        protected UIElementModel(UISubcomponentModel subcomponent, UIElementModel parent, string name) : base(subcomponent, name)
+        protected UIElementModel(UISubcomponentModel subcomponent, string name) : base(subcomponent, name)
         {
-            this.parent = parent;
             Children = new ObservableCollection<UIElementModel>();
         }
 
@@ -42,6 +43,12 @@ namespace ImasArchiveApp
             {
                 child.RenderElement(drawingContext, multiplier, false);
             }
+        }
+
+        public virtual void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(ElementName));
+            subcomponent.PauModel.ForceRender();
         }
 
         public override int BoundingPixelWidth => 1280;
