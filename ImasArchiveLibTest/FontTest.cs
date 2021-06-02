@@ -190,5 +190,18 @@ namespace ImasArchiveLibTest
             FileInfo fileInfo = new FileInfo(inFont);
             font.GenerateGlyphs(fileInfo.FullName, "ABCDEFGHIJKLMNOP涙".ToCharArray(), outPath);
         }
+
+        [DataTestMethod]
+        [DataRow("font/im2nx_font.par", "font/FOT-RodinNTLGPro-DB.otf", "font/otf.par")]
+        [DataRow("font/im2nx_font.par", "font/FOT-UDMinchoPr6-DB.otf", "font/min.par")]
+        public async Task GenerateOtfTest(string parFile, string inFont, string outPath)
+        {
+            using Font font = await Font.CreateFromPar(File.OpenRead(parFile));
+            FileInfo fileInfo = new(inFont);
+            font.GenerateAllFromOtf(fileInfo.FullName);
+            font.AddDigraphs();
+            await font.WriteFontPar(File.Create(outPath), false);
+            Assert.IsTrue(font.CheckTree());
+        }
     }
 }
