@@ -16,20 +16,20 @@ namespace Imas.Gtf
 
         private int[] GetCharPixelData(int[] bigBitmap, CharData c)
         {
-            int[] pixelData = new int[c.datawidth * c.dataheight];
-            for (int y = 0; y < c.dataheight; y++)
+            int[] pixelData = new int[c.paddedBbWidth * c.paddedBbHeight];
+            for (int y = 0; y < c.paddedBbHeight; y++)
             {
-                for (int x = 0; x < c.datawidth; x++)
+                for (int x = 0; x < c.paddedBbWidth; x++)
                 {
-                    int xx = c.datax + x;
-                    int yy = c.datay + y;
+                    int xx = c.dataX + x;
+                    int yy = c.dataY + y;
                     int color;
                     if (xx < 0 || yy < 0 ||
                         xx >= BigBitmapWidth || yy >= BigBitmapHeight)
                         color = Color.Transparent.ToArgb();
                     else
                         color = bigBitmap[yy * BigBitmapStride + xx];
-                    pixelData[y * c.datawidth + x] = color;
+                    pixelData[y * c.paddedBbWidth + x] = color;
                 }
             }
             return pixelData;
@@ -52,11 +52,11 @@ namespace Imas.Gtf
             {
                 if (c.isEmoji == 0)
                 {
-                    for (int y = 0; y < c.dataheight; y++)
+                    for (int y = 0; y < c.paddedBbHeight; y++)
                     {
-                        for (int x = 0; x < c.datawidth; x++)
+                        for (int x = 0; x < c.paddedBbWidth; x++)
                         {
-                            charBitmaps[c.key][y * c.datawidth + x] &= -0x01000000;
+                            charBitmaps[c.key][y * c.paddedBbWidth + x] &= -0x01000000;
                         }
                     }
                 }
@@ -77,29 +77,29 @@ namespace Imas.Gtf
             short x = 2049;
             short y = -1;
             byte lineHeight = 0;
-            foreach (CharData c in chars.OrderBy(c => c.key - (c.dataheight << 16)))
+            foreach (CharData c in chars.OrderBy(c => c.key - (c.paddedBbHeight << 16)))
             {
-                if (x + c.datawidth > 2048 + 1)
+                if (x + c.paddedBbWidth > 2048 + 1)
                 {
                     y += lineHeight;
-                    lineHeight = c.dataheight;
+                    lineHeight = c.paddedBbHeight;
                     x = -1;
                 }
                 CopyCharBitmap(charBitmaps[c.key], c, newPixelData, BigBitmapStride, x, y);
-                c.datax = x;
-                c.datay = y;
-                x += c.datawidth;
+                c.dataX = x;
+                c.dataY = y;
+                x += c.paddedBbWidth;
             }
             return newPixelData;
         }
 
         private static void CopyCharBitmap(int[] charBitmap, CharData c, int[] destBitmap, int stride, int destX, int destY)
         {
-            for (int yy = 1; yy < c.dataheight - 1; yy++)
+            for (int yy = 1; yy < c.paddedBbHeight - 1; yy++)
             {
-                for (int xx = 1; xx < c.datawidth - 1; xx++)
+                for (int xx = 1; xx < c.paddedBbWidth - 1; xx++)
                 {
-                    destBitmap[(destY + yy) * stride + (destX + xx)] = charBitmap[yy * c.datawidth + xx];
+                    destBitmap[(destY + yy) * stride + (destX + xx)] = charBitmap[yy * c.paddedBbWidth + xx];
                 }
             }
         }

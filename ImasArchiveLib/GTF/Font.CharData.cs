@@ -7,13 +7,13 @@ namespace Imas.Gtf
         private class CharData : IComparable<CharData>
         {
             public ushort key;
-            public byte datawidth;
-            public byte dataheight;
-            public short datax;
-            public short datay;
-            public short offsetx;
-            public short offsety;
-            public short width;
+            public byte paddedBbWidth;
+            public byte paddedBbHeight;
+            public short dataX;
+            public short dataY;
+            public short bearingX;
+            public short bearingY;
+            public short advance;
             public short blank;
 
             public int index;

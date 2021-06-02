@@ -24,14 +24,14 @@ namespace Imas.Gtf
                 CharData charData = Find(cID);
                 if (charData != null)
                 {
-                    if (lineWidth + charData.width > maxWidth && wordWrap)
+                    if (lineWidth + charData.advance > maxWidth && wordWrap)
                     {
                         lines.Add((line.ToArray(), lineWidth));
                         line.Clear();
                         lineWidth = 0;
                     }
                     line.Add(charData);
-                    lineWidth += charData.width;
+                    lineWidth += charData.advance;
                 }
             }
             lines.Add((line.ToArray(), lineWidth));
@@ -57,13 +57,13 @@ namespace Imas.Gtf
             foreach (CharData charData in line)
             {
                 drawChar(
-                    x + charData.offsetx,
-                    y + charData.offsety,
-                    charData.datax,
-                    charData.datay,
-                    charData.datawidth,
-                    charData.dataheight);
-                x += charData.width;
+                    x + charData.bearingX,
+                    y + charData.bearingY,
+                    charData.dataX,
+                    charData.dataY,
+                    charData.paddedBbWidth,
+                    charData.paddedBbHeight);
+                x += charData.advance;
             }
         }
 

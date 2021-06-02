@@ -37,13 +37,13 @@ namespace Imas.Gtf
                 {
                     index = i,
                     key = binary.ReadUInt16(),
-                    datawidth = binary.ReadByte(),
-                    dataheight = binary.ReadByte(),
-                    datax = binary.ReadInt16(),
-                    datay = binary.ReadInt16(),
-                    offsetx = binary.ReadInt16(),
-                    offsety = binary.ReadInt16(),
-                    width = binary.ReadInt16(),
+                    paddedBbWidth = binary.ReadByte(),
+                    paddedBbHeight = binary.ReadByte(),
+                    dataX = binary.ReadInt16(),
+                    dataY = binary.ReadInt16(),
+                    bearingX = binary.ReadInt16(),
+                    bearingY = binary.ReadInt16(),
+                    advance = binary.ReadInt16(),
                     blank = binary.ReadInt16(),
                     left = binary.ReadInt32(),
                     right = binary.ReadInt32(),
@@ -145,13 +145,13 @@ namespace Imas.Gtf
             foreach (CharData c in chars)
             {
                 binary.WriteUInt16(c.key);
-                binary.WriteByte(c.datawidth);
-                binary.WriteByte(c.dataheight);
-                binary.WriteInt16(c.datax);
-                binary.WriteInt16(c.datay);
-                binary.WriteInt16(c.offsetx);
-                binary.WriteInt16(c.offsety);
-                binary.WriteInt16((isNxp || !nxFixedWidth) ? c.width : (short)0x20);
+                binary.WriteByte(c.paddedBbWidth);
+                binary.WriteByte(c.paddedBbHeight);
+                binary.WriteInt16(c.dataX);
+                binary.WriteInt16(c.dataY);
+                binary.WriteInt16(c.bearingX);
+                binary.WriteInt16(c.bearingY);
+                binary.WriteInt16((isNxp || !nxFixedWidth) ? c.advance : (short)0x20);
                 binary.WriteInt16(c.blank);
                 binary.WriteInt32(c.left);
                 binary.WriteInt32(c.right);

@@ -18,7 +18,7 @@ namespace Imas.Gtf
             for (int i = 0; i < chars.Length; i++)
             {
                 using FileStream fileStream = new FileStream($"{dInfo.FullName}\\{chars[i].key:X4}.png", FileMode.Create);
-                SavePngFromPixelData(fileStream, charBitmaps[chars[i].key], chars[i].datawidth, chars[i].dataheight);
+                SavePngFromPixelData(fileStream, charBitmaps[chars[i].key], chars[i].paddedBbWidth, chars[i].paddedBbHeight);
             }
         }
 
@@ -30,9 +30,9 @@ namespace Imas.Gtf
             foreach (CharData c in chars)
             {
                 binary.WriteUInt16(c.key);
-                binary.WriteInt16(c.offsetx);
-                binary.WriteInt16(c.offsety);
-                binary.WriteInt16(c.width);
+                binary.WriteInt16(c.bearingX);
+                binary.WriteInt16(c.bearingY);
+                binary.WriteInt16(c.advance);
                 binary.WriteUInt16(c.isEmoji);
             }
         }
@@ -54,8 +54,8 @@ namespace Imas.Gtf
                         out int height));
                 if (width > 255 || height > 255)
                     throw new Exception("Bitmap is too big for a character (should be at most 255x255 px).");
-                chars[i].datawidth = (byte)width;
-                chars[i].dataheight = (byte)height;
+                chars[i].paddedBbWidth = (byte)width;
+                chars[i].paddedBbHeight = (byte)height;
             }
             int[] newBitmap = BuildBitmap(charBitmaps, chars);
             Font font = new Font(
@@ -76,9 +76,9 @@ namespace Imas.Gtf
                 chars[i] = new CharData
                 {
                     key = binary.ReadUInt16(),
-                    offsetx = binary.ReadInt16(),
-                    offsety = binary.ReadInt16(),
-                    width = binary.ReadInt16(),
+                    bearingX = binary.ReadInt16(),
+                    bearingY = binary.ReadInt16(),
+                    advance = binary.ReadInt16(),
                     isEmoji = binary.ReadUInt16()
                 };
             }

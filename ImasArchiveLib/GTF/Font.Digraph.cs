@@ -34,26 +34,26 @@ namespace Imas.Gtf
                 charsNew.Add(new CharData
                 {
                     key = (ushort)(((c.key & 0xFF | 0x80) << 8) + 0xA0),
-                    datawidth = c.datawidth,
-                    dataheight = c.dataheight,
-                    datax = c.datax,
-                    datay = c.datay,
-                    offsetx = c.offsetx,
-                    offsety = c.offsety,
-                    width = (short)(c.width + 0xA)
+                    paddedBbWidth = c.paddedBbWidth,
+                    paddedBbHeight = c.paddedBbHeight,
+                    dataX = c.dataX,
+                    dataY = c.dataY,
+                    bearingX = c.bearingX,
+                    bearingY = c.bearingY,
+                    advance = (short)(c.advance + 0xA)
                 });
                 if (c.key != 0x20)
                 {
                     charsNew.Add(new CharData
                     {
                         key = (ushort)(0xA000 + (c.key & 0xFF | 0x80)),
-                        datawidth = c.datawidth,
-                        dataheight = c.dataheight,
-                        datax = c.datax,
-                        datay = c.datay,
-                        offsetx = (short)(c.offsetx + 0xA),
-                        offsety = c.offsety,
-                        width = (short)(c.width + 0xA)
+                        paddedBbWidth = c.paddedBbWidth,
+                        paddedBbHeight = c.paddedBbHeight,
+                        dataX = c.dataX,
+                        dataY = c.dataY,
+                        bearingX = (short)(c.bearingX + 0xA),
+                        bearingY = c.bearingY,
+                        advance = (short)(c.advance + 0xA)
                     });
                 }
             }
@@ -78,13 +78,13 @@ namespace Imas.Gtf
                 charsNew.Add(new CharData
                 {
                     key = (ushort)((c.key & 0xFF | 0x80) << 8),
-                    datawidth = c.datawidth,
-                    dataheight = c.dataheight,
-                    datax = c.datax,
-                    datay = c.datay,
-                    offsetx = c.offsetx,
-                    offsety = c.offsety,
-                    width = c.width
+                    paddedBbWidth = c.paddedBbWidth,
+                    paddedBbHeight = c.paddedBbHeight,
+                    dataX = c.dataX,
+                    dataY = c.dataY,
+                    bearingX = c.bearingX,
+                    bearingY = c.bearingY,
+                    advance = c.advance
                 });
             }
             chars = charsNew.ToArray();
@@ -153,39 +153,39 @@ namespace Imas.Gtf
                         c1, charBitmaps[c1.key],
                         c2, charBitmaps[c2.key]);
                     using FileStream fileStream = new FileStream($"{dInfo.FullName}\\{c1.key:X4}{c2.key:X4}.png", FileMode.Create);
-                    SavePngFromPixelData(fileStream, newPixelData, newC.datawidth, newC.dataheight);
+                    SavePngFromPixelData(fileStream, newPixelData, newC.paddedBbWidth, newC.paddedBbHeight);
                 }
             }
         }
 
         private (CharData, int[]) CreateDigraph(CharData c1, int[] pix1, CharData c2, int[] pix2)
         {
-            int offsetxmin = Math.Min(c1.offsetx, c2.offsetx + c1.width);
-            int offsetymin = Math.Min(c1.offsety, c2.offsety);
-            int offsetxmax = Math.Max(c1.offsetx + c1.datawidth, c2.offsetx + c1.width + c2.datawidth);
-            int offsetymax = Math.Max(c1.offsety + c1.dataheight, c2.offsety + c2.dataheight);
+            int offsetxmin = Math.Min(c1.bearingX, c2.bearingX + c1.advance);
+            int offsetymin = Math.Min(c1.bearingY, c2.bearingY);
+            int offsetxmax = Math.Max(c1.bearingX + c1.paddedBbWidth, c2.bearingX + c1.advance + c2.paddedBbWidth);
+            int offsetymax = Math.Max(c1.bearingY + c1.paddedBbHeight, c2.bearingY + c2.paddedBbHeight);
             int width = offsetxmax - offsetxmin;
             int height = offsetymax - offsetymin;
 
             int[] newPixelData = new int[width * height];
 
-            int x = c1.offsetx - offsetxmin;
-            int y = c1.offsety - offsetymin;
-            for (int yy = 0; yy < c1.dataheight; ++yy)
+            int x = c1.bearingX - offsetxmin;
+            int y = c1.bearingY - offsetymin;
+            for (int yy = 0; yy < c1.paddedBbHeight; ++yy)
             {
-                for (int xx = 0; xx < c1.datawidth; ++xx)
+                for (int xx = 0; xx < c1.paddedBbWidth; ++xx)
                 {
-                    newPixelData[(y + yy) * width + (x + xx)] = pix1[yy * c1.datawidth + xx];
+                    newPixelData[(y + yy) * width + (x + xx)] = pix1[yy * c1.paddedBbWidth + xx];
                 }
             }
-            x = c2.offsetx - offsetxmin + c1.width;
-            y = c2.offsety - offsetymin;
-            for (int yy = 0; yy < c2.dataheight; ++yy)
+            x = c2.bearingX - offsetxmin + c1.advance;
+            y = c2.bearingY - offsetymin;
+            for (int yy = 0; yy < c2.paddedBbHeight; ++yy)
             {
-                for (int xx = 0; xx < c2.datawidth; ++xx)
+                for (int xx = 0; xx < c2.paddedBbWidth; ++xx)
                 {
                     Color colorBottom = Color.FromArgb(newPixelData[(y + yy) * width + (x + xx)]);
-                    Color colorTop = Color.FromArgb(pix2[yy * c2.datawidth + xx]);
+                    Color colorTop = Color.FromArgb(pix2[yy * c2.paddedBbWidth + xx]);
                     float bottomAFrac = (colorBottom.A / 255f);
                     float topAFrac = (colorTop.A / 255f);
                     float newA = (colorBottom.A * (1 - topAFrac)) + colorTop.A;
@@ -205,11 +205,11 @@ namespace Imas.Gtf
             return (new CharData
             {
                 key = (ushort)(((c1.key & 0xFF | 0x80) << 8) + (c2.key & 0xFF | 0x80)),
-                datawidth = (byte)width,
-                dataheight = (byte)height,
-                offsetx = (short)offsetxmin,
-                offsety = (short)offsetymin,
-                width = (short)(c1.width + c2.width)
+                paddedBbWidth = (byte)width,
+                paddedBbHeight = (byte)height,
+                bearingX = (short)offsetxmin,
+                bearingY = (short)offsetymin,
+                advance = (short)(c1.advance + c2.advance)
             }, newPixelData);
         }
     }
