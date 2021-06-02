@@ -90,6 +90,15 @@ namespace Imas.Gtf
                 c.dataY = y;
                 x += c.paddedBbWidth;
             }
+
+            // make transparent pixels white
+            for (int k = 0; k < BigBitmapWidth * BigBitmapHeight; ++k)
+            {
+                if (((uint)newPixelData[k] & 0xFF000000) == 0)
+                {
+                    newPixelData[k] = 0x00FFFFFF;
+                }
+            }
             return newPixelData;
         }
 
