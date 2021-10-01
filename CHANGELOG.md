@@ -1,3 +1,32 @@
+## Version 0.7.0
+
+### Added
+New image/UI component renderer now supports zooming in/out and dragging, and saving the rendered image
+
+UI editor new features:
+- Display, edit and export animations
+- Add/delete sprites and controls
+- Export the PAU part of a component (UI component data)
+
+Accelerator keys (Alt+ shortcuts) have been added for menu options
+
+DLC catalog info and work info is now also extracted to spreadsheet and added from speradsheet to patches
+
+### Changed
+
+UI editor now uses the specified default visibility for UI controls instead of always rendering them as visible
+
+Border rectangles of sprites in a spritesheet can now be toggled on/off
+
+File browser no longer displays the files and folders as buttons
+
+File browser uses greyed-out icons when navigation buttons are disabled
+
+Refactored parameter extraction and UI component parsing
+
+### Fixed
+Rewrote color quantizer to fix bug with transparent pixels
+
 ## Version 0.6.0
 
 ### Added

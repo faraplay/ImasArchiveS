@@ -7,7 +7,7 @@
     <Product>ImasArchiveConsole</Product>
     <PackageId>ImasArchiveConsole</PackageId>
     <AssemblyName>imas</AssemblyName>
-    <Version>0.6.0</Version>
+    <Version>0.7.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
