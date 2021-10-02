@@ -55,9 +55,22 @@ namespace ImasArchiveApp
             UIComponentModel model = null;
             try
             {
+                Stream dataStream;
+                if (stream is FileStream)
+                {
+                    dataStream = new MemoryStream();
+                    stream.Position = 0;
+                    await stream.CopyToAsync(dataStream);
+                    stream.Close();
+                    dataStream.Position = 0;
+                }
+                else
+                {
+                    dataStream = stream;
+                }
                 model = new UIComponentModel(parent, fileName, getFileName)
                 {
-                    _component = await UIComponent.CreateUIComponent(stream)
+                    _component = await UIComponent.CreateUIComponent(dataStream)
                 };
                 foreach (string name in model._component.SubcomponentNames)
                     model.SubcomponentNames.Add(name);
