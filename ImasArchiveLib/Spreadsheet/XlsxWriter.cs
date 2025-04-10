@@ -133,6 +133,14 @@ namespace Imas.Spreadsheet
             cell.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.Number);
         }
 
+        public void AppendCell(Row row, string colName, float value)
+        {
+            Cell cell = new Cell { CellReference = colName + row.RowIndex.ToString() };
+            row.Append(cell);
+            cell.CellValue = new CellValue(value.ToString());
+            cell.DataType = new DocumentFormat.OpenXml.EnumValue<CellValues>(CellValues.Number);
+        }
+
         public void AppendCell(Row row, string colName, bool value)
         {
             Cell cell = new Cell { CellReference = colName + row.RowIndex.ToString() };

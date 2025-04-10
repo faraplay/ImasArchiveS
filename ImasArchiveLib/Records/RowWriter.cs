@@ -20,6 +20,7 @@ namespace Imas.Records
         public void Write(bool value) => xlsx.AppendCell(row, ColumnName(colIndex++), value);
 
         public void Write(int value) => xlsx.AppendCell(row, ColumnName(colIndex++), value);
+        public void Write(float value) => xlsx.AppendCell(row, ColumnName(colIndex++), value);
 
         public void Write(string value) => xlsx.AppendCell(row, ColumnName(colIndex++), value);
 

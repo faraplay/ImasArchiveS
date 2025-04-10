@@ -144,6 +144,20 @@ namespace Imas.Spreadsheet
                 return "";
             }
         }
+        public float GetFloat(Row row, string colName)
+        {
+            string address = colName + row.RowIndex.ToString();
+            Cell cell = row.Descendants<Cell>().FirstOrDefault(cell => cell.CellReference == address);
+            if (cell != null && (cell.DataType == null || cell.DataType.Value == CellValues.Number))
+            {
+                if (float.TryParse(cell.InnerText, out float result))
+                    return result;
+                else
+                    throw new InvalidDataException("Could not parse contents of " + address + " as float");
+            }
+            else
+                throw new InvalidDataException("Expected a number in cell " + address);
+        }
 
         public int GetInt(Row row, string colName)
         {

@@ -43,6 +43,10 @@ namespace Imas.Records
                         format.Add(new FormatElement { type = FormatType.Int, serialise = true });
                         break;
 
+                    case 'f':
+                        format.Add(new FormatElement { type = FormatType.Float, serialise = true });
+                        break;
+
                     case 'c':
                         int length = int.Parse(formatString.Substring(i, 3), System.Globalization.NumberStyles.HexNumber);
                         i += 3;
@@ -65,6 +69,10 @@ namespace Imas.Records
 
                     case 'I':
                         format.Add(new FormatElement { type = FormatType.Int, serialise = false });
+                        break;
+
+                    case 'F':
+                        format.Add(new FormatElement { type = FormatType.Float, serialise = false });
                         break;
 
                     case 'X':
@@ -112,6 +120,10 @@ namespace Imas.Records
                             list[i] = binary.ReadInt32();
                             break;
 
+                        case FormatType.Float:
+                            list[i] = binary.ReadFloat();
+                            break;
+
                         case FormatType.AsciiString:
                         case FormatType.CustomString:
                             byte[] array = new byte[format[i].arrayLen];
@@ -140,6 +152,10 @@ namespace Imas.Records
 
                     case FormatType.Int:
                         list[i] = r.ReadInt();
+                        break;
+
+                    case FormatType.Float:
+                        list[i] = r.ReadFloat();
                         break;
 
                     case FormatType.AsciiString:
@@ -182,6 +198,10 @@ namespace Imas.Records
                             binary.WriteInt32((int)list[i]);
                             break;
 
+                        case FormatType.Float:
+                            binary.WriteFloat((float)list[i]);
+                            break;
+
                         case FormatType.AsciiString:
                         case FormatType.CustomString:
                             outStream.Write((byte[])list[i]);
@@ -217,6 +237,10 @@ namespace Imas.Records
 
                     case FormatType.Int:
                         r.Write((int)list[i]);
+                        break;
+
+                    case FormatType.Float:
+                        r.Write((float)list[i]);
                         break;
 
                     case FormatType.AsciiString:
@@ -268,6 +292,7 @@ namespace Imas.Records
             Byte,
             Short,
             Int,
+            Float,
             AsciiString,
             CustomString,
             String

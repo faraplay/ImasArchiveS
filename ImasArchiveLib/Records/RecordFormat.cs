@@ -80,14 +80,13 @@
                 {
                     "ID", "", "", "Text 1", "Text 2", "Counter Word",
                 }),
-            new RecordFormat("work/workInfo.bin", "workInfo", "sbbbbbbbbbbiiiisbbssssssssbbsbbssbbssbbbbisbbsssbbbbsc020c020c100", new string[]
+            new RecordFormat("work/workInfo.bin", "workInfo", "sbbbbbbbbbbiiiisbbssssssssbbsfisbbbbbbisbbsssbbbbsc020c020c100", new string[]
                 {
                     "", "", "", "", "", "", "", "", "", "",
                     "", "", "", "", "", "", "", "", "", "",
                     "", "", "", "", "", "", "", "", "", "",
                     "", "", "", "", "", "", "", "", "", "",
                     "", "", "", "", "", "", "", "", "", "",
-                    "", "", "",
                     "Name", "Location", "Description",
                 }),
             new RecordFormat("work/rivalInfo.bin", "rivalInfo", "sbbbbbbssssbbbbbbbbiiiiiiiibbbbssc040c080c020", new string[]

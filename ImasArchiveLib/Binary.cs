@@ -389,7 +389,7 @@ namespace Imas
         #region Float
 
         /// <summary>
-        /// Writes a 32-bit unsigned integer to the stream.
+        /// Writes a 32-bit float to the stream.
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="x"></param>

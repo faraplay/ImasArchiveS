@@ -25,6 +25,8 @@ namespace Imas.Records
 
         public int ReadInt() => xlsx.GetInt(row, ColumnName(colIndex++));
 
+        public float ReadFloat() => xlsx.GetFloat(row, ColumnName(colIndex++));
+
         public string ReadString() => xlsx.GetString(row, ColumnName(colIndex++));
 
         private static string ColumnName(int colIndex)
